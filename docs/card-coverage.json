@@ -4,12 +4,12 @@
   "provider": "Riftcodex",
   "providerPrintings": 1451,
   "registered": 1456,
-  "playable": 937,
+  "playable": 1029,
   "statuses": {
-    "scripted": 701,
+    "scripted": 779,
     "compiled": 37,
-    "alias": 199,
-    "unsupported": 519
+    "alias": 213,
+    "unsupported": 427
   },
   "sets": {
     "JDG": {
@@ -19,8 +19,8 @@
     },
     "OGN": {
       "total": 352,
-      "playable": 246,
-      "unsupported": 106
+      "playable": 260,
+      "unsupported": 92
     },
     "OGS": {
       "total": 24,
@@ -29,8 +29,8 @@
     },
     "OPP": {
       "total": 133,
-      "playable": 97,
-      "unsupported": 36
+      "playable": 101,
+      "unsupported": 32
     },
     "PR": {
       "total": 13,
@@ -39,18 +39,18 @@
     },
     "SFD": {
       "total": 288,
-      "playable": 148,
-      "unsupported": 140
+      "playable": 166,
+      "unsupported": 122
     },
     "UNL": {
       "total": 280,
-      "playable": 177,
-      "unsupported": 103
+      "playable": 195,
+      "unsupported": 85
     },
     "VEN": {
       "total": 358,
-      "playable": 230,
-      "unsupported": 128
+      "playable": 268,
+      "unsupported": 90
     },
     "TOKEN": {
       "total": 5,
@@ -767,8 +767,24 @@
       "type": "Gear",
       "cardId": "ogn-040-298",
       "rulesCardId": "ogn-040-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Fury Power",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "domain": "Fury"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Volibear - Furious",
@@ -1517,8 +1533,24 @@
       "type": "Gear",
       "cardId": "ogn-081-298",
       "rulesCardId": "ogn-081-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Calm Power",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "domain": "Calm"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Whiteflame Protector",
@@ -1996,8 +2028,18 @@
       "type": "Spell",
       "cardId": "ogn-108-298",
       "rulesCardId": "ogn-108-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave4:mutation",
+            "target": "orderedTwoFriendlyUnits"
+          }
+        ],
+        "reaction": true
+      }
     },
     {
       "name": "Dr. Mundo - Expert",
@@ -2192,8 +2234,24 @@
       "type": "Gear",
       "cardId": "ogn-120-298",
       "rulesCardId": "ogn-120-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Mind Power",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "domain": "Mind"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Teemo - Strategist",
@@ -2725,8 +2783,17 @@
       "type": "Spell",
       "cardId": "ogn-153-298",
       "rulesCardId": "ogn-153-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave4:overt"
+          }
+        ],
+        "action": true
+      }
     },
     {
       "name": "Primal Strength",
@@ -2938,8 +3005,24 @@
       "type": "Gear",
       "cardId": "ogn-163-298",
       "rulesCardId": "ogn-163-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Body Power",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "domain": "Body"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Sett - Brawler",
@@ -3161,8 +3244,22 @@
       "type": "Spell",
       "cardId": "ogn-173-298",
       "rulesCardId": "ogn-173-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "moveTarget",
+            "target": "friendlyUnit",
+            "condition": "chooseDestination"
+          },
+          {
+            "type": "ready",
+            "target": "friendlyUnit"
+          }
+        ],
+        "action": true
+      }
     },
     {
       "name": "Sai Scout",
@@ -3598,8 +3695,20 @@
       "type": "Unit",
       "cardId": "ogn-199-298",
       "rulesCardId": "ogn-199-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "hidden": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "wave4:tideturner",
+            "target": "friendlyUnit",
+            "optional": true,
+            "targetDifferentLocationFromSource": true
+          }
+        ]
+      }
     },
     {
       "name": "Twisted Fate - Gambler",
@@ -3660,8 +3769,24 @@
       "type": "Gear",
       "cardId": "ogn-204-298",
       "rulesCardId": "ogn-204-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Chaos Power",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "domain": "Chaos"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Yasuo - Windrider",
@@ -4055,8 +4180,16 @@
       "type": "Unit",
       "cardId": "ogn-230-298",
       "rulesCardId": "ogn-230-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "wave4:albus"
+          }
+        ]
+      }
     },
     {
       "name": "Commander Ledros",
@@ -4312,8 +4445,24 @@
       "type": "Gear",
       "cardId": "ogn-245-298",
       "rulesCardId": "ogn-245-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Order Power",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "domain": "Order"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Viktor - Leader",
@@ -4428,8 +4577,10 @@
       "type": "Legend",
       "cardId": "ogn-255-298",
       "rulesCardId": "ogn-255-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Fox-Fire",
@@ -4911,8 +5062,10 @@
       "type": "Battlefield",
       "cardId": "ogn-292-298",
       "rulesCardId": "ogn-292-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "The Grand Plaza",
@@ -4942,8 +5095,10 @@
       "type": "Battlefield",
       "cardId": "ogn-295-298",
       "rulesCardId": "ogn-295-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Void Gate",
@@ -6777,9 +6932,15 @@
       "set": "OPP",
       "type": "Unit",
       "cardId": "opp-120-219",
-      "rulesCardId": "opp-120-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-179-166--6a517607ad64d2d80a4f03be",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "ambush": true,
+        "keywords": [
+          "AmbushEnemyOccupied"
+        ]
+      }
     },
     {
       "name": "Doran's Ring",
@@ -7046,9 +7207,19 @@
       "set": "OPP",
       "type": "Unit",
       "cardId": "opp-178-219",
-      "rulesCardId": "opp-178-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-178-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "ambush": true,
+        "keywords": [
+          "Tank"
+        ],
+        "additionalCost": {
+          "xp": 3,
+          "energyReduction": 3
+        }
+      }
     },
     {
       "name": "Rumble - Mechanized Menace (Metal)",
@@ -7400,8 +7571,10 @@
       "type": "Legend",
       "cardId": "opp-255-298--69bc5befd308c64675ca89d0",
       "rulesCardId": "ogn-255-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Ahri - Nine-Tailed Fox (Metal)",
@@ -7409,8 +7582,10 @@
       "type": "Legend",
       "cardId": "opp-255-298--69bc5bf1d308c64675ca89f5",
       "rulesCardId": "ogn-255-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Lee Sin - Blind Monk",
@@ -8282,8 +8457,21 @@
       "type": "Unit",
       "cardId": "sfd-028-221",
       "rulesCardId": "sfd-028-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "assault": 1,
+        "keywords": [
+          "Assault"
+        ],
+        "onAttack": [
+          {
+            "type": "special",
+            "custom": "wave4:assault-damage",
+            "target": "enemyUnitHere"
+          }
+        ]
+      }
     },
     {
       "name": "Lucian - Gunslinger (Alternate Art)",
@@ -8291,8 +8479,21 @@
       "type": "Unit",
       "cardId": "sfd-028a-221",
       "rulesCardId": "sfd-028-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "assault": 1,
+        "keywords": [
+          "Assault"
+        ],
+        "onAttack": [
+          {
+            "type": "special",
+            "custom": "wave4:assault-damage",
+            "target": "enemyUnitHere"
+          }
+        ]
+      }
     },
     {
       "name": "Rek'Sai - Breacher",
@@ -8815,8 +9016,14 @@
       "type": "Unit",
       "cardId": "sfd-060-221",
       "rulesCardId": "sfd-060-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "deflect": 1,
+        "keywords": [
+          "No enemy scoring"
+        ]
+      }
     },
     {
       "name": "Aspiring Engineer",
@@ -9148,8 +9355,41 @@
       "type": "Unit",
       "cardId": "sfd-082-221",
       "rulesCardId": "sfd-082-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "No combat damage"
+        ],
+        "onAttack": [
+          {
+            "type": "special",
+            "custom": "wave4:might-damage",
+            "target": "enemyUnitHere"
+          }
+        ],
+        "onDefend": [
+          {
+            "type": "special",
+            "custom": "wave4:might-damage",
+            "target": "enemyUnitHere"
+          }
+        ],
+        "abilities": [
+          {
+            "label": "Move me to base",
+            "power": 1,
+            "domain": "Mind",
+            "timing": "action",
+            "effects": [
+              {
+                "type": "moveTarget",
+                "condition": "self"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Ezreal - Dashing (Alternate Art)",
@@ -9157,8 +9397,41 @@
       "type": "Unit",
       "cardId": "sfd-082a-221",
       "rulesCardId": "sfd-082-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "No combat damage"
+        ],
+        "onAttack": [
+          {
+            "type": "special",
+            "custom": "wave4:might-damage",
+            "target": "enemyUnitHere"
+          }
+        ],
+        "onDefend": [
+          {
+            "type": "special",
+            "custom": "wave4:might-damage",
+            "target": "enemyUnitHere"
+          }
+        ],
+        "abilities": [
+          {
+            "label": "Move me to base",
+            "power": 1,
+            "domain": "Mind",
+            "timing": "action",
+            "effects": [
+              {
+                "type": "moveTarget",
+                "condition": "self"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Hextech Anomaly",
@@ -9708,8 +9981,20 @@
       "type": "Spell",
       "cardId": "sfd-114-221",
       "rulesCardId": "sfd-114-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "duel",
+            "target": "duelEnemyAtBattlefield"
+          }
+        ],
+        "action": true,
+        "repeat": {
+          "energy": 3
+        }
+      }
     },
     {
       "name": "Trinity Force",
@@ -9874,8 +10159,23 @@
       "type": "Unit",
       "cardId": "sfd-125-221",
       "rulesCardId": "sfd-125-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onMove": [
+          {
+            "type": "special",
+            "custom": "wave4:porter",
+            "target": "friendlyUnit",
+            "condition": "atBattlefield",
+            "optional": true,
+            "triggerCost": {
+              "power": 1,
+              "domain": "Chaos"
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Loyal Pup",
@@ -9883,8 +10183,10 @@
       "type": "Unit",
       "cardId": "sfd-126-221",
       "rulesCardId": "sfd-126-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Master Bingwen",
@@ -9994,8 +10296,21 @@
       "type": "Spell",
       "cardId": "sfd-136-221",
       "rulesCardId": "sfd-136-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave4:bargain",
+            "target": "spell"
+          }
+        ],
+        "reaction": true,
+        "repeat": {
+          "energy": 2
+        }
+      }
     },
     {
       "name": "Harpoon Squad",
@@ -10255,8 +10570,17 @@
       "type": "Spell",
       "cardId": "sfd-154-221",
       "rulesCardId": "sfd-154-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave4:guards"
+          }
+        ],
+        "hidden": true
+      }
     },
     {
       "name": "Honest Broker",
@@ -10386,8 +10710,22 @@
       "type": "Spell",
       "cardId": "sfd-163-221",
       "rulesCardId": "sfd-163-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave4:deathgrip",
+            "target": "orderedTwoFriendlyUnits"
+          },
+          {
+            "type": "draw",
+            "amount": 1
+          }
+        ],
+        "reaction": true
+      }
     },
     {
       "name": "Drag Under",
@@ -10808,8 +11146,18 @@
       "type": "Spell",
       "cardId": "sfd-196-221",
       "rulesCardId": "sfd-196-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave4:dance",
+            "target": "orderedTwoUnits"
+          }
+        ],
+        "reaction": true
+      }
     },
     {
       "name": "Azir - Emperor of the Sands",
@@ -11116,8 +11464,24 @@
       "type": "Gear",
       "cardId": "sfd-222-221",
       "rulesCardId": "ogn-040-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Fury Power",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "domain": "Fury"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Vayne - Hunter (Overnumbered)",
@@ -11191,8 +11555,24 @@
       "type": "Gear",
       "cardId": "sfd-226-221",
       "rulesCardId": "ogn-081-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Calm Power",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "domain": "Calm"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Ahri - Inquisitive (Overnumbered)",
@@ -11272,8 +11652,24 @@
       "type": "Gear",
       "cardId": "sfd-229-221",
       "rulesCardId": "ogn-120-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Mind Power",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "domain": "Mind"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Teemo - Strategist (Overnumbered)",
@@ -11299,8 +11695,24 @@
       "type": "Gear",
       "cardId": "sfd-231-221",
       "rulesCardId": "ogn-163-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Body Power",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "domain": "Body"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Sett - Brawler (Overnumbered)",
@@ -11366,8 +11778,24 @@
       "type": "Gear",
       "cardId": "sfd-234-221",
       "rulesCardId": "ogn-204-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Chaos Power",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "domain": "Chaos"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Yasuo - Windrider (Overnumbered)",
@@ -11429,8 +11857,24 @@
       "type": "Gear",
       "cardId": "sfd-238-221",
       "rulesCardId": "ogn-245-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Order Power",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "domain": "Order"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Soraka - Wanderer (Overnumbered)",
@@ -12066,8 +12510,17 @@
       "type": "Unit",
       "cardId": "unl-025-219",
       "rulesCardId": "unl-025-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "flow": {
+          "energy": 3,
+          "power": 1,
+          "domain": "Fury",
+          "condition": "legion",
+          "banishAfter": false
+        }
+      }
     },
     {
       "name": "Xerath - Freed",
@@ -12653,8 +13106,21 @@
       "type": "Unit",
       "cardId": "unl-053-219",
       "rulesCardId": "unl-053-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "draw"
+          }
+        ],
+        "onDeath": [
+          {
+            "type": "special",
+            "custom": "unl-wave4:scuttle"
+          }
+        ]
+      }
     },
     {
       "name": "Tricksy Tentacles",
@@ -13008,8 +13474,18 @@
       "type": "Spell",
       "cardId": "unl-072-219",
       "rulesCardId": "unl-072-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "action": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "unl-wave4:crescent",
+            "target": "enemyUnitAndBattlefield"
+          }
+        ]
+      }
     },
     {
       "name": "Deadly Flourish",
@@ -13307,8 +13783,14 @@
       "type": "Unit",
       "cardId": "unl-090-219",
       "rulesCardId": "unl-090-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Backline",
+          "Suppress friendly Temporary"
+        ]
+      }
     },
     {
       "name": "LeBlanc - Everywhere At Once (Alternate Art)",
@@ -13316,8 +13798,14 @@
       "type": "Unit",
       "cardId": "unl-090a-219",
       "rulesCardId": "unl-090a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Backline",
+          "Suppress friendly Temporary"
+        ]
+      }
     },
     {
       "name": "Concentrate",
@@ -13759,8 +14247,29 @@
       "type": "Unit",
       "cardId": "unl-117-219",
       "rulesCardId": "unl-117-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Hunt 2",
+          "Play against lone enemy",
+          "Friendly units play against lone enemy"
+        ],
+        "onConquer": [
+          {
+            "type": "special",
+            "custom": "unl-wave4:xp",
+            "amount": 2
+          }
+        ],
+        "onHold": [
+          {
+            "type": "special",
+            "custom": "unl-wave4:xp",
+            "amount": 2
+          }
+        ]
+      }
     },
     {
       "name": "Elder Dragon",
@@ -13825,8 +14334,38 @@
       "type": "Unit",
       "cardId": "unl-119a-219",
       "rulesCardId": "ven-180-166--6a517606ad64d2d80a4f03a1",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Hunt"
+        ],
+        "onConquer": [
+          {
+            "type": "special",
+            "custom": "ven-wave4:xp",
+            "amount": 1
+          }
+        ],
+        "onHold": [
+          {
+            "type": "special",
+            "custom": "ven-wave4:xp",
+            "amount": 1
+          }
+        ],
+        "onAttack": [
+          {
+            "type": "special",
+            "custom": "ven-wave4:hunter",
+            "target": "enemyUnitHere",
+            "optional": true,
+            "triggerCost": {
+              "xp": 3
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Rengar - Trophy Hunter",
@@ -13848,9 +14387,15 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-120a-219",
-      "rulesCardId": "opp-120-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-179-166--6a517607ad64d2d80a4f03be",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "ambush": true,
+        "keywords": [
+          "AmbushEnemyOccupied"
+        ]
+      }
     },
     {
       "name": "Bewitching Spirit",
@@ -13894,8 +14439,16 @@
       "type": "Unit",
       "cardId": "unl-122-219",
       "rulesCardId": "unl-122-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "additionalCost": {
+          "power": 1,
+          "domain": "Chaos",
+          "condition": "playedSpell",
+          "enterReady": true
+        }
+      }
     },
     {
       "name": "Evershade Stalker",
@@ -14124,8 +14677,16 @@
       "type": "Unit",
       "cardId": "unl-135-219",
       "rulesCardId": "unl-135-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "unl-wave4:investigator"
+          }
+        ]
+      }
     },
     {
       "name": "Scryer's Bloom",
@@ -14258,8 +14819,13 @@
       "type": "Unit",
       "cardId": "unl-144-219",
       "rulesCardId": "unl-144-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Cannot ready"
+        ]
+      }
     },
     {
       "name": "Pyke - Returned",
@@ -14437,8 +15003,18 @@
       "type": "Spell",
       "cardId": "unl-155-219",
       "rulesCardId": "unl-155-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "action": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "unl-wave4:heroic",
+            "target": "friendlyAndEnemyHere"
+          }
+        ]
+      }
     },
     {
       "name": "Loyal Poro",
@@ -14576,8 +15152,19 @@
       "type": "Unit",
       "cardId": "unl-164-219",
       "rulesCardId": "unl-164-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "additionalCost": {
+          "xp": 3
+        },
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "unl-wave4:inspector"
+          }
+        ]
+      }
     },
     {
       "name": "Shadow's Call",
@@ -14790,9 +15377,19 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-178-219",
-      "rulesCardId": "opp-178-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-178-219",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "ambush": true,
+        "keywords": [
+          "Tank"
+        ],
+        "additionalCost": {
+          "xp": 3,
+          "energyReduction": 3
+        }
+      }
     },
     {
       "name": "Poppy - Defender of the Meek (Alternate Art)",
@@ -14800,8 +15397,18 @@
       "type": "Unit",
       "cardId": "unl-178a-219",
       "rulesCardId": "unl-178a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "ambush": true,
+        "keywords": [
+          "Tank"
+        ],
+        "additionalCost": {
+          "xp": 3,
+          "energyReduction": 3
+        }
+      }
     },
     {
       "name": "Rift Herald",
@@ -15051,8 +15658,24 @@
       "type": "Legend",
       "cardId": "unl-197-219",
       "rulesCardId": "unl-197-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add 1 Energy for showdowns",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "energy",
+                "amount": 1,
+                "condition": "showdownsOnly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Moonfall",
@@ -15556,17 +16179,49 @@
       "type": "Legend",
       "cardId": "unl-234-219",
       "rulesCardId": "unl-234-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add 1 Energy for showdowns",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "energy",
+                "amount": 1,
+                "condition": "showdownsOnly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Diana - Scorn of the Moon (Signature)",
       "set": "UNL",
       "type": "Legend",
       "cardId": "unl-234*-219",
-      "rulesCardId": "unl-234-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-234*-219",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add 1 Energy for showdowns",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "energy",
+                "amount": 1,
+                "condition": "showdownsOnly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "LeBlanc - Deceiver (Overnumbered)",
@@ -15712,8 +16367,13 @@
       "type": "Unit",
       "cardId": "ven-004-166",
       "rulesCardId": "ven-004-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Ignore Tank"
+        ]
+      }
     },
     {
       "name": "Forsaken Baccai",
@@ -15956,8 +16616,20 @@
       "type": "Spell",
       "cardId": "ven-015-166",
       "rulesCardId": "ven-015-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "damage",
+            "amount": 4,
+            "target": "enemyUnit",
+            "targetDomain": "Calm"
+          }
+        ],
+        "action": true,
+        "uncounterable": true
+      }
     },
     {
       "name": "Eclipse Dragon",
@@ -16097,17 +16769,37 @@
       "type": "Unit",
       "cardId": "ven-019a-166--6a517607ad64d2d80a4f03bd",
       "rulesCardId": "ven-019a-166--6a517607ad64d2d80a4f03bd",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "onAttack": [
+          {
+            "type": "special",
+            "custom": "ven-wave4:rage",
+            "condition": "runesAtMostFour"
+          }
+        ]
+      }
     },
     {
       "name": "Renekton, Rage Fueled (Alternate Art)",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-019a-166--6a56ab99ff602fd324f47656",
-      "rulesCardId": "ven-019a-166--6a517607ad64d2d80a4f03bd",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-019a-166--6a56ab99ff602fd324f47656",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "onAttack": [
+          {
+            "type": "special",
+            "custom": "ven-wave4:rage",
+            "condition": "runesAtMostFour"
+          }
+        ]
+      }
     },
     {
       "name": "Twilight Reveler",
@@ -16132,17 +16824,21 @@
       "type": "Unit",
       "cardId": "ven-021-166--6a517603ad64d2d80a4f0374",
       "rulesCardId": "ven-021-166--6a517603ad64d2d80a4f0374",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Akali, Deadly Weapon",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-021-166--6a56ab94ff602fd324f475fa",
-      "rulesCardId": "ven-021-166--6a517603ad64d2d80a4f0374",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-021-166--6a56ab94ff602fd324f475fa",
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Akali, Deadly Weapon",
@@ -16150,17 +16846,21 @@
       "type": "Unit",
       "cardId": "ven-021a-166--6a517603ad64d2d80a4f0375",
       "rulesCardId": "ven-021a-166--6a517603ad64d2d80a4f0375",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Akali, Deadly Weapon (Alternate Art)",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-021a-166--6a56ab94ff602fd324f475f9",
-      "rulesCardId": "ven-021a-166--6a517603ad64d2d80a4f0375",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-021a-166--6a56ab94ff602fd324f475f9",
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Endless Riches",
@@ -16490,8 +17190,36 @@
       "type": "Spell",
       "cardId": "ven-035-166",
       "rulesCardId": "ven-035-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "reaction": true,
+        "spellModes": [
+          {
+            "label": "Empower a unit until end of turn",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "ven-wave4:sanction",
+                "target": "anyUnit",
+                "amount": 1
+              }
+            ]
+          },
+          {
+            "label": "Disempower a unit until end of turn",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "ven-wave4:sanction",
+                "target": "anyUnit",
+                "targetEmpowered": true,
+                "amount": 0
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Sandstone Chimera",
@@ -16574,8 +17302,18 @@
       "type": "Spell",
       "cardId": "ven-039-166",
       "rulesCardId": "ven-039-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "ven-wave4:crumbling",
+            "target": "spell"
+          }
+        ],
+        "reaction": true
+      }
     },
     {
       "name": "Decree of Focus",
@@ -16772,17 +17510,37 @@
       "type": "Unit",
       "cardId": "ven-046a-166--6a517606ad64d2d80a4f03ae",
       "rulesCardId": "ven-046a-166--6a517606ad64d2d80a4f03ae",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "deflect": 2,
+        "onConquer": [
+          {
+            "type": "score",
+            "amount": 1,
+            "condition": "sourceEmpowered"
+          }
+        ]
+      }
     },
     {
       "name": "Nasus, Ascended (Alternate Art)",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-046a-166--6a56ab98ff602fd324f47643",
-      "rulesCardId": "ven-046a-166--6a517606ad64d2d80a4f03ae",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-046a-166--6a56ab98ff602fd324f47643",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "deflect": 2,
+        "onConquer": [
+          {
+            "type": "score",
+            "amount": 1,
+            "condition": "sourceEmpowered"
+          }
+        ]
+      }
     },
     {
       "name": "Apprentice Mage",
@@ -17048,33 +17806,17 @@
       "type": "Unit",
       "cardId": "ven-058-166--6a517607ad64d2d80a4f03b5",
       "rulesCardId": "ven-058-166--6a517607ad64d2d80a4f03b5",
-      "status": "scripted",
-      "script": {
-        "implemented": true,
-        "onPlay": [
-          {
-            "type": "special",
-            "custom": "ven-extra:porobot"
-          }
-        ]
-      }
+      "status": "unsupported",
+      "reason": "Patched Porobot is both Unit and Gear; its hybrid card type requires full engine support."
     },
     {
       "name": "Patched Porobot",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-058-166--6a56ab98ff602fd324f4764b",
-      "rulesCardId": "ven-058-166--6a56ab98ff602fd324f4764b",
-      "status": "scripted",
-      "script": {
-        "implemented": true,
-        "onPlay": [
-          {
-            "type": "special",
-            "custom": "ven-extra:porobot"
-          }
-        ]
-      }
+      "rulesCardId": "ven-058-166--6a517607ad64d2d80a4f03b5",
+      "status": "unsupported",
+      "reason": "Patched Porobot is both Unit and Gear; its hybrid card type requires full engine support."
     },
     {
       "name": "Shock Blast",
@@ -17101,17 +17843,21 @@
       "type": "Unit",
       "cardId": "ven-060-166--6a518b2837f518eaadf8bb11",
       "rulesCardId": "ven-060-166--6a518b2837f518eaadf8bb11",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Sky Cruiser",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-060-166--6a56ab9aff602fd324f47669",
-      "rulesCardId": "ven-060-166--6a518b2837f518eaadf8bb11",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-060-166--6a56ab9aff602fd324f47669",
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Decree of Insight",
@@ -17119,17 +17865,41 @@
       "type": "Spell",
       "cardId": "ven-061-166--6a517604ad64d2d80a4f0386",
       "rulesCardId": "ven-061-166--6a517604ad64d2d80a4f0386",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "might",
+            "target": "enemyUnit",
+            "targetDomain": "Body",
+            "amount": -5
+          }
+        ],
+        "reaction": true,
+        "ignoreDeflect": true
+      }
     },
     {
       "name": "Decree of Insight",
       "set": "VEN",
       "type": "Spell",
       "cardId": "ven-061-166--6a56ab95ff602fd324f4760f",
-      "rulesCardId": "ven-061-166--6a517604ad64d2d80a4f0386",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-061-166--6a56ab95ff602fd324f4760f",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "might",
+            "target": "enemyUnit",
+            "targetDomain": "Body",
+            "amount": -5
+          }
+        ],
+        "reaction": true,
+        "ignoreDeflect": true
+      }
     },
     {
       "name": "Hextech Formula",
@@ -17209,17 +17979,21 @@
       "type": "Unit",
       "cardId": "ven-063a-166--6a517607ad64d2d80a4f03b1",
       "rulesCardId": "ven-063a-166--6a517607ad64d2d80a4f03b1",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Nasus, Guardian of Knowledge (Alternate Art)",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-063a-166--6a56ab98ff602fd324f47645",
-      "rulesCardId": "ven-063a-166--6a517607ad64d2d80a4f03b1",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-063a-166--6a56ab98ff602fd324f47645",
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Plaza Guardian",
@@ -17887,8 +18661,23 @@
       "type": "Unit",
       "cardId": "ven-092a-166",
       "rulesCardId": "ven-092a-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "+1 Might this turn",
+            "energy": 1,
+            "effects": [
+              {
+                "type": "might",
+                "condition": "self",
+                "amount": 1
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Kinkou Lifeblade",
@@ -18492,17 +19281,43 @@
       "type": "Unit",
       "cardId": "ven-115-166--6a517607ad64d2d80a4f03b2",
       "rulesCardId": "ven-115-166--6a517607ad64d2d80a4f03b2",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Play to open battlefields"
+        ],
+        "onPlay": [
+          {
+            "type": "bounce",
+            "target": "anyUnit",
+            "excludeTag": "Dragon",
+            "optional": true
+          }
+        ]
+      }
     },
     {
       "name": "Ocean Drake",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-115-166--6a56ab98ff602fd324f47648",
-      "rulesCardId": "ven-115-166--6a517607ad64d2d80a4f03b2",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-115-166--6a56ab98ff602fd324f47648",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Play to open battlefields"
+        ],
+        "onPlay": [
+          {
+            "type": "bounce",
+            "target": "anyUnit",
+            "excludeTag": "Dragon",
+            "optional": true
+          }
+        ]
+      }
     },
     {
       "name": "Dragon Form",
@@ -18824,8 +19639,17 @@
       "type": "Spell",
       "cardId": "ven-131-166",
       "rulesCardId": "ven-131-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "kill",
+            "target": "enemyUnitOrGear",
+            "targetDomain": "Chaos"
+          }
+        ]
+      }
     },
     {
       "name": "Fallen Feline",
@@ -18965,17 +19789,37 @@
       "type": "Unit",
       "cardId": "ven-136-166--6a517603ad64d2d80a4f0377",
       "rulesCardId": "ven-136-166--6a517603ad64d2d80a4f0377",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onAttack": [
+          {
+            "type": "kill",
+            "target": "enemyUnitHere",
+            "lessMightThanSource": true,
+            "condition": "sourceEmpowered"
+          }
+        ]
+      }
     },
     {
       "name": "Ambessa, Respected and Feared",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-136-166--6a56ab94ff602fd324f475fd",
-      "rulesCardId": "ven-136-166--6a517603ad64d2d80a4f0377",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-136-166--6a56ab94ff602fd324f475fd",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onAttack": [
+          {
+            "type": "kill",
+            "target": "enemyUnitHere",
+            "lessMightThanSource": true,
+            "condition": "sourceEmpowered"
+          }
+        ]
+      }
     },
     {
       "name": "Ambessa, Respected and Feared",
@@ -18983,17 +19827,37 @@
       "type": "Unit",
       "cardId": "ven-136a-166--6a517603ad64d2d80a4f0376",
       "rulesCardId": "ven-136a-166--6a517603ad64d2d80a4f0376",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onAttack": [
+          {
+            "type": "kill",
+            "target": "enemyUnitHere",
+            "lessMightThanSource": true,
+            "condition": "sourceEmpowered"
+          }
+        ]
+      }
     },
     {
       "name": "Ambessa, Respected and Feared (Alternate Art)",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-136a-166--6a56ab94ff602fd324f475fe",
-      "rulesCardId": "ven-136a-166--6a517603ad64d2d80a4f0376",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-136a-166--6a56ab94ff602fd324f475fe",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onAttack": [
+          {
+            "type": "kill",
+            "target": "enemyUnitHere",
+            "lessMightThanSource": true,
+            "condition": "sourceEmpowered"
+          }
+        ]
+      }
     },
     {
       "name": "Shady Spectacles",
@@ -19161,17 +20025,37 @@
       "type": "Spell",
       "cardId": "ven-142-166--6a517604ad64d2d80a4f0387",
       "rulesCardId": "ven-142-166--6a517604ad64d2d80a4f0387",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "ven-wave4:dominus",
+            "target": "anyUnit"
+          }
+        ],
+        "action": true
+      }
     },
     {
       "name": "Dominus",
       "set": "VEN",
       "type": "Spell",
       "cardId": "ven-142-166--6a56ab95ff602fd324f47611",
-      "rulesCardId": "ven-142-166--6a517604ad64d2d80a4f0387",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-142-166--6a56ab95ff602fd324f47611",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "ven-wave4:dominus",
+            "target": "anyUnit"
+          }
+        ],
+        "action": true
+      }
     },
     {
       "name": "Master of Shadows",
@@ -19381,8 +20265,37 @@
       "type": "Legend",
       "cardId": "ven-149-166--6a518b2537f518eaadf8baff",
       "rulesCardId": "ven-149-166--6a518b2537f518eaadf8baff",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Ready a gear",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "ven-wave4:ready-gear",
+                "target": "anyGear"
+              }
+            ]
+          },
+          {
+            "label": "Ready 2 gear",
+            "energy": 1,
+            "exhaust": true,
+            "condition": "sourceEmpowered",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "ven-wave4:ready-gear",
+                "target": "twoGear"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Jayce - Defender of Tomorrow",
@@ -19390,8 +20303,37 @@
       "type": "Legend",
       "cardId": "ven-149-166--6a56ab95ff602fd324f47610",
       "rulesCardId": "ven-149-166--6a56ab95ff602fd324f47610",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Ready a gear",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "ven-wave4:ready-gear",
+                "target": "anyGear"
+              }
+            ]
+          },
+          {
+            "label": "Ready 2 gear",
+            "energy": 1,
+            "exhaust": true,
+            "condition": "sourceEmpowered",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "ven-wave4:ready-gear",
+                "target": "twoGear"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Acceleration Gate",
@@ -19930,35 +20872,64 @@
       "type": "Unit",
       "cardId": "ven-177-166",
       "rulesCardId": "ven-177-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "+1 Might this turn",
+            "energy": 1,
+            "effects": [
+              {
+                "type": "might",
+                "condition": "self",
+                "amount": 1
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Nasus, Guardian of Knowledge",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-178-166",
-      "rulesCardId": "ven-063a-166--6a517607ad64d2d80a4f03b1",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-178-166",
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Rengar, Trophy Hunter",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-179-166--6a517607ad64d2d80a4f03be",
-      "rulesCardId": "opp-120-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-179-166--6a517607ad64d2d80a4f03be",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "ambush": true,
+        "keywords": [
+          "AmbushEnemyOccupied"
+        ]
+      }
     },
     {
       "name": "Rengar, Trophy Hunter",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-179-166--6a56ab99ff602fd324f47657",
-      "rulesCardId": "opp-120-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-179-166--6a56ab99ff602fd324f47657",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "ambush": true,
+        "keywords": [
+          "AmbushEnemyOccupied"
+        ]
+      }
     },
     {
       "name": "Kha'Zix, Evolving Hunter",
@@ -19966,17 +20937,77 @@
       "type": "Unit",
       "cardId": "ven-180-166--6a517606ad64d2d80a4f03a1",
       "rulesCardId": "ven-180-166--6a517606ad64d2d80a4f03a1",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Hunt"
+        ],
+        "onConquer": [
+          {
+            "type": "special",
+            "custom": "ven-wave4:xp",
+            "amount": 1
+          }
+        ],
+        "onHold": [
+          {
+            "type": "special",
+            "custom": "ven-wave4:xp",
+            "amount": 1
+          }
+        ],
+        "onAttack": [
+          {
+            "type": "special",
+            "custom": "ven-wave4:hunter",
+            "target": "enemyUnitHere",
+            "optional": true,
+            "triggerCost": {
+              "xp": 3
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Kha'Zix, Evolving Hunter",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-180-166--6a56ab97ff602fd324f47630",
-      "rulesCardId": "ven-180-166--6a517606ad64d2d80a4f03a1",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-180-166--6a56ab97ff602fd324f47630",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Hunt"
+        ],
+        "onConquer": [
+          {
+            "type": "special",
+            "custom": "ven-wave4:xp",
+            "amount": 1
+          }
+        ],
+        "onHold": [
+          {
+            "type": "special",
+            "custom": "ven-wave4:xp",
+            "amount": 1
+          }
+        ],
+        "onAttack": [
+          {
+            "type": "special",
+            "custom": "ven-wave4:hunter",
+            "target": "enemyUnitHere",
+            "optional": true,
+            "triggerCost": {
+              "xp": 3
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Gangplank, Naval",
@@ -20126,9 +21157,19 @@
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-187-166",
-      "rulesCardId": "ven-136a-166--6a517603ad64d2d80a4f0376",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-187-166",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onAttack": [
+          {
+            "type": "kill",
+            "target": "enemyUnitHere",
+            "lessMightThanSource": true,
+            "condition": "sourceEmpowered"
+          }
+        ]
+      }
     },
     {
       "name": "Mel, Defiant Soul",
@@ -20224,8 +21265,24 @@
       "type": "Legend",
       "cardId": "ven-193-166--6a517605ad64d2d80a4f038b",
       "rulesCardId": "ven-193-166--6a517605ad64d2d80a4f038b",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Give a friendly unit Tank this turn",
+            "exhaust": true,
+            "timing": "action",
+            "effects": [
+              {
+                "type": "keyword",
+                "keyword": "Tank",
+                "target": "friendlyUnit"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Shen - Eye of Twilight (Overnumbered)",
@@ -20233,8 +21290,24 @@
       "type": "Legend",
       "cardId": "ven-193-166--6a56ab95ff602fd324f47614",
       "rulesCardId": "ven-193-166--6a56ab95ff602fd324f47614",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Give a friendly unit Tank this turn",
+            "exhaust": true,
+            "timing": "action",
+            "effects": [
+              {
+                "type": "keyword",
+                "keyword": "Tank",
+                "target": "friendlyUnit"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Defender of Tomorrow",
@@ -20242,8 +21315,37 @@
       "type": "Legend",
       "cardId": "ven-194-166",
       "rulesCardId": "ven-194-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Ready a gear",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "ven-wave4:ready-gear",
+                "target": "anyGear"
+              }
+            ]
+          },
+          {
+            "label": "Ready 2 gear",
+            "energy": 1,
+            "exhaust": true,
+            "condition": "sourceEmpowered",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "ven-wave4:ready-gear",
+                "target": "twoGear"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Soul's Reflection",

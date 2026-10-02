@@ -573,6 +573,25 @@ describe("Vendetta verified equipment and empowerment combat effects", () => {
     s = resolve(s, 79, getScript(id(79))!.onDefend!, a.id, b.id);
     expect(getMight(s, s.units[0])).toBe(10);
   });
+  it.each([
+    [-3, 2, 3],
+    [-3, -1, 0],
+    [2, -3, 3],
+  ])(
+    "Dame computes a Might increase from raw values %i and %i",
+    (sourceMight, targetMight, expected) => {
+      let s = fixture();
+      const dame = unit(79),
+        target = unit(16, 1);
+      dame.empowered = true;
+      dame.location = target.location = "field:0";
+      dame.temporaryMight = sourceMight - getCard(dame.cardId).might!;
+      target.temporaryMight = targetMight - getCard(target.cardId).might!;
+      s.units = [dame, target];
+      s = resolve(s, 79, getScript(id(79))!.onAttack!, dame.id, target.id);
+      expect(getMight(s, s.units[0], false)).toBe(expected);
+    },
+  );
   it("Dame pays the typed Body empower cost before becoming empowered", () => {
     let s = fixture();
     s.units = [unit(79)];

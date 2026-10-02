@@ -57,7 +57,6 @@ const faces: Record<number, CardScript> = {
     ...plain,
     onMove: [{ type: "draw", amount: 1, condition: "sourceEmpowered" }],
   },
-  58: { ...plain, onPlay: [fx("porobot")] },
   59: spell(
     [{ type: "damage", amount: 4, target: "unitAtBattlefield" }],
     "action",
@@ -580,9 +579,6 @@ export const vendettaExtraModule: ExpansionModule = {
             [{ type: "damageAll", who: "opponent", amount: 2 }],
             source.location,
           );
-        break;
-      case "porobot":
-        if (s.gears.filter((g) => g.owner === p).length >= 3) ctx.draw(s, p, 1);
         break;
       case "barbara": {
         const g = s.gears.find((g) => g.id === ctx.targetId) as

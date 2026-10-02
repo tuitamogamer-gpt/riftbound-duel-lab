@@ -191,6 +191,11 @@ export const appMessages: Record<string, [string, string, string]> = {
     "AI · Hidden karta",
     "IA · Carta nascosta",
   ],
+  "Protivnička Hidden: {card}": [
+    "Opponent Hidden: {card}",
+    "Protivnička Hidden: {card}",
+    "Nascosta avversaria: {card}",
+  ],
   "Zauzmi bojište za bod": [
     "Capture a battlefield to score",
     "Zauzmi bojište za bod",

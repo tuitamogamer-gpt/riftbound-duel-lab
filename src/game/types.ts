@@ -62,6 +62,10 @@ export interface PlayerState {
   runeDeck: Domain[];
   energy: number;
   spellEnergy?: number;
+  showdownEnergy?: number;
+  typedPower?: Record<string, number>;
+  canLookAtEnemyHiddenTurn?: number;
+  spellsPlayedThisTurn?: number;
   power?: number;
   unitsEnterReadyTurn?: number;
   cannotPlaySpellsTurn?: number;
@@ -236,6 +240,8 @@ export interface GameAction {
 }
 export type TargetFilter =
   | "anyTwoUnits"
+  | "orderedTwoUnits"
+  | "orderedTwoFriendlyUnits"
   | "attackingUnit"
   | "unitInBase"
   | "spell"
@@ -248,6 +254,7 @@ export type TargetFilter =
   | "friendlyBuffableUnit"
   | "enemyGear"
   | "anyGear"
+  | "twoGear"
   | "friendlyDamagedUnit"
   | "friendlyReadyUnit"
   | "friendlyExhaustedUnit"
@@ -259,6 +266,11 @@ export type TargetFilter =
   | "unitAtBattlefield"
   | "friendlyUnitAtBattlefield"
   | "duel"
+  | "duelSameBattlefield"
+  | "duelEnemyAtBattlefield"
+  | "friendlyAndEnemyHere"
+  | "enemyUnitAndBattlefield"
+  | "enemyUnitOrGear"
   | "twoFriendlyUnits"
   | "upToTwoFriendlyUnits"
   | "upToTwoUnits"
@@ -281,6 +293,7 @@ export type Effect = {
     | "token"
     | "channel"
     | "energy"
+    | "power"
     | "recycle"
     | "discard"
     | "drawDiscard"
@@ -306,6 +319,12 @@ export type Effect = {
     | "special";
   amount?: number;
   target?: TargetFilter;
+  targetDomain?: string;
+  targetLocations?: LocationId[];
+  targetEmpowered?: boolean;
+  targetDifferentLocationFromSource?: boolean;
+  excludeTag?: string;
+  lessMightThanSource?: boolean;
   who?: "self" | "opponent" | "all";
   cardName?: string;
   location?: "base" | "target" | "here";
@@ -355,6 +374,8 @@ export interface ActivatedAbility {
 }
 export interface CardScript {
   implemented: true;
+  uncounterable?: boolean;
+  ignoreDeflect?: boolean;
   spellModes?: { label: string; effects: Effect[] }[];
   spell?: Effect[];
   onPlay?: Effect[];
@@ -375,7 +396,13 @@ export interface CardScript {
   bonusDraw?: number;
   hidden?: boolean;
   ambush?: boolean;
-  flow?: { energy: number; power: number; domain?: string };
+  flow?: {
+    energy: number;
+    power: number;
+    domain?: string;
+    condition?: "legion";
+    banishAfter?: boolean;
+  };
   repeat?: {
     energy?: number;
     power?: number;
@@ -387,6 +414,10 @@ export interface CardScript {
     power?: number;
     domain?: string;
     discard?: number;
+    xp?: number;
+    energyReduction?: number;
+    condition?: "playedSpell";
+    enterReady?: boolean;
   };
   equipEnergy?: number;
   combatCondition?: "paired";

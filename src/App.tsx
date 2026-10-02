@@ -34,6 +34,7 @@ import { cardArtUrl } from "./data/art";
 import { type StarterDeck } from "./data/decks";
 import { DeckImport } from "./components/DeckImport";
 import { Lobby } from "./components/Lobby";
+import { HiddenCard } from "./components/HiddenCard";
 import {
   exportDeckText,
   getDeckScriptCoverage,
@@ -133,7 +134,7 @@ export default function App() {
     loadImportedDecks(),
   );
   const allDecks = useMemo(() => [...decks, ...importedDecks], [importedDecks]);
-  const [deckGroup, setDeckGroup] = useState(decks[0]?.product || "Precon");
+  const [deckGroup, setDeckGroup] = useState("Precon");
   const [importOpen, setImportOpen] = useState(false);
   const [deckDetails, setDeckDetails] = useState<StarterDeck | null>(null);
   const [playerDeck, setPlayerDeck] = useState(decks[0]?.id || "");
@@ -362,7 +363,19 @@ export default function App() {
       setError(e instanceof Error ? e.message : String(e));
     }
   };
-  const chooseDeck = (id: string) => setPlayerDeck(id);
+  const chooseDeck = (id: string) => {
+    setPlayerDeck(id);
+    if (!visibleDecks.some((deck) => deck.id === id)) {
+      const deck = allDecks.find((candidate) => candidate.id === id);
+      setDeckGroup(
+        deck?.source === "Official preconstructed deck"
+          ? "Precon"
+          : deck?.source === "Imported deck"
+            ? "Moji"
+            : "Trening",
+      );
+    }
+  };
   const header = (
     <header className="topbar">
       <button
@@ -460,7 +473,7 @@ export default function App() {
                 onClick={() => setScreen("lobby")}
               >
                 <ArrowLeft size={15} />
-                {t("Arena")}{" "}
+                {t("Špilovi")}{" "}
               </button>
               <strong className="match-brand">
                 RIFTBOUND <small>DUEL LAB</small>
@@ -607,24 +620,13 @@ export default function App() {
                               {(game.hidden ?? [])
                                 .filter((h) => h.location === field.id)
                                 .map((h) => (
-                                  <button
+                                  <HiddenCard
                                     key={h.id}
-                                    className="hidden-card"
-                                    data-card-preview={
-                                      h.owner === 0 ? h.cardId : undefined
-                                    }
-                                    onClick={() =>
-                                      h.owner === 0 &&
-                                      selectCard(`hidden:${h.id}`)
-                                    }
-                                    disabled={h.owner !== 0}
-                                  >
-                                    {h.owner === 0
-                                      ? t("Tvoja Hidden: {card}", {
-                                          card: findCard(h.cardId)?.name ?? "",
-                                        })
-                                      : t("AI · Hidden karta")}
-                                  </button>
+                                    game={game}
+                                    hidden={h}
+                                    select={selectCard}
+                                    inspect={setInspected}
+                                  />
                                 ))}
                             </div>
                           )}
@@ -1053,6 +1055,20 @@ function RuneZone({
           {p.runes.filter((r) => r.ready).length} {t("spremnih ·")} {p.energy}{" "}
           {t("energije ·")} {p.runeDeck.length} {t("u špilu")}{" "}
           {p.power ? t(" · {count} univerzalne moći", { count: p.power }) : ""}
+          {Object.entries(p.typedPower ?? {})
+            .filter(([, count]) => count > 0)
+            .map(([domain, count]) => (
+              <span key={domain}>
+                {" "}
+                · {count} {t(domain)} {t("power")}
+              </span>
+            ))}
+          {p.showdownEnergy
+            ? ` · ${t("{count} Energy for showdowns", { count: p.showdownEnergy })}`
+            : ""}
+          {p.spellEnergy
+            ? ` · ${t("{count} Energy for spells", { count: p.spellEnergy })}`
+            : ""}
           {p.xp ? ` · ${p.xp} XP` : ""}
         </small>
       </div>

@@ -458,6 +458,31 @@ body {
   font-size: 10px;
   color: #65727a;
 }
+.rift-player-select {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #172632;
+}
+.rift-player-select select {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 11px 12px;
+  border: 2px solid #172632;
+  border-radius: 4px;
+  background: #fffdf5;
+  color: #172632;
+  font: inherit;
+  font-size: 14px;
+}
+.rift-deck-selection-note {
+  margin: 9px 0 18px;
+  color: #52616a;
+  font-size: 12px;
+  line-height: 1.5;
+}
 .rift-collections {
   display: flex;
   flex-wrap: wrap;

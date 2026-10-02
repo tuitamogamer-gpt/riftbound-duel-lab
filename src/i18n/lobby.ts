@@ -115,6 +115,13 @@ export const lobbyMessages: Record<string, [string, string, string]> = {
     "Collezioni di mazzi",
   ],
   "Svi preconi": ["All precons", "Svi preconi", "Tutti i precostruiti"],
+  "Tvoj špil": ["Your deck", "Tvoj špil", "Il tuo mazzo"],
+  "Špilovi": ["Decks", "Špilovi", "Mazzi"],
+  "{count} precona iz svih izdanja. Izaberi špil iz liste ili karticu ispod.": [
+    "{count} precons across all sets. Choose a deck from the list or a card below.",
+    "{count} precona iz svih izdanja. Izaberi špil iz liste ili karticu ispod.",
+    "{count} mazzi precostruiti di tutte le espansioni. Scegli dalla lista o dalle carte qui sotto.",
+  ],
   Precon: ["Precons", "Preconi", "Precostruiti"],
   "Moji ({count})": [
     "My decks ({count})",

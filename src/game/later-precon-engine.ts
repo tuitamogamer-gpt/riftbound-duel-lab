@@ -1,3 +1,6 @@
+import { originsWave4Module } from "./origins-wave4";
+import { vendettaWave4Module } from "./vendetta-wave4";
+import { unleashedWave4Module } from "./unleashed-wave4";
 import { vendettaWave3Module } from "./vendetta-wave3";
 import { unleashedWave3Module } from "./unleashed-wave3";
 import { originsWave3Module } from "./origins-wave3";
@@ -78,7 +81,7 @@ export interface PreconContext {
     ready?: boolean,
   ) => void;
   killUnits: (s: GameState, ids: string[]) => void;
-  getMight: (s: GameState, u: Unit) => number;
+  getMight: (s: GameState, u: Unit, clamp?: boolean) => number;
   channel: (s: GameState, p: PlayerId, count: number, ready?: boolean) => void;
   moveUnit: (
     s: GameState,
@@ -131,6 +134,8 @@ export interface PreconContext {
   ) => void;
 }
 export type PreconEvent =
+  | "attack"
+  | "spendBuff"
   | "draw"
   | "score"
   | "empower"
@@ -198,6 +203,9 @@ function modules(): ExpansionModule[] {
     vendettaWave3Module,
     unleashedWave3Module,
     originsWave3Module,
+    originsWave4Module,
+    vendettaWave4Module,
+    unleashedWave4Module,
   ];
 }
 export function laterMight(s: GameState, u: Unit, value: number) {

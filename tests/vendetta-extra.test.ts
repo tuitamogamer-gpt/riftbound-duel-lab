@@ -458,12 +458,11 @@ describe("Vendetta spells and triggers", () => {
       expect(s.players[0].points).toBe(empowered ? 2 : 1);
     },
   );
-  it("Porobot draws only with three other friendly gear", () => {
-    let s = fixture();
-    s.gears = [gear(18), gear(77), gear(87)];
-    s = play(s, 58);
-    expect(s.players[0].hand).toHaveLength(1);
-    expect(s.units[0].ready).toBe(false);
+  it("does not advertise a partial Patched Porobot script without its Unit and Gear types", () => {
+    const printings = cards.filter((c) => c.riftboundId === "ven-058-166");
+    expect(printings).toHaveLength(2);
+    for (const printing of printings)
+      expect(vendettaExtraScripts[printing.id]).toBeUndefined();
   });
   it("Covert Informant needs empowerment at the time of moving", () => {
     let s = fixture();

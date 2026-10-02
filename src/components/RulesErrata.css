@@ -1,0 +1,15 @@
+.rules-errata {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-left: 3px solid #d9b45d;
+  background: #b59b6612;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.rules-errata > p {
+  margin: 5px 0;
+}
+.rules-errata > a {
+  color: inherit;
+  text-decoration: underline;
+}

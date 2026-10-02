@@ -17,6 +17,9 @@ import { vendettaExtraScripts } from "../src/game/vendetta-extra";
 import { originsWave3Scripts } from "../src/game/origins-wave3";
 import { unleashedWave3Scripts } from "../src/game/unleashed-wave3";
 import { vendettaWave3Scripts } from "../src/game/vendetta-wave3";
+import { originsWave4Scripts } from "../src/game/origins-wave4";
+import { vendettaWave4Scripts } from "../src/game/vendetta-wave4";
+import { unleashedWave4Scripts } from "../src/game/unleashed-wave4";
 import { parseSession } from "../src/persistence";
 import type { GameState } from "../src/game/types";
 
@@ -29,6 +32,9 @@ const added = {
   ...originsWave3Scripts,
   ...unleashedWave3Scripts,
   ...vendettaWave3Scripts,
+  ...originsWave4Scripts,
+  ...vendettaWave4Scripts,
+  ...unleashedWave4Scripts,
 };
 function deck(set: string, seed: number): StarterDeck {
   const pool = [

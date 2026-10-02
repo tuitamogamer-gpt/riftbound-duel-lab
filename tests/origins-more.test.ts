@@ -379,9 +379,16 @@ describe("further Origins and Spiritforged explicit scripts", () => {
     expect(end.units[0].temporaryMight).toBe(2);
     expect(end.gears.filter((g) => g.token)).toHaveLength(1);
   });
-  it("does not advertise Ride the Wind until destinations can be finalized before responses", () => {
+  it("delegates Ride the Wind to the later complete movement script", () => {
     expect(scripts[id(173)]).toBeUndefined();
-    expect(getScript(id(173))?.implemented ?? false).toBe(false);
+    expect(getScript(id(173))?.spell).toEqual([
+      {
+        type: "moveTarget",
+        target: "friendlyUnit",
+        condition: "chooseDestination",
+      },
+      { type: "ready", target: "friendlyUnit" },
+    ]);
   });
   it("Acceptable Losses lets each player kill their own gear", () => {
     const s = fixture();

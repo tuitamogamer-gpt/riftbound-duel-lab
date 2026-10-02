@@ -1,5 +1,5 @@
 import type { Card } from "../data/cards";
-import { gameplayFingerprint } from "../data/card-identity";
+import { canonicalCardName, gameplayFingerprint } from "../data/card-identity";
 import type { CardScript } from "./types";
 
 export interface CardRegistration {
@@ -8,6 +8,15 @@ export interface CardRegistration {
   status: "scripted" | "compiled" | "alias" | "unsupported";
   script?: CardScript;
   reason?: string;
+}
+
+function unsupportedRulesReason(card: Card): string | undefined {
+  // The Vendetta FAQ makes this both Unit and Gear, despite the provider's
+  // single-type record. A keyword-only script cannot implement that rules face.
+  // https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications/
+  if (canonicalCardName(card.name) === "patched porobot")
+    return "Patched Porobot is both Unit and Gear; its hybrid card type requires full engine support.";
+  return undefined;
 }
 
 /** Every imported printing receives a record; only complete scripts are executable. */
@@ -21,7 +30,7 @@ export function buildCardRegistry(
   for (const card of catalog) {
     const key = gameplayFingerprint(card);
     groups.set(key, [...(groups.get(key) ?? []), card]);
-    if (!explicit[card.id]) {
+    if (!unsupportedRulesReason(card) && !explicit[card.id]) {
       const script = compile(card);
       if (script) compiled.set(card.id, script);
     }
@@ -38,7 +47,11 @@ export function buildCardRegistry(
     for (const card of group) {
       // Explicit scripts can contain exact-ID engine hooks. Preserve their identity.
       const rulesCard = explicit[card.id] ? card : source;
-      const script = explicit[rulesCard.id] ?? compiled.get(rulesCard.id);
+      const blockedReason =
+        unsupportedRulesReason(card) ?? unsupportedRulesReason(rulesCard);
+      const script = blockedReason
+        ? undefined
+        : (explicit[rulesCard.id] ?? compiled.get(rulesCard.id));
       registry[card.id] = {
         cardId: card.id,
         rulesCardId: rulesCard.id,
@@ -53,9 +66,10 @@ export function buildCardRegistry(
           ? { script }
           : {
               reason:
-                card.type === "Gear" && /\[Equip\]/.test(card.text)
+                blockedReason ??
+                (card.type === "Gear" && /\[Equip\]/.test(card.text)
                   ? "Equipment needs its full printed effect and an explicit rules script."
-                  : "Rules text requires an explicit effect implementation and behavior tests.",
+                  : "Rules text requires an explicit effect implementation and behavior tests."),
             }),
       };
     }

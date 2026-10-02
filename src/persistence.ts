@@ -52,6 +52,7 @@ const effectTypes = new Set([
   "token",
   "channel",
   "energy",
+  "power",
   "recycle",
   "discard",
   "drawDiscard",
@@ -78,6 +79,13 @@ const effectTypes = new Set([
 ]);
 const targetFilters = new Set([
   "anyTwoUnits",
+  "orderedTwoUnits",
+  "orderedTwoFriendlyUnits",
+  "duelSameBattlefield",
+  "duelEnemyAtBattlefield",
+  "friendlyAndEnemyHere",
+  "enemyUnitAndBattlefield",
+  "enemyUnitOrGear",
   "attackingUnit",
   "unitInBase",
   "spell",
@@ -90,6 +98,7 @@ const targetFilters = new Set([
   "friendlyBuffableUnit",
   "enemyGear",
   "anyGear",
+  "twoGear",
   "friendlyDamagedUnit",
   "friendlyReadyUnit",
   "friendlyExhaustedUnit",
@@ -120,9 +129,15 @@ const effects = (x: unknown, depth = 0): boolean =>
       ["amount", "minMight", "maxMight", "maxEnergy", "maxPower"].every(
         (k) => e[k] === undefined || finite(e[k]),
       ) &&
-      ["custom", "cardName", "domain", "keyword", "condition"].every((k) =>
-        optionalString(e[k]),
-      ) &&
+      [
+        "custom",
+        "cardName",
+        "domain",
+        "keyword",
+        "condition",
+        "targetDomain",
+        "excludeTag",
+      ].every((k) => optionalString(e[k])) &&
       [
         "permanent",
         "ready",
@@ -131,9 +146,17 @@ const effects = (x: unknown, depth = 0): boolean =>
         "optional",
         "fromHidden",
         "additionalCostPaid",
+        "targetEmpowered",
+        "targetDifferentLocationFromSource",
+        "lessMightThanSource",
       ].every((k) => optionalBoolean(e[k])) &&
       (e.chosenTargetId === null || optionalString(e.chosenTargetId)) &&
       (e.runeIds === undefined || stringArray(e.runeIds)) &&
+      (e.type !== "power" ||
+        ((e.domain === undefined || domain(e.domain)) && optionalCount(e.amount))) &&
+      (e.targetLocations === undefined ||
+        (Array.isArray(e.targetLocations) &&
+          e.targetLocations.every(location))) &&
       (e.who === undefined || ["self", "opponent", "all"].includes(e.who)) &&
       (e.location === undefined ||
         ["base", "target", "here"].includes(e.location)) &&
@@ -406,10 +429,18 @@ export function validState(x: unknown, actionable = true): x is GameState {
           "endReadyRunes",
           "power",
           "spellEnergy",
+          "showdownEnergy",
+          "spellsPlayedThisTurn",
+          "canLookAtEnemyHiddenTurn",
           "unitsEnterReadyTurn",
           "cannotPlaySpellsTurn",
           "firstDeathTurn",
         ].every((k) => optionalCount(p[k])) &&
+        (p.typedPower === undefined ||
+          (isObject(p.typedPower) &&
+            Object.entries(p.typedPower).every(
+              ([key, value]) => domain(key) && count(value),
+            ))) &&
         (p.legendEmpowered === undefined ||
           typeof p.legendEmpowered === "boolean"),
     )

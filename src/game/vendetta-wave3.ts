@@ -696,7 +696,10 @@ export const vendettaWave3Module: ExpansionModule = {
       case "dame":
         if (source && target && source.location === target.location)
           source.temporaryMight +=
-            Math.max(0, ctx.getMight(s, target) - ctx.getMight(s, source)) + 1;
+            Math.max(
+              0,
+              ctx.getMight(s, target, false) - ctx.getMight(s, source, false),
+            ) + 1;
         break;
       case "demolish": {
         const g = s.gears.find((g) => g.id === ctx.targetId);

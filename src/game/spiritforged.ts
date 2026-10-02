@@ -470,7 +470,14 @@ export const spiritforgedModule: ExpansionModule = {
         const u = s.units.find((u) => u.id === arg[0]);
         if (u && ctx.canPay(s, p, 0, 1, ["Order"])) {
           ctx.pay(s, p, 0, 1, ["Order"]);
-          u.ready = true;
+          ctx.runEffects(
+            s,
+            p,
+            [{ type: "ready", chosenTargetId: u.id }],
+            undefined,
+            ctx.sourceId,
+            u.location,
+          );
         }
         break;
       }
@@ -532,8 +539,10 @@ export const spiritforgedModule: ExpansionModule = {
         );
         const u = s.units.find((u) => u.id === unitId && u.owner === p);
         if (index >= 0) {
-          const item = s.stack.splice(index, 1)[0];
+          const item = s.stack[index];
           if (u) u.temporaryMight += getCard(item.cardId).energy ?? 0;
+          if (getScript(item.cardId)?.uncounterable) break;
+          s.stack.splice(index, 1);
           if (item.flowed) {
             s.players[item.player].banished.push(item.cardId);
             ctx.cardEvent(s, "banish", item.player, item.cardId);

@@ -2,7 +2,17 @@
 
 The catalog was fetched again on 2 October 2026. It contains every printing returned by the paginated Riftcodex API: 1,451 printings in eight sets, plus five local rules tokens. Provider completeness is checked against both pagination totals and each set's card count. It is not independent evidence that Riftcodex has every Riot publication or preview; its latest reported record update was 21 July 2026. No Radiance set is returned in this snapshot.
 
-Current checked snapshot: **937 executable entries and 519 unsupported entries**, including the five local rules tokens. These counts refer to printings, not unique gameplay cards. Validation passes **961 tests across 31 files**, including 169 precon pairings and 16 mixed-expansion integration games.
+Current checked snapshot: **1,029 executable entries and 427 unsupported entries**, including the five local rules tokens. These counts refer to printings, not unique gameplay cards. The [validation log](VALIDATION.md) records the current full-suite acceptance, including 169 precon pairings and 16 mixed-expansion integration games.
+
+## Fourth implementation wave
+
+This continuation implements **94 previously unsupported printings** through 55 rules families in `origins-wave4.ts`, `unleashed-wave4.ts`, and `vendetta-wave4.ts`. It also withdraws the two Patched Porobot records: the official Vendetta FAQ makes it both Unit and Gear, which the engine does not yet implement completely. The registry explicitly blocks both compilation and aliases from restoring this incomplete face. The net increase is 92 executable entries, from 937 to 1,029. The provider catalog and its original text remain unchanged.
+
+The wave adds typed Power, showdown-only Energy, optional XP play costs, compound targets and destination declarations, new movement and readying restrictions, Temporary-trigger suppression, and turn-limited permission to inspect an opponent's Hidden cards. Defender of Tomorrow's abilities use the shared activation pipeline, including Heimerdinger's copied abilities. Focused suites cover costs before responses, target revalidation, partial resolution, private choices, and save restoration. Raw Might arithmetic is retained for increase/doubling effects before applying the normal zero floor.
+
+Official corrections for Deathgrip, Guards!, Tideturner, Tianna Crownguard and Rengar appear beside the preserved printed text in card inspection. See [rules research](RULES-RESEARCH.md) for the source links and tested differences. Brynhir, Facebreaker and Rockfall Path remain unsupported pending the required general engine support.
+
+All 13 retail precons are now visible by default. Separate grouped selectors expose every deck for both players regardless of the current gallery filter. The match toolbar's **Decks** button returns to the picker. The local launcher rebuilds before opening so it cannot silently reuse an old distribution.
 
 ## Third implementation wave
 

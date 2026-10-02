@@ -1,5 +1,50 @@
 // UI labels and review summaries. Printed card rules and proper names stay in English.
 export const componentMessages: Record<string, [string, string, string]> = {
+  "{count} Energy for spells": [
+    "{count} Energy for spells",
+    "{count} energije za čarolije",
+    "{count} Energia per gli incantesimi",
+  ],
+  "Tideturner's swap must choose a unit you control at a different location.": [
+    "Tideturner's swap must choose a unit you control at a different location.",
+    "Za Tideturnerovu zamjenu moraš izabrati jedinicu pod svojom kontrolom na drugoj lokaciji.",
+    "Lo scambio di Tideturner deve scegliere un'unità che controlli in un'altra posizione.",
+  ],
+  "Updated rules": ["Updated rules", "Ažurirana pravila", "Regole aggiornate"],
+  "Official errata": [
+    "Official errata",
+    "Službene ispravke",
+    "Errata ufficiali",
+  ],
+  "{count} Energy for showdowns": [
+    "{count} Energy for showdowns",
+    "{count} energije za obračune",
+    "{count} Energia per gli scontri",
+  ],
+  "Declare both friendly targets before responses. Kill the first on resolution; only a successful kill grants its Might to the other. Then draw.":
+    [
+      "Declare both friendly targets before responses. Kill the first on resolution; only a successful kill grants its Might to the other. Then draw.",
+      "Obje prijateljske mete biraju se prije reakcija. Prva se ubija pri razrješenju; samo uspješno ubistvo daje njenu snagu drugoj. Zatim povuci kartu.",
+      "Scegli entrambi i bersagli alleati prima delle risposte. Uccidi il primo alla risoluzione: solo se muore conferisce la sua Forza all'altro. Poi pesca.",
+    ],
+  "Opponents cannot gain points while Tianna is at a battlefield. Conquer and hold triggers still happen, including the final-point replacement draw.":
+    [
+      "Opponents cannot gain points while Tianna is at a battlefield. Conquer and hold triggers still happen, including the final-point replacement draw.",
+      "Protivnici ne mogu dobiti bodove dok je Tianna na bojištu. Efekti osvajanja i zadržavanja i dalje se aktiviraju, uključujući povlačenje karte umjesto završnog boda.",
+      "Gli avversari non possono ottenere punti mentre Tianna è su un campo. Gli effetti di conquista e mantenimento si attivano comunque, inclusa la pesca al posto del punto finale.",
+    ],
+  "After creating the Sand Soldier, a separate triggered ability lets you pay Order Power to ready it. Players can respond to that ability.":
+    [
+      "After creating the Sand Soldier, a separate triggered ability lets you pay Order Power to ready it. Players can respond to that ability.",
+      "Nakon stvaranja Sand Soldiera, zaseban efekat omogućava plaćanje moći Reda da ga pripremiš. Igrači mogu reagovati na taj efekat.",
+      "Dopo aver creato il Sand Soldier, un'abilità innescata separata permette di pagare Potere Ordine per prepararlo. I giocatori possono rispondere a questa abilità.",
+    ],
+  "Ambush also allows Rengar to enter a battlefield occupied by enemies, even without a friendly unit there.":
+    [
+      "Ambush also allows Rengar to enter a battlefield occupied by enemies, even without a friendly unit there.",
+      "Ambush omogućava Rengaru ulazak i na bojište s protivničkim jedinicama, čak i bez prijateljske jedinice tamo.",
+      "Ambush permette a Rengar di entrare anche in un campo occupato da nemici, senza bisogno di un'unità alleata presente.",
+    ],
   ENERGY: ["ENERGY", "ENERGIJA", "ENERGIA"],
   MIGHT: ["MIGHT", "SNAGA", "FORZA"],
   ISCRPLJENA: ["EXHAUSTED", "ISCRPLJENA", "ESAUSTA"],

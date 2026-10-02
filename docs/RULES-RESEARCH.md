@@ -10,8 +10,26 @@ Verified on 2026-10-02. This is an implementation brief, not a reproduction of t
 - [Quick-start booklet, official PDF](https://cmsassets.rgpub.io/sanity/files/dsfx7636/news_live/3694623875b098a3d0daed824e242b3a0e68dae6.pdf)
 - [Deckbuilding primer and original champion deck lists](https://playriftbound.com/en-us/news/rules-and-releases/deckbuilding-primer/)
 - [Vendetta FAQ, 2026-08-14](https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications/)
+- [Origins card errata, 2025-10-28](https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata/)
+- [Spiritforged errata, 2026-01-14](https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata/)
+- [Spiritforged FAQ, 2026-01-14](https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq/)
+- [Unleashed errata, 2026-04-03](https://playriftbound.com/en-us/news/rules-and-releases/unleashed-errata-updates/)
 
 Rule numbers below refer to the July 16 core PDF. The complete PDF was downloaded and its text inspected during research. The short learning booklet omits important details and sometimes reflects an earlier rules version; prefer the numbered core rules.
+
+## Fourth-wave errata verification — 2 October 2026
+
+Provider records can retain old text. This wave preserves those records for source integrity and implements the current official corrections, with a visible note in card inspection:
+
+- **Deathgrip:** declare both friendly targets before responses. Killing is an instruction on resolution, not an upfront cost; only an actual kill supplies the Might increase. Draw remains an independent instruction.
+- **Guards!:** token creation is followed by a separate optional reflexive trigger. Its Order cost is paid before opponents receive the trigger's response window. From Hidden, the token appears at that battlefield.
+- **Tideturner:** the chosen controlled unit must be at a different location, checked both on declaration and on resolution. Hidden local targeting does not override its explicit other-location requirement (811.1.d.2).
+- **Tianna Crownguard:** opponents cannot gain points while she occupies a battlefield, including burnout and ability points. Conquer/hold events still occur; final-point replacement can still cause a draw.
+- **Rengar, Trophy Hunter:** Ambush also permits enemy-occupied battlefields without a friendly unit there.
+
+The Vendetta FAQ also confirms that Akali's already-triggered effect retains the captured movement locations after she leaves, and that Defender of Tomorrow retains its original ability while gaining the Empowered one. Copied dependent abilities check the new source's Empowered state. Patched Porobot's hybrid Unit/Gear type remains unsupported and is explicitly blocked in the registry, including equivalent printings.
+
+Rules 143.2.b.1 and 432.1 require raw Might arithmetic for increase/doubling before the zero floor. Passive played-spell conditions count finalized spells even if countered (419.4.b); resolved-play triggers remain separate. These cases have focused regression tests in the wave4 suites and the Dame regression in `vendetta-wave3.test.ts`.
 
 ## Duel setup and deck validation
 
@@ -87,31 +105,31 @@ Damage does not reduce Might. A damaged 6-Might unit still contributes six comba
 
 ## Common keywords and persistent state
 
-| Mechanic | Required behavior |
-| --- | --- |
-| Buff (701–705) | Persistent +1 Might counter; at most one per unit by default; remove on leaving board. A unit's specific text can allow more. |
-| Accelerate (805) | Optional additional energy 1 plus appropriate power as card is played; changes entry to ready. Later FAQ should determine special multicolor cases. |
-| Action (806) | Adds permission to play during any player's showdown, with Focus and an open chain. |
-| Assault X (807) | Add X Might while attacking; omitted X means 1; multiple grants add. |
-| Deathknell (808) | Trigger when killed and actually sent to trash; retain last location/attributes to resolve. A replacement that prevents death prevents this trigger. |
-| Deflect X (809) | Enemy targeted spells/abilities cost X extra any-domain power for each time they target this object. Omitted X is 1. |
-| Ganking (810) | Standard move may go from battlefield to battlefield; still exhausts. |
-| Hidden (811) | On own open turn, pay one any-domain power to hide in a controlled field's empty hidden slot. Hiding is not playing and opens no chain. **Cannot be played from hidden until a subsequent turn.** Thereafter gains Reaction and ignores base cost. Targets and entry locations are restricted to that battlefield where applicable. Loss of control sends it to trash. |
-| Legion (812) | Dependent ability becomes active after its controller finalized a different main-deck card this turn. |
-| Reaction (813) | Includes Action permission and may also be played on a closed chain with Priority. It does not allow unsolicited plays during the opponent's neutral open main phase. |
-| Shield X (814) | Add X Might while defending; omitted X is 1; multiple grants add. |
-| Tank (815) | Must receive lethal combat assignment before non-Tanks. |
-| Temporary (816) | Dies during controller's next beginning step before hold scoring. |
-| Vision (817) / Predict (436) | On play, inspect top card, optionally recycle it. Multiple Vision triggers are separate. |
-| Stun (423) | Stops the unit contributing combat damage for this turn; it can still absorb damage and hold/capture. |
-| Mighty (706–711) | Current Might at least 5 on board; printed Might off board. Becoming Mighty is a threshold-crossing event. |
-| Equip / Quick-Draw (818–819) | Equip pays an activation to attach equipment. Quick-Draw gives Reaction and a play trigger that attaches it. |
-| Repeat (820) | Pay optional cost once per instance while finalizing; execute instructions again, using choices fixed during finalization. |
-| Ambush (822) | May play at a field with your units, with Reaction timing for that destination, even if you do not control it. |
-| Hunt / Level (823–824) | Hunt earns XP on hold/conquer. Level enables text at an XP threshold. |
-| Backline (826) | Receives lethal combat assignment after non-Backline units. |
-| Empower / Empowered (827–828) | Paid status change enables dependent text. |
-| Flow (829) | Alternate-cost play from trash, ordinary timing still applies, then banish when leaving chain unless its own execution moved it. |
+| Mechanic                      | Required behavior                                                                                                                                                                                                                                                                                                                                                      |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Buff (701–705)                | Persistent +1 Might counter; at most one per unit by default; remove on leaving board. A unit's specific text can allow more.                                                                                                                                                                                                                                          |
+| Accelerate (805)              | Optional additional energy 1 plus appropriate power as card is played; changes entry to ready. Later FAQ should determine special multicolor cases.                                                                                                                                                                                                                    |
+| Action (806)                  | Adds permission to play during any player's showdown, with Focus and an open chain.                                                                                                                                                                                                                                                                                    |
+| Assault X (807)               | Add X Might while attacking; omitted X means 1; multiple grants add.                                                                                                                                                                                                                                                                                                   |
+| Deathknell (808)              | Trigger when killed and actually sent to trash; retain last location/attributes to resolve. A replacement that prevents death prevents this trigger.                                                                                                                                                                                                                   |
+| Deflect X (809)               | Enemy targeted spells/abilities cost X extra any-domain power for each time they target this object. Omitted X is 1.                                                                                                                                                                                                                                                   |
+| Ganking (810)                 | Standard move may go from battlefield to battlefield; still exhausts.                                                                                                                                                                                                                                                                                                  |
+| Hidden (811)                  | On own open turn, pay one any-domain power to hide in a controlled field's empty hidden slot. Hiding is not playing and opens no chain. **Cannot be played from hidden until a subsequent turn.** Thereafter gains Reaction and ignores base cost. Targets and entry locations are restricted to that battlefield where applicable. Loss of control sends it to trash. |
+| Legion (812)                  | Dependent ability becomes active after its controller finalized a different main-deck card this turn.                                                                                                                                                                                                                                                                  |
+| Reaction (813)                | Includes Action permission and may also be played on a closed chain with Priority. It does not allow unsolicited plays during the opponent's neutral open main phase.                                                                                                                                                                                                  |
+| Shield X (814)                | Add X Might while defending; omitted X is 1; multiple grants add.                                                                                                                                                                                                                                                                                                      |
+| Tank (815)                    | Must receive lethal combat assignment before non-Tanks.                                                                                                                                                                                                                                                                                                                |
+| Temporary (816)               | Dies during controller's next beginning step before hold scoring.                                                                                                                                                                                                                                                                                                      |
+| Vision (817) / Predict (436)  | On play, inspect top card, optionally recycle it. Multiple Vision triggers are separate.                                                                                                                                                                                                                                                                               |
+| Stun (423)                    | Stops the unit contributing combat damage for this turn; it can still absorb damage and hold/capture.                                                                                                                                                                                                                                                                  |
+| Mighty (706–711)              | Current Might at least 5 on board; printed Might off board. Becoming Mighty is a threshold-crossing event.                                                                                                                                                                                                                                                             |
+| Equip / Quick-Draw (818–819)  | Equip pays an activation to attach equipment. Quick-Draw gives Reaction and a play trigger that attaches it.                                                                                                                                                                                                                                                           |
+| Repeat (820)                  | Pay optional cost once per instance while finalizing; execute instructions again, using choices fixed during finalization.                                                                                                                                                                                                                                             |
+| Ambush (822)                  | May play at a field with your units, with Reaction timing for that destination, even if you do not control it.                                                                                                                                                                                                                                                         |
+| Hunt / Level (823–824)        | Hunt earns XP on hold/conquer. Level enables text at an XP threshold.                                                                                                                                                                                                                                                                                                  |
+| Backline (826)                | Receives lethal combat assignment after non-Backline units.                                                                                                                                                                                                                                                                                                            |
+| Empower / Empowered (827–828) | Paid status change enables dependent text.                                                                                                                                                                                                                                                                                                                             |
+| Flow (829)                    | Alternate-cost play from trash, ordinary timing still applies, then banish when leaving chain unless its own execution moved it.                                                                                                                                                                                                                                       |
 
 ## Official original champion deck lists
 

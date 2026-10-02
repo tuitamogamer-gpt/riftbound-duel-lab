@@ -20,6 +20,35 @@ import {
 } from "../src/game/deck-import";
 
 describe("complete printing registry", () => {
+  it("keeps both hybrid Porobot records unavailable until Unit/Gear rules exist", () => {
+    const porobots = cards.filter(
+      (card) => canonicalCardName(card.name) === "patched porobot",
+    );
+    expect(porobots).toHaveLength(2);
+    for (const card of porobots) {
+      expect(cardRegistry[card.id].status).toBe("unsupported");
+      expect(cardRegistry[card.id].reason).toContain("both Unit and Gear");
+      expect(getScript(card.id)).toBeUndefined();
+    }
+  });
+  it("cannot restore a hybrid card through compilation or printing aliases", () => {
+    const base = cards.find((card) => card.name === "Patched Porobot")!;
+    const alias = {
+      ...base,
+      id: "porobot-promo",
+      name: "Patched Porobot (Promo)",
+    };
+    const script = { implemented: true as const };
+    const result = buildCardRegistry(
+      [base, alias],
+      { [base.id]: script },
+      () => script,
+    );
+    for (const card of [base, alias]) {
+      expect(result[card.id].status).toBe("unsupported");
+      expect(result[card.id].script).toBeUndefined();
+    }
+  });
   it("registers every catalog printing and rules token with explicit support status", () => {
     expect(Object.keys(cardRegistry).sort()).toEqual(
       cards.map((c) => c.id).sort(),

@@ -9,6 +9,7 @@ import { readableText } from "../data/cards";
 import "./CardPreview.css";
 import { useI18n } from "../i18n";
 import { ExhaustedToken } from "./ExhaustedToken";
+import { RulesErrata } from "./RulesErrata";
 
 type Preview = { card: CatalogCard; anchor: HTMLElement };
 const triggerSelector = "[data-card-preview]";
@@ -344,6 +345,7 @@ export function PreviewPanel({
         <p className="card-preview-rules">
           {readableText(card.text) || t("Ova karta nema dodatni tekst efekta.")}
         </p>
+        <RulesErrata name={card.name} />
         {(ready || damage > 0 || footer) && (
           <div className="card-preview-state">
             {ready && (

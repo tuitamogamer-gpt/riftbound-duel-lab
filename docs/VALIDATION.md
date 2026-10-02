@@ -1,5 +1,15 @@
 # Validation evidence
 
+## Fourth card wave and visible precon selection — 2 October 2026
+
+Acceptance at **20:32 Sarajevo time**: **1,245 tests in 46 files passed**, including all 169 ordered precon pairings and the mixed-expansion games. TypeScript and production bundling passed. The registry contains 1,456 entries: **1,029 executable and 427 unsupported**. This wave adds 94 previously unsupported printings and withdraws two incomplete hybrid Patched Porobot records, a net gain of 92. The three wave4 suites cover 63 Origins/Spiritforged, 49 Unleashed and 52 Vendetta scenarios; existing suites also test the new shared engine behavior.
+
+New behavior checks include typed Power and showdown Energy, optional XP payments, compound target revalidation, live source restrictions, raw negative-Might arithmetic, copied gear abilities, source departure after a trigger, and saved pending choices. Deathgrip, Guards!, Tideturner, Tianna and Rengar follow the official errata documented in [rules research](RULES-RESEARCH.md). Registry tests prohibit incomplete hybrid cards from becoming executable through aliases or compilation.
+
+The production preview at `http://127.0.0.1:5271/` was tested on a separate origin to preserve the user's existing saved duel. All 13 official precons appeared on first load. With the Origins gallery filter selected, choosing Vex from **Your deck** reset the gallery to all precons; **Opponent's deck** independently selected Zed. Starting this matchup and keeping the opening hand reached turn 1 with Vex and Zed's correct Legends and chosen champions. The new **Decks** button returned to the picker. Card inspection displayed Deathgrip's current-rule notice and official source link beside the unchanged provider text. No browser console warnings or errors were captured. [Precon picker screenshot](screenshots/precon-picker.jpg).
+
+SSR regressions cover every official deck in both grouped selectors, first-load visibility, errata notices across equivalent printings, and Hidden-card inspection only with a current permission. The local launcher now rebuilds before opening an existing preview server; `zsh -n` validates its syntax. Earlier checkpoints below retain their historical counts.
+
 ## Native match flow — 2 October 2026
 
 Replaced the separate Proceed/review toolbar and action sidebar with a viewport-sized table and a single bottom decision bar. Card selection shows legal actions and costs; board targets and destinations can be clicked directly. Mulligan selection happens in the hand. Opponent actions and effect frames advance automatically. Human reactions, optional choices, movement confirmation, damage assignments and end-turn remain explicit; only a sole legal priority pass advances automatically.

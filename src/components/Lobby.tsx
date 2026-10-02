@@ -51,6 +51,29 @@ function deckArt(deck?: StarterDeck) {
   return championArt(deck.champion) || (card ? cardArtUrl(card) : undefined);
 }
 
+function DeckOptions({ choices }: { choices: StarterDeck[] }) {
+  const { t } = useI18n();
+  const collections = new Map<string, StarterDeck[]>();
+  for (const deck of choices) {
+    const group =
+      deck.source === "Imported deck"
+        ? "Moji"
+        : deck.source === "Curated practice deck"
+          ? "Trening"
+          : deck.product || "Precon";
+    collections.set(group, [...(collections.get(group) || []), deck]);
+  }
+  return [...collections].map(([group, options]) => (
+    <optgroup key={group} label={t(group)}>
+      {options.map((deck) => (
+        <option value={deck.id} key={deck.id}>
+          {t(deck.name)}
+        </option>
+      ))}
+    </optgroup>
+  ));
+}
+
 function StartingCardPair({
   deck,
   onDetails,
@@ -160,7 +183,7 @@ export function Lobby(p: Props) {
           </p>
           <div className="rift-hero-actions">
             <button className="rift-primary" onClick={scrollToSetup}>
-              {t("Izaberi šampiona")}
+              {t("Izaberi svoj špil")}
               <ArrowRight size={20} />
             </button>
             <button
@@ -228,6 +251,26 @@ export function Lobby(p: Props) {
               <h3>{t("IZABERI ŠAMPIONA")}</h3>
               <small>{t("Pronađi svoju prednost.")}</small>
             </div>
+            <label className="rift-player-select">
+              <span>{t("Tvoj špil")}</span>
+              <select
+                aria-label={t("Tvoj špil")}
+                value={p.playerDeck?.id || ""}
+                onChange={(event) => p.onPlayer(event.target.value)}
+              >
+                <DeckOptions choices={p.allDecks} />
+              </select>
+            </label>
+            <p className="rift-deck-selection-note">
+              {t(
+                "{count} precona iz svih izdanja. Izaberi špil iz liste ili karticu ispod.",
+                {
+                  count: p.allDecks.filter(
+                    (deck) => deck.source === "Official preconstructed deck",
+                  ).length,
+                },
+              )}
+            </p>
             <div
               className="rift-collections"
               aria-label={t("Kolekcija špilova")}
@@ -396,11 +439,7 @@ export function Lobby(p: Props) {
                 value={p.botDeck?.id || ""}
                 onChange={(e) => p.onBot(e.target.value)}
               >
-                {available.map((deck) => (
-                  <option value={deck.id} key={deck.id}>
-                    {t(deck.name)}
-                  </option>
-                ))}
+                <DeckOptions choices={available} />
               </select>
             </label>
             <div

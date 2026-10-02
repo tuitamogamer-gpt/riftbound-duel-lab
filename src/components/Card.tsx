@@ -6,6 +6,7 @@ import { readableText } from "../data/cards";
 import { domainColors } from "../catalog";
 import { useI18n } from "../i18n";
 import { ExhaustedToken } from "./ExhaustedToken";
+import { RulesErrata } from "./RulesErrata";
 export function Card({
   card,
   onClick,
@@ -128,6 +129,7 @@ export function CardDetail({
             {readableText(card.text) ||
               t("Ova karta nema dodatni tekst efekta.")}
           </p>
+          <RulesErrata name={card.name} />
           <div className="stat-row">
             {card.energy !== null && (
               <span>

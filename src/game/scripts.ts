@@ -1,3 +1,6 @@
+import { originsWave4Scripts } from "./origins-wave4";
+import { vendettaWave4Scripts } from "./vendetta-wave4";
+import { unleashedWave4Scripts } from "./unleashed-wave4";
 import { vendettaWave3Scripts } from "./vendetta-wave3";
 import { unleashedWave3Scripts } from "./unleashed-wave3";
 import { originsWave3Scripts } from "./origins-wave3";
@@ -198,6 +201,9 @@ Object.assign(
   originsWave3Scripts,
   unleashedWave3Scripts,
   vendettaWave3Scripts,
+  originsWave4Scripts,
+  vendettaWave4Scripts,
+  unleashedWave4Scripts,
   unleashedExtraScripts,
 );
 map["token-tentacle"] = plain;

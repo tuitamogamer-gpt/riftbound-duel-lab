@@ -2,15 +2,13 @@
 cd "${0:A:h}"
 export PATH="/Users/boro/.local/bin:$PATH"
 riftbound_url='http://127.0.0.1:4173'
-if curl --silent --fail "$riftbound_url" | rg -q 'Riftbound'; then
-  open "$riftbound_url"
-  exit 0
-fi
 if [ ! -d node_modules ]; then
   npm install || exit 1
 fi
-if [ ! -f dist/index.html ]; then
-  npm run build || exit 1
+npm run build || exit 1
+if curl --silent --fail "$riftbound_url" | rg -q 'Riftbound'; then
+  open "$riftbound_url"
+  exit 0
 fi
 npm run preview -- --port 4173 --strictPort &
 riftbound_server_pid=$!
