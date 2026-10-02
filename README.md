@@ -2,6 +2,8 @@
 
 A local-first, unofficial Riftbound 1v1 practice simulator with a deterministic rules engine, a heuristic opponent, and a mandatory **Proceed** gate after every action and narrated effect. English is the default interface language. Choose **ENG · English**, **SRB · Srpski** (Latin script), or **ITA · Italiano** in the header. The app remembers your choice locally, including after reload. Switching languages preserves the current match and review step. Card names, artwork and official rules text retain their original English.
 
+**Play:** [riftbound-duel-lab.vercel.app](https://riftbound-duel-lab.vercel.app/). Published on 2 October 2026; see [deployment details and verification](docs/DEPLOYMENT.md).
+
 ## Run locally
 
 ```sh
