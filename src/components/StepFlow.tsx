@@ -1,11 +1,19 @@
 import { createContext, useContext } from "react";
-import { ArrowRight, Check, Clock3, Crosshair } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Clock3,
+  Crosshair,
+  Pause,
+  Play,
+} from "lucide-react";
 import { getMight } from "../game/engine";
+import type { StepFrame } from "../game/engine";
 import type { GameAction, GameState, Unit } from "../game/types";
-export interface StepFrame {
-  state: GameState;
-  label: string;
-}
+import "./StepFlow.css";
+import { useI18n } from "../i18n";
+export type { StepFrame } from "../game/engine";
 export interface Review {
   before: GameState;
   final: GameState;
@@ -86,6 +94,9 @@ export function getHighlights(review: Review | null): Highlights {
     if (
       a.points !== b.points ||
       a.energy !== b.energy ||
+      a.power !== b.power ||
+      a.xp !== b.xp ||
+      a.legendUsedTurn !== b.legendUsedTurn ||
       runesChanged ||
       handChanged ||
       a.championAvailable !== b.championAvailable
@@ -93,7 +104,9 @@ export function getHighlights(review: Review | null): Highlights {
       h.players.add(p);
     if (a.points !== b.points)
       h.changes.push(`${name}: ${a.points} → ${b.points} bodova.`);
-    if (runesChanged || a.energy !== b.energy)
+    if (a.xp !== b.xp)
+      h.changes.push(`${name}: ${a.xp ?? 0} → ${b.xp ?? 0} XP.`);
+    if (runesChanged || a.energy !== b.energy || a.power !== b.power)
       h.changes.push(`${name}: promjena runa ili energije.`);
     if (handChanged)
       h.changes.push(
@@ -151,11 +164,22 @@ export function StepFlow({
   review,
   botPending,
   onProceed,
+  onPrevious,
+  playing = false,
+  onTogglePlayback,
+  playbackMs = 1600,
+  onSpeedChange,
 }: {
   review: Review | null;
   botPending: boolean;
   onProceed: () => void;
+  onPrevious?: () => void;
+  playing?: boolean;
+  onTogglePlayback?: () => void;
+  playbackMs?: number;
+  onSpeedChange?: (ms: number) => void;
 }) {
+  const { t } = useI18n();
   if (!review && !botPending)
     return (
       <div className="step-flow idle">
@@ -163,10 +187,10 @@ export function StepFlow({
           <Clock3 size={17} />
         </span>
         <div>
-          <strong>TI KONTROLIŠEŠ TEMPO</strong>
-          <p>Odaberi potez. Svaki naredni korak čeka tvoj Proceed.</p>
+          <strong>{t("TI KONTROLIŠEŠ TEMPO")}</strong>
+          <p>{t("Odaberi potez. Svaki naredni korak čeka tvoj Proceed.")}</p>
         </div>
-        <span className="manual-badge">RUČNO NAPREDOVANJE</span>
+        <span className="manual-badge">{t("RUČNO NAPREDOVANJE")}</span>
       </div>
     );
   const last = !!review && review.index === review.frames.length - 1;
@@ -183,37 +207,80 @@ export function StepFlow({
       <div className="step-description">
         <span className="eyebrow">
           {review
-            ? `${review.action.player === 0 ? "TVOJA AKCIJA" : "AI AKCIJA"} · KORAK ${review.index + 1} / ${review.frames.length}`
-            : "AI ČEKA TVOJ PROCEED"}
+            ? `${t(review.action.player === 0 ? "TVOJA AKCIJA" : "AI AKCIJA")} · ${t("KORAK {current} / {total}", { current: review.index + 1, total: review.frames.length })}`
+            : t("AI ČEKA TVOJ PROCEED")}
         </span>
         <strong>
           {review
-            ? (frame?.label ??
-              "Pregled koraka nije dostupan. Nastavi do trenutnog stanja.")
-            : "Protivnik je spreman za sljedeći potez."}
+            ? t(
+                frame?.label ??
+                  "Pregled koraka nije dostupan. Nastavi do trenutnog stanja.",
+              )
+            : t("Protivnik je spreman za sljedeći potez.")}
         </strong>
         <p>
           {review
             ? highlights.changes.length
-              ? highlights.changes.slice(0, 3).join(" ")
-              : "Istaknute karte i područja pokazuju izvor ili cilj akcije."
-            : "Ništa se neće odigrati dok ne nastaviš."}
+              ? highlights.changes
+                  .slice(0, 3)
+                  .map((change) => t(change))
+                  .join(" ")
+              : t("Istaknute karte i područja pokazuju izvor ili cilj akcije.")
+            : t("Ništa se neće odigrati dok ne nastaviš.")}
         </p>
       </div>
-      <button
-        className="gold-button proceed-button"
-        onClick={onProceed}
-        aria-label="Proceed"
-      >
-        Proceed <ArrowRight size={18} />
-        <small>
-          {review
-            ? last
-              ? "Potvrdi korak"
-              : "Sljedeći efekat"
-            : "Prikaži AI potez"}
-        </small>
-      </button>
+      <div className="step-controls">
+        {review && onPrevious && (
+          <div className="review-transport" aria-label={t("Kontrole pregleda")}>
+            <button
+              type="button"
+              onClick={onPrevious}
+              disabled={review.index === 0}
+              aria-label={t("Prethodni korak")}
+              title={t("Prethodni korak")}
+            >
+              <ArrowLeft size={16} />
+            </button>
+            {onTogglePlayback && (
+              <button
+                type="button"
+                onClick={onTogglePlayback}
+                disabled={last && !playing}
+                aria-label={t(playing ? "Pauziraj pregled" : "Pusti pregled")}
+                aria-pressed={playing}
+              >
+                {playing ? <Pause size={16} /> : <Play size={16} />}
+                {t(playing ? "Pauza" : "Pusti")}
+              </button>
+            )}
+            {onSpeedChange && (
+              <select
+                aria-label={t("Brzina pregleda")}
+                value={playbackMs}
+                onChange={(e) => onSpeedChange(Number(e.target.value))}
+              >
+                <option value={2600}>{t("Sporo")}</option>
+                <option value={1600}>{t("Normalno")}</option>
+                <option value={900}>{t("Brzo")}</option>
+              </select>
+            )}
+          </div>
+        )}
+        <button
+          className="gold-button proceed-button"
+          onClick={onProceed}
+          aria-label={t("Proceed")}
+        >
+          {t("Proceed")} <ArrowRight size={18} />
+          <small>
+            {review
+              ? last
+                ? t("Potvrdi korak")
+                : t("Sljedeći efekat")
+              : t("Prikaži AI potez")}
+          </small>
+        </button>
+      </div>
     </div>
   );
 }

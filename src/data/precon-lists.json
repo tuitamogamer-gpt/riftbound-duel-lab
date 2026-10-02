@@ -1,0 +1,1409 @@
+[
+  {
+    "id": "precon-annie",
+    "name": "Annie · Proving Grounds",
+    "champion": "Annie",
+    "title": "Proving Grounds",
+    "description": "Originalni preconstructed špil: 40 karata, 12 runa i pripadajuća bojišta.",
+    "difficulty": "Srednje",
+    "archetype": "Starter precon",
+    "color": "#f07352",
+    "domains": ["Fury", "Chaos"],
+    "legendId": "ogs-017-024",
+    "championId": "ogs-010-024",
+    "battlefieldId": "ogn-296-298",
+    "battlefieldIds": ["ogn-296-298"],
+    "main": [
+      {
+        "cardId": "ogn-169-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-170-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-171-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-185-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogs-003-024",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-013-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogs-011-024",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-176-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-005-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogs-010-024",
+        "count": 1
+      },
+      {
+        "cardId": "ogn-191-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogs-001-024",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-174-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogs-002-024",
+        "count": 3
+      },
+      {
+        "cardId": "ogs-018-024",
+        "count": 2
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ven-r01--6a517605ad64d2d80a4f038d",
+        "count": 6
+      },
+      {
+        "cardId": "ven-r05--6a517604ad64d2d80a4f037f",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Proving Grounds",
+    "sourceUrls": ["https://riftmana.com/riftbound-proving-grounds-decklists/"],
+    "verifiedAt": "2026-10-02",
+    "importNotes": [
+      "Retail box supplies one battlefield per deck. Exact contents transcribed from RiftMana; official product confirms the four decks, but no Riot-hosted full decklist was located."
+    ]
+  },
+  {
+    "id": "precon-lux",
+    "name": "Lux · Proving Grounds",
+    "champion": "Lux",
+    "title": "Proving Grounds",
+    "description": "Originalni preconstructed špil: 40 karata, 12 runa i pripadajuća bojišta.",
+    "difficulty": "Srednje",
+    "archetype": "Starter precon",
+    "color": "#9f9bff",
+    "domains": ["Mind", "Order"],
+    "legendId": "ogs-021-024",
+    "championId": "ogs-014-024",
+    "battlefieldId": "ogn-288-298",
+    "battlefieldIds": ["ogn-288-298"],
+    "main": [
+      {
+        "cardId": "ogn-095-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-103-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-210-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-084-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-087-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-206-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogs-014-024",
+        "count": 1
+      },
+      {
+        "cardId": "ogn-219-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-085-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogs-006-024",
+        "count": 2
+      },
+      {
+        "cardId": "ogs-016-024",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-105-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogs-012-024",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-088-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogs-022-024",
+        "count": 2
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ven-r03--6a517606ad64d2d80a4f03ad",
+        "count": 6
+      },
+      {
+        "cardId": "ven-r06--6a517607ad64d2d80a4f03b4",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Proving Grounds",
+    "sourceUrls": ["https://riftmana.com/riftbound-proving-grounds-decklists/"],
+    "verifiedAt": "2026-10-02",
+    "importNotes": [
+      "Retail box supplies one battlefield per deck. Exact contents transcribed from RiftMana; official product confirms the four decks, but no Riot-hosted full decklist was located."
+    ]
+  },
+  {
+    "id": "precon-garen",
+    "name": "Garen · Proving Grounds",
+    "champion": "Garen",
+    "title": "Proving Grounds",
+    "description": "Originalni preconstructed špil: 40 karata, 12 runa i pripadajuća bojišta.",
+    "difficulty": "Srednje",
+    "archetype": "Starter precon",
+    "color": "#e89b58",
+    "domains": ["Body", "Order"],
+    "legendId": "ogs-023-024",
+    "championId": "ogs-007-024",
+    "battlefieldId": "ogn-294-298",
+    "battlefieldIds": ["ogn-294-298"],
+    "main": [
+      {
+        "cardId": "ogn-210-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-129-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-130-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-132-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-211-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-222-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-206-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-219-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-131-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-215-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogs-024-024",
+        "count": 2
+      },
+      {
+        "cardId": "ogs-007-024",
+        "count": 1
+      },
+      {
+        "cardId": "ogs-013-024",
+        "count": 2
+      },
+      {
+        "cardId": "ogs-016-024",
+        "count": 3
+      },
+      {
+        "cardId": "ogs-015-024",
+        "count": 3
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ven-r04--6a517604ad64d2d80a4f037b",
+        "count": 6
+      },
+      {
+        "cardId": "ven-r06--6a517607ad64d2d80a4f03b4",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Proving Grounds",
+    "sourceUrls": ["https://riftmana.com/riftbound-proving-grounds-decklists/"],
+    "verifiedAt": "2026-10-02",
+    "importNotes": [
+      "Retail box supplies one battlefield per deck. Exact contents transcribed from RiftMana; official product confirms the four decks, but no Riot-hosted full decklist was located."
+    ]
+  },
+  {
+    "id": "precon-master-yi",
+    "name": "Master Yi · Proving Grounds",
+    "champion": "Master Yi",
+    "title": "Proving Grounds",
+    "description": "Originalni preconstructed špil: 40 karata, 12 runa i pripadajuća bojišta.",
+    "difficulty": "Srednje",
+    "archetype": "Starter precon",
+    "color": "#63c9aa",
+    "domains": ["Calm", "Body"],
+    "legendId": "ogs-019-024",
+    "championId": "ogs-004-024",
+    "battlefieldId": "ogn-279-298",
+    "battlefieldIds": ["ogn-279-298"],
+    "main": [
+      {
+        "cardId": "ogn-046-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-048-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-052-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-127-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-134-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-129-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-055-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogs-020-024",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-049-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogs-004-024",
+        "count": 1
+      },
+      {
+        "cardId": "ogs-005-024",
+        "count": 3
+      },
+      {
+        "cardId": "ogs-008-024",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-137-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogs-009-024",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-142-298",
+        "count": 2
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ven-r02--6a517604ad64d2d80a4f037e",
+        "count": 6
+      },
+      {
+        "cardId": "ven-r04--6a517604ad64d2d80a4f037b",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Proving Grounds",
+    "sourceUrls": ["https://riftmana.com/riftbound-proving-grounds-decklists/"],
+    "verifiedAt": "2026-10-02",
+    "importNotes": [
+      "Retail box supplies one battlefield per deck. Exact contents transcribed from RiftMana; official product confirms the four decks, but no Riot-hosted full decklist was located."
+    ]
+  },
+  {
+    "id": "precon-jinx",
+    "name": "Jinx · Origins",
+    "champion": "Jinx",
+    "title": "Origins",
+    "description": "Originalni preconstructed špil: 40 karata, 12 runa i pripadajuća bojišta.",
+    "difficulty": "Srednje",
+    "archetype": "Starter precon",
+    "color": "#f07352",
+    "domains": ["Fury", "Chaos"],
+    "legendId": "ogn-251-298",
+    "championId": "ogn-030-298",
+    "battlefieldId": "ogn-289-298",
+    "battlefieldIds": ["ogn-289-298", "ogn-298-298", "ogn-285-298"],
+    "main": [
+      {
+        "cardId": "ogn-006-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-001-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-168-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-008-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-169-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-165-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-178-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-003-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-002-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-011-298",
+        "count": 1
+      },
+      {
+        "cardId": "ogn-024-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-180-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-185-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-182-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-019-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-036-298",
+        "count": 1
+      },
+      {
+        "cardId": "ogn-195-298",
+        "count": 1
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ven-r01--6a517605ad64d2d80a4f038d",
+        "count": 6
+      },
+      {
+        "cardId": "ven-r05--6a517604ad64d2d80a4f037f",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Origins",
+    "sourceUrls": [
+      "https://playriftbound.com/en-us/news/rules-and-releases/deckbuilding-primer/"
+    ],
+    "verifiedAt": "2026-10-02",
+    "importNotes": []
+  },
+  {
+    "id": "precon-viktor",
+    "name": "Viktor · Origins",
+    "champion": "Viktor",
+    "title": "Origins",
+    "description": "Originalni preconstructed špil: 40 karata, 12 runa i pripadajuća bojišta.",
+    "difficulty": "Srednje",
+    "archetype": "Starter precon",
+    "color": "#9f9bff",
+    "domains": ["Mind", "Order"],
+    "legendId": "ogn-265-298",
+    "championId": "ogn-117-298",
+    "battlefieldId": "ogn-294-298",
+    "battlefieldIds": ["ogn-294-298", "ogn-293-298", "ogn-275-298"],
+    "main": [
+      {
+        "cardId": "ogn-090-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-209-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-213-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-083-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-093-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-206-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-094-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-216-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-095-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-084-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-208-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-086-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-101-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-103-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-222-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-118-298",
+        "count": 1
+      },
+      {
+        "cardId": "ogn-233-298",
+        "count": 1
+      },
+      {
+        "cardId": "ogn-111-298",
+        "count": 1
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ven-r03--6a517606ad64d2d80a4f03ad",
+        "count": 6
+      },
+      {
+        "cardId": "ven-r06--6a517607ad64d2d80a4f03b4",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Origins",
+    "sourceUrls": [
+      "https://playriftbound.com/en-us/news/rules-and-releases/deckbuilding-primer/"
+    ],
+    "verifiedAt": "2026-10-02",
+    "importNotes": []
+  },
+  {
+    "id": "precon-lee-sin",
+    "name": "Lee Sin · Origins",
+    "champion": "Lee Sin",
+    "title": "Origins",
+    "description": "Originalni preconstructed špil: 40 karata, 12 runa i pripadajuća bojišta.",
+    "difficulty": "Srednje",
+    "archetype": "Starter precon",
+    "color": "#63c9aa",
+    "domains": ["Calm", "Body"],
+    "legendId": "ogn-257-298",
+    "championId": "ogn-151-298",
+    "battlefieldId": "ogn-282-298",
+    "battlefieldIds": ["ogn-282-298", "ogn-289-298", "ogn-280-298"],
+    "main": [
+      {
+        "cardId": "ogn-052-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-136-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-055-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-132-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-043-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-128-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-053-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-135-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-125-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-137-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-058-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-147-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-060-298",
+        "count": 1
+      },
+      {
+        "cardId": "ogn-142-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-065-298",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-152-298",
+        "count": 1
+      },
+      {
+        "cardId": "ogn-157-298",
+        "count": 1
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ven-r02--6a517604ad64d2d80a4f037e",
+        "count": 6
+      },
+      {
+        "cardId": "ven-r04--6a517604ad64d2d80a4f037b",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Origins",
+    "sourceUrls": [
+      "https://playriftbound.com/en-us/news/rules-and-releases/deckbuilding-primer/"
+    ],
+    "verifiedAt": "2026-10-02",
+    "importNotes": []
+  },
+  {
+    "id": "precon-fiora",
+    "name": "Fiora · Spiritforged",
+    "champion": "Fiora",
+    "title": "Spiritforged",
+    "description": "Originalni preconstructed špil: 40 karata, 12 runa i pripadajuća bojišta.",
+    "difficulty": "Srednje",
+    "archetype": "Starter precon",
+    "color": "#e89b58",
+    "domains": ["Body", "Order"],
+    "legendId": "sfd-205-221",
+    "championId": "sfd-180-221",
+    "battlefieldId": "sfd-213-221",
+    "battlefieldIds": ["sfd-213-221", "sfd-221-221", "sfd-218-221"],
+    "main": [
+      {
+        "cardId": "sfd-110-221",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-103-221",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-156-221",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-113-221",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-099-221",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-136-298",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-093-221",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-167-221",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-157-221",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-116-221",
+        "count": 1
+      },
+      {
+        "cardId": "sfd-097-221",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-107-221",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-229-298",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-206-221",
+        "count": 1
+      },
+      {
+        "cardId": "sfd-106-221",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-161-221",
+        "count": 3
+      },
+      {
+        "cardId": "sfd-108-221",
+        "count": 3
+      },
+      {
+        "cardId": "sfd-172-221",
+        "count": 1
+      },
+      {
+        "cardId": "sfd-095-221",
+        "count": 3
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ogn-214-298",
+        "count": 6
+      },
+      {
+        "cardId": "ogn-126-298",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Spiritforged",
+    "sourceUrls": [
+      "https://playriftbound.com/en-us/news/announcements/spiritforged-precons-fiora-rumble/"
+    ],
+    "verifiedAt": "2026-10-02",
+    "importNotes": []
+  },
+  {
+    "id": "precon-rumble",
+    "name": "Rumble · Spiritforged",
+    "champion": "Rumble",
+    "title": "Spiritforged",
+    "description": "Originalni preconstructed špil: 40 karata, 12 runa i pripadajuća bojišta.",
+    "difficulty": "Srednje",
+    "archetype": "Starter precon",
+    "color": "#f07352",
+    "domains": ["Fury", "Mind"],
+    "legendId": "sfd-181-221",
+    "championId": "sfd-089-221",
+    "battlefieldId": "sfd-212-221",
+    "battlefieldIds": ["sfd-212-221", "sfd-215-221", "sfd-220-221"],
+    "main": [
+      {
+        "cardId": "sfd-021-221",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-026-221",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-007-221",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-016-298",
+        "count": 3
+      },
+      {
+        "cardId": "sfd-065-221",
+        "count": 3
+      },
+      {
+        "cardId": "sfd-062-221",
+        "count": 3
+      },
+      {
+        "cardId": "sfd-069-221",
+        "count": 3
+      },
+      {
+        "cardId": "sfd-071-221",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-083-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-105-298",
+        "count": 1
+      },
+      {
+        "cardId": "sfd-070-221",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-066-221",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-076-221",
+        "count": 3
+      },
+      {
+        "cardId": "ogn-095-298",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-024-298",
+        "count": 3
+      },
+      {
+        "cardId": "sfd-182-221",
+        "count": 1
+      },
+      {
+        "cardId": "sfd-019-221",
+        "count": 1
+      },
+      {
+        "cardId": "sfd-022-221",
+        "count": 1
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ogn-089-298",
+        "count": 6
+      },
+      {
+        "cardId": "ogn-007-298",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Spiritforged",
+    "sourceUrls": [
+      "https://playriftbound.com/en-us/news/announcements/spiritforged-precons-fiora-rumble/"
+    ],
+    "verifiedAt": "2026-10-02",
+    "importNotes": []
+  },
+  {
+    "id": "precon-vi",
+    "name": "Vi · Unleashed",
+    "champion": "Vi",
+    "title": "Unleashed",
+    "description": "Originalni preconstructed špil: 40 karata, 12 runa i pripadajuća bojišta.",
+    "difficulty": "Srednje",
+    "archetype": "Starter precon",
+    "color": "#f07352",
+    "domains": ["Fury", "Order"],
+    "legendId": "unl-187-219",
+    "championId": "ogn-036-298",
+    "battlefieldId": "unl-217-219",
+    "battlefieldIds": ["unl-217-219", "unl-215-219", "unl-218-219"],
+    "main": [
+      {
+        "cardId": "unl-030-219",
+        "count": 1
+      },
+      {
+        "cardId": "unl-176-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-010-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-002-219",
+        "count": 3
+      },
+      {
+        "cardId": "unl-156-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-154-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-006-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-017-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-188-219",
+        "count": 1
+      },
+      {
+        "cardId": "unl-015-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-001-219",
+        "count": 1
+      },
+      {
+        "cardId": "unl-012-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-008-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-018-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-153-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-024-219",
+        "count": 1
+      },
+      {
+        "cardId": "sfd-009-221",
+        "count": 2
+      },
+      {
+        "cardId": "unl-175-219",
+        "count": 1
+      },
+      {
+        "cardId": "unl-161-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-163-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-026-219",
+        "count": 1
+      },
+      {
+        "cardId": "unl-009-219",
+        "count": 1
+      },
+      {
+        "cardId": "unl-159-219",
+        "count": 1
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ven-r06--6a517607ad64d2d80a4f03b4",
+        "count": 6
+      },
+      {
+        "cardId": "ven-r01--6a517605ad64d2d80a4f038d",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Unleashed",
+    "sourceUrls": [
+      "https://playriftbound.com/en-us/news/announcements/vi--vex-champion-decks/"
+    ],
+    "verifiedAt": "2026-10-02",
+    "importNotes": [
+      "Official article typos Carion Dredger and Mageseeker, Investigator normalized to catalog names."
+    ]
+  },
+  {
+    "id": "precon-vex",
+    "name": "Vex · Unleashed",
+    "champion": "Vex",
+    "title": "Unleashed",
+    "description": "Originalni preconstructed špil: 40 karata, 12 runa i pripadajuća bojišta.",
+    "difficulty": "Srednje",
+    "archetype": "Starter precon",
+    "color": "#63c9aa",
+    "domains": ["Calm", "Chaos"],
+    "legendId": "unl-193-219",
+    "championId": "unl-150-219",
+    "battlefieldId": "unl-207-219",
+    "battlefieldIds": ["unl-207-219", "unl-213-219", "unl-214-219"],
+    "main": [
+      {
+        "cardId": "sfd-146-221",
+        "count": 1
+      },
+      {
+        "cardId": "unl-055-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-036-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-035-219",
+        "count": 1
+      },
+      {
+        "cardId": "unl-134-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-041-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-042-219",
+        "count": 3
+      },
+      {
+        "cardId": "unl-043-219",
+        "count": 1
+      },
+      {
+        "cardId": "unl-048-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-133-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-126-219",
+        "count": 1
+      },
+      {
+        "cardId": "unl-141-219",
+        "count": 1
+      },
+      {
+        "cardId": "unl-052-219",
+        "count": 1
+      },
+      {
+        "cardId": "unl-050-219",
+        "count": 1
+      },
+      {
+        "cardId": "unl-194-219",
+        "count": 1
+      },
+      {
+        "cardId": "unl-136-219",
+        "count": 1
+      },
+      {
+        "cardId": "unl-039-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-127-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-038-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-031-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-034-219",
+        "count": 2
+      },
+      {
+        "cardId": "unl-040-219",
+        "count": 3
+      },
+      {
+        "cardId": "unl-047-219",
+        "count": 2
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ven-r02--6a517604ad64d2d80a4f037e",
+        "count": 6
+      },
+      {
+        "cardId": "ven-r05--6a517604ad64d2d80a4f037f",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Unleashed",
+    "sourceUrls": [
+      "https://playriftbound.com/en-us/news/announcements/vi--vex-champion-decks/"
+    ],
+    "verifiedAt": "2026-10-02",
+    "importNotes": ["Official article typo Evelyn resolved to catalog Evelynn."]
+  },
+  {
+    "id": "precon-shen",
+    "name": "Shen · Vendetta Showdown",
+    "champion": "Shen",
+    "title": "Vendetta Showdown",
+    "description": "Originalni preconstructed špil: 40 karata, 12 runa i pripadajuća bojišta.",
+    "difficulty": "Srednje",
+    "archetype": "Starter precon",
+    "color": "#63c9aa",
+    "domains": ["Calm", "Order"],
+    "legendId": "ven-147-166--6a56ab95ff602fd324f47615",
+    "championId": "ven-138-166--6a517608ad64d2d80a4f03c9",
+    "battlefieldId": "ven-159-166",
+    "battlefieldIds": ["ven-159-166", "ogn-280-298", "ven-166-166"],
+    "main": [
+      {
+        "cardId": "ven-042-166--6a517608ad64d2d80a4f03cb",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-241-298",
+        "count": 1
+      },
+      {
+        "cardId": "ven-148-166",
+        "count": 1
+      },
+      {
+        "cardId": "ven-043-166--6a518b2937f518eaadf8bb13",
+        "count": 1
+      },
+      {
+        "cardId": "ven-135-166--6a517606ad64d2d80a4f039e",
+        "count": 1
+      },
+      {
+        "cardId": "ven-129-166--6a518b2837f518eaadf8bb10",
+        "count": 2
+      },
+      {
+        "cardId": "ven-034-166",
+        "count": 1
+      },
+      {
+        "cardId": "ven-126-166--6a517606ad64d2d80a4f03a2",
+        "count": 1
+      },
+      {
+        "cardId": "ogn-058-298",
+        "count": 2
+      },
+      {
+        "cardId": "ven-128-166",
+        "count": 2
+      },
+      {
+        "cardId": "ven-033-166",
+        "count": 2
+      },
+      {
+        "cardId": "ven-127-166--6a518b2637f518eaadf8bb05",
+        "count": 1
+      },
+      {
+        "cardId": "ven-028-166--6a518b2737f518eaadf8bb09",
+        "count": 3
+      },
+      {
+        "cardId": "ven-117-166",
+        "count": 3
+      },
+      {
+        "cardId": "ven-027-166",
+        "count": 2
+      },
+      {
+        "cardId": "ven-031-166--6a517608ad64d2d80a4f03d1",
+        "count": 1
+      },
+      {
+        "cardId": "ven-123-166",
+        "count": 2
+      },
+      {
+        "cardId": "ven-119-166--6a518b2637f518eaadf8bb04",
+        "count": 2
+      },
+      {
+        "cardId": "ven-026-166--6a517605ad64d2d80a4f038c",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-043-298",
+        "count": 2
+      },
+      {
+        "cardId": "ven-030-166",
+        "count": 2
+      },
+      {
+        "cardId": "unl-156-219",
+        "count": 2
+      },
+      {
+        "cardId": "ven-116-166",
+        "count": 1
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ven-r06--6a517607ad64d2d80a4f03b4",
+        "count": 6
+      },
+      {
+        "cardId": "ven-r02--6a517604ad64d2d80a4f037e",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Vendetta Showdown",
+    "sourceUrls": [
+      "https://playriftbound.com/en-us/news/announcements/the-vendetta-overview/"
+    ],
+    "verifiedAt": "2026-10-02",
+    "importNotes": []
+  },
+  {
+    "id": "precon-zed",
+    "name": "Zed · Vendetta Showdown",
+    "champion": "Zed",
+    "title": "Vendetta Showdown",
+    "description": "Originalni preconstructed špil: 40 karata, 12 runa i pripadajuća bojišta.",
+    "difficulty": "Srednje",
+    "archetype": "Starter precon",
+    "color": "#f07352",
+    "domains": ["Fury", "Chaos"],
+    "legendId": "ven-143-166--6a56ab97ff602fd324f47636",
+    "championId": "ven-023-166--6a517609ad64d2d80a4f03d7",
+    "battlefieldId": "ogn-298-298",
+    "battlefieldIds": ["ogn-298-298", "ven-165-166", "ven-166-166"],
+    "main": [
+      {
+        "cardId": "ven-112-166--6a517609ad64d2d80a4f03d9",
+        "count": 2
+      },
+      {
+        "cardId": "ven-110-166--6a517606ad64d2d80a4f03a9",
+        "count": 1
+      },
+      {
+        "cardId": "ven-017-166--6a518b2737f518eaadf8bb08",
+        "count": 1
+      },
+      {
+        "cardId": "ven-144-166--6a517604ad64d2d80a4f0385",
+        "count": 1
+      },
+      {
+        "cardId": "ven-020-166",
+        "count": 1
+      },
+      {
+        "cardId": "ven-105-166",
+        "count": 2
+      },
+      {
+        "cardId": "ven-012-166--6a517607ad64d2d80a4f03b6",
+        "count": 2
+      },
+      {
+        "cardId": "ven-106-166--6a517609ad64d2d80a4f03d5",
+        "count": 1
+      },
+      {
+        "cardId": "ven-101-166--6a518b2537f518eaadf8bb01",
+        "count": 2
+      },
+      {
+        "cardId": "ven-014-166",
+        "count": 2
+      },
+      {
+        "cardId": "ven-013-166--6a517608ad64d2d80a4f03c4",
+        "count": 3
+      },
+      {
+        "cardId": "ven-102-166--6a517607ad64d2d80a4f03ba",
+        "count": 1
+      },
+      {
+        "cardId": "ogn-185-298",
+        "count": 2
+      },
+      {
+        "cardId": "ven-095-166--6a517608ad64d2d80a4f03c5",
+        "count": 3
+      },
+      {
+        "cardId": "ven-007-166--6a517607ad64d2d80a4f03b8",
+        "count": 3
+      },
+      {
+        "cardId": "ven-008-166",
+        "count": 3
+      },
+      {
+        "cardId": "ven-096-166",
+        "count": 3
+      },
+      {
+        "cardId": "ven-002-166--6a517604ad64d2d80a4f037a",
+        "count": 3
+      },
+      {
+        "cardId": "ven-093-166--6a517606ad64d2d80a4f03a3",
+        "count": 3
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ven-r05--6a517604ad64d2d80a4f037f",
+        "count": 6
+      },
+      {
+        "cardId": "ven-r01--6a517605ad64d2d80a4f038d",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Vendetta Showdown",
+    "sourceUrls": [
+      "https://playriftbound.com/en-us/news/announcements/the-vendetta-overview/"
+    ],
+    "verifiedAt": "2026-10-02",
+    "importNotes": [
+      "Official article uses preview name Shadowcloaked Assassin; final catalog and retail transcription identify the slot as VEN-096 Shadowblade Lurker."
+    ]
+  }
+]

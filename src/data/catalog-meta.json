@@ -3,52 +3,75 @@
   "apiBase": "https://api.riftcodex.com",
   "documentation": "https://api.riftcodex.com/docs",
   "schema": "https://api.riftcodex.com/openapi.json",
-  "fetchedAt": "2026-10-02T06:13:03.072Z",
+  "schemaVersion": 2,
+  "startedAt": "2026-10-02T09:01:04.069Z",
+  "fetchedAt": "2026-10-02T09:03:43.729Z",
+  "scope": "All printings returned by /cards without set, new, rarity, or variant filters; completeness is relative to Riftcodex.",
   "count": 1451,
   "uniqueNames": 961,
+  "variantCount": 236,
+  "sourceUpdatedAt": "2026-07-21T20:05:23.285938+00:00",
+  "cardDataSha256": "0861c196b3100198a9fffa7b9465afc76a2e4b07db84e63e8efa6145fea25f6c",
+  "banListDate": "2026-09-18",
+  "banListSource": "https://playriftbound.com/en-us/rules-hub/",
   "sets": [
     {
-      "id": "OPP",
-      "name": "Riftbound Organized Play Promotional Cards",
-      "releasedAt": "2025-10-31T00:00:00"
-    },
-    {
-      "id": "UNL",
-      "name": "Unleashed",
-      "releasedAt": "2026-05-08T00:00:00"
+      "id": "JDG",
+      "name": "Riftbound Judge Promotional Cards",
+      "releasedAt": "2025-12-01T00:00:00",
+      "count": 3,
+      "providerCount": 3
     },
     {
       "id": "OGN",
       "name": "Origins",
-      "releasedAt": "2025-10-31T00:00:00"
-    },
-    {
-      "id": "JDG",
-      "name": "Riftbound Judge Promotional Cards",
-      "releasedAt": "2025-12-01T00:00:00"
-    },
-    {
-      "id": "VEN",
-      "name": "Vendetta",
-      "releasedAt": "2026-07-31T00:00:00"
-    },
-    {
-      "id": "PR",
-      "name": "Riftbound Promotional Cards",
-      "releasedAt": "2025-10-31T00:00:00"
-    },
-    {
-      "id": "SFD",
-      "name": "Spiritforged",
-      "releasedAt": "2026-02-13T00:00:00"
+      "releasedAt": "2025-10-31T00:00:00",
+      "count": 352,
+      "providerCount": 352
     },
     {
       "id": "OGS",
       "name": "Origins: Proving Grounds",
-      "releasedAt": "2025-10-31T00:00:00"
+      "releasedAt": "2025-10-31T00:00:00",
+      "count": 24,
+      "providerCount": 24
+    },
+    {
+      "id": "OPP",
+      "name": "Riftbound Organized Play Promotional Cards",
+      "releasedAt": "2025-10-31T00:00:00",
+      "count": 133,
+      "providerCount": 133
+    },
+    {
+      "id": "PR",
+      "name": "Riftbound Promotional Cards",
+      "releasedAt": "2025-10-31T00:00:00",
+      "count": 13,
+      "providerCount": 13
+    },
+    {
+      "id": "SFD",
+      "name": "Spiritforged",
+      "releasedAt": "2026-02-13T00:00:00",
+      "count": 288,
+      "providerCount": 288
+    },
+    {
+      "id": "UNL",
+      "name": "Unleashed",
+      "releasedAt": "2026-05-08T00:00:00",
+      "count": 280,
+      "providerCount": 280
+    },
+    {
+      "id": "VEN",
+      "name": "Vendetta",
+      "releasedAt": "2026-07-31T00:00:00",
+      "count": 358,
+      "providerCount": 358
     }
   ],
-  "attribution": "Unofficial fan project. Riftbound, card names, rules text, and artwork are property of Riot Games, Inc.",
-  "banListDate": "2026-09-18",
-  "banListSource": "https://playriftbound.com/en-us/rules-hub/"
+  "removedIds": [],
+  "attribution": "Unofficial fan project. Riftbound, card names, rules text, and artwork are property of Riot Games, Inc."
 }

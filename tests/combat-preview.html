@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="bs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Combat interaction QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Dev-only browser fixture. Use a separate origin so the real save stays intact.
+      import { createCombatFixture } from "./fixtures/combat.ts";
+      import { applyActionStepped, getLegalActions } from "/src/game/engine.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      let match = createCombatFixture();
+      let review = null;
+      if (new URLSearchParams(location.search).has("impact")) {
+        for (const targetId of [
+          "defender-guard",
+          "defender-front",
+          "attacker-front",
+          "attacker-guard",
+        ]) {
+          const before = match;
+          const action = getLegalActions(before, before.priorityPlayer).find(
+            (a) => a.targetId === targetId,
+          );
+          const result = applyActionStepped(before, action);
+          match = result.state;
+          review = {
+            before,
+            final: match,
+            frames: result.frames,
+            index: result.frames.findIndex((f) => f.combat?.stage === "impact"),
+            action,
+          };
+        }
+      }
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review }));
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

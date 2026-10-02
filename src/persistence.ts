@@ -13,6 +13,10 @@ const isObject = (x: unknown): x is Record<string, any> =>
 const finite = (x: unknown): x is number =>
   typeof x === "number" && Number.isFinite(x);
 const nonnegative = (x: unknown) => finite(x) && x >= 0;
+const count = (x: unknown) => nonnegative(x) && Number.isSafeInteger(x);
+const optionalBoolean = (x: unknown) =>
+  x === undefined || typeof x === "boolean";
+const optionalCount = (x: unknown) => x === undefined || count(x);
 const playerId = (x: unknown) => x === 0 || x === 1;
 const optionalString = (x: unknown) => x === undefined || typeof x === "string";
 const cardId = (x: unknown) => typeof x === "string" && Boolean(cardsById[x]);
@@ -33,45 +37,173 @@ const location = (x: unknown) =>
 const field = (x: unknown) => x === "field:0" || x === "field:1";
 const domain = (x: unknown) =>
   ["Fury", "Calm", "Mind", "Body", "Chaos", "Order"].includes(x as string);
-const effects = (x: unknown): boolean =>
+const effectTypes = new Set([
+  "draw",
+  "damage",
+  "heal",
+  "buff",
+  "might",
+  "kill",
+  "recall",
+  "stun",
+  "ready",
+  "readyRunes",
+  "exhaust",
+  "token",
+  "channel",
+  "energy",
+  "recycle",
+  "discard",
+  "drawDiscard",
+  "damageAll",
+  "mightAll",
+  "buffAll",
+  "healAll",
+  "counter",
+  "moveTarget",
+  "equip",
+  "mill",
+  "score",
+  "retrieve",
+  "assault",
+  "duel",
+  "bounce",
+  "temporary",
+  "predict",
+  "sacrifice",
+  "spendBuff",
+  "keyword",
+  "buffBonus",
+  "special",
+]);
+const targetFilters = new Set([
+  "anyTwoUnits",
+  "attackingUnit",
+  "unitInBase",
+  "spell",
+  "anyUnit",
+  "enemyUnitInBase",
+  "enemyUnit",
+  "enemyAttackingUnit",
+  "friendlyUnit",
+  "friendlyUnitWithoutTemporary",
+  "friendlyBuffableUnit",
+  "enemyGear",
+  "anyGear",
+  "friendlyDamagedUnit",
+  "friendlyReadyUnit",
+  "friendlyExhaustedUnit",
+  "enemySmallUnit",
+  "friendlyUnitHere",
+  "unitHere",
+  "enemyUnitHere",
+  "enemyUnitAtBattlefield",
+  "unitAtBattlefield",
+  "friendlyUnitAtBattlefield",
+  "duel",
+  "twoFriendlyUnits",
+  "upToTwoFriendlyUnits",
+  "upToTwoUnits",
+  "unitAndSpell",
+  "unitOrGear",
+  "battlefield",
+]);
+const effects = (x: unknown, depth = 0): boolean =>
+  depth <= 32 &&
   Array.isArray(x) &&
+  x.length <= 1000 &&
   x.every(
     (e) =>
       isObject(e) &&
+      effectTypes.has(e.type) &&
+      (e.target === undefined || targetFilters.has(e.target)) &&
+      ["amount", "minMight", "maxMight", "maxEnergy", "maxPower"].every(
+        (k) => e[k] === undefined || finite(e[k]),
+      ) &&
+      ["custom", "cardName", "domain", "keyword", "condition"].every((k) =>
+        optionalString(e[k]),
+      ) &&
       [
-        "draw",
-        "damage",
-        "heal",
-        "buff",
-        "might",
-        "kill",
-        "recall",
-        "stun",
+        "permanent",
         "ready",
-        "readyRunes",
-        "exhaust",
-        "token",
-        "channel",
-        "energy",
-        "recycle",
-        "discard",
-        "drawDiscard",
-        "damageAll",
-        "mightAll",
-        "buffAll",
-        "healAll",
-        "counter",
-        "moveTarget",
-        "equip",
-        "mill",
-        "score",
-        "retrieve",
-        "assault",
-        "duel",
-      ].includes(e.type) &&
-      (e.amount === undefined || finite(e.amount)) &&
-      optionalString(e.target),
+        "chooseRunes",
+        "excludeSource",
+        "optional",
+        "fromHidden",
+        "additionalCostPaid",
+      ].every((k) => optionalBoolean(e[k])) &&
+      (e.chosenTargetId === null || optionalString(e.chosenTargetId)) &&
+      (e.runeIds === undefined || stringArray(e.runeIds)) &&
+      (e.who === undefined || ["self", "opponent", "all"].includes(e.who)) &&
+      (e.location === undefined ||
+        ["base", "target", "here"].includes(e.location)) &&
+      (e.triggerCost === undefined ||
+        (isObject(e.triggerCost) &&
+          ["energy", "power", "xp", "recycleCost"].every((key) =>
+            optionalCount(e.triggerCost[key]),
+          ) &&
+          optionalString(e.triggerCost.domain) &&
+          optionalBoolean(e.triggerCost.exhaust))) &&
+      (e.modes === undefined ||
+        (Array.isArray(e.modes) &&
+          e.modes.length > 0 &&
+          e.modes.every(
+            (mode: unknown) =>
+              isObject(mode) &&
+              typeof mode.label === "string" &&
+              effects(mode.effects, depth + 1),
+          ))) &&
+      (e.effects === undefined || effects(e.effects, depth + 1)),
   );
+const validUnit = (u: unknown): boolean =>
+  isObject(u) &&
+  cardId(u.cardId) &&
+  cardsById[u.cardId].type === "Unit" &&
+  typeof u.id === "string" &&
+  playerId(u.owner) &&
+  location(u.location) &&
+  typeof u.ready === "boolean" &&
+  typeof u.stunned === "boolean" &&
+  stringArray(u.gear) &&
+  ["damage", "buff", "summonedTurn"].every((k) => count(u[k])) &&
+  finite(u.temporaryMight) &&
+  finite(u.temporaryAssault) &&
+  [
+    "preventDamage",
+    "baseMightOverride",
+    "moveLockedTurn",
+    "deathReplacementTurn",
+    "combatShield",
+  ].every((k) => optionalCount(u[k])) &&
+  [
+    "empowered",
+    "untargetableByEnemy",
+    "paidAdditionalCost",
+    "additionalCostPaid",
+    "playedFromHidden",
+    "temporary",
+    "token",
+  ].every((k) => optionalBoolean(u[k])) &&
+  (u.temporaryKeywords === undefined || stringArray(u.temporaryKeywords)) &&
+  (u.usedAbilities === undefined || stringArray(u.usedAbilities));
+const validStackItem = (s: unknown): boolean =>
+  isObject(s) &&
+  typeof s.id === "string" &&
+  cardId(s.cardId) &&
+  playerId(s.player) &&
+  ["spell", "ability", "trigger"].includes(s.kind) &&
+  (s.kind !== "spell" || cardsById[s.cardId].type === "Spell") &&
+  effects(s.effects) &&
+  optionalString(s.sourceId) &&
+  optionalString(s.targetId) &&
+  ["playOrdinal", "energySpent"].every(
+    (k) => s[k] === undefined || nonnegative(s[k]),
+  ) &&
+  (s.locationId === undefined || location(s.locationId)) &&
+  ["flowed", "fromHidden", "additionalCostPaid"].every((k) =>
+    optionalBoolean(s[k]),
+  ) &&
+  (s.sourceSnapshot === undefined || validUnit(s.sourceSnapshot));
 const combat = (x: unknown): boolean =>
   isObject(x) &&
   field(x.fieldId) &&
@@ -79,6 +211,8 @@ const combat = (x: unknown): boolean =>
   playerId(x.defender) &&
   x.attacker !== x.defender &&
   ["priority", "assign"].includes(x.stage) &&
+  optionalBoolean(x.engaged) &&
+  (x.designatedUnits === undefined || stringArray(x.designatedUnits)) &&
   playerId(x.assigningPlayer) &&
   ["total", "remaining"].every(
     (k) => Array.isArray(x[k]) && x[k].length === 2 && x[k].every(nonnegative),
@@ -94,16 +228,117 @@ const move = (x: unknown): boolean =>
   location(x.from) &&
   location(x.to) &&
   stringArray(x.unitIds);
+// Combat playback is display-only, but malformed saved metadata must not reach
+// the card/animation renderer. Legacy frames without it remain compatible.
+const combatStep = (x: unknown): boolean => {
+  if (
+    !isObject(x) ||
+    !["start", "assign", "impact", "result"].includes(x.stage)
+  )
+    return false;
+  const p = x.preview;
+  return (
+    isObject(p) &&
+    field(p.fieldId) &&
+    cardId(p.fieldCardId) &&
+    playerId(p.attacker) &&
+    playerId(p.defender) &&
+    p.attacker !== p.defender &&
+    ["priority", "assign"].includes(p.stage) &&
+    ["total", "remaining"].every(
+      (k) =>
+        Array.isArray(p[k]) && p[k].length === 2 && p[k].every(nonnegative),
+    ) &&
+    Array.isArray(p.assignments) &&
+    p.assignments.length === 2 &&
+    p.assignments.every(
+      (a: unknown) => isObject(a) && Object.values(a).every(nonnegative),
+    ) &&
+    Array.isArray(p.units) &&
+    p.units.every(
+      (u: unknown) =>
+        isObject(u) &&
+        validUnit(u.unit) &&
+        ["might", "power", "incoming", "prevention", "lethalAt"].every((k) =>
+          nonnegative(u[k]),
+        ) &&
+        stringArray(u.keywords),
+    ) &&
+    (x.hits === undefined ||
+      (Array.isArray(x.hits) &&
+        x.hits.every(
+          (h: unknown) =>
+            isObject(h) &&
+            typeof h.unitId === "string" &&
+            cardId(h.cardId) &&
+            playerId(h.owner) &&
+            [
+              "assigned",
+              "damageBefore",
+              "damageAfter",
+              "prevented",
+              "might",
+            ].every((k) => nonnegative(h[k])),
+        ))) &&
+    (x.defeatedIds === undefined || stringArray(x.defeatedIds)) &&
+    (x.recalledIds === undefined || stringArray(x.recalledIds)) &&
+    (x.controller === undefined ||
+      x.controller === null ||
+      playerId(x.controller))
+  );
+};
 const choice = (x: unknown): boolean =>
   isObject(x) &&
   playerId(x.player) &&
-  ["token", "trigger"].includes(x.kind) &&
-  nonnegative(x.remaining) &&
+  [
+    "token",
+    "trigger",
+    "discard",
+    "recycle",
+    "retrieve",
+    "readyRunes",
+    "predict",
+    "sacrifice",
+    "spendBuff",
+    "optional",
+    "move",
+    "custom",
+  ].includes(x.kind) &&
+  count(x.remaining) &&
   phase(x.returnPhase) &&
   playerId(x.returnPriority) &&
   optionalString(x.sourceId) &&
+  optionalString(x.targetId) &&
+  optionalCount(x.lastDiscardEnergy) &&
+  (x.sourceSnapshot === undefined || validUnit(x.sourceSnapshot)) &&
   (x.cardId === undefined || cardId(x.cardId)) &&
-  (x.effects === undefined || effects(x.effects));
+  (x.effects === undefined || effects(x.effects)) &&
+  (x.afterEffects === undefined || effects(x.afterEffects)) &&
+  optionalBoolean(x.finalizingTrigger) &&
+  (!x.finalizingTrigger ||
+    (x.kind === "readyRunes" &&
+      cardId(x.cardId) &&
+      typeof x.sourceId === "string" &&
+      effects(x.effects))) &&
+  (x.chosenRuneIds === undefined || stringArray(x.chosenRuneIds)) &&
+  (x.cardIndices === undefined ||
+    (Array.isArray(x.cardIndices) && x.cardIndices.every(count))) &&
+  (x.effect === undefined || effects([x.effect])) &&
+  (x.options === undefined ||
+    (Array.isArray(x.options) &&
+      x.options.length > 0 &&
+      x.options.every(validAction))) &&
+  (x.kind !== "custom" ||
+    (Array.isArray(x.options) &&
+      x.options.every(
+        (option: any) =>
+          option.player === x.player &&
+          option.category === "ability" &&
+          option.id.startsWith("choose-custom:") &&
+          Array.isArray(option.effects),
+      ))) &&
+  (x.locationId === undefined || location(x.locationId)) &&
+  (x.actor === undefined || playerId(x.actor));
 
 /** Review frames may capture a log snapshot before the action restores its phase payload. */
 export function validState(x: unknown, actionable = true): x is GameState {
@@ -163,7 +398,20 @@ export function validState(x: unknown, actionable = true): x is GameState {
         ["points", "energy", "cardsPlayedThisTurn", "fatigue"].every((k) =>
           nonnegative(p[k]),
         ) &&
-        finite(p.legendUsedTurn),
+        finite(p.legendUsedTurn) &&
+        [
+          "xp",
+          "discardedThisTurn",
+          "buffBonus",
+          "endReadyRunes",
+          "power",
+          "spellEnergy",
+          "unitsEnterReadyTurn",
+          "cannotPlaySpellsTurn",
+          "firstDeathTurn",
+        ].every((k) => optionalCount(p[k])) &&
+        (p.legendEmpowered === undefined ||
+          typeof p.legendEmpowered === "boolean"),
     )
   )
     return false;
@@ -176,20 +424,7 @@ export function validState(x: unknown, actionable = true): x is GameState {
         cardId(f.cardId) &&
         [null, 0, 1].includes(f.controller),
     ) ||
-    !x.units.every(
-      (u: unknown) =>
-        isObject(u) &&
-        cardId(u.cardId) &&
-        typeof u.id === "string" &&
-        playerId(u.owner) &&
-        location(u.location) &&
-        typeof u.ready === "boolean" &&
-        typeof u.stunned === "boolean" &&
-        stringArray(u.gear) &&
-        ["damage", "buff", "summonedTurn"].every((k) => nonnegative(u[k])) &&
-        finite(u.temporaryMight) &&
-        finite(u.temporaryAssault),
-    ) ||
+    !x.units.every(validUnit) ||
     !x.gears.every(
       (g: unknown) =>
         isObject(g) &&
@@ -197,20 +432,20 @@ export function validState(x: unknown, actionable = true): x is GameState {
         typeof g.id === "string" &&
         playerId(g.owner) &&
         typeof g.ready === "boolean" &&
-        optionalString(g.attachedTo),
+        optionalString(g.attachedTo) &&
+        cardsById[g.cardId].type === "Gear" &&
+        ["token", "temporary", "empowered"].every((k) =>
+          optionalBoolean(g[k]),
+        ) &&
+        (g.usedAbilities === undefined || stringArray(g.usedAbilities)),
     ) ||
-    !x.stack.every(
-      (s: unknown) =>
-        isObject(s) &&
-        typeof s.id === "string" &&
-        cardId(s.cardId) &&
-        playerId(s.player) &&
-        ["spell", "ability", "trigger"].includes(s.kind) &&
-        effects(s.effects) &&
-        optionalString(s.sourceId) &&
-        optionalString(s.targetId) &&
-        (s.locationId === undefined || location(s.locationId)),
-    ) ||
+    !x.stack.every(validStackItem) ||
+    (x.resolving !== undefined &&
+      (!Array.isArray(x.resolving) ||
+        !x.resolving.every(
+          (item: unknown) =>
+            validStackItem(item) && (item as { kind: string }).kind === "spell",
+        ))) ||
     !x.log.every(
       (l: unknown) =>
         isObject(l) &&
@@ -223,6 +458,18 @@ export function validState(x: unknown, actionable = true): x is GameState {
     return false;
 
   if (
+    (x.hidden !== undefined &&
+      (!Array.isArray(x.hidden) ||
+        !x.hidden.every(
+          (h: unknown) =>
+            isObject(h) &&
+            typeof h.id === "string" &&
+            cardId(h.cardId) &&
+            playerId(h.owner) &&
+            field(h.location) &&
+            count(h.hiddenTurn) &&
+            h.hiddenTurn <= x.turn,
+        ))) ||
     (x.combat !== null && !combat(x.combat)) ||
     (x.pendingMove !== null && !move(x.pendingMove)) ||
     (x.pendingChoice !== null && !choice(x.pendingChoice)) ||
@@ -235,14 +482,35 @@ export function validState(x: unknown, actionable = true): x is GameState {
             cardId(t.cardId) &&
             typeof t.sourceId === "string" &&
             effects(t.effects) &&
+            (t.sourceSnapshot === undefined || validUnit(t.sourceSnapshot)) &&
             (t.locationId === undefined || location(t.locationId)),
         ))) ||
+    (x.stagedFields !== undefined &&
+      (!Array.isArray(x.stagedFields) || !x.stagedFields.every(location))) ||
+    !optionalCount(x.unitDiedTurn) ||
+    !optionalCount(x.lastExcessDamage) ||
+    !optionalBoolean(x.pendingCombatFinish) ||
+    (x.pendingBeginning !== undefined && !playerId(x.pendingBeginning)) ||
+    (x.pendingAwaken !== undefined && !playerId(x.pendingAwaken)) ||
     (x.pendingTurnStart !== undefined && !playerId(x.pendingTurnStart)) ||
     (x.pendingEndTurn !== undefined && !playerId(x.pendingEndTurn))
   )
     return false;
 
   if (actionable) {
+    const stackIds = [...x.stack, ...(x.resolving ?? [])].map(
+      (item: { id: string }) => item.id,
+    );
+    const boardIds = [...x.units, ...x.gears, ...(x.hidden ?? [])].map(
+      (item: { id: string }) => item.id,
+    );
+    if (
+      new Set(stackIds).size !== stackIds.length ||
+      new Set(boardIds).size !== boardIds.length
+    )
+      return false;
+    if (x.resolving?.length && !x.pendingChoice && x.winner === null)
+      return false;
     if (
       (x.phase === "move" &&
         (!move(x.pendingMove) ||
@@ -293,9 +561,22 @@ function validAction(x: unknown): boolean {
     ].includes(x.category) &&
     optionalString(x.sourceId) &&
     optionalString(x.targetId) &&
+    optionalString(x.repeatedTargetId) &&
+    optionalString(x.abilityKey) &&
+    optionalString(x.detail) &&
+    optionalBoolean(x.repeated) &&
+    optionalBoolean(x.additionalCostPaid) &&
     (x.cardId === undefined || cardId(x.cardId)) &&
     (x.locationId === undefined || location(x.locationId)) &&
-    (x.unitIds === undefined || stringArray(x.unitIds))
+    (x.unitIds === undefined || stringArray(x.unitIds)) &&
+    (x.effects === undefined || effects(x.effects)) &&
+    (x.repeatedEffects === undefined || effects(x.repeatedEffects)) &&
+    (x.amount === undefined || finite(x.amount)) &&
+    (x.cardIndices === undefined ||
+      (Array.isArray(x.cardIndices) &&
+        x.cardIndices.every(
+          (n: unknown) => Number.isInteger(n) && (n as number) >= 0,
+        )))
   );
 }
 
@@ -317,6 +598,7 @@ export function parseSession(raw: string | null): SavedSession {
         (f: unknown) =>
           isObject(f) &&
           typeof f.label === "string" &&
+          (f.combat === undefined || combatStep(f.combat)) &&
           validState(f.state, false),
       ) &&
       Number.isInteger(r.index) &&

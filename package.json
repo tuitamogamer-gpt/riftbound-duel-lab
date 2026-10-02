@@ -9,14 +9,17 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "test:watch": "vitest",
-    "sync:cards": "node scripts/sync-cards.mjs",
+    "sync:cards": "node scripts/sync-cards.mjs && npm run cards:report",
     "cache:art": "node scripts/cache-playable-art.mjs",
-    "format": "prettier --write src tests docs *.json *.ts *.md"
+    "format": "prettier --write src tests docs *.json *.ts *.md",
+    "cards:report": "node scripts/report-card-coverage.mjs",
+    "cards:check": "node scripts/report-card-coverage.mjs --check"
   },
   "dependencies": {
     "@fontsource/barlow-condensed": "^5.3.0",
     "@fontsource/cinzel": "^5.3.0",
     "@fontsource/dm-sans": "^5.3.0",
+    "@fontsource/exo-2": "^5.3.0",
     "lucide-react": "^0.468.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

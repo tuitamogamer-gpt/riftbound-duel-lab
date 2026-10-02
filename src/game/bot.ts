@@ -7,8 +7,8 @@ import {
   otherPlayer,
 } from "./engine";
 import { getScript } from "./scripts";
-import type { GameAction, GameState, PlayerId, Unit } from "./types";
-/** Board-and-own-hand heuristic. Never inspects either draw-pile order or the opponent's hand. */
+import type { Effect, GameAction, GameState, PlayerId, Unit } from "./types";
+/** Uses public board state, own hand, and only the top card explicitly revealed by a Predict choice. */
 export function getBotAction(
   s: GameState,
   player: PlayerId = s.priorityPlayer,
@@ -22,7 +22,187 @@ export function getBotAction(
     getMight(s, u) +
     (getCard(u.cardId).energy ?? 0) * 0.25 +
     (u.cardId.startsWith("ogs-00") ? 1 : 0);
+  const cardValue = (id: string): number => {
+    const c = getCard(id),
+      sc = getScript(id);
+    const resources = s.players[player].energy + s.players[player].runes.length;
+    const unreachable = Math.max(0, (c.energy ?? 0) - resources - 2) * 2;
+    return (
+      (c.type === "Unit"
+        ? 12 + (c.might ?? 0) * 2
+        : c.type === "Gear"
+          ? 9
+          : 7) +
+      (sc?.spell?.some((e) => ["draw", "channel", "token"].includes(e.type))
+        ? 6
+        : 0) -
+      unreachable
+    );
+  };
+  const effectValue = (effect: Effect | undefined, target?: Unit): number => {
+    if (!effect) return 0;
+    const custom = effect.custom ?? "";
+    if (
+      effect.type === "ready" ||
+      /(?:vi-ready|fiora-ready|ready-unit)/.test(custom)
+    )
+      return target?.owner === player && !target.ready
+        ? 16 + value(target)
+        : -20;
+    if (effect.type === "buff" || /(?:valley-pay|buff-unit)/.test(custom))
+      return target?.owner === player && !target.buff
+        ? 12 + value(target)
+        : -20;
+    if (effect.type === "stun" || /(?:blast-stun|dread)/.test(custom))
+      return target?.owner === opponent && !target.stunned
+        ? 18 + value(target)
+        : -25;
+    if (
+      ["damage", "kill", "bounce"].includes(effect.type) ||
+      /(?:banish|wind-ghosts|lacerate|morgana)/.test(custom)
+    )
+      return target?.owner === opponent ? 15 + value(target) : -35;
+    if (
+      ["might", "assault", "keyword"].includes(effect.type) ||
+      /(?:combat-experience|barrier|shroud|retreat)/.test(custom)
+    )
+      return target?.owner === player
+        ? s.combat?.fieldId === target.location
+          ? 20
+          : target.ready
+            ? 8
+            : 1
+        : -35;
+    if (custom.endsWith("move-base") || effect.type === "moveTarget")
+      return target?.owner === opponent
+        ? 15 + value(target)
+        : target && enemies.some((u) => u.location === target.location)
+          ? 8
+          : -10;
+    if (
+      ["draw", "channel", "token", "score"].includes(effect.type) ||
+      /(?:vex-draw|ripper-pay|treasure|pay-mighty|play-mech|draw)/.test(custom)
+    )
+      return 15;
+    if (effect.type === "heal")
+      return target?.owner === player && target.damage ? 8 : -5;
+    return 3;
+  };
   const rate = (a: GameAction): number => {
+    const selected = s.units.find((u) => u.id === a.targetId);
+    if (s.phase === "choice") {
+      const choice = s.pendingChoice!;
+      if (a.id.endsWith(":skip") || a.id === "choose-optional:no") return 0;
+      if (a.id.startsWith("choose-rune:"))
+        return s.players[player].runes.find((rune) => rune.id === a.sourceId)
+          ?.ready
+          ? -1
+          : 5;
+      if (a.id.startsWith("choose-card:")) {
+        if (!a.cardId) return -5;
+        const amount = cardValue(a.cardId);
+        if (choice.kind === "retrieve") return 10 + amount;
+        const discardBonus =
+          choice.kind === "discard" && getScript(a.cardId)?.onDiscard ? 20 : 0;
+        return 40 - amount + discardBonus;
+      }
+      if (a.id.startsWith("choose-unit:")) {
+        if (!selected) return -10;
+        return (
+          40 -
+          value(selected) +
+          (selected.token ? 10 : 0) +
+          (choice.kind === "sacrifice" && getScript(selected.cardId)?.onDeath
+            ? 8
+            : 0)
+        );
+      }
+      if (a.id.startsWith("choose-predict:")) {
+        // This one card is information the active Predict effect explicitly reveals.
+        const revealed = s.players[player].deck[0];
+        if (!revealed) return a.id.endsWith(":keep") ? 1 : -1;
+        const c = getCard(revealed);
+        const tooExpensive =
+          (c.energy ?? 0) > s.players[player].runes.length + 3;
+        const lacksUnits = own.length < 2 && c.type === "Unit";
+        return a.id.endsWith(":recycle")
+          ? tooExpensive && !lacksUnits
+            ? 10
+            : -5
+          : 1;
+      }
+      if (a.id.startsWith("choose-destination:")) {
+        const moved = s.units.find((u) => u.id === choice.targetId);
+        if (!moved) return 0;
+        if (moved.owner === opponent)
+          return a.locationId === `base:${opponent}` ? 30 : -10;
+        const defenders = enemies.filter((u) => u.location === a.locationId);
+        return a.locationId?.startsWith("field:") && !defenders.length
+          ? 20
+          : a.locationId === `base:${player}`
+            ? 5
+            : -5;
+      }
+      if (a.id.startsWith("choose-custom:")) {
+        const effects = a.effects ?? [];
+        if (!effects.length) return 0;
+        return effects.reduce((sum, e) => sum + effectValue(e, selected), 0);
+      }
+      if (a.id === "choose-optional:yes")
+        return (choice.effect?.effects ?? [choice.effect]).reduce(
+          (sum, e) => sum + effectValue(e, selected),
+          0,
+        );
+    }
+    if (a.id.startsWith("hide:"))
+      return own.some((u) => u.location.startsWith("field:")) ? 3 : -5;
+    if (a.id.startsWith("equip:")) {
+      const gear = s.gears.find((g) => g.id === a.sourceId);
+      if (
+        !selected ||
+        selected.owner !== player ||
+        gear?.attachedTo === selected.id
+      )
+        return -20;
+      const previous = s.units.find((u) => u.id === gear?.attachedTo);
+      return previous
+        ? value(selected) > value(previous) + 4 && selected.ready
+          ? 4
+          : -10
+        : 10 + value(selected) * 0.2;
+    }
+    if (a.abilityKey === "megatusk") {
+      const source = own.find((u) => u.id === a.sourceId);
+      return source &&
+        own.some(
+          (u) =>
+            u.location === source.location &&
+            u.ready &&
+            !getKeywords(s, u).includes("Ganking"),
+        )
+        ? 8
+        : -10;
+    }
+    if (a.abilityKey === "garden") return 8;
+    if (["xerath", "shadow"].includes(a.abilityKey ?? ""))
+      return selected?.owner === opponent ? 20 + value(selected) : -30;
+    if (a.abilityKey === "shells")
+      return selected?.owner === player &&
+        selected.location === s.combat?.fieldId
+        ? 20
+        : -5;
+    if (a.abilityKey === "scryer") return 15;
+    if (
+      /gold/i.test(a.id) ||
+      (a.category === "resource" && /gold/i.test(a.label))
+    )
+      return s.players[player].hand.length &&
+        !actions.some(
+          (other) => other.category === "play" && !other.id.startsWith("hide:"),
+        )
+        ? 4
+        : -5;
+
     if (a.category === "mulligan") {
       const indices = a.cardIndices ?? [];
       return (
@@ -46,9 +226,23 @@ export function getBotAction(
       return 20 - own.filter((u) => u.location === f.id).length * 2;
     }
     if (a.id.startsWith("choose-trigger:")) {
-      const e = s.pendingChoice?.effects?.find((e) => e.target);
+      if (a.id === "choose-trigger:skip") return 0;
+      const effects = a.effects ?? s.pendingChoice?.effects ?? [];
+      const e = effects.find((e) => e.target);
       const u = s.units.find((u) => u.id === a.targetId);
-      if (!u) return 0;
+      if (!u)
+        return effects.reduce(
+          (score, effect) =>
+            score +
+            (effect.type === "draw"
+              ? 7 * (effect.amount ?? 1) * (effect.who === "opponent" ? -1 : 1)
+              : ["channel", "token", "score"].includes(effect.type)
+                ? 9 * (effect.amount ?? 1)
+                : 1),
+          1,
+        );
+      if (e?.type === "might")
+        return (u.owner === player ? 1 : -1) * (e.amount ?? 1) * 10;
       if (e?.type === "ready")
         return u.owner === player && !u.ready ? 20 + value(u) : -30;
       if (e?.type === "buff")
@@ -70,6 +264,13 @@ export function getBotAction(
     if (s.phase === "move") {
       const move = s.pendingMove!;
       const selected = own.filter((u) => move.unitIds.includes(u.id));
+      if (
+        !actions.some((next) => next.id === "move-confirm") &&
+        move.unitIds.length
+      ) {
+        const removable = selected.find((u) => u.id === a.sourceId);
+        if (removable) return 40 - value(removable);
+      }
       const defense = enemies
         .filter((u) => u.location === move.to)
         .reduce(
@@ -99,7 +300,15 @@ export function getBotAction(
         (n, e) => n + getMight(s, e) + (getScript(e.cardId)?.shield ?? 0),
         0,
       );
-      const possible = own
+      const investigators = defenders.filter(
+        (unit) => unit.cardId === "unl-163-219",
+      ).length;
+      const movementPower =
+        s.players[player].runes.length + (s.players[player].power ?? 0);
+      const maxGroup = investigators
+        ? 1 + Math.floor(movementPower / investigators)
+        : Infinity;
+      const movers = own
         .filter(
           (x) =>
             x.ready &&
@@ -107,10 +316,19 @@ export function getBotAction(
             (x.location === `base:${player}` ||
               getKeywords(s, x).includes("Ganking")),
         )
-        .reduce(
-          (n, x) => n + getMight(s, x) + (getScript(x.cardId)?.assault ?? 0),
-          0,
-        );
+        .sort(
+          (first, second) =>
+            getMight(s, second) +
+            (getScript(second.cardId)?.assault ?? 0) -
+            getMight(s, first) -
+            (getScript(first.cardId)?.assault ?? 0),
+        )
+        .slice(0, maxGroup);
+      if (!movers.some((candidate) => candidate.id === u.id)) return -10;
+      const possible = movers.reduce(
+        (n, x) => n + getMight(s, x) + (getScript(x.cardId)?.assault ?? 0),
+        0,
+      );
       if (possible <= defense) return -10;
       return (
         65 +
@@ -132,10 +350,14 @@ export function getBotAction(
           (a.id.endsWith("accelerate") ? 6 : 0)
         );
       }
-      const effects = getScript(c.id)?.spell ?? [];
+      const effects = a.effects ?? getScript(c.id)?.spell ?? [];
       const effect = effects[0];
       const target = s.units.find((u) => u.id === a.targetId);
       const during = s.phase === "showdown" || s.stack.length > 0;
+      if (effect?.type === "counter") {
+        const spell = s.stack.find((item) => item.id === a.targetId);
+        return spell?.player === opponent ? 40 : -100;
+      }
       if (effect?.type === "damage" || effect?.type === "kill") {
         if (!target || target.owner !== opponent) return -50;
         const lethal =
@@ -148,8 +370,14 @@ export function getBotAction(
           .split("~")
           .map((id) => s.units.find((u) => u.id === id));
         if (!first || !second) return -30;
-        return getMight(s, first) > getMight(s, second)
-          ? 40 + value(second)
+        if (first.owner === second.owner)
+          return first.owner === opponent
+            ? 30 + value(first) + value(second)
+            : -50;
+        const friend = first.owner === player ? first : second;
+        const enemy = first.owner === opponent ? first : second;
+        return getMight(s, friend) > getMight(s, enemy)
+          ? 40 + value(enemy)
           : -10;
       }
       if (effect?.type === "damageAll") {
@@ -179,6 +407,21 @@ export function getBotAction(
       if (effect?.type === "channel") return 30;
       if (effect?.type === "token") return 29;
       return 2;
+    }
+    if (a.category === "ability") {
+      const script = a.cardId ? getScript(a.cardId) : undefined;
+      const index = Number(a.id.split("|")[2]);
+      const ability = Number.isInteger(index)
+        ? script?.abilities?.[index]
+        : undefined;
+      if (ability?.effects.length) {
+        const source = s.units.find((u) => u.id === a.sourceId);
+        return ability.effects.reduce(
+          (n, e) => n + effectValue(e, selected ?? source),
+          0,
+        );
+      }
+      if (a.id.includes("empower")) return 6;
     }
     return 1;
   };

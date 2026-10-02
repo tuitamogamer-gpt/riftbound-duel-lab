@@ -1,14 +1,9 @@
+import type { StarterDeck } from "../data/decks";
 export type PlayerId = 0 | 1;
 export type Domain = string;
 export type LocationId = "base:0" | "base:1" | "field:0" | "field:1";
 export type Phase =
-  | "mulligan"
-  | "main"
-  | "showdown"
-  | "move"
-  | "damage"
-  | "choice"
-  | "ended";
+  "mulligan" | "main" | "showdown" | "move" | "damage" | "choice" | "ended";
 export interface Rune {
   id: string;
   domain: Domain;
@@ -24,17 +19,33 @@ export interface Unit {
   buff: number;
   temporaryMight: number;
   temporaryAssault: number;
+  combatShield?: number;
   stunned: boolean;
   gear: string[];
   token?: boolean;
   summonedTurn: number;
+  empowered?: boolean;
+  additionalCostPaid?: boolean;
+  playedFromHidden?: boolean;
+  preventDamage?: number;
+  untargetableByEnemy?: boolean;
+  baseMightOverride?: number;
+  moveLockedTurn?: number;
+  deathReplacementTurn?: number;
+  temporary?: boolean;
+  temporaryKeywords?: string[];
+  usedAbilities?: string[];
 }
 export interface Gear {
+  empowered?: boolean;
+  token?: boolean;
   id: string;
   cardId: string;
   owner: PlayerId;
   ready: boolean;
   attachedTo?: string;
+  temporary?: boolean;
+  usedAbilities?: string[];
 }
 export interface PlayerState {
   id: PlayerId;
@@ -50,6 +61,10 @@ export interface PlayerState {
   runes: Rune[];
   runeDeck: Domain[];
   energy: number;
+  spellEnergy?: number;
+  power?: number;
+  unitsEnterReadyTurn?: number;
+  cannotPlaySpellsTurn?: number;
   points: number;
   conqueredThisTurn: number[];
   cardsPlayedThisTurn: number;
@@ -58,6 +73,12 @@ export interface PlayerState {
   mulliganDone: boolean;
   fatigue: number;
   legendUsedTurn: number;
+  legendEmpowered?: boolean;
+  xp?: number;
+  discardedThisTurn?: number;
+  buffBonus?: number;
+  firstDeathTurn?: number;
+  endReadyRunes?: number;
 }
 export interface Battlefield {
   id: LocationId;
@@ -78,6 +99,8 @@ export interface PendingMove {
   unitIds: string[];
 }
 export interface StackItem {
+  playOrdinal?: number;
+  energySpent?: number;
   id: string;
   player: PlayerId;
   cardId: string;
@@ -86,8 +109,13 @@ export interface StackItem {
   locationId?: LocationId;
   effects: Effect[];
   kind: "spell" | "ability" | "trigger";
+  flowed?: boolean;
+  fromHidden?: boolean;
+  additionalCostPaid?: boolean;
+  sourceSnapshot?: Unit;
 }
 export interface Combat {
+  designatedUnits?: string[];
   fieldId: LocationId;
   attacker: PlayerId;
   defender: PlayerId;
@@ -99,7 +127,10 @@ export interface Combat {
   assigningPlayer: PlayerId;
 }
 export interface GameState {
+  stagedFields?: LocationId[];
   version: 1;
+  unitDiedTurn?: number;
+  lastExcessDamage?: number;
   seed: number;
   rng: number;
   turn: number;
@@ -110,7 +141,15 @@ export interface GameState {
   fields: [Battlefield, Battlefield];
   units: Unit[];
   gears: Gear[];
+  hidden?: {
+    id: string;
+    cardId: string;
+    owner: PlayerId;
+    location: LocationId;
+    hiddenTurn: number;
+  }[];
   stack: StackItem[];
+  resolving?: StackItem[];
   consecutivePasses: number;
   focusPlayer: PlayerId;
   chainStarter: PlayerId | null;
@@ -118,15 +157,40 @@ export interface GameState {
   pendingMove: PendingMove | null;
   pendingChoice: {
     player: PlayerId;
-    kind: "token" | "trigger";
+    kind:
+      | "token"
+      | "trigger"
+      | "discard"
+      | "recycle"
+      | "retrieve"
+      | "readyRunes"
+      | "predict"
+      | "sacrifice"
+      | "spendBuff"
+      | "optional"
+      | "move"
+      | "custom";
     remaining: number;
     sourceId?: string;
     cardId?: string;
     effects?: Effect[];
     returnPhase: Phase;
+    locationId?: LocationId;
+    targetId?: string;
+    effect?: Effect;
+    afterEffects?: Effect[];
+    actor?: PlayerId;
+    options?: GameAction[];
+    sourceSnapshot?: Unit;
+    lastDiscardEnergy?: number;
+    finalizingTrigger?: boolean;
+    chosenRuneIds?: string[];
+    cardIndices?: number[];
     returnPriority: PlayerId;
   } | null;
   pendingTurnStart?: PlayerId;
+  pendingBeginning?: PlayerId;
+  pendingAwaken?: PlayerId;
   pendingEndTurn?: PlayerId;
   pendingCombatFinish?: boolean;
   pendingTriggers?: {
@@ -135,6 +199,7 @@ export interface GameState {
     sourceId: string;
     effects: Effect[];
     locationId?: LocationId;
+    sourceSnapshot?: Unit;
   }[];
   winner: PlayerId | null;
   log: LogEntry[];
@@ -162,11 +227,24 @@ export interface GameAction {
   cardIndices?: number[];
   unitIds?: string[];
   detail?: string;
+  effects?: Effect[];
+  abilityKey?: string;
+  additionalCostPaid?: boolean;
+  repeated?: boolean;
+  repeatedTargetId?: string;
+  repeatedEffects?: Effect[];
 }
 export type TargetFilter =
+  | "anyTwoUnits"
+  | "attackingUnit"
+  | "unitInBase"
+  | "spell"
   | "anyUnit"
+  | "enemyUnitInBase"
   | "enemyUnit"
+  | "enemyAttackingUnit"
   | "friendlyUnit"
+  | "friendlyUnitWithoutTemporary"
   | "friendlyBuffableUnit"
   | "enemyGear"
   | "anyGear"
@@ -175,10 +253,17 @@ export type TargetFilter =
   | "friendlyExhaustedUnit"
   | "enemySmallUnit"
   | "friendlyUnitHere"
+  | "unitHere"
+  | "enemyUnitAtBattlefield"
   | "enemyUnitHere"
   | "unitAtBattlefield"
   | "friendlyUnitAtBattlefield"
   | "duel"
+  | "twoFriendlyUnits"
+  | "upToTwoFriendlyUnits"
+  | "upToTwoUnits"
+  | "unitAndSpell"
+  | "unitOrGear"
   | "battlefield";
 export type Effect = {
   type:
@@ -210,16 +295,49 @@ export type Effect = {
     | "score"
     | "retrieve"
     | "assault"
-    | "duel";
+    | "duel"
+    | "bounce"
+    | "temporary"
+    | "predict"
+    | "sacrifice"
+    | "spendBuff"
+    | "keyword"
+    | "buffBonus"
+    | "special";
   amount?: number;
   target?: TargetFilter;
   who?: "self" | "opponent" | "all";
   cardName?: string;
   location?: "base" | "target" | "here";
   maxMight?: number;
+  maxEnergy?: number;
+  maxPower?: number;
   domain?: string;
   permanent?: boolean;
+  minMight?: number;
+  ready?: boolean;
+  chooseRunes?: boolean;
+  runeIds?: string[];
+  excludeSource?: boolean;
+  optional?: boolean;
+  keyword?: string;
+  effects?: Effect[];
+  custom?: string;
+  fromHidden?: boolean;
+  additionalCostPaid?: boolean;
+  chosenTargetId?: string | null;
   condition?: string;
+  /** Leading trigger costs are paid while finalizing, before responses. */
+  triggerCost?: {
+    energy?: number;
+    power?: number;
+    domain?: string;
+    exhaust?: boolean;
+    xp?: number;
+    recycleCost?: number;
+  };
+  /** Bulleted modes are chosen before the triggered ability enters the chain. */
+  modes?: { label: string; effects: Effect[] }[];
 };
 export interface ActivatedAbility {
   label: string;
@@ -230,9 +348,14 @@ export interface ActivatedAbility {
   recycleRune?: boolean;
   oncePerTurn?: boolean;
   timing?: "main" | "action" | "reaction";
+  recycleCost?: number;
+  spendBuff?: boolean;
+  domain?: string;
+  condition?: string;
 }
 export interface CardScript {
   implemented: true;
+  spellModes?: { label: string; effects: Effect[] }[];
   spell?: Effect[];
   onPlay?: Effect[];
   onDeath?: Effect[];
@@ -250,10 +373,34 @@ export interface CardScript {
   reaction?: boolean;
   accelerating?: boolean;
   bonusDraw?: number;
+  hidden?: boolean;
+  ambush?: boolean;
+  flow?: { energy: number; power: number; domain?: string };
+  repeat?: {
+    energy?: number;
+    power?: number;
+    domain?: string;
+    discard?: number;
+  };
+  additionalCost?: {
+    energy?: number;
+    power?: number;
+    domain?: string;
+    discard?: number;
+  };
+  equipEnergy?: number;
+  combatCondition?: "paired";
+  onMove?: Effect[];
+  onBegin?: Effect[];
+  onEnd?: Effect[];
+  onDiscard?: Effect[];
+  onDefend?: Effect[];
   notes?: string;
 }
 export interface GameOptions {
   playerDeckId?: string;
+  playerDeck?: StarterDeck;
+  botDeck?: StarterDeck;
   botDeckId?: string;
   seed?: number;
   firstPlayer?: PlayerId;

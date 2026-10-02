@@ -230,7 +230,7 @@ describe("step review persistence and presentation boundaries", () => {
           onProceed: () => {},
         }),
       ),
-    ).toContain("KORAK 2 /");
+    ).toContain("STEP 2 /");
   });
 
   it("does not invoke Proceed during initial render or merely because the bot is pending", () => {
@@ -243,7 +243,7 @@ describe("step review persistence and presentation boundaries", () => {
       }),
     );
     expect(calls).toBe(0);
-    expect(html).toContain("AI ČEKA TVOJ PROCEED");
+    expect(html).toContain("AI IS WAITING FOR YOU TO PROCEED");
     expect(html).toContain('aria-label="Proceed"');
   });
 

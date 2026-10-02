@@ -1,0 +1,154 @@
+.rift-starting-pair {
+  margin-top: 14px;
+}
+
+.rift-starting-pair-heading {
+  display: block;
+  margin-bottom: 8px;
+  color: #536770;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.rift-starting-pair-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.rift-starting-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #087b8345;
+  border-radius: 4px;
+  color: #172632;
+  background: #f8fbf6;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.rift-starting-card-legend {
+  border-color: #ab882b60;
+  background: #fff9e8;
+}
+
+.rift-starting-card:hover,
+.rift-starting-card:focus-visible {
+  border-color: #087b83;
+  box-shadow: 0 0 0 2px #087b8325;
+}
+
+.rift-starting-card > img {
+  display: block;
+  width: 56px;
+  aspect-ratio: 5 / 7;
+  flex: 0 0 56px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: #172632;
+}
+
+.rift-starting-card-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.rift-starting-card-role {
+  color: #08747c;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.rift-starting-card-legend .rift-starting-card-role {
+  color: #83620e;
+}
+
+.rift-starting-card-copy strong {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.rift-starting-card-copy small {
+  color: #596871;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.rift-opponent .rift-starting-pair-cards {
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+.rift-opponent .rift-starting-pair-heading {
+  color: #bfccd3;
+}
+
+.rift-opponent .rift-starting-card {
+  gap: 10px;
+  padding: 8px;
+  color: #f5f4ee;
+  border-color: #51828b80;
+  background: #203b4c;
+}
+
+.rift-opponent .rift-starting-card-legend {
+  border-color: #d3be7960;
+  background: #2a3b42;
+}
+
+.rift-opponent .rift-starting-card > img {
+  width: 43px;
+  flex-basis: 43px;
+}
+
+.rift-opponent .rift-starting-card-role {
+  color: #80d6d0;
+}
+
+.rift-opponent .rift-starting-card-legend .rift-starting-card-role {
+  color: #efd379;
+}
+
+.rift-opponent .rift-starting-card-copy small {
+  color: #c4d0d7;
+}
+
+.rift-opponent .rift-starting-card:hover,
+.rift-opponent .rift-starting-card:focus-visible {
+  border-color: #efd379;
+  box-shadow: 0 0 0 2px #efd37925;
+}
+
+@media (max-width: 560px) {
+  .rift-starting-pair-cards {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .rift-starting-card {
+    padding: 8px;
+  }
+
+  .rift-starting-card > img {
+    width: 43px;
+    flex-basis: 43px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rift-starting-card {
+    transition: none;
+  }
+}

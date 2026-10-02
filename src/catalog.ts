@@ -1,4 +1,4 @@
-import data from "./data/cards.json";
+import { cards as data } from "./data/cards";
 export interface CatalogCard {
   id: string;
   providerId: string;

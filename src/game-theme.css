@@ -1,0 +1,649 @@
+/* Match table: ink navy, clearly separated sides, and readable action controls. */
+.app.is-game {
+  background: #10202d;
+  color: #eef3f5;
+  --muted: #a1b2bf;
+  --line: #ffffff18;
+}
+.app.is-game .game-layout {
+  padding-bottom: 28px;
+}
+.app.is-game .match-toolbar {
+  color: #a4b5c3;
+  font-size: 10px;
+  border-color: #ffffff18;
+}
+.app.is-game .match-toolbar .text-button {
+  color: #d4e0e7;
+}
+.app.is-game .turn-indicator {
+  color: #eff6f5;
+  font-size: 11px;
+}
+.app.is-game .match-content {
+  gap: 18px;
+}
+.app.is-game .playmat {
+  padding: 12px;
+  background: radial-gradient(
+    ellipse at 50% 42%,
+    #243e49 0%,
+    #152b38 58%,
+    #102330 100%
+  );
+  border: 1px solid #54717c;
+  border-radius: 5px;
+  box-shadow:
+    0 12px 26px #06111a35,
+    inset 0 0 0 4px #0c1a2455;
+}
+.app.is-game .playmat:before {
+  background: none;
+}
+.app.is-game .player-bar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-height: 57px;
+  padding: 7px 10px;
+  border-radius: 3px;
+}
+.app.is-game .player-0 {
+  background: #173b43;
+  border: 1px solid #39887e;
+  border-left: 4px solid #67d2bd;
+}
+.app.is-game .player-1 {
+  background: #382d37;
+  border: 1px solid #795363;
+  border-left: 4px solid #d9888b;
+}
+.app.is-game .legend-portrait {
+  flex: none;
+  border-color: #d7bc7e;
+  box-shadow: 0 0 0 2px #10202d;
+}
+.app.is-game .player-name strong,
+.app.is-game .field-heading button,
+.app.is-game .phase-panel h3,
+.app.is-game .action-panel h3,
+.app.is-game .review-lock h3,
+.app.is-game .result-banner h2 {
+  font-family: "Exo 2", sans-serif;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  color: #f1f5f5;
+  text-shadow: none;
+}
+.app.is-game .player-name strong {
+  font-size: 14px;
+}
+.app.is-game .player-name small {
+  color: #bfccd3;
+  font-size: 10px;
+}
+.app.is-game .rune-area small {
+  color: #afc1cb;
+  font-size: 9px;
+}
+.app.is-game .score > span {
+  font-family: "Exo 2", sans-serif;
+  font-weight: 800;
+  font-style: italic;
+  color: #a4efde;
+  text-shadow: none;
+}
+.app.is-game .player-1 .score > span {
+  color: #efb0ad;
+  text-shadow: none;
+}
+.app.is-game .score > small {
+  color: #bdcbd3;
+}
+.app.is-game .player-bar .score {
+  grid-column: 3;
+  grid-row: 1;
+}
+.app.is-game .rune-area.rune-zone {
+  max-width: none;
+  min-width: 0;
+  margin: 12px 0 0;
+  padding: 10px 0 4px;
+  border-top: 1px solid #71989c40;
+  text-align: left;
+}
+.app.is-game .rune-zone-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.app.is-game .rune-zone-heading > span {
+  color: #c3dcd8;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.app.is-game .rune-zone-heading small {
+  margin: 0;
+  text-align: right;
+}
+.app.is-game .hand-section .rune-zone {
+  margin-top: 14px;
+}
+.app.is-game .rune-zone .rune-orbs {
+  justify-content: center;
+}
+.app.is-game .rune-orbs {
+  justify-content: flex-start;
+  gap: 6px;
+}
+.rune-card {
+  width: 48px;
+  flex: 0 0 auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--rune-color);
+  border-radius: 4px;
+  background: #0c1a24;
+  box-shadow: 0 2px 6px #0005;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
+}
+.rune-card-art {
+  position: relative;
+  display: block;
+  aspect-ratio: 744 / 1039;
+  overflow: hidden;
+}
+.rune-card-art > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.rune-card-fallback {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-size: 26px;
+  color: var(--rune-color);
+}
+.rune-card-state {
+  display: block;
+  padding: 3px 1px;
+  color: #adf0d7;
+  background: #123b32;
+  font-size: 7px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.rune-card.spent {
+  border-color: #72838e;
+}
+.rune-card.spent .rune-card-art > img,
+.rune-card.spent .rune-card-fallback {
+  filter: grayscale(1) brightness(0.62);
+}
+.rune-card.spent .rune-card-state {
+  color: #e0d7cd;
+  background: #3a3535;
+}
+.rune-card:hover,
+.rune-card:focus-visible {
+  transform: translateY(-3px);
+  box-shadow:
+    0 0 0 2px #dfc080,
+    0 4px 10px #0008;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rune-card {
+    transition: none;
+  }
+}
+@media (max-width: 760px) {
+  .rune-card {
+    width: 44px;
+  }
+}
+.app.is-game .enemy-hand {
+  height: 35px;
+  margin-bottom: 11px;
+  background: #0c1c2866;
+}
+.app.is-game .enemy-hand > span {
+  color: #aabac5;
+  font-size: 9px;
+  right: 8px;
+}
+.app.is-game .card-back {
+  border-color: #9b895f;
+  color: #dac68f;
+  background: repeating-linear-gradient(135deg, #23424f 0 3px, #19333f 3px 6px);
+}
+.app.is-game .base-zone {
+  background: #0f2431a6;
+  border: 1px dashed #57727e;
+  box-shadow: none;
+  border-radius: 3px;
+}
+.app.is-game .zone-label {
+  background: #152d3b;
+  color: #c9d7dc;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+.app.is-game .empty-base {
+  color: #a4b8c2;
+  font-size: 10px;
+}
+.app.is-game .battlefields {
+  gap: 13px;
+}
+.app.is-game .battlefield {
+  border: 1px solid #9a8a61;
+  border-radius: 4px;
+  background: #112433;
+  box-shadow: 0 5px 14px #07141f44;
+}
+.app.is-game .battlefield .field-art {
+  opacity: 0.53 !important;
+  filter: saturate(0.65);
+}
+.app.is-game .battlefield:after {
+  background: linear-gradient(#07152038, #0a19264d);
+}
+.app.is-game .field-heading {
+  background: #10222fed;
+  border-bottom: 1px solid #ffffff26;
+  padding: 10px 11px;
+  gap: 8px;
+}
+.app.is-game .field-heading button {
+  display: block;
+  font-size: 14px;
+  line-height: 1.2;
+  margin-top: 4px;
+}
+.app.is-game .field-heading .eyebrow {
+  font-size: 8px;
+  color: #d7bd84;
+  letter-spacing: 1.3px;
+}
+.app.is-game .control-badge {
+  flex: none;
+  color: #d9e0e2;
+  font-size: 8px;
+  padding: 5px;
+  background: #10202d;
+  border-color: #87959b66;
+}
+.app.is-game .battlefield.owned {
+  border-color: #63d4bd;
+}
+.app.is-game .battlefield.enemy-owned {
+  border-color: #d68d93;
+}
+.app.is-game .battlefield.in-combat {
+  border-color: #f1ca78;
+  box-shadow:
+    0 0 0 2px #f1ca7833,
+    0 5px 14px #07141f44;
+}
+.app.is-game .owned .control-badge {
+  background: #183f40;
+  color: #a2ead9;
+  border-color: #5fc5ae88;
+}
+.app.is-game .enemy-owned .control-badge {
+  background: #432f38;
+  color: #f0b6bb;
+  border-color: #d68d9388;
+}
+.app.is-game .field-divider {
+  color: #dec38b;
+}
+.app.is-game .field-divider span {
+  background: #d5c49a66;
+}
+.app.is-game .empty-field {
+  color: #dde6e8;
+  font-size: 10px;
+  text-shadow: 0 1px 5px #000;
+}
+.app.is-game .unit-power {
+  background: #0f2230;
+  border-color: #cfb57c;
+  color: #f0dcaa;
+}
+.app.is-game .hand-section {
+  padding: 13px 10px 8px;
+  border: 1px solid #468778;
+  border-radius: 3px;
+  background: #102a34;
+  margin-top: 11px;
+}
+.app.is-game .hand-title {
+  font-size: 10px;
+  color: #d7e8e8;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+.app.is-game .hand-title span:last-child {
+  color: #a8c0c8;
+  font-size: 9px;
+  font-weight: 400;
+}
+.app.is-game .champion-in-hand > span {
+  font-size: 8px;
+  letter-spacing: 0.8px;
+}
+.app.is-game .game-layout .game-card {
+  box-shadow: 0 4px 9px #020a1166;
+}
+.app.is-game .game-layout .game-card.selected {
+  outline: 2px solid #8fe8d1;
+  outline-offset: 3px;
+  box-shadow: 0 0 18px #4ed1b544;
+}
+.app.is-game .action-sidebar {
+  border: 1px solid #597381;
+  border-radius: 5px;
+  padding: 18px 15px;
+  background: #0d1d29;
+}
+.app.is-game .phase-panel {
+  padding-bottom: 17px;
+  border-color: #ffffff20;
+}
+.app.is-game .phase-panel > .eyebrow {
+  color: #a4bdc9;
+  font-size: 9px;
+  letter-spacing: 1.8px;
+}
+.app.is-game .phase-panel h3 {
+  font-size: 24px;
+  line-height: 1.15;
+  margin: 8px 0 14px;
+}
+.app.is-game .phase-track {
+  font-size: 9px;
+  color: #9aafbd;
+  gap: 8px;
+}
+.app.is-game .phase-track > span.current {
+  color: #f2d492;
+}
+.app.is-game .action-panel h3 {
+  font-size: 16px;
+  color: #e5d3a7;
+}
+.app.is-game .action-panel p,
+.app.is-game .review-lock p {
+  color: #b6c5d0;
+  font-size: 11px;
+}
+.app.is-game .action-button {
+  background: #203747;
+  border: 1px solid #52717e;
+  border-radius: 3px;
+  padding: 11px;
+  font-size: 12px !important;
+  line-height: 1.4;
+  margin-bottom: 7px;
+}
+.app.is-game .action-button:hover {
+  background: #2a4d59;
+  border-color: #81c9bb;
+}
+.app.is-game .action-button small {
+  color: #b2c5d0;
+  font-size: 10px;
+}
+.app.is-game .action-icon {
+  color: #ebd09b;
+}
+.app.is-game .action-button > svg {
+  color: #b9cecd;
+}
+.app.is-game .game-layout .gold-button {
+  background: #d9b971;
+  border: 1px solid #f4d698;
+  color: #142630;
+  border-radius: 3px;
+  box-shadow: 0 3px 0 #846c3c;
+  font-family: "Exo 2", sans-serif;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  text-shadow: none;
+}
+.app.is-game .game-layout .gold-button:hover {
+  background: #efd391;
+}
+.app.is-game .game-layout .outline-button {
+  border-radius: 3px;
+  color: #d2e4e6;
+  border-color: #527981;
+}
+.app.is-game .mulligan-list button {
+  color: #dbe6eb;
+  background: #193140;
+  border-color: #375666;
+}
+.app.is-game .mulligan-list button.active {
+  background: #3b3530;
+  border-color: #d4b77c;
+}
+.app.is-game .step-flow {
+  background: #18303f;
+  border-color: #a88e58;
+  border-radius: 4px;
+  box-shadow: 0 6px 14px #0002;
+}
+.app.is-game .step-flow.idle {
+  background: #122835;
+  border-color: #4a6572;
+}
+.app.is-game .step-flow:before {
+  display: none;
+}
+.app.is-game .step-symbol {
+  background: #10212c;
+  border-color: #aa955e;
+}
+.app.is-game .step-flow .eyebrow {
+  color: #d8c085;
+  font-size: 9px;
+}
+.app.is-game .step-flow strong {
+  color: #f0e0b9 !important;
+  font-size: 13px;
+}
+.app.is-game .step-flow p {
+  color: #bfced7;
+  font-size: 11px;
+}
+.app.is-game .manual-badge {
+  color: #b4c8d2;
+  font-size: 9px;
+}
+.app.is-game .proceed-button small {
+  color: #142630;
+  opacity: 0.85;
+  font-size: 9px;
+}
+.app.is-game .log-panel > .eyebrow {
+  font-size: 9px;
+  color: #b5c7ce;
+}
+.app.is-game .log-entries p {
+  font-size: 10px;
+  line-height: 1.6;
+  color: #abc0ca;
+}
+.app.is-game .log-entries p.log-combat {
+  color: #e4adab;
+}
+.app.is-game .log-entries p.log-score {
+  color: #e9cf94;
+}
+.app.is-game .autosave {
+  font-size: 9px;
+  color: #94b2bd;
+}
+.app.is-game .result-banner {
+  background: #142b3cf5;
+  border-color: #d3b575;
+}
+@media (max-width: 1050px) and (min-width: 761px) {
+  .app.is-game .match-content {
+    gap: 12px;
+  }
+  .app.is-game .field-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .app.is-game .rune-area {
+    max-width: 175px;
+  }
+}
+@media (max-width: 760px) {
+  .app.is-game .game-layout {
+    padding: 0 10px 20px;
+  }
+  .app.is-game .match-toolbar {
+    font-size: 9px;
+    gap: 5px;
+  }
+  .app.is-game .match-toolbar > span {
+    padding: 0 5px;
+  }
+  .app.is-game .turn-indicator {
+    font-size: 9px;
+  }
+  .app.is-game .match-content {
+    gap: 0;
+  }
+  .app.is-game .playmat {
+    padding: 8px 6px 12px;
+  }
+  .app.is-game .player-bar {
+    padding: 7px;
+    gap: 8px;
+    min-height: 57px;
+  }
+  .app.is-game .player-name {
+    min-width: 0;
+  }
+  .app.is-game .player-name strong {
+    font-size: 12px;
+  }
+  .app.is-game .player-name small {
+    font-size: 8px;
+    max-width: 105px;
+  }
+  .app.is-game .rune-area {
+    max-width: 105px;
+  }
+  .app.is-game .rune-area small {
+    font-size: 8px;
+  }
+  .app.is-game .rune {
+    font-size: 10px;
+  }
+  .app.is-game .enemy-hand > span {
+    font-size: 8px;
+    right: 4px;
+    bottom: 0;
+  }
+  .app.is-game .base-zone {
+    margin-top: 13px;
+  }
+  .app.is-game .zone-label {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+  .app.is-game .empty-base {
+    font-size: 9px;
+  }
+  .app.is-game .battlefields {
+    gap: 8px;
+  }
+  .app.is-game .field-heading {
+    padding: 8px 7px;
+  }
+  .app.is-game .field-heading button {
+    font-size: 12px;
+    min-height: 29px;
+  }
+  .app.is-game .field-heading .eyebrow {
+    font-size: 7px;
+  }
+  .app.is-game .control-badge {
+    font-size: 7px;
+    padding: 4px;
+  }
+  .app.is-game .empty-field {
+    font-size: 9px;
+    text-align: center;
+  }
+  .app.is-game .hand-section {
+    padding: 11px 6px 4px;
+  }
+  .app.is-game .hand-title {
+    font-size: 9px;
+    margin-bottom: 10px;
+    gap: 8px;
+  }
+  .app.is-game .hand-title span:last-child {
+    font-size: 8px;
+    max-width: 158px;
+  }
+  .app.is-game .champion-in-hand > span {
+    font-size: 7px;
+  }
+  .app.is-game .action-sidebar {
+    padding: 17px 13px;
+  }
+  .app.is-game .phase-panel h3 {
+    font-size: 22px;
+    margin: 0;
+  }
+  .app.is-game .phase-track {
+    gap: 8px;
+    font-size: 8px;
+  }
+  .app.is-game .action-button {
+    padding: 12px;
+  }
+  .app.is-game .step-flow {
+    padding: 10px;
+    gap: 9px;
+  }
+  .app.is-game .step-flow strong {
+    font-size: 11px;
+  }
+  .app.is-game .step-flow p {
+    font-size: 9px;
+  }
+  .app.is-game .step-flow .eyebrow {
+    font-size: 8px;
+  }
+  .app.is-game .manual-badge {
+    font-size: 8px;
+  }
+  .app.is-game .proceed-button {
+    min-width: 113px;
+    padding-left: 11px;
+    padding-right: 11px;
+  }
+  .app.is-game .proceed-button small {
+    font-size: 8px;
+  }
+}

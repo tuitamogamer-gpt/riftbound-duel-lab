@@ -1,0 +1,310 @@
+.app.is-game .champion-zone {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 136px));
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin: 9px 0 12px;
+}
+
+.app.is-game .setup-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 7px;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid #71817580;
+  border-radius: 4px;
+  background: #0b202c;
+}
+
+.app.is-game .legend-zone {
+  border-color: #bca06799;
+  background: linear-gradient(115deg, #38372b55, #0b202c);
+}
+
+.app.is-game .setup-card.is-selected {
+  border-color: #8fe8d1;
+}
+
+.app.is-game .champion-zone .game-card.small,
+.app.is-game .setup-empty-art {
+  flex: 0 0 134px;
+  align-self: center;
+  width: 96px;
+  height: 134px;
+  margin: 0;
+}
+
+.app.is-game .setup-empty-art {
+  display: grid;
+  place-items: center;
+  border: 1px dashed #607783;
+  border-radius: 4px;
+  color: #607783;
+  background: #112632;
+  cursor: pointer;
+}
+
+.app.is-game .setup-empty-art span {
+  font-size: 34px;
+  font-weight: 400;
+}
+
+.app.is-game .setup-empty-art:hover {
+  color: #d7c28e;
+  border-color: #d7c28e;
+}
+
+.app.is-game .setup-card-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  text-align: center;
+}
+
+.app.is-game .setup-card-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 5px;
+  color: #e7cb92;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.app.is-game .setup-status {
+  color: #aebec8;
+  font-size: 9px;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.app.is-game .setup-status.is-ready {
+  color: #92dcc5;
+}
+
+.app.is-game .setup-card-name {
+  display: block;
+  min-height: 2.7em;
+  padding: 0;
+  color: #f0f4f3;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+/* Full rules remain available to assistive technology, previews and inspection. */
+.app.is-game .setup-card-description {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.app.is-game .setup-action {
+  width: 100%;
+  min-height: 29px;
+  margin-top: 7px;
+  padding: 4px;
+  color: #b7f4e4;
+  border: 1px solid #67bfa480;
+  border-radius: 3px;
+  background: #23504780;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.app.is-game .setup-action:hover {
+  background: #286053;
+}
+
+.app.is-game .zone-empty {
+  border-style: dashed;
+}
+
+/* The hand and its runes occupy the left column; setup cards stay beside it. */
+.app.is-game .player-cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  align-items: start;
+  gap: 12px;
+  min-width: 0;
+  margin: 10px 0 12px;
+}
+
+.app.is-game .player-cards > .hand-section,
+.app.is-game .player-cards > .opponent-hand-section {
+  min-width: 0;
+  margin: 0;
+}
+
+.app.is-game .player-cards > .champion-zone {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+  margin: 0;
+}
+
+.app.is-game .player-cards .hand-title {
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.app.is-game .player-cards .hand-title span:last-child {
+  max-width: 100%;
+  text-align: left;
+}
+
+.app.is-game .player-cards .hand {
+  min-width: 0;
+  max-width: 100%;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: 8px 5px 12px;
+  scrollbar-width: thin;
+}
+
+.app.is-game .player-cards .hand-card-wrap {
+  flex: 0 0 auto;
+}
+
+.app.is-game .player-cards .enemy-hand {
+  height: auto;
+  min-height: 64px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  padding: 8px;
+  margin: 0;
+}
+
+.app.is-game .player-cards .enemy-hand > span {
+  position: static;
+  flex-basis: 100%;
+  min-width: 0;
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+.app.is-game .player-cards .rune-zone {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.app.is-game .player-cards .rune-zone-heading {
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.app.is-game .player-cards .rune-zone-heading small {
+  min-width: 0;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.app.is-game .player-cards .rune-orbs {
+  justify-content: flex-start;
+}
+
+@media (max-width: 1100px) {
+  .app.is-game .player-cards {
+    grid-template-columns: minmax(0, 1fr) 228px;
+    gap: 9px;
+  }
+
+  .app.is-game .player-cards .setup-card {
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .app.is-game .player-cards .champion-zone {
+    gap: 6px;
+  }
+
+  .app.is-game .player-cards .game-card.small,
+  .app.is-game .player-cards .setup-empty-art {
+    flex-basis: 117px;
+    width: 84px;
+    height: 117px;
+  }
+}
+
+@media (max-width: 760px) {
+  .app.is-game .player-cards {
+    grid-template-columns: minmax(0, 1fr) 180px;
+    gap: 7px;
+  }
+
+  .app.is-game .player-cards .setup-card {
+    padding: 5px;
+    gap: 5px;
+  }
+
+  .app.is-game .player-cards .game-card.small,
+  .app.is-game .player-cards .setup-empty-art {
+    flex-basis: 95px;
+    width: 68px;
+    height: 95px;
+  }
+
+  .app.is-game .player-cards .setup-card-heading {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+
+  .app.is-game .player-cards .setup-status {
+    font-size: 8px;
+  }
+
+  .app.is-game .player-cards .setup-card-name {
+    font-size: 9px;
+  }
+
+  .app.is-game .player-cards .setup-action {
+    padding: 4px 2px;
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 420px) {
+  .app.is-game .player-cards {
+    grid-template-columns: minmax(0, 1fr) 158px;
+    gap: 6px;
+  }
+
+  .app.is-game .player-cards .game-card.small,
+  .app.is-game .player-cards .setup-empty-art {
+    flex-basis: 84px;
+    width: 60px;
+    height: 84px;
+  }
+
+  .app.is-game .player-cards .setup-card-heading,
+  .app.is-game .player-cards .setup-status {
+    font-size: 7px;
+  }
+
+  .app.is-game .player-cards .setup-card-name {
+    font-size: 8px;
+  }
+
+  .app.is-game .player-cards .setup-action {
+    font-size: 7px;
+  }
+}

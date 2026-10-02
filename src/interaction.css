@@ -1,0 +1,53 @@
+.deck-preview-list {
+  max-height: 48vh;
+  overflow-y: auto;
+  margin: 18px 0;
+  border: 1px solid #3d5261;
+  border-radius: 8px;
+  background: #091723;
+  padding: 12px;
+}
+.deck-preview-list section + section {
+  margin-top: 16px;
+}
+.deck-preview-list h3 {
+  color: #8daab9;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  margin: 0 0 7px;
+}
+.deck-preview-list button {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: #e8edf1;
+  border: 0;
+  border-bottom: 1px solid #203442;
+  padding: 9px 7px;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.deck-preview-list button:hover,
+.deck-preview-list button:focus-visible {
+  background: #213749;
+  color: #adf0ff;
+  outline: 1px solid #60b0cf;
+}
+.deck-preview-list button span {
+  color: #a8d76d;
+  font-variant-numeric: tabular-nums;
+}
+.deck-preview-list button svg {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.stack-panel [data-card-preview]:focus-visible,
+.removed-unit:focus-visible {
+  outline: 2px solid #7fe4f8;
+  outline-offset: 3px;
+}

@@ -1,0 +1,17 @@
+button.gear-chip {
+  position: relative;
+  min-height: 32px;
+  text-align: left;
+}
+button.gear-chip.is-exhausted {
+  padding-right: 33px;
+  border-color: #777;
+  background: #1c1c1c;
+  color: #bbb;
+}
+.gear-chip > .exhausted-token {
+  inset: auto 5px 4px auto;
+  width: 22px;
+  height: 22px;
+  transform: none;
+}

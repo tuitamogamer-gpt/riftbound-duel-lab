@@ -1,3 +1,18 @@
+import { vendettaWave3Scripts } from "./vendetta-wave3";
+import { unleashedWave3Scripts } from "./unleashed-wave3";
+import { originsWave3Scripts } from "./origins-wave3";
+import { preconScripts } from "./precon-scripts";
+import { unleashedScripts } from "./unleashed";
+import { spiritforgedScripts } from "./spiritforged";
+import { vendettaScripts } from "./vendetta";
+import { originsExtraScripts } from "./origins-extra";
+import { spiritforgedExtraScripts } from "./spiritforged-extra";
+import { originsMoreScripts } from "./origins-more";
+import { vendettaExtraScripts } from "./vendetta-extra";
+import { unleashedExtraScripts } from "./unleashed-extra";
+import { cards } from "../data/cards";
+import { buildCardRegistry } from "./card-registry";
+import { compileCardScript } from "./card-script-compiler";
 import type { CardScript } from "./types";
 const plain: CardScript = { implemented: true };
 const action = (spell: CardScript["spell"]): CardScript => ({
@@ -11,6 +26,10 @@ const reaction = (spell: CardScript["spell"]): CardScript => ({
   spell,
 });
 const map: Record<string, CardScript> = {
+  "ogn-045-298": reaction([
+    { type: "counter", target: "spell", maxEnergy: 4, maxPower: 1 },
+  ]),
+  "ogn-064-298": reaction([{ type: "counter", target: "spell" }]),
   "ogn-001-298": { ...plain, accelerating: true },
   "ogn-004-298": action([{ type: "assault", amount: 3, target: "anyUnit" }]),
   "ogn-005-298": action([
@@ -166,10 +185,41 @@ const map: Record<string, CardScript> = {
   "ogn-275-298": { ...plain, notes: "Holding creates a Recruit in base." },
   "ogn-280-298": { ...plain, notes: "Holding draws 1." },
 };
+Object.assign(
+  map,
+  preconScripts,
+  spiritforgedScripts,
+  unleashedScripts,
+  vendettaScripts,
+  originsExtraScripts,
+  spiritforgedExtraScripts,
+  originsMoreScripts,
+  vendettaExtraScripts,
+  originsWave3Scripts,
+  unleashedWave3Scripts,
+  vendettaWave3Scripts,
+  unleashedExtraScripts,
+);
+map["token-tentacle"] = plain;
+map["token-mech"] = plain;
+map["token-sand-soldier"] = plain;
+map["token-bird"] = { ...plain, deflect: 1, keywords: ["Deflect"] };
+export const cardRegistry = buildCardRegistry(cards, map, compileCardScript);
+Object.assign(
+  map,
+  Object.fromEntries(
+    Object.values(cardRegistry)
+      .filter((entry) => entry.script)
+      .map((entry) => [entry.cardId, entry.script]),
+  ),
+);
 export const scripts = map;
 export const supportedCardIds = new Set(Object.keys(map));
 export function getScript(cardId: string): CardScript | undefined {
-  return map[cardId];
+  return Object.hasOwn(map, cardId) ? map[cardId] : undefined;
+}
+export function getRulesCardId(cardId: string): string {
+  return cardRegistry[cardId]?.rulesCardId ?? cardId;
 }
 export function isImplemented(cardId: string): boolean {
   return supportedCardIds.has(cardId);

@@ -1,0 +1,84 @@
+/* Small square acrylic token, separate from the card's centered Might badge. */
+.exhausted-token {
+  position: absolute;
+  z-index: 3;
+  right: 4px;
+  bottom: 5px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  filter: drop-shadow(0 1px 1px #000c);
+  container-type: inline-size;
+  pointer-events: none;
+  user-select: none;
+  isolation: isolate;
+}
+
+.exhausted-token > .exhausted-token-art {
+  position: absolute;
+  top: -14%;
+  left: -14%;
+  display: block;
+  width: 128%;
+  height: 128%;
+  object-fit: contain;
+  filter: none;
+}
+
+.exhausted-token-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  color: #ff634d;
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-size: clamp(4.5px, 26cqi, 11px);
+  font-style: italic;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  text-align: center;
+  text-shadow: 0 0.4px 0.4px #090707;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  white-space: nowrap;
+}
+
+/* Raise unit markers enough to leave the separate Might badge unobstructed. */
+.unit-wrap .game-card > .exhausted-token {
+  right: 3px;
+  bottom: 14px;
+  width: 20px;
+  height: 20px;
+}
+
+.game-card[data-card-footer] > .exhausted-token {
+  bottom: 29px;
+}
+
+.exhausted-token.is-compact {
+  width: 20px;
+  height: 20px;
+}
+
+.rune-card-art > .exhausted-token {
+  right: 3px;
+  bottom: 3px;
+}
+
+@media (max-width: 760px) {
+  .unit-wrap .game-card > .exhausted-token {
+    width: 18px;
+    height: 18px;
+    bottom: 12px;
+  }
+
+  .champion-zone .game-card > .exhausted-token {
+    width: 22px;
+    height: 22px;
+  }
+}
