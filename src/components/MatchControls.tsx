@@ -2,10 +2,13 @@ import { useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { findCard } from "../catalog";
 import { readableText } from "../data/cards";
-import { selectedCardId, sourceActions } from "../game/flow";
+import { decisionActions, selectedCardId, sourceActions } from "../game/flow";
 import type { GameAction, GameState } from "../game/types";
 import { useI18n } from "../i18n";
 import type { Review } from "./StepFlow";
+import { priorityWindow } from "../game/presentation";
+import { getEffectView } from "../game/effect-presentation";
+import { EffectAnnouncement } from "./EffectFeedback";
 
 export function MatchControls({
   game,
@@ -33,14 +36,31 @@ export function MatchControls({
   mulligan: number[];
 }) {
   const { t } = useI18n();
+  const window = priorityWindow(game);
+  const effectView = getEffectView(review);
+  const forcedPass =
+    !review && legal.length === 1 && legal[0].category === "pass";
   const card = findCard(selectedCardId(game, selected));
   const effectCard = findCard(game.stack.at(-1)?.cardId);
-  const actions = sourceActions(game, legal, selected).filter(
+  const available = sourceActions(game, legal, selected).filter(
     (action) =>
       !target ||
       action.targetId === target ||
       (!action.targetId && action.locationId === target),
   );
+  const {
+    options: actions,
+    confirm,
+    cancel,
+  } = decisionActions(game, available);
+  const movement =
+    game.phase === "move" && game.pendingMove?.player === 0
+      ? game.pendingMove
+      : null;
+  const destination = movement?.to.startsWith("field:")
+    ? findCard(game.fields.find((field) => field.id === movement.to)?.cardId)
+        ?.name
+    : t("Tvoja baza");
   const ending = legal.find((action) =>
     ["pass", "end"].includes(action.category),
   );
@@ -78,7 +98,9 @@ export function MatchControls({
                   : game.phase === "choice"
                     ? "Choose an effect"
                     : ending?.category === "pass"
-                      ? "Your reaction"
+                      ? window === "reaction"
+                        ? "Your reaction"
+                        : "Action window"
                       : "Your turn"));
   const hint = paused
     ? "Resume when you are ready."
@@ -102,46 +124,66 @@ export function MatchControls({
                 ? "Click your units to add or remove them, then confirm the move."
                 : game.phase === "choice"
                   ? "Choose one of the available effects below."
-                  : ending?.category === "pass"
-                    ? "Play a highlighted card to respond, or let the effect resolve."
-                    : "Click a glowing card to play it, or a ready unit to move. End your turn when finished.";
+                  : forcedPass
+                    ? "No available response. Passing priority shortly."
+                    : ending?.category === "pass"
+                      ? window === "reaction"
+                        ? "Play a highlighted card to respond, or let the effect resolve."
+                        : "Play an Action or Reaction, or pass focus to continue the showdown."
+                      : "Click a glowing card to play it, or a ready unit to move. End your turn when finished.";
   return (
     <section
-      className={`match-controls ${review || busy ? "is-busy" : ""}`}
+      className={`match-controls window-${window} ${review || busy ? "is-busy" : ""}`}
       aria-label={t("Game controls")}
     >
-      <div className="decision-copy" role="status" aria-live="polite">
-        <span className="decision-kicker">
-          {t(
-            opening
-              ? "Opening hand"
-              : busy || review
-                ? "Resolving effects"
-                : "Your next move",
-          )}
-        </span>
-        <strong>
-          {card && !busy && !review && !paused ? card.name : t(title)}
-          {!card &&
-            !review &&
-            ending?.category === "pass" &&
-            effectCard &&
-            ` · ${effectCard.name}`}
-          {card && !busy && !review && !paused && (
-            <span className="card-cost-note">
-              {t(card.type)} · {card.energy ?? 0} {t("ENERGY")} ·{" "}
-              {card.power ?? 0} {t("power")}
-            </span>
-          )}
-        </strong>
-        <p>
-          {game.combat &&
-            !review &&
-            game.phase === "damage" &&
-            `${t("Damage remaining: {count}", { count: game.combat.remaining[0] })} · `}
-          {t(hint)}
-        </p>
-      </div>
+      {effectView ? (
+        <EffectAnnouncement review={review} paused={paused} />
+      ) : (
+        <div className="decision-copy" role="status" aria-live="polite">
+          <span className="decision-kicker">
+            {t(
+              opening
+                ? "Opening hand"
+                : busy || review
+                  ? "Resolving effects"
+                  : "Your next move",
+            )}
+          </span>
+          <strong>
+            {card && !busy && !review && !paused ? card.name : t(title)}
+            {!card &&
+              !review &&
+              ending?.category === "pass" &&
+              effectCard &&
+              ` · ${effectCard.name}`}
+            {card && !busy && !review && !paused && (
+              <span className="card-cost-note">
+                {t(card.type)} · {card.energy ?? 0} {t("ENERGY")} ·{" "}
+                {card.power ?? 0} {t("power")}
+              </span>
+            )}
+          </strong>
+          <p>
+            {game.combat &&
+              !review &&
+              game.phase === "damage" &&
+              `${t("Damage remaining: {count}", { count: game.combat.remaining[0] })} · `}
+            {movement && !review && !paused && !busy
+              ? t("{count} selected → {destination}. {instruction}", {
+                  count: movement.unitIds.length,
+                  destination: destination ?? "",
+                  instruction: t(
+                    !movement.unitIds.length
+                      ? "Click a ready unit to add it."
+                      : !confirm
+                        ? "Cannot pay for this group. Remove a unit or cancel."
+                        : "Click units to change the group, then confirm.",
+                  ),
+                })
+              : t(hint)}
+          </p>
+        </div>
+      )}
       {selected && !busy && !review && !opening && (
         <button
           className="cancel-selection"
@@ -211,15 +253,35 @@ export function MatchControls({
                 </button>
               </div>
             )}
+            {cancel && (
+              <button
+                className="secondary-decision"
+                onClick={() => act(cancel)}
+              >
+                {t("Cancel movement")}
+              </button>
+            )}
+            {(movement || confirm) && (
+              <button
+                className="gold-button confirm-decision"
+                disabled={!confirm}
+                onClick={() => confirm && act(confirm)}
+              >
+                {t(movement ? "Confirm movement" : confirm!.label)}{" "}
+                <ArrowRight size={17} />
+              </button>
+            )}
             {ending && (
               <button
-                className="gold-button end-turn"
+                className={`gold-button end-turn ${selected && actions.length ? "secondary-ending" : ""}`}
                 onClick={() => act(ending)}
               >
                 {t(
                   ending.category === "end"
                     ? "End turn"
-                    : "Continue without reacting",
+                    : window === "reaction"
+                      ? "Continue without reacting"
+                      : "Pass focus",
                 )}{" "}
                 <ArrowRight size={17} />
               </button>

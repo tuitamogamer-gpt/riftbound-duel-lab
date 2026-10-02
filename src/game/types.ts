@@ -1,5 +1,6 @@
 import type { StarterDeck } from "../data/decks";
 export type PlayerId = 0 | 1;
+export type TurnStep = "awaken" | "beginning" | "channel" | "draw" | "main";
 export type Domain = string;
 export type LocationId = "base:0" | "base:1" | "field:0" | "field:1";
 export type Phase =
@@ -131,6 +132,8 @@ export interface Combat {
   assigningPlayer: PlayerId;
 }
 export interface GameState {
+  /** Presentation of the turn opening; priority and legality still use phase. */
+  turnStep?: TurnStep;
   stagedFields?: LocationId[];
   version: 1;
   unitDiedTurn?: number;

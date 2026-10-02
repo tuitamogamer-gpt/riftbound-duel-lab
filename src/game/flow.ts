@@ -2,6 +2,31 @@ import { getBotAction } from "./bot";
 import { getLegalActions } from "./engine";
 import type { GameAction, GameState } from "./types";
 
+/** These only edit the proposed group; movement, payment and combat wait for confirmation. */
+export function isMovementSelection(action: GameAction): boolean {
+  return (
+    action.player === 0 &&
+    action.category === "move" &&
+    (action.id.startsWith("move-start:") ||
+      action.id.startsWith("move-toggle:") ||
+      action.id === "move-cancel")
+  );
+}
+
+/** Keep committing/cancelling a decision independent of paginated target options. */
+export function decisionActions(game: GameState, actions: GameAction[]) {
+  return {
+    options:
+      game.phase === "move"
+        ? []
+        : actions.filter((action) => action.id !== "damage-done"),
+    confirm: actions.find(
+      (action) => action.id === "move-confirm" || action.id === "damage-done",
+    ),
+    cancel: actions.find((action) => action.id === "move-cancel"),
+  };
+}
+
 /** Only the opponent and a forced priority pass may advance without a decision. */
 export function getAutomaticAction(
   game: GameState,

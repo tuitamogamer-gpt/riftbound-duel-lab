@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movement controls QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Synthetic fixture. Use a separate local origin; this replaces only that origin's test save.
+      import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
+      import { getLegalActions, applyAction } from "/src/game/engine.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      let match = createCombatFixture();
+      match.phase = "main";
+      match.combat = null;
+      match.units = Array.from({ length: 8 }, (_, i) => ({
+        ...combatUnit(
+          `unit-${i}`,
+          0,
+          3,
+          ["ogn-175-298", "ogn-049-298", "ogn-088-298", "ogn-219-298"][i % 4],
+        ),
+        location: "base:0",
+        ready: true,
+      }));
+      const action = getLegalActions(match, 0).find(
+        (a) => a.sourceId === "unit-0" && a.locationId === "field:1",
+      );
+      match = applyAction(match, action);
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review: null }));
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

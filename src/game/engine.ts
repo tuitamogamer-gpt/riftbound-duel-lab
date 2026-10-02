@@ -35,6 +35,16 @@ export interface StepFrame {
   state: GameState;
   label: string;
   combat?: CombatStep;
+  effect?: StepEffect;
+}
+export interface StepEffect {
+  cardId?: string;
+  sourceId?: string;
+  player: PlayerId;
+  targetId?: string;
+  locationId?: LocationId;
+  type?: string;
+  stage?: "announced" | "resolving" | "applied";
 }
 export interface CombatUnitPreview {
   unit: Unit;
@@ -77,6 +87,19 @@ export interface CombatStep {
 }
 let stepFrames: StepFrame[] | null = null;
 const executingEffects = new WeakSet<GameState>();
+const stepEffects = new WeakMap<GameState, StepEffect>();
+/** Presentation metadata is scoped to this synchronous effect, never game rules. */
+function withStepEffect<T>(s: GameState, effect: StepEffect, run: () => T): T {
+  if (!stepFrames) return run();
+  const previous = stepEffects.get(s);
+  stepEffects.set(s, effect);
+  try {
+    return run();
+  } finally {
+    if (previous) stepEffects.set(s, previous);
+    else stepEffects.delete(s);
+  }
+}
 const cardName = (id: string) => getCard(id).name.replace(" (Starter)", "");
 function log(
   s: GameState,
@@ -95,6 +118,7 @@ function recordStep(s: GameState, label: string, combat?: CombatStep) {
       state: structuredClone(s),
       label,
       ...(combat ? { combat: structuredClone(combat) } : {}),
+      ...(stepEffects.has(s) ? { effect: { ...stepEffects.get(s)! } } : {}),
     });
 }
 function random(s: GameState) {
@@ -565,16 +589,33 @@ function scoreField(
   if (x.scoredFieldsThisTurn.includes(index)) return;
   x.scoredFieldsThisTurn.push(index);
   if (!hold) x.conqueredThisTurn.push(index);
-  if (!hold && x.points === 7 && x.scoredFieldsThisTurn.length < 2) {
-    draw(s, p, 1);
-    log(
-      s,
-      `${x.name} conquers: draw 1 instead of the final point. Hold or score both battlefields to win.`,
-      "score",
-      p,
-    );
-  } else
-    point(s, p, hold ? "holding a battlefield" : "conquering a battlefield");
+  withStepEffect(
+    s,
+    {
+      cardId: s.fields.find((f) => f.id === field)?.cardId,
+      sourceId: field,
+      locationId: field,
+      player: p,
+      type: "score",
+      stage: "applied",
+    },
+    () => {
+      if (!hold && x.points === 7 && x.scoredFieldsThisTurn.length < 2) {
+        draw(s, p, 1);
+        log(
+          s,
+          `${x.name} conquers: draw 1 instead of the final point. Hold or score both battlefields to win.`,
+          "score",
+          p,
+        );
+      } else
+        point(
+          s,
+          p,
+          hold ? "holding a battlefield" : "conquering a battlefield",
+        );
+    },
+  );
   if (s.winner !== null) return;
   if (
     !hold &&
@@ -623,6 +664,7 @@ function scoreField(
       pushStack(s, {
         player: p,
         cardId: f.cardId,
+        sourceId: f.id,
         effects: [{ type: "token", amount: 1, location: "here" }],
         locationId: base(p),
         kind: "trigger",
@@ -631,12 +673,14 @@ function scoreField(
       pushStack(s, {
         player: p,
         cardId: f.cardId,
+        sourceId: f.id,
         effects: [{ type: "draw", amount: 1 }],
         kind: "trigger",
       });
   }
 }
 function beginTurn(s: GameState, p: PlayerId) {
+  s.turnStep = "awaken";
   s.turn++;
   s.currentPlayer = p;
   s.priorityPlayer = p;
@@ -680,6 +724,8 @@ function beginTurn(s: GameState, p: PlayerId) {
   startBeginning(s, p);
 }
 function startBeginning(s: GameState, p: PlayerId) {
+  s.turnStep = "beginning";
+  recordStep(s, "Beginning: resolve start-of-turn effects and holding points.");
   const x = s.players[p];
   s.pendingBeginning = p;
   event(s, "beginning", p, x.legendId, "legend");
@@ -741,8 +787,13 @@ function finishBeginning(s: GameState, p: PlayerId) {
 }
 function finishTurnStart(s: GameState, p: PlayerId) {
   const x = s.players[p];
+  s.turnStep = "channel";
+  const hadRunes = x.runeDeck.length > 0;
   channel(s, p, !x.hasBegun && s.turn === 2 ? 3 : 2);
+  // Keep C visible even when the rune deck is empty.
+  if (!hadRunes) recordStep(s, "Channel: no runes left in the rune deck.");
   x.hasBegun = true;
+  s.turnStep = "draw";
   draw(s, p, 1);
   for (const player of s.players) {
     player.energy = 0;
@@ -751,6 +802,7 @@ function finishTurnStart(s: GameState, p: PlayerId) {
     player.typedPower = {};
     player.power = 0;
   }
+  s.turnStep = "main";
   event(s, "main", p, x.legendId, "legend");
 }
 function protectedFrom(s: GameState, u: Unit, p: PlayerId) {
@@ -2615,14 +2667,35 @@ function runEffects(
   const nested = executingEffects.has(s);
   executingEffects.add(s);
   try {
-    executeEffects(
+    const active = stepEffects.get(s);
+    const sourceCard =
+      sourceSnapshot?.cardId ??
+      s.units.find((u) => u.id === sourceId)?.cardId ??
+      s.gears.find((g) => g.id === sourceId)?.cardId ??
+      s.fields.find((f) => f.id === sourceId)?.cardId ??
+      (sourceId === "legend" ? s.players[p].legendId : undefined);
+    withStepEffect(
       s,
-      p,
-      effects,
-      targetId,
-      sourceId,
-      locationId,
-      sourceSnapshot,
+      {
+        ...active,
+        cardId: active?.cardId ?? sourceCard ?? s.resolving?.at(-1)?.cardId,
+        sourceId,
+        player: p,
+        targetId,
+        locationId,
+        stage: "applied",
+      },
+      () => {
+        executeEffects(
+          s,
+          p,
+          effects,
+          targetId,
+          sourceId,
+          locationId,
+          sourceSnapshot,
+        );
+      },
     );
   } finally {
     if (!nested) executingEffects.delete(s);
@@ -2644,6 +2717,15 @@ function executeEffects(
         ? originalTargetId
         : (e.chosenTargetId ?? undefined);
     const rest = effects.slice(effectIndex + 1);
+    if (stepFrames)
+      stepEffects.set(s, {
+        ...stepEffects.get(s),
+        player: p,
+        targetId,
+        type: e.type,
+        stage: "applied",
+      });
+
     if (e.condition === "handAtMostOne" && s.players[p].hand.length > 1)
       continue;
     if (
@@ -3367,11 +3449,24 @@ function pushStack(
   s.stack.push({ ...item, id: uid(s, "stack") });
   s.consecutivePasses = 0;
   s.priorityPlayer = item.player;
-  log(
+  withStepEffect(
     s,
-    `${cardName(item.cardId)}: ${item.kind === "trigger" ? "triggered ability" : "effect"} enters the chain.`,
-    "play",
-    item.player,
+    {
+      cardId: item.cardId,
+      sourceId: item.sourceId,
+      player: item.player,
+      targetId: item.targetId,
+      locationId: item.locationId,
+      stage: "announced",
+    },
+    () => {
+      log(
+        s,
+        `${cardName(item.cardId)}: ${item.kind === "trigger" ? "triggered ability" : "effect"} enters the chain.`,
+        "play",
+        item.player,
+      );
+    },
   );
   const ids =
     selectedTargets ??
@@ -3854,15 +3949,28 @@ function passPriority(s: GameState) {
   if (s.stack.length) {
     const item = s.stack.pop()!;
     if (item.kind === "spell") (s.resolving ??= []).push(item);
-    log(s, `${cardName(item.cardId)} resolves.`, "play", item.player);
-    runEffects(
+    withStepEffect(
       s,
-      item.player,
-      item.effects,
-      item.targetId,
-      item.sourceId,
-      item.locationId,
-      item.sourceSnapshot,
+      {
+        cardId: item.cardId,
+        sourceId: item.sourceId,
+        player: item.player,
+        targetId: item.targetId,
+        locationId: item.locationId,
+        stage: "resolving",
+      },
+      () => {
+        log(s, `${cardName(item.cardId)} resolves.`, "play", item.player);
+        runEffects(
+          s,
+          item.player,
+          item.effects,
+          item.targetId,
+          item.sourceId,
+          item.locationId,
+          item.sourceSnapshot,
+        );
+      },
     );
     if (!s.pendingChoice) finishResolvedCards(s);
     drainTriggers(s);

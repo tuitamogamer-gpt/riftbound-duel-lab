@@ -41,7 +41,7 @@ export function ChampionZone({
     >
       {legend && (
         <article
-          className={`setup-card legend-zone ${own && selected === "legend" ? "is-selected" : ""} ${highlights.players.has(player) ? "event-highlight" : ""}`}
+          className={`setup-card legend-zone ${own && selected === "legend" ? "is-selected" : ""} ${highlights.legends.has(player) ? "legend-changed" : ""}`}
         >
           <Card
             card={legend}

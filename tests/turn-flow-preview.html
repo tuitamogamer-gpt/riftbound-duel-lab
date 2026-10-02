@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Turn presentation QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Development-only synthetic fixtures. Use an isolated localhost origin.
+      import {
+        createGame,
+        applyAction,
+        applyActionStepped,
+        getLegalActions,
+      } from "/src/game/engine.ts";
+      import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      const mode = new URLSearchParams(location.search).get("mode");
+      let match,
+        review = null;
+      if (["battlefield", "damage", "buff"].includes(mode)) {
+        match = createCombatFixture();
+        match.phase = "showdown";
+        match.combat.stage = "priority";
+        match.priorityPlayer = 1;
+        match.consecutivePasses = 1;
+        match.units = [combatUnit("ally", 0, 4), combatUnit("enemy", 1, 8)];
+        match.fields[0].cardId = "ogn-280-298";
+        const cardId =
+          mode === "battlefield"
+            ? "ogn-280-298"
+            : mode === "buff"
+              ? "ogn-058-298"
+              : "ogn-009-298";
+        match.stack = [
+          {
+            id: "visible-effect",
+            cardId,
+            player: 0,
+            sourceId: mode === "battlefield" ? "field:0" : undefined,
+            targetId:
+              mode === "battlefield"
+                ? undefined
+                : mode === "buff"
+                  ? "ally"
+                  : "enemy",
+            locationId: "field:0",
+            kind: mode === "battlefield" ? "trigger" : "spell",
+            effects: [
+              {
+                type:
+                  mode === "battlefield"
+                    ? "draw"
+                    : mode === "buff"
+                      ? "might"
+                      : "damage",
+                amount: mode === "damage" ? 3 : mode === "buff" ? 2 : 1,
+                ...(mode === "battlefield" ? {} : { target: "anyUnit" }),
+              },
+            ],
+          },
+        ];
+        const before = match;
+        const action = getLegalActions(before, 1).find((a) => a.id === "pass");
+        const result = applyActionStepped(before, action);
+        match = result.state;
+        const index = result.frames.findIndex(
+          (f) => f.effect?.stage === "applied",
+        );
+        review = { before, final: match, frames: result.frames, index, action };
+      } else if (mode === "turn") {
+        const before = applyAction(
+          createGame({ seed: 44, firstPlayer: 0 }),
+          "mulligan:",
+        );
+        const action = getLegalActions(before, 1).find(
+          (a) => a.id === "mulligan:",
+        );
+        const result = applyActionStepped(before, action);
+        match = result.state;
+        review = {
+          before,
+          final: match,
+          frames: result.frames,
+          index: 0,
+          action,
+        };
+      } else {
+        match = createCombatFixture();
+        match.phase = "showdown";
+        match.combat.stage = "priority";
+        if (mode === "reaction") {
+          match.stack = [
+            {
+              id: "incoming",
+              cardId: "ogn-009-298",
+              player: 1,
+              targetId: match.units[0].id,
+              effects: [
+                { type: "damage", amount: 3, target: "unitAtBattlefield" },
+              ],
+              kind: "spell",
+            },
+          ];
+          match.players[0].hand = ["ogn-046-298"];
+          match.players[0].energy = 6;
+          match.players[0].runes = [
+            { id: "calm", domain: "Calm", ready: true },
+          ];
+        } else {
+          match.phase = "main";
+          match.combat = null;
+          match.units = [
+            {
+              ...combatUnit("attacker", 0, 5),
+              location: "base:0",
+              ready: true,
+            },
+            combatUnit("defender", 1, 3),
+          ];
+          const moving = applyAction(match, "move-start:attacker:field:0");
+          const action = getLegalActions(moving, 0).find(
+            (a) => a.id === "move-confirm",
+          );
+          const result = applyActionStepped(moving, action);
+          const index = result.frames.findIndex(
+            (f) => f.combat?.stage === "start",
+          );
+          match = result.state;
+          review = {
+            before: moving,
+            final: match,
+            frames: result.frames,
+            index,
+            action,
+          };
+        }
+      }
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review }));
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

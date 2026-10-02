@@ -1,0 +1,152 @@
+.app.is-game .rune-card[data-rune-event] {
+  position: relative;
+  z-index: 3;
+  --rune-event-color: #a9efd4;
+  box-shadow: 0 0 12px
+    color-mix(in srgb, var(--rune-event-color), transparent 35%);
+  border-color: var(--rune-event-color);
+}
+.app.is-game .rune-card[data-rune-event="channel"] {
+  animation: rune-channel 480ms cubic-bezier(0.2, 0.7, 0.2, 1)
+    var(--rune-event-delay) both;
+}
+.app.is-game .rune-card[data-rune-event="recycle"] {
+  --rune-event-color: #d4bbff;
+  cursor: default;
+  animation: rune-recycle 580ms ease-in var(--rune-event-delay) both;
+}
+.app.is-game .rune-card[data-rune-event="ready"] {
+  animation: rune-ready 500ms ease-out var(--rune-event-delay) both;
+}
+.app.is-game .rune-card[data-rune-event="exhaust"] {
+  --rune-event-color: #ffd599;
+  animation: rune-exhaust 480ms ease-out var(--rune-event-delay) both;
+}
+.rune-event-flare {
+  position: absolute;
+  inset: -3px;
+  border: 2px solid var(--rune-event-color);
+  border-radius: 5px;
+  pointer-events: none;
+  animation: rune-flare 580ms ease-out var(--rune-event-delay) both;
+}
+.rune-event-label {
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  padding: 2px 3px;
+  font:
+    700 7px "DM Sans",
+    sans-serif;
+  line-height: 1.2;
+  white-space: nowrap;
+  background: var(--rune-event-color);
+  color: #172a36;
+  box-shadow: 0 2px 5px #0008;
+  pointer-events: none;
+}
+.rune-zone-feedback {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 1px 6px;
+  min-width: 0;
+  font-size: 9px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #a9efd4;
+}
+.rune-feedback-recycle {
+  color: #d4bbff;
+}
+.rune-feedback-exhaust {
+  color: #ffd599;
+}
+@keyframes rune-channel {
+  from {
+    opacity: 0.15;
+    transform: translateY(9px) scale(0.8);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.05);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rune-recycle {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  45% {
+    opacity: 0.85;
+    transform: translateY(-7px) rotate(8deg);
+  }
+  to {
+    opacity: 0.4;
+    transform: translate(3px, -5px) scale(0.86);
+  }
+}
+@keyframes rune-ready {
+  from {
+    filter: brightness(0.65);
+    transform: scale(0.93);
+  }
+  45% {
+    filter: brightness(1.6);
+    transform: scale(1.07);
+  }
+  to {
+    filter: brightness(1);
+    transform: none;
+  }
+}
+@keyframes rune-exhaust {
+  40% {
+    transform: translateY(3px) rotate(-6deg);
+    filter: brightness(1.6);
+  }
+  to {
+    transform: none;
+    filter: brightness(1);
+  }
+}
+@keyframes rune-flare {
+  from {
+    opacity: 0.95;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+@media (max-width: 650px) {
+  .rune-event-word { display: none; }
+  .rune-event-symbol { font-size: 10px; }
+  .rune-zone-feedback {
+    font-size: 7px;
+    gap: 1px 4px;
+  }
+  .rune-event-label {
+    font-size: 6px;
+    padding: 1px 2px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app.is-game .rune-card[data-rune-event],
+  .rune-event-flare {
+    animation: none;
+  }
+  .rune-event-flare {
+    display: none;
+  }
+  .app.is-game .rune-card[data-rune-event="recycle"] {
+    opacity: 0.55;
+  }
+}

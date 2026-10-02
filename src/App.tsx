@@ -52,8 +52,16 @@ import {
   applyActionStepped,
   getMight,
 } from "./game/engine";
-import { getAutomaticAction, sourceActions } from "./game/flow";
+import {
+  getAutomaticAction,
+  isMovementSelection,
+  sourceActions,
+} from "./game/flow";
 import { MatchControls } from "./components/MatchControls";
+import { TurnFlow, ShowdownCue, CombatReadout } from "./components/TurnFlow";
+import { reviewDelay, automaticDelay } from "./game/presentation";
+import { EffectTrails, FieldEffect } from "./components/EffectFeedback";
+import { runeOutcomeLabels, type RuneEvent } from "./game/rune-presentation";
 import { decks } from "./data/decks";
 import {
   HighlightContext,
@@ -176,13 +184,17 @@ export default function App() {
           ? result.frames
           : [{ state: result.state, label: action.label }];
         setGame(result.state);
-        setReview({
-          before: match,
-          final: result.state,
-          frames,
-          index: 0,
-          action,
-        });
+        setReview(
+          isMovementSelection(action)
+            ? null
+            : {
+                before: match,
+                final: result.state,
+                frames,
+                index: 0,
+                action,
+              },
+        );
         setError("");
         if (!muted) sound();
         setSelected(null);
@@ -209,8 +221,7 @@ export default function App() {
     )
       return;
     if (review) {
-      const frame = review.frames[review.index];
-      const delay = frame?.combat ? 1050 : 550;
+      const delay = reviewDelay(review);
       const timer = window.setTimeout(
         () =>
           setReview((current) =>
@@ -226,7 +237,7 @@ export default function App() {
     if (!next) return;
     const timer = window.setTimeout(
       () => doAction(next),
-      next.player === 1 ? 750 : 300,
+      automaticDelay(match, next.player),
     );
     return () => window.clearTimeout(timer);
   }, [
@@ -278,8 +289,8 @@ export default function App() {
       );
       if (toggle) {
         doAction(toggle);
-        return;
       }
+      return;
     }
     setTarget(null);
     setSelected((current) => (current === source ? null : source));
@@ -517,6 +528,7 @@ export default function App() {
                 <CircleHelp size={18} />
               </button>
             </div>
+            <TurnFlow game={game} review={review} paused={paused} />
             <BoardInteraction.Provider
               value={{
                 game,
@@ -531,7 +543,7 @@ export default function App() {
                   <div className="player-cards opponent-cards">
                     <div className="opponent-hand-section">
                       <div
-                        className={`enemy-hand ${highlights.players.has(1) ? "event-highlight" : ""}`}
+                        className="enemy-hand"
                         aria-label={t("{count} skrivenih karata protivnika", {
                           count: game.players[1].hand.length,
                         })}
@@ -570,8 +582,9 @@ export default function App() {
                       const c = findCard(field.cardId);
                       return (
                         <section
-                          className={`battlefield ${highlights.fields.has(field.id) ? "event-highlight" : ""} ${field.controller === 0 ? "owned" : field.controller === 1 ? "enemy-owned" : ""} ${game.combat?.fieldId === field.id ? "in-combat" : ""}`}
+                          className={`battlefield ${field.controller === 0 ? "owned" : field.controller === 1 ? "enemy-owned" : ""} ${game.combat?.fieldId === field.id ? "in-combat" : ""}`}
                           key={field.id}
+                          data-field-id={field.id}
                         >
                           <div
                             className="field-art"
@@ -589,6 +602,7 @@ export default function App() {
                               </span>
                               <button
                                 data-card-preview={c?.id}
+                                data-field-source={field.id}
                                 onClick={() => c && setInspected(c)}
                               >
                                 {c?.name || t(locationName(field.id))}
@@ -603,6 +617,12 @@ export default function App() {
                             </span>
                           </div>
                           <Destination location={field.id} />
+                          <FieldEffect review={review} fieldId={field.id} />
+                          <ShowdownCue
+                            game={game}
+                            review={review}
+                            fieldId={field.id}
+                          />
                           <div className="field-half enemy-side">
                             <UnitRow
                               units={game.units.filter(
@@ -633,7 +653,7 @@ export default function App() {
                           <div className="field-divider">
                             <span />
                             {game.combat?.fieldId === field.id ? (
-                              <Swords size={18} />
+                              <CombatReadout game={game} />
                             ) : (
                               <Flag size={16} />
                             )}
@@ -696,8 +716,7 @@ export default function App() {
                                 card={c}
                                 selected={
                                   selected === `hand:${i}` ||
-                                  mulligan.includes(i) ||
-                                  highlights.newCards.has(id)
+                                  mulligan.includes(i)
                                 }
                                 onClick={() => selectCard(`hand:${i}`)}
                                 playable={
@@ -725,8 +744,8 @@ export default function App() {
                           ) : null;
                         })}
                       </div>
-                      <RuneZone game={game} player={0} inspect={setInspected} />
                     </section>
+                    <RuneZone game={game} player={0} inspect={setInspected} />
                     <ChampionZone
                       game={game}
                       player={0}
@@ -737,6 +756,7 @@ export default function App() {
                     />
                   </div>
                 </div>
+                <EffectTrails review={review} />
               </div>
               <MatchControls
                 game={game}
@@ -1000,13 +1020,11 @@ function PlayerBar({
   inspect: (c: CatalogCard) => void;
 }) {
   const { t } = useI18n();
-  const h = useHighlights();
+  const highlights = useHighlights();
   const p = game.players[player],
     legend = findCard(p.legendId);
   return (
-    <div
-      className={`player-bar player-${player} ${h.players.has(player) ? "event-highlight" : ""}`}
-    >
+    <div className={`player-bar player-${player}`} data-effect-player={player}>
       <button
         className="legend-portrait"
         data-card-preview={legend?.id}
@@ -1021,6 +1039,11 @@ function PlayerBar({
         <small>{legend?.name}</small>
       </div>
       <div className="score">
+        {highlights.playerEvents.has(player) && (
+          <span className="player-effect-label">
+            {t(highlights.playerEvents.get(player))}
+          </span>
+        )}
         <span>{p.points}</span>
         <small>/ 8</small>
         <div className="score-pips">
@@ -1044,37 +1067,81 @@ function RuneZone({
   const { t } = useI18n();
   const h = useHighlights();
   const p = game.players[player];
+  const runeChanges = h.runeChanges.filter(
+    (change) => change.player === player,
+  );
+  const visibleRunes = [...p.runes];
+  for (const change of runeChanges.filter(
+    (change) => change.kind === "recycle",
+  ))
+    visibleRunes.splice(
+      Math.min(change.index, visibleRunes.length),
+      0,
+      change.rune,
+    );
+  const runeMessages = (
+    ["channel", "recycle", "ready", "exhaust"] as RuneEvent[]
+  )
+    .map((kind) => ({
+      kind,
+      amount: runeChanges.filter((change) => change.kind === kind).length,
+    }))
+    .filter(({ amount }) => amount);
   return (
     <section
-      className={`rune-area rune-zone ${h.players.has(player) ? "event-highlight" : ""}`}
+      className="rune-area rune-zone"
       aria-label={t(player === 0 ? "Your runes" : "Opponent runes")}
     >
       <div className="rune-zone-heading">
         <span>{t("Runes")}</span>
-        <small>
-          {p.runes.filter((r) => r.ready).length} {t("spremnih ·")} {p.energy}{" "}
-          {t("energije ·")} {p.runeDeck.length} {t("u špilu")}{" "}
-          {p.power ? t(" · {count} univerzalne moći", { count: p.power }) : ""}
-          {Object.entries(p.typedPower ?? {})
-            .filter(([, count]) => count > 0)
-            .map(([domain, count]) => (
-              <span key={domain}>
-                {" "}
-                · {count} {t(domain)} {t("power")}
+        {runeMessages.length ? (
+          <div
+            className="rune-zone-feedback"
+            role="status"
+            key={h.runeEventKey}
+          >
+            {runeMessages.map(({ kind, amount }) => (
+              <span key={kind} className={`rune-feedback-${kind}`}>
+                {t(runeOutcomeLabels[kind], { amount })}
               </span>
             ))}
-          {p.showdownEnergy
-            ? ` · ${t("{count} Energy for showdowns", { count: p.showdownEnergy })}`
-            : ""}
-          {p.spellEnergy
-            ? ` · ${t("{count} Energy for spells", { count: p.spellEnergy })}`
-            : ""}
-          {p.xp ? ` · ${p.xp} XP` : ""}
-        </small>
+          </div>
+        ) : (
+          <small>
+            {p.runes.filter((r) => r.ready).length} {t("spremnih ·")} {p.energy}{" "}
+            {t("energije ·")} {p.runeDeck.length} {t("u špilu")}{" "}
+            {p.power
+              ? t(" · {count} univerzalne moći", { count: p.power })
+              : ""}
+            {Object.entries(p.typedPower ?? {})
+              .filter(([, count]) => count > 0)
+              .map(([domain, count]) => (
+                <span key={domain}>
+                  {" "}
+                  · {count} {t(domain)} {t("power")}
+                </span>
+              ))}
+            {p.showdownEnergy
+              ? ` · ${t("{count} Energy for showdowns", { count: p.showdownEnergy })}`
+              : ""}
+            {p.spellEnergy
+              ? ` · ${t("{count} Energy for spells", { count: p.spellEnergy })}`
+              : ""}
+            {p.xp ? ` · ${p.xp} XP` : ""}
+          </small>
+        )}
       </div>
       <div className="rune-orbs">
-        {p.runes.map((r) => (
-          <RuneCard key={r.id} rune={r} inspect={inspect} />
+        {visibleRunes.map((r, i) => (
+          <RuneCard
+            key={r.id}
+            rune={r}
+            inspect={inspect}
+            highlighted={h.runes.has(r.id)}
+            event={runeChanges.find((change) => change.rune.id === r.id)?.kind}
+            eventKey={h.runeEventKey}
+            eventIndex={i}
+          />
         ))}
       </div>
     </section>
@@ -1101,6 +1168,13 @@ function UnitRow({
         return c ? (
           <div
             className={`unit-wrap ${h.units.has(u.id) ? "event-highlight" : ""}`}
+            data-unit-id={u.id}
+            data-effect-tone={h.unitTones.get(u.id)}
+            data-event={
+              h.units.has(u.id)
+                ? t(h.unitEvents.get(u.id) ?? "Effect")
+                : undefined
+            }
             key={u.id}
           >
             <Card
@@ -1116,7 +1190,8 @@ function UnitRow({
               selected={
                 selected === u.id ||
                 interaction.actions.some((a) => a.targetId === u.id) ||
-                !!interaction.game?.pendingMove?.unitIds.includes(u.id)
+                (interaction.game?.pendingMove?.player === 0 &&
+                  !!interaction.game.pendingMove.unitIds.includes(u.id))
               }
               playable={
                 interaction.legal.some((a) => a.sourceId === u.id) ||
@@ -1124,6 +1199,15 @@ function UnitRow({
               }
               onClick={() => select(u.id)}
             />
+            {interaction.game?.pendingMove?.player === 0 &&
+              interaction.game.pendingMove.unitIds.includes(u.id) && (
+                <span
+                  className="move-selection-badge"
+                  aria-label={t("Selected for movement")}
+                >
+                  ✓
+                </span>
+              )}
             <div className="unit-power">
               <Shield size={10} />
               {interaction.game
@@ -1147,7 +1231,17 @@ function UnitRow({
 }
 function Destination({ location }: { location: LocationId }) {
   const { t } = useI18n();
-  const { actions, choose } = useContext(BoardInteraction);
+  const { actions, choose, game } = useContext(BoardInteraction);
+  if (
+    game?.phase === "move" &&
+    game.pendingMove?.player === 0 &&
+    game.pendingMove.to === location
+  )
+    return (
+      <span className="movement-destination">
+        <ArrowRight size={13} /> {t("Movement destination")}
+      </span>
+    );
   const options = actions.filter(
     (action) =>
       action.locationId === location &&
@@ -1186,12 +1280,9 @@ function BoardZone({
   inspect: (c: CatalogCard) => void;
 }) {
   const { t } = useI18n();
-  const h = useHighlights();
   const units = game.units.filter((u) => u.location === location);
   return (
-    <section
-      className={`base-zone ${h.fields.has(location) ? "event-highlight" : ""}`}
-    >
+    <section className="base-zone">
       <span className="zone-label">{t(title)}</span>
       <Destination location={location} />
       <div className="base-units">

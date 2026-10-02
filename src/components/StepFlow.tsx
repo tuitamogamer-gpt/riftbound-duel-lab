@@ -13,6 +13,8 @@ import type { StepFrame } from "../game/engine";
 import type { GameAction, GameState, Unit } from "../game/types";
 import "./StepFlow.css";
 import { useI18n } from "../i18n";
+import { getEffectView } from "../game/effect-presentation";
+import { getRuneChanges, type RuneChange } from "../game/rune-presentation";
 export type { StepFrame } from "../game/engine";
 export interface Review {
   before: GameState;
@@ -28,6 +30,13 @@ export interface Highlights {
   newCards: Set<string>;
   removed: Unit[];
   changes: string[];
+  runes: Set<string>;
+  runeChanges: RuneChange[];
+  runeEventKey?: string;
+  legends: Set<number>;
+  unitEvents: Map<string, string>;
+  unitTones: Map<string, string>;
+  playerEvents: Map<number, string>;
   action?: GameAction;
   game?: GameState;
 }
@@ -38,6 +47,12 @@ const empty: Highlights = {
   newCards: new Set(),
   removed: [],
   changes: [],
+  runes: new Set(),
+  runeChanges: [],
+  legends: new Set(),
+  unitEvents: new Map(),
+  unitTones: new Map(),
+  playerEvents: new Map(),
 };
 export const HighlightContext = createContext<Highlights>(empty);
 export const useHighlights = () => useContext(HighlightContext);
@@ -60,6 +75,13 @@ export function getHighlights(review: Review | null): Highlights {
     newCards: new Set(),
     removed: [],
     changes: [],
+    runes: new Set(),
+    runeChanges: getRuneChanges(review),
+    runeEventKey: `${review.action.id}:${review.index}`,
+    legends: new Set(),
+    unitEvents: new Map(),
+    unitTones: new Map(),
+    playerEvents: new Map(),
     action: review.action,
     game: now,
   };
@@ -72,6 +94,18 @@ export function getHighlights(review: Review | null): Highlights {
       getMight(before, old) !== getMight(now, u)
     ) {
       h.units.add(u.id);
+      h.unitEvents.set(
+        u.id,
+        !old
+          ? "Deployed"
+          : old.location !== u.location
+            ? "Moved"
+            : old.damage < u.damage
+              ? "Damage"
+              : !old.ready && u.ready
+                ? "Ready"
+                : "Effect",
+      );
       h.fields.add(u.location);
       if (old) h.fields.add(old.location);
       changedUnits++;
@@ -91,6 +125,13 @@ export function getHighlights(review: Review | null): Highlights {
       name = p === 0 ? "Ti" : "AI";
     const handChanged = JSON.stringify(a.hand) !== JSON.stringify(b.hand);
     const runesChanged = JSON.stringify(a.runes) !== JSON.stringify(b.runes);
+    for (const change of h.runeChanges)
+      if (change.player === p) h.runes.add(change.rune.id);
+    if (
+      a.legendUsedTurn !== b.legendUsedTurn ||
+      a.legendEmpowered !== b.legendEmpowered
+    )
+      h.legends.add(p);
     if (
       a.points !== b.points ||
       a.energy !== b.energy ||
@@ -158,6 +199,22 @@ export function getHighlights(review: Review | null): Highlights {
       if (item.locationId) h.fields.add(item.locationId);
     }
   if (review.action.locationId) h.fields.add(review.action.locationId);
+  const feedback = getEffectView(review);
+  for (const change of feedback?.changes ?? []) {
+    const label = change.key
+      .replace("{card} · ", "")
+      .replace("{amount}", String(change.values?.amount ?? ""));
+    if (change.unitId && !h.unitTones.has(change.unitId)) {
+      h.units.add(change.unitId);
+      h.unitEvents.set(change.unitId, label);
+      h.unitTones.set(change.unitId, change.tone);
+    }
+    if (change.player !== undefined) h.playerEvents.set(change.player, label);
+  }
+  if (review.frames[review.index].effect) {
+    markTarget(review.frames[review.index].effect?.sourceId);
+    markTarget(review.frames[review.index].effect?.targetId);
+  }
   return h;
 }
 export function StepFlow({

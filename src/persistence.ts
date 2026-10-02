@@ -377,6 +377,10 @@ export function validState(x: unknown, actionable = true): x is GameState {
     !Array.isArray(x.stack) ||
     !Array.isArray(x.log) ||
     !phase(x.phase) ||
+    (x.turnStep !== undefined &&
+      !["awaken", "beginning", "channel", "draw", "main"].includes(
+        x.turnStep,
+      )) ||
     !playerId(x.priorityPlayer) ||
     !playerId(x.currentPlayer) ||
     !playerId(x.focusPlayer) ||
@@ -630,6 +634,11 @@ export function parseSession(raw: string | null): SavedSession {
           isObject(f) &&
           typeof f.label === "string" &&
           (f.combat === undefined || combatStep(f.combat)) &&
+          (f.effect === undefined || (isObject(f.effect) && playerId(f.effect.player) &&
+            (f.effect.cardId === undefined || cardId(f.effect.cardId)) &&
+            optionalString(f.effect.sourceId) && optionalString(f.effect.targetId) && optionalString(f.effect.type) &&
+            (f.effect.locationId === undefined || location(f.effect.locationId)) &&
+            (f.effect.stage === undefined || ["announced", "resolving", "applied"].includes(f.effect.stage)))) &&
           validState(f.state, false),
       ) &&
       Number.isInteger(r.index) &&
