@@ -17,6 +17,7 @@ export function Card({
   footer,
   might,
   preview = true,
+  playable = false,
 }: {
   card: CatalogCard;
   onClick?: () => void;
@@ -28,14 +29,16 @@ export function Card({
   footer?: string;
   might?: number;
   preview?: boolean;
+  playable?: boolean;
 }) {
   const { t } = useI18n();
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [card.id]);
   return (
     <button
-      className={`game-card ${small ? "small" : ""} ${selected ? "selected" : ""} ${disabled ? "muted" : ""} ${ready === false ? "exhausted" : ""}`}
+      className={`game-card ${small ? "small" : ""} ${selected ? "selected" : ""} ${disabled ? "muted" : ""} ${playable ? "playable" : ""} ${ready === false ? "exhausted" : ""}`}
       onClick={onClick}
+      aria-pressed={selected}
       aria-label={
         card.name +
         (footer ? `: ${t(footer)}` : "") +

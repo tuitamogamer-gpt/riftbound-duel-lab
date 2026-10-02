@@ -1,21 +1,25 @@
 import { LanguageSelector, useI18n } from "./i18n";
-import { useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
-  Check,
-  ChevronRight,
   CircleHelp,
-  Clock3,
-  Crosshair,
+  Pause,
+  Play,
   Flag,
   History,
   Layers3,
   RotateCcw,
   Search,
   Shield,
-  Sparkles,
   Swords,
   Trophy,
   Volume2,
@@ -36,7 +40,6 @@ import {
   loadImportedDecks,
   saveImportedDecks,
 } from "./game/deck-import";
-import { readableText } from "./data/cards";
 import { Card, CardDetail } from "./components/Card";
 import { RuneCard } from "./components/RuneCard";
 import { GearChip } from "./components/GearChip";
@@ -48,10 +51,10 @@ import {
   applyActionStepped,
   getMight,
 } from "./game/engine";
-import { getBotAction } from "./game/bot";
+import { getAutomaticAction, sourceActions } from "./game/flow";
+import { MatchControls } from "./components/MatchControls";
 import { decks } from "./data/decks";
 import {
-  StepFlow,
   HighlightContext,
   getHighlights,
   useHighlights,
@@ -60,6 +63,13 @@ import type { Review } from "./components/StepFlow";
 import { scripts } from "./game/scripts";
 import type { GameAction, GameState, LocationId, Unit } from "./game/types";
 import "./interaction.css";
+
+const BoardInteraction = createContext<{
+  game: GameState | null;
+  legal: GameAction[];
+  actions: GameAction[];
+  choose: (id: string) => void;
+}>({ game: null, legal: [], actions: [], choose: () => {} });
 
 const freshRead = () => {
   try {
@@ -71,15 +81,6 @@ const freshRead = () => {
 const supported = (c: CatalogCard) =>
   Boolean(scripts[c.id]) || c.type === "Rune";
 const uniqueCards = catalog.filter((c) => !c.variant);
-const phaseNames: Record<string, string> = {
-  mulligan: "Početna ruka",
-  main: "Glavna faza",
-  showdown: "Showdown · reakcije",
-  move: "Priprema pokreta",
-  damage: "Dodjela štete",
-  choice: "Odaberi efekat",
-  ended: "Kraj meča",
-};
 const locationName = (l?: string) =>
   l === "base:0"
     ? "Tvoja baza"
@@ -116,19 +117,15 @@ export default function App() {
   const [saved] = useState(freshRead);
   const [match, setGame] = useState<GameState | null>(saved.match);
   const [review, setReview] = useState<Review | null>(saved.review);
-  const [playingReview, setPlayingReview] = useState(false);
-  const [playbackMs, setPlaybackMs] = useState(1600);
+  const [paused, setPaused] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const [mulligan, setMulligan] = useState<number[]>([]);
+  const [target, setTarget] = useState<string | null>(null);
   useEffect(() => {
-    const pause = () => setPlayingReview(false);
-    const visibility = () => {
-      if (document.hidden) pause();
-    };
-    window.addEventListener("blur", pause);
-    document.addEventListener("visibilitychange", visibility);
-    return () => {
-      window.removeEventListener("blur", pause);
-      document.removeEventListener("visibilitychange", visibility);
-    };
+    const update = () => setVisible(!document.hidden);
+    update();
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
   }, []);
   const game = review?.frames[review.index]?.state || match;
   const highlights = useMemo(() => getHighlights(review), [review]);
@@ -158,8 +155,8 @@ export default function App() {
   const [difficulty, setDifficulty] = useState("Taktički");
   const [confirmNew, setConfirmNew] = useState(false);
   const legal = useMemo(
-    () => (match && !review ? getLegalActions(match, 0) : []),
-    [match, review],
+    () => (match && !review && !paused ? getLegalActions(match, 0) : []),
+    [match, review, paused],
   );
   useEffect(() => {
     if (match)
@@ -167,107 +164,136 @@ export default function App() {
         localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review }));
       } catch {}
   }, [match, review]);
-  const doAction = (action: GameAction) => {
-    if (!match || review) return;
-    try {
-      const result = applyActionStepped(match, action.id);
-      setPlayingReview(false);
-      const frames = result.frames.length
-        ? result.frames
-        : [{ state: result.state, label: action.label }];
-      setGame(result.state);
-      setReview({
-        before: match,
-        final: result.state,
-        frames,
-        index: 0,
-        action,
-      });
-      setError("");
-      if (!muted) sound();
-      if (!["move", "resource"].includes(action.category)) setSelected(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Nevažeći potez");
-    }
-  };
-  const proceed = () => {
-    setPlayingReview(false);
-    if (review) {
-      if (review.index < review.frames.length - 1)
-        setReview({ ...review, index: review.index + 1 });
-      else setReview(null);
-      if (!muted) sound();
-      return;
-    }
-    if (match && botActions.length) {
-      const action =
-        difficulty === "Trening" &&
-        match.phase === "main" &&
-        !match.stack.length
-          ? botActions.find((a) => a.category === "play") || getBotAction(match)
-          : getBotAction(match);
-      if (action) {
-        const found =
-          typeof action === "string"
-            ? botActions.find((a) => a.id === action)
-            : action;
-        if (found) doAction(found);
+  const doAction = useCallback(
+    (action: GameAction) => {
+      if (!match || review) return;
+      try {
+        const result = applyActionStepped(match, action.id);
+        setTarget(null);
+        setMulligan([]);
+        const frames = result.frames.length
+          ? result.frames
+          : [{ state: result.state, label: action.label }];
+        setGame(result.state);
+        setReview({
+          before: match,
+          final: result.state,
+          frames,
+          index: 0,
+          action,
+        });
+        setError("");
+        if (!muted) sound();
+        setSelected(null);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Nevažeći potez");
+        setPaused(true);
       }
-    }
-  };
-  // Playback only advances the recorded display frames. Decisions and the next
-  // bot action still require an explicit Proceed or a legal action click.
+    },
+    [match, review, muted],
+  );
+
+  // Animate recorded effects, then hand control back only for a real decision.
+  // Human mulligans, reactions, optional effects and end-turn are never chosen here.
   useEffect(() => {
-    if (!playingReview) return;
     if (
-      !review ||
+      !match ||
       screen !== "game" ||
+      paused ||
+      !visible ||
       help ||
       inspected ||
       confirmNew ||
-      review.index >= review.frames.length - 1
-    ) {
-      setPlayingReview(false);
+      logOpen
+    )
+      return;
+    if (review) {
+      const frame = review.frames[review.index];
+      const delay = frame?.combat ? 1050 : 550;
+      const timer = window.setTimeout(
+        () =>
+          setReview((current) =>
+            current && current.index + 1 < current.frames.length
+              ? { ...current, index: current.index + 1 }
+              : null,
+          ),
+        delay,
+      );
+      return () => window.clearTimeout(timer);
+    }
+    const next = getAutomaticAction(match, difficulty === "Trening");
+    if (!next) return;
+    const timer = window.setTimeout(
+      () => doAction(next),
+      next.player === 1 ? 750 : 300,
+    );
+    return () => window.clearTimeout(timer);
+  }, [
+    match,
+    review,
+    screen,
+    paused,
+    visible,
+    help,
+    inspected,
+    confirmNew,
+    logOpen,
+    difficulty,
+    doAction,
+  ]);
+
+  const currentActions = game ? sourceActions(game, legal, selected) : [];
+  const chooseTarget = (id: string) => {
+    const candidates = currentActions.filter(
+      (action) =>
+        action.targetId === id ||
+        (!action.targetId && action.locationId === id),
+    );
+    if (candidates.length === 1) doAction(candidates[0]);
+    else if (candidates.length) setTarget(id);
+  };
+  const selectCard = (source: string) => {
+    if (!game || review || thinking || paused) return;
+    if (game.phase === "mulligan") {
+      if (source.startsWith("hand:") && !game.players[0].mulliganDone) {
+        const index = Number(source.slice(5));
+        setMulligan((current) =>
+          current.includes(index)
+            ? current.filter((i) => i !== index)
+            : current.length < 2
+              ? [...current, index]
+              : current,
+        );
+      }
       return;
     }
-    const timer = window.setTimeout(() => {
-      setReview((current) =>
-        current && current.index < current.frames.length - 1
-          ? { ...current, index: current.index + 1 }
-          : current,
+    if (currentActions.some((action) => action.targetId === source)) {
+      chooseTarget(source);
+      return;
+    }
+    if (game.phase === "move") {
+      const toggle = legal.find(
+        (action) => action.id === `move-toggle:${source}`,
       );
-    }, playbackMs);
-    return () => window.clearTimeout(timer);
-  }, [playingReview, playbackMs, review, screen, help, inspected, confirmNew]);
-  const previousStep = () => {
-    setPlayingReview(false);
-    setReview((current) =>
-      current && current.index > 0
-        ? { ...current, index: current.index - 1 }
-        : current,
-    );
+      if (toggle) {
+        doAction(toggle);
+        return;
+      }
+    }
+    setTarget(null);
+    setSelected((current) => (current === source ? null : source));
   };
   useEffect(() => {
-    const key = (e: KeyboardEvent) => {
-      if (
-        !e.repeat &&
-        e.code === "Space" &&
-        screen === "game" &&
-        !help &&
-        !inspected &&
-        (review || thinking) &&
-        !(e.target instanceof HTMLInputElement) &&
-        !(e.target instanceof HTMLSelectElement) &&
-        !(e.target instanceof HTMLTextAreaElement) &&
-        !(e.target instanceof HTMLButtonElement)
-      ) {
-        e.preventDefault();
-        proceed();
+    const key = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelected(null);
+        setTarget(null);
+        setLogOpen(false);
       }
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [review, thinking, match, screen, help, inspected]);
+  }, []);
   const selectedPlayerDeck = allDecks.find((d) => d.id === playerDeck);
   const selectedBotDeck = allDecks.find((d) => d.id === botDeck);
   const matchReady = Boolean(
@@ -325,7 +351,9 @@ export default function App() {
         }),
       );
       setReview(null);
-      setPlayingReview(false);
+      setPaused(false);
+      setMulligan([]);
+      setTarget(null);
       setSelected(null);
       setError("");
       setScreen("game");
@@ -393,7 +421,7 @@ export default function App() {
         <a className="skip-link" href="#main-content">
           {t("Preskoči na sadržaj")}{" "}
         </a>
-        {header}
+        {screen !== "game" && header}
         {screen === "lobby" && (
           <Lobby
             allDecks={allDecks}
@@ -434,22 +462,33 @@ export default function App() {
                 <ArrowLeft size={15} />
                 {t("Arena")}{" "}
               </button>
+              <strong className="match-brand">
+                RIFTBOUND <small>DUEL LAB</small>
+              </strong>
               <div className="turn-indicator">
-                <span className={thinking ? "pulse-dot" : "status-dot"} />
-                {review
-                  ? t("Pregled akcije · Proceed")
-                  : thinking
-                    ? t("AI čeka Proceed")
-                    : game.winner !== null
-                      ? t("Meč završen")
-                      : legal.length
-                        ? t("Ti si na potezu")
-                        : t("Protivnikov potez")}
+                {t(
+                  game.winner !== null
+                    ? "Meč završen"
+                    : review
+                      ? "Resolving effects"
+                      : thinking
+                        ? "Opponent is playing"
+                        : "Your turn",
+                )}
               </div>
               <span>
                 {" "}
                 {t("POTEZ")} {game.turn}
               </span>
+              <LanguageSelector />
+              <button
+                className="icon-button"
+                onClick={() => setPaused((value) => !value)}
+                aria-label={t(paused ? "Resume game" : "Pause game")}
+                title={t(paused ? "Resume game" : "Pause game")}
+              >
+                {paused ? <Play size={16} /> : <Pause size={16} />}
+              </button>
               <button
                 className="icon-button"
                 onClick={() => setLogOpen(!logOpen)}
@@ -465,315 +504,287 @@ export default function App() {
                 <CircleHelp size={18} />
               </button>
             </div>
-            <StepFlow
-              review={review}
-              botPending={thinking}
-              onProceed={proceed}
-              onPrevious={previousStep}
-              playing={playingReview}
-              onTogglePlayback={() => setPlayingReview((value) => !value)}
-              playbackMs={playbackMs}
-              onSpeedChange={setPlaybackMs}
-            />
-            <div className="match-content">
-              <div className="playmat">
-                <PlayerBar game={game} player={1} inspect={setInspected} />
-                <div className="player-cards opponent-cards">
-                  <div className="opponent-hand-section">
-                    <div
-                      className={`enemy-hand ${highlights.players.has(1) ? "event-highlight" : ""}`}
-                      aria-label={t("{count} skrivenih karata protivnika", {
-                        count: game.players[1].hand.length,
-                      })}
-                    >
-                      {game.players[1].hand.slice(0, 12).map((_, i) => (
-                        <div className="card-back" key={i}>
-                          <span>ϟ</span>
-                        </div>
-                      ))}
-                      <span>
-                        {game.players[1].hand.length} {t("u ruci ·")}{" "}
-                        {game.players[1].deck.length} {t("u špilu")}{" "}
-                      </span>
-                    </div>
-                    <RuneZone game={game} player={1} inspect={setInspected} />
-                  </div>
-                  <ChampionZone
-                    game={game}
-                    player={1}
-                    legal={legal}
-                    selected={selected}
-                    select={setSelected}
-                    inspect={setInspected}
-                  />
-                </div>
-                <BoardZone
-                  game={game}
-                  location="base:1"
-                  title={t("PROTIVNIČKA BAZA")}
-                  select={setSelected}
-                  selected={selected}
-                  inspect={setInspected}
-                />
-                <CombatPanel
-                  game={game}
-                  review={review}
-                  legal={legal}
-                  onAction={doAction}
-                  inspect={setInspected}
-                />
-                <div className="battlefields">
-                  {game.fields.map((field, i) => {
-                    const c = findCard(field.cardId);
-                    return (
-                      <section
-                        className={`battlefield ${highlights.fields.has(field.id) ? "event-highlight" : ""} ${field.controller === 0 ? "owned" : field.controller === 1 ? "enemy-owned" : ""} ${game.combat?.fieldId === field.id ? "in-combat" : ""}`}
-                        key={field.id}
+            <BoardInteraction.Provider
+              value={{
+                game,
+                legal,
+                actions: currentActions,
+                choose: chooseTarget,
+              }}
+            >
+              <div className="match-content">
+                <div className="playmat">
+                  <PlayerBar game={game} player={1} inspect={setInspected} />
+                  <div className="player-cards opponent-cards">
+                    <div className="opponent-hand-section">
+                      <div
+                        className={`enemy-hand ${highlights.players.has(1) ? "event-highlight" : ""}`}
+                        aria-label={t("{count} skrivenih karata protivnika", {
+                          count: game.players[1].hand.length,
+                        })}
                       >
-                        <div
-                          className="field-art"
-                          style={{
-                            backgroundImage: `url(/art/${i === 0 ? "ancient-altar" : "moonlit-willow"}.webp)`,
-                          }}
-                        />
-                        <div className="field-heading">
-                          <div>
-                            <span className="eyebrow">
-                              {" "}
-                              {t("Battlefield {number}", {
-                                number: String(i + 1).padStart(2, "0"),
-                              })}
-                            </span>
-                            <button
-                              data-card-preview={c?.id}
-                              onClick={() => c && setInspected(c)}
-                            >
-                              {c?.name || t(locationName(field.id))}
-                            </button>
+                        {game.players[1].hand.slice(0, 12).map((_, i) => (
+                          <div className="card-back" key={i}>
+                            <span>ϟ</span>
                           </div>
-                          <span className="control-badge">
-                            {field.controller === null
-                              ? t("NEUTRALNO")
-                              : field.controller === 0
-                                ? t("TVOJA KONTROLA")
-                                : t("AI KONTROLA")}
-                          </span>
-                        </div>
-                        <div className="field-half enemy-side">
-                          <UnitRow
-                            units={game.units.filter(
-                              (u) => u.location === field.id && u.owner === 1,
-                            )}
-                            select={setSelected}
-                            selected={selected}
-                            inspect={setInspected}
-                          />
-                        </div>
-                        {(game.hidden ?? []).some(
-                          (h) => h.location === field.id,
-                        ) && (
-                          <div className="hidden-zone">
-                            {(game.hidden ?? [])
-                              .filter((h) => h.location === field.id)
-                              .map((h) => (
-                                <button
-                                  key={h.id}
-                                  className="hidden-card"
-                                  data-card-preview={
-                                    h.owner === 0 ? h.cardId : undefined
-                                  }
-                                  onClick={() =>
-                                    h.owner === 0 &&
-                                    setSelected(`hidden:${h.id}`)
-                                  }
-                                  disabled={h.owner !== 0}
-                                >
-                                  {h.owner === 0
-                                    ? t("Tvoja Hidden: {card}", {
-                                        card: findCard(h.cardId)?.name ?? "",
-                                      })
-                                    : t("AI · Hidden karta")}
-                                </button>
-                              ))}
-                          </div>
-                        )}
-                        <div className="field-divider">
-                          <span />
-                          {game.combat?.fieldId === field.id ? (
-                            <Swords size={18} />
-                          ) : (
-                            <Flag size={16} />
-                          )}
-                          <span />
-                        </div>
-                        <div className="field-half">
-                          <UnitRow
-                            units={game.units.filter(
-                              (u) => u.location === field.id && u.owner === 0,
-                            )}
-                            select={setSelected}
-                            selected={selected}
-                            inspect={setInspected}
-                          />
-                          {!game.units.some((u) => u.location === field.id) && (
-                            <span className="empty-field">
-                              {t("Zauzmi bojište za bod")}{" "}
-                            </span>
-                          )}
-                        </div>
-                      </section>
-                    );
-                  })}
-                </div>
-                <BoardZone
-                  game={game}
-                  location="base:0"
-                  title={t("TVOJA BAZA")}
-                  select={setSelected}
-                  selected={selected}
-                  inspect={setInspected}
-                />
-                <PlayerBar game={game} player={0} inspect={setInspected} />
-                <div className="player-cards">
-                  <section className="hand-section">
-                    <div className="hand-title">
-                      <span>
-                        {t("TVOJA RUKA")} <b>{game.players[0].hand.length}</b>
-                      </span>
-                      <span>
-                        {t(
-                          "Pređi mišem za uvećanje · klik za poteze · ⓘ za detalje",
-                        )}{" "}
-                      </span>
+                        ))}
+                        <span>
+                          {game.players[1].hand.length} {t("u ruci ·")}{" "}
+                          {game.players[1].deck.length} {t("u špilu")}{" "}
+                        </span>
+                      </div>
+                      <RuneZone game={game} player={1} inspect={setInspected} />
                     </div>
-                    <div className="hand">
-                      {game.players[0].hand.map((id, i) => {
-                        const c = findCard(id);
-                        return c ? (
-                          <div className="hand-card-wrap" key={`${id}-${i}`}>
-                            <Card
-                              card={c}
-                              selected={
-                                selected === `hand:${i}` ||
-                                highlights.newCards.has(id)
-                              }
-                              onClick={() => setSelected(`hand:${i}`)}
-                              disabled={
-                                !legal.some(
-                                  (a) =>
-                                    a.cardId === id && a.category === "play",
-                                )
-                              }
-                            />
-                            <button
-                              className="card-info-button"
-                              aria-label={t("Detalji {card}", { card: c.name })}
-                              onClick={() => setInspected(c)}
-                            >
-                              ⓘ
-                            </button>
-                          </div>
-                        ) : null;
-                      })}
-                    </div>
-                    <RuneZone game={game} player={0} inspect={setInspected} />
-                  </section>
-                  <ChampionZone
+                    <ChampionZone
+                      game={game}
+                      player={1}
+                      legal={legal}
+                      selected={selected}
+                      select={selectCard}
+                      inspect={setInspected}
+                    />
+                  </div>
+                  <BoardZone
                     game={game}
-                    player={0}
-                    legal={legal}
+                    location="base:1"
+                    title={t("PROTIVNIČKA BAZA")}
+                    select={selectCard}
                     selected={selected}
-                    select={setSelected}
                     inspect={setInspected}
                   />
+                  <div className="battlefields">
+                    {game.fields.map((field, i) => {
+                      const c = findCard(field.cardId);
+                      return (
+                        <section
+                          className={`battlefield ${highlights.fields.has(field.id) ? "event-highlight" : ""} ${field.controller === 0 ? "owned" : field.controller === 1 ? "enemy-owned" : ""} ${game.combat?.fieldId === field.id ? "in-combat" : ""}`}
+                          key={field.id}
+                        >
+                          <div
+                            className="field-art"
+                            style={{
+                              backgroundImage: `url(/art/${i === 0 ? "ancient-altar" : "moonlit-willow"}.webp)`,
+                            }}
+                          />
+                          <div className="field-heading">
+                            <div>
+                              <span className="eyebrow">
+                                {" "}
+                                {t("Battlefield {number}", {
+                                  number: String(i + 1).padStart(2, "0"),
+                                })}
+                              </span>
+                              <button
+                                data-card-preview={c?.id}
+                                onClick={() => c && setInspected(c)}
+                              >
+                                {c?.name || t(locationName(field.id))}
+                              </button>
+                            </div>
+                            <span className="control-badge">
+                              {field.controller === null
+                                ? t("NEUTRALNO")
+                                : field.controller === 0
+                                  ? t("TVOJA KONTROLA")
+                                  : t("AI KONTROLA")}
+                            </span>
+                          </div>
+                          <Destination location={field.id} />
+                          <div className="field-half enemy-side">
+                            <UnitRow
+                              units={game.units.filter(
+                                (u) => u.location === field.id && u.owner === 1,
+                              )}
+                              select={selectCard}
+                              selected={selected}
+                              inspect={setInspected}
+                            />
+                          </div>
+                          {(game.hidden ?? []).some(
+                            (h) => h.location === field.id,
+                          ) && (
+                            <div className="hidden-zone">
+                              {(game.hidden ?? [])
+                                .filter((h) => h.location === field.id)
+                                .map((h) => (
+                                  <button
+                                    key={h.id}
+                                    className="hidden-card"
+                                    data-card-preview={
+                                      h.owner === 0 ? h.cardId : undefined
+                                    }
+                                    onClick={() =>
+                                      h.owner === 0 &&
+                                      selectCard(`hidden:${h.id}`)
+                                    }
+                                    disabled={h.owner !== 0}
+                                  >
+                                    {h.owner === 0
+                                      ? t("Tvoja Hidden: {card}", {
+                                          card: findCard(h.cardId)?.name ?? "",
+                                        })
+                                      : t("AI · Hidden karta")}
+                                  </button>
+                                ))}
+                            </div>
+                          )}
+                          <div className="field-divider">
+                            <span />
+                            {game.combat?.fieldId === field.id ? (
+                              <Swords size={18} />
+                            ) : (
+                              <Flag size={16} />
+                            )}
+                            <span />
+                          </div>
+                          <div className="field-half">
+                            <UnitRow
+                              units={game.units.filter(
+                                (u) => u.location === field.id && u.owner === 0,
+                              )}
+                              select={selectCard}
+                              selected={selected}
+                              inspect={setInspected}
+                            />
+                            {!game.units.some(
+                              (u) => u.location === field.id,
+                            ) && (
+                              <span className="empty-field">
+                                {t("Zauzmi bojište za bod")}{" "}
+                              </span>
+                            )}
+                          </div>
+                        </section>
+                      );
+                    })}
+                  </div>
+                  <BoardZone
+                    game={game}
+                    location="base:0"
+                    title={t("TVOJA BAZA")}
+                    select={selectCard}
+                    selected={selected}
+                    inspect={setInspected}
+                  />
+                  <PlayerBar game={game} player={0} inspect={setInspected} />
+                  <div className="player-cards">
+                    <section className="hand-section">
+                      <div className="hand-title">
+                        <span>
+                          {t("TVOJA RUKA")} <b>{game.players[0].hand.length}</b>
+                        </span>
+                        <span>{t("Click a card · choose a move below")} </span>
+                      </div>
+                      <div
+                        className="hand"
+                        style={
+                          {
+                            "--hand-count": Math.max(
+                              1,
+                              game.players[0].hand.length,
+                            ),
+                          } as React.CSSProperties
+                        }
+                      >
+                        {game.players[0].hand.map((id, i) => {
+                          const c = findCard(id);
+                          return c ? (
+                            <div className="hand-card-wrap" key={`${id}-${i}`}>
+                              <Card
+                                card={c}
+                                selected={
+                                  selected === `hand:${i}` ||
+                                  mulligan.includes(i) ||
+                                  highlights.newCards.has(id)
+                                }
+                                onClick={() => selectCard(`hand:${i}`)}
+                                playable={
+                                  game.phase === "mulligan"
+                                    ? !game.players[0].mulliganDone
+                                    : legal.some(
+                                        (a) => a.sourceId === `hand:${i}`,
+                                      )
+                                }
+                                disabled={
+                                  game.phase !== "mulligan" &&
+                                  !legal.some((a) => a.sourceId === `hand:${i}`)
+                                }
+                              />
+                              <button
+                                className="card-info-button"
+                                aria-label={t("Detalji {card}", {
+                                  card: c.name,
+                                })}
+                                onClick={() => setInspected(c)}
+                              >
+                                ⓘ
+                              </button>
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+                      <RuneZone game={game} player={0} inspect={setInspected} />
+                    </section>
+                    <ChampionZone
+                      game={game}
+                      player={0}
+                      legal={legal}
+                      selected={selected}
+                      select={selectCard}
+                      inspect={setInspected}
+                    />
+                  </div>
                 </div>
               </div>
-              <aside className="action-sidebar">
-                <div className="phase-panel">
-                  <span className="eyebrow"> {t("TOK MEČA")} </span>
-                  <h3>{t(phaseNames[game.phase])}</h3>
-                  <div className="phase-track">
-                    {["Priprema", "Runes", "Karta", "Akcije"].map((p, i) => (
-                      <span className={i === 3 ? "current" : ""} key={p}>
-                        {i < 3 ? <Check size={11} /> : <span />}
-                        {t(p)}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                {review ? (
-                  <div className="review-lock">
-                    <Clock3 size={24} />
-                    <h3> {t("Pregledaj ovaj korak")} </h3>
-                    <p>
-                      {t("Igra je zaustavljena. Pritisni")}{" "}
-                      <strong> {t("Proceed")} </strong>{" "}
-                      {t("iznad table kada si spreman nastaviti.")}{" "}
-                    </p>
-                    {highlights.removed.map((u) => (
-                      <div
-                        className="removed-unit"
-                        key={u.id}
-                        data-card-preview={u.cardId}
-                        tabIndex={0}
-                      >
-                        <span>✕</span>
-                        {findCard(u.cardId)?.name}
-                        <small> {t("uklonjena s table")} </small>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <ActionPanel
+              <MatchControls
+                game={game}
+                legal={legal}
+                selected={selected}
+                target={target}
+                clear={() => {
+                  setSelected(null);
+                  setTarget(null);
+                }}
+                act={doAction}
+                review={review}
+                busy={thinking}
+                paused={paused}
+                resume={() => setPaused(false)}
+                mulligan={mulligan}
+              />
+            </BoardInteraction.Provider>
+            {logOpen && (
+              <div className="modal-backdrop" onClick={() => setLogOpen(false)}>
+                <section
+                  className="modal match-history"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label={t("Dnevnik meča")}
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <button
+                    className="close-button"
+                    onClick={() => setLogOpen(false)}
+                    aria-label={t("Zatvori")}
+                  >
+                    ×
+                  </button>
+                  <h2>{t("Dnevnik meča")}</h2>
+                  <CombatPanel
                     game={game}
-                    legal={legal}
-                    selected={selected}
-                    clear={() => setSelected(null)}
-                    doAction={doAction}
+                    review={review}
+                    legal={[]}
+                    onAction={doAction}
                     inspect={setInspected}
-                    thinking={thinking}
                   />
-                )}
-                {game.stack.length > 0 && (
-                  <div className="stack-panel">
-                    <span className="eyebrow">
-                      {t("LANAC EFEKATA ·")} {game.stack.length}
-                    </span>
-                    {[...game.stack].reverse().map((s) => (
-                      <div key={s.id} data-card-preview={s.cardId} tabIndex={0}>
-                        <Zap size={13} />
-                        <span>{findCard(s.cardId)?.name}</span>
-                        <small>{s.player === 0 ? t("TI") : t("AI")}</small>
-                      </div>
-                    ))}
-                    <small>
-                      {" "}
-                      {t("Posljednji dodani efekat rješava se prvi.")}{" "}
-                    </small>
-                  </div>
-                )}
-                <div className={`log-panel ${logOpen ? "expanded" : ""}`}>
-                  <span className="eyebrow">
-                    <History size={13} /> {t("DNEVNIK MEČA")}{" "}
-                  </span>
-                  <div className="log-entries">
-                    {game.log
-                      .slice(-16)
-                      .reverse()
-                      .map((l) => (
-                        <p className={`log-${l.kind}`} key={l.id}>
-                          <span>{l.turn.toString().padStart(2, "0")}</span>
-                          {t(l.text)}
-                        </p>
-                      ))}
-                  </div>
-                </div>
-                <div className="autosave">
-                  <span className="status-dot" />{" "}
-                  {t("Meč se automatski čuva")}{" "}
-                </div>
-              </aside>
-            </div>
+                  {[...game.log].reverse().map((entry) => (
+                    <p key={entry.id}>
+                      <b>{entry.turn}</b> {t(entry.text)}
+                    </p>
+                  ))}
+                </section>
+              </div>
+            )}
             {!review && game.winner !== null && (
               <div className="result-banner">
                 <Trophy size={40} />
@@ -1066,6 +1077,7 @@ function UnitRow({
 }) {
   const { t } = useI18n();
   const h = useHighlights();
+  const interaction = useContext(BoardInteraction);
   return (
     <>
       {units.map((u) => {
@@ -1081,17 +1093,25 @@ function UnitRow({
               ready={u.ready}
               damage={u.damage}
               might={
-                h.game
-                  ? getMight(h.game, u)
+                interaction.game
+                  ? getMight(interaction.game, u)
                   : (c.might || 0) + u.buff + u.temporaryMight
               }
-              selected={selected === u.id}
+              selected={
+                selected === u.id ||
+                interaction.actions.some((a) => a.targetId === u.id) ||
+                !!interaction.game?.pendingMove?.unitIds.includes(u.id)
+              }
+              playable={
+                interaction.legal.some((a) => a.sourceId === u.id) ||
+                interaction.actions.some((a) => a.targetId === u.id)
+              }
               onClick={() => select(u.id)}
             />
             <div className="unit-power">
               <Shield size={10} />
-              {h.game
-                ? getMight(h.game, u)
+              {interaction.game
+                ? getMight(interaction.game, u)
                 : (c.might || 0) + u.buff + u.temporaryMight}
               {u.buff > 0 && <span> +</span>}
               {u.empowered && <span title={t("Empowered")}> ✦</span>}
@@ -1107,6 +1127,31 @@ function UnitRow({
         ) : null;
       })}
     </>
+  );
+}
+function Destination({ location }: { location: LocationId }) {
+  const { t } = useI18n();
+  const { actions, choose } = useContext(BoardInteraction);
+  const options = actions.filter(
+    (action) =>
+      action.locationId === location &&
+      !action.targetId &&
+      !action.id.startsWith("move-toggle:"),
+  );
+  if (
+    !options.length ||
+    options.every((action) => action.id === "move-confirm")
+  )
+    return null;
+  return (
+    <button className="destination-button" onClick={() => choose(location)}>
+      {t(
+        options.every((action) => action.category === "move")
+          ? "Move here"
+          : "Play here",
+      )}{" "}
+      <ArrowRight size={13} />
+    </button>
   );
 }
 function BoardZone({
@@ -1132,6 +1177,7 @@ function BoardZone({
       className={`base-zone ${h.fields.has(location) ? "event-highlight" : ""}`}
     >
       <span className="zone-label">{t(title)}</span>
+      <Destination location={location} />
       <div className="base-units">
         <UnitRow
           units={units}
@@ -1161,195 +1207,6 @@ function BoardZone({
           })}
       </div>
     </section>
-  );
-}
-function ActionPanel({
-  game,
-  legal,
-  selected,
-  clear,
-  doAction,
-  inspect,
-  thinking,
-}: {
-  game: GameState;
-  legal: GameAction[];
-  selected: string | null;
-  clear: () => void;
-  doAction: (a: GameAction) => void;
-  inspect: (c: CatalogCard) => void;
-  thinking: boolean;
-}) {
-  const { t } = useI18n();
-  const cardId = selected?.startsWith("hand:")
-    ? game.players[0].hand[Number(selected.split(":")[1])]
-    : selected === "champion"
-      ? game.players[0].championId
-      : selected === "legend"
-        ? game.players[0].legendId
-        : game.units.find((u) => u.id === selected)?.cardId ||
-          game.gears.find((g) => g.id === selected)?.cardId;
-  const c = findCard(cardId);
-  const [mulligan, setMulligan] = useState<number[]>([]);
-  const mainActions = legal.filter(
-    (a) => !["pass", "end"].includes(a.category),
-  );
-  const actions =
-    selected && !["move", "choice", "damage"].includes(game.phase)
-      ? mainActions.filter(
-          (a) =>
-            a.sourceId === selected ||
-            (!selected.startsWith("hand:") &&
-              selected !== "champion" &&
-              (a.unitIds?.includes(selected) ||
-                a.targetId?.split("~").includes(selected))),
-        )
-      : mainActions;
-  const ending = legal.filter((a) => ["pass", "end"].includes(a.category));
-  if (game.phase === "mulligan" && game.players[0].mulliganDone)
-    return (
-      <div className="action-panel">
-        <h3> {t("Početna ruka potvrđena")} </h3>
-        <p> {t("Protivnik čeka tvoj Proceed prije odabira svoje ruke.")} </p>
-      </div>
-    );
-  if (game.phase === "mulligan")
-    return (
-      <div className="action-panel">
-        <h3> {t("Izaberi početnu ruku")} </h3>
-        <p>
-          {t(
-            "Možeš zamijeniti najviše dvije karte. Odaberi ih ovdje, zatim potvrdi.",
-          )}{" "}
-        </p>
-        <div className="mulligan-list">
-          {game.players[0].hand.map((id, i) => (
-            <button
-              className={mulligan.includes(i) ? "active" : ""}
-              data-card-preview={id}
-              key={i}
-              onClick={() =>
-                setMulligan((m) =>
-                  m.includes(i)
-                    ? m.filter((j) => j !== i)
-                    : m.length < 2
-                      ? [...m, i]
-                      : m,
-                )
-              }
-            >
-              <span className="check-box">
-                {mulligan.includes(i) && <Check size={12} />}
-              </span>
-              {findCard(id)?.name}
-            </button>
-          ))}
-        </div>
-        <button
-          className="gold-button full"
-          disabled={!legal.some((a) => a.category === "mulligan")}
-          onClick={() => {
-            const a =
-              legal.find(
-                (a) =>
-                  a.category === "mulligan" &&
-                  JSON.stringify([...(a.cardIndices || [])].sort()) ===
-                    JSON.stringify([...mulligan].sort()),
-              ) || legal.find((a) => a.category === "mulligan");
-            if (a) {
-              doAction(a);
-              setMulligan([]);
-            }
-          }}
-        >
-          {mulligan.length
-            ? t("Zamijeni {count} karte", { count: mulligan.length })
-            : t("Zadrži ruku")}
-          <ArrowRight size={16} />
-        </button>
-      </div>
-    );
-  return (
-    <div className="action-panel">
-      <div className="action-panel-heading">
-        <h3>
-          {c?.name ||
-            (game.phase === "damage" ? t("Dodijeli štetu") : t("Tvoji potezi"))}
-        </h3>
-        {selected && (
-          <button
-            className="icon-button"
-            aria-label={t("Poništi odabir")}
-            onClick={clear}
-          >
-            <X size={15} />
-          </button>
-        )}
-      </div>
-      {c && (
-        <>
-          <p className="selected-card-text">{readableText(c.text)}</p>
-          <button className="text-button small-text" onClick={() => inspect(c)}>
-            {t("Pogledaj kartu")} <Search size={12} />
-          </button>
-        </>
-      )}
-      {!selected && (
-        <p>
-          {thinking
-            ? t("AI čeka tvoj Proceed iznad table.")
-            : t("Odaberi kartu ili jedinicu na stolu, ili potez s liste.")}
-        </p>
-      )}
-      <div className="action-list">
-        {actions.map((a) => (
-          <button
-            className={`action-button action-${a.category}`}
-            key={a.id}
-            onClick={() => doAction(a)}
-            title={t(a.detail)}
-          >
-            <span className="action-icon">
-              {a.category === "play" ? (
-                <Zap size={14} />
-              ) : a.category === "move" ? (
-                <ArrowRight size={14} />
-              ) : a.category === "combat" ? (
-                <Swords size={14} />
-              ) : (
-                <Sparkles size={14} />
-              )}
-            </span>
-            <span>
-              {t(a.label)}
-              {a.detail && <small>{t(a.detail)}</small>}
-            </span>
-            <ChevronRight size={13} />
-          </button>
-        ))}
-        {actions.length === 0 && (
-          <div className="no-actions">
-            {selected
-              ? t("Nema dostupnih poteza za ovaj odabir.")
-              : t("Pritisni Proceed za sljedeću AI akciju.")}
-          </div>
-        )}
-      </div>
-      {ending.map((a) => (
-        <button
-          className={
-            a.category === "end"
-              ? "gold-button full end-turn"
-              : "outline-button full"
-          }
-          key={a.id}
-          onClick={() => doAction(a)}
-        >
-          {t(a.label)}
-          <ArrowRight size={17} />
-        </button>
-      ))}
-    </div>
   );
 }
 function Library({ inspect }: { inspect: (c: CatalogCard) => void }) {
@@ -1514,7 +1371,7 @@ function Help({ close }: { close: () => void }) {
             [
               "03",
               "Pošalji jedinice",
-              "Jedinice uglavnom ulaze iscrpljene. Spremne jedinice mogu iz baze na bojište ili nazad. Izaberi jedinicu pa legalan potez desno.",
+              "Select a ready unit, then a highlighted battlefield. Add other units if you want, then confirm the move below.",
             ],
             [
               "04",
@@ -1524,7 +1381,7 @@ function Help({ close }: { close: () => void }) {
             [
               "05",
               "Riješi borbu",
-              "Pregled borbe prikazuje snagu i štetu svake jedinice. Klikni cilj za dodjelu štete; Tank ide prvi. Šteta je istovremena. Korake možeš pustiti, pauzirati ili vratiti unazad.",
+              "Click highlighted enemies to assign combat damage. Both sides deal damage simultaneously. Open the match log for combat details.",
             ],
             [
               "06",
@@ -1540,10 +1397,10 @@ function Help({ close }: { close: () => void }) {
           ))}
         </div>
         <div className="scope-note">
-          <h3> {t("Proceed — ti biraš tempo")} </h3>
+          <h3> {t("One place for every decision")} </h3>
           <p>
             {t(
-              "Svaka akcija i svaki efekat se zaustavljaju radi pregleda. Istaknute karte, bojišta i resursi pokazuju promjene. Klikni Proceed (ili razmak na tastaturi) za sljedeći korak. Pusti/Pauza i brzina služe za pregled već odigrane akcije; AI čeka tvoju potvrdu.",
+              "Select a card on the board and choose its move in the bottom bar. The opponent and effects advance automatically. The game waits whenever you have a real choice. Pause at any time or open the log to review what happened.",
             )}{" "}
           </p>
           <h3> {t("Podrška i izvori")} </h3>

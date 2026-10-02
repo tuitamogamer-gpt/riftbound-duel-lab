@@ -1,3 +1,4 @@
+import { flowMessages } from "./flow";
 import { appMessages } from "./app";
 import { lobbyMessages } from "./lobby";
 import { componentMessages } from "./components";
@@ -12,6 +13,7 @@ export const messages: Record<string, [string, string, string]> = {
   ...componentMessages,
   ...lobbyMessages,
   ...appMessages,
+  ...flowMessages,
 };
 const localeIndex = { en: 0, sr: 1, it: 2 } as const;
 export const isLocale = (value: unknown): value is Locale =>

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Native match flow QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Synthetic browser QA only. Serve on a separate origin from real matches.
+      import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      const match = createCombatFixture();
+      if (new URLSearchParams(location.search).has("crowded")) {
+        match.phase = "main";
+        match.combat = null;
+        for (const p of match.players) {
+          p.hand = Array.from(
+            { length: 12 },
+            (_, i) => ["ogn-049-298", "ogn-175-298", "ogn-088-298"][i % 3],
+          );
+          p.runes = Array.from({ length: 12 }, (_, i) => ({
+            id: `rune-${p.id}-${i}`,
+            domain: p.runeDeck[i % p.runeDeck.length],
+            ready: i % 2 === 0,
+          }));
+          p.runeDeck = [];
+        }
+        match.units = Array.from({ length: 36 }, (_, i) => ({
+          ...combatUnit(`crowd-${i}`, i % 2),
+          ready: true,
+          location: i < 12 ? `base:${i % 2}` : i < 24 ? "field:0" : "field:1",
+        }));
+      }
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review: null }));
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

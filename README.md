@@ -1,6 +1,6 @@
 # Riftbound Duel Lab
 
-A local-first, unofficial Riftbound 1v1 practice simulator with a deterministic rules engine, a heuristic opponent, and a mandatory **Proceed** gate after every action and narrated effect. English is the default interface language. Choose **ENG · English**, **SRB · Srpski** (Latin script), or **ITA · Italiano** in the header. The app remembers your choice locally, including after reload. Switching languages preserves the current match and review step. Card names, artwork and official rules text retain their original English.
+A local-first, unofficial Riftbound 1v1 practice simulator with a deterministic rules engine, a heuristic opponent, and a full-viewport table, one decision bar, and automatic opponent/effect playback. English is the default interface language. Choose **ENG · English**, **SRB · Srpski** (Latin script), or **ITA · Italiano** in the header. The app remembers your choice locally, including after reload. Switching languages preserves the current match and review step. Card names, artwork and official rules text retain their original English.
 
 **Play:** [riftbound-duel-lab.vercel.app](https://riftbound-duel-lab.vercel.app/). Published on 2 October 2026; see [deployment details and verification](docs/DEPLOYMENT.md).
 
@@ -49,21 +49,17 @@ Precon effects extend this with explicit discard, recycle, retrieval and Vision 
 
 **A script entry and a passing scenario are not proof of every possible rules interaction.** This is an unofficial local practice simulator, not a certified tournament referee or a complete implementation of every Riftbound card. The provider catalog contains 1,451 printings from eight sets, including cards that remain unsupported. Unsupported cards are displayed and reported explicitly rather than played as blank units. A refresh can reuse existing scripts or supported rule families; unfamiliar effects still require implementation and tests. The complete per-card inventory, executable scripts and missing-effect reasons are saved in [docs/card-coverage.json](docs/card-coverage.json); see [coverage and import validation](docs/CARD-COVERAGE.md). There is no network multiplayer, account system, or ranked play. Rules research and validation scope are documented in [docs/RULES-RESEARCH.md](docs/RULES-RESEARCH.md) and [docs/VALIDATION.md](docs/VALIDATION.md).
 
-## Deliberate pace and visible changes
+## Native match flow
 
-- The bot **never acts on a timer**.
-- Choose a player action, then inspect one immutable event snapshot at a time.
-- Press **Proceed** (or Space when a form control is not focused) to advance one snapshot.
-- **Previous step** returns to an earlier snapshot; **Play/Pause** and the speed selector play recorded frames. Playback stops at the final frame and never chooses a move or starts the next bot action.
-- After the event sequence is acknowledged, a separate Proceed starts the next bot action.
-- Cards, units, resources, and battlefields changed by the current step receive a persistent gold highlight. Removed units are called out in the review panel.
-- During review, action execution is locked. The final rules state and the current review index are saved together in this browser's localStorage, so reload does not advance the match.
-- Hover or keyboard-focus any public card, legend, battlefield, equipment, rune, or deck-list entry to see enlarged art and readable rules. Unit previews include current Might and damage; Escape dismisses the preview. Card info buttons retain the full detail view for touch screens. Opponent hands and facedown cards remain hidden.
-- Both players' **Legend zone** and **Champion zone** are visible from setup as compact card-sized slots to the right of each hand, separate from the hand and base. Their labels show ready/exhausted or available/empty state; hover to read the full rules, or select your Legend to see its currently legal abilities in the action panel. The chosen champion is played from its zone by paying its cost, after which that zone is marked empty. Deck selection also shows both starting cards for each player. Rune cards appear in their own row below each player's hand.
-- Active runes show locally cached card artwork for all six domains, with ready/exhausted labels. Click or tap a rune to open its full card details. Rune cards wrap on narrow screens.
-- Exhausted units, Legends, runes, and equipment carry a small square black-and-red EXHAUSTED token at the card's lower right, while their artwork becomes grayscale. The marker disappears when readied and follows the visible Proceed frame and enlarged preview. The transparent artwork, reference, and exact imagegen prompt are documented in [docs/EXHAUSTED-SQUARE-TOKEN.md](docs/EXHAUSTED-SQUARE-TOKEN.md).
-- The combat panel shows each side's actual damage contribution, existing wounds, protection, assigned damage and remaining damage. Choose legal damage targets directly beside their cards. Animated simultaneous hits precede casualties and retreat; the result shows who controls the battlefield. Reaction windows can change the numbers and target choices can change the surviving units.
-- The event log records game events.
+- The complete table and one bottom decision bar fit the viewport. Both battlefields, bases, hands, runes, Legends and Champions stay visible. Cards overlap when rows are crowded instead of adding page or hand scrolling.
+- Select up to two cards directly in your opening hand, then confirm the replacement or keep the hand.
+- Select a glowing card to see its name, type, cost and legal plays in the bottom bar. Select an available target or destination directly on the table, or use the matching action button. A selection can be cancelled with Escape.
+- Select a ready unit and a battlefield; add or remove units directly on the table, then confirm the group move. During combat, click highlighted enemies to assign damage. Remaining damage is shown in the decision bar.
+- End turn is always an explicit player decision. The opponent chooses its own legal moves and recorded effect frames play automatically. Human priority passes are automatic only when passing is the sole legal action; playable reactions, optional effects, mulligans, movement and damage choices wait for the player.
+- Pause stops playback and opponent timers. Rules, card details, the match log, hidden tabs and leaving the match also suspend automatic progress. Closing the overlay or returning resumes it. Saves retain the final rules state and current visual frame; selecting Resume after reload continues the sequence.
+- Hover or keyboard-focus public cards for enlarged art and rules. Info buttons open full details on touch screens. Opponent hands and facedown cards remain private. Exhausted cards retain grayscale art and their EXHAUSTED marker.
+- The match log is opened from the toolbar. It also contains the detailed combat summary; routine play uses the board and bottom bar.
+- English, Serbian and Italian remain available from the compact match toolbar. Changing language preserves the match.
 
 ## Architecture
 

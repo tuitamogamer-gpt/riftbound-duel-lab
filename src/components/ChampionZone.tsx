@@ -47,6 +47,7 @@ export function ChampionZone({
             card={legend}
             small
             ready={legendReady}
+            playable={hasAction("legend")}
             selected={own && selected === "legend"}
             onClick={() => (own ? select("legend") : inspect(legend))}
           />
@@ -88,6 +89,7 @@ export function ChampionZone({
               card={champion}
               small
               selected={own && selected === "champion"}
+              playable={hasAction("champion")}
               onClick={() => (own ? select("champion") : inspect(champion))}
             />
           ) : (

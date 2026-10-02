@@ -1,5 +1,15 @@
 # Validation evidence
 
+## Native match flow — 2 October 2026
+
+Replaced the separate Proceed/review toolbar and action sidebar with a viewport-sized table and a single bottom decision bar. Card selection shows legal actions and costs; board targets and destinations can be clicked directly. Mulligan selection happens in the hand. Opponent actions and effect frames advance automatically. Human reactions, optional choices, movement confirmation, damage assignments and end-turn remain explicit; only a sole legal priority pass advances automatically.
+
+All **1,036 tests in 36 files** passed, including the new native-flow suite. The production build, card coverage check and whitespace check pass. The existing Vite bundle-size warning is unchanged.
+
+Browser verification on an isolated localhost origin covered hand replacement, automatic opponent mulligan, playing Pouty Poro, end turn through the opponent's actions back to the human, movement selection, direct damage assignment (7 → 1 → 0), the opponent's remaining combat decisions, and pause. A synthetic crowded board with 36 units, 12 hand cards and 12 runes per player was measured at 390×844 and 900×650: document dimensions matched the viewport and no card or decision control extended outside it. Normal play was also measured at 1280×720 with both battlefields, both bases, both setup pairs, the hand and all decision controls inside the viewport. The development-only reproduction page is `tests/native-flow-preview.html`; `?crowded` selects the stress fixture. These fixtures are not included in the production build.
+
+Earlier validation entries below describe the former manual Proceed interface.
+
 ## Publication preparation — 2 October 2026
 
 The current working tree passes **1,031 tests in 35 files**, `npm run cards:check`, `npm run build`, and `git diff --check`. The registry contains 1,456 entries: 937 executable and 519 unsupported. Vite's existing bundle-size warning is non-blocking.
