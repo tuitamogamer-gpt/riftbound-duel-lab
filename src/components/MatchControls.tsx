@@ -7,8 +7,7 @@ import type { GameAction, GameState } from "../game/types";
 import { useI18n } from "../i18n";
 import type { Review } from "./StepFlow";
 import { priorityWindow } from "../game/presentation";
-import { getEffectView } from "../game/effect-presentation";
-import { EffectAnnouncement } from "./EffectFeedback";
+import { getActionStackView } from "../game/stack-presentation";
 
 export function MatchControls({
   game,
@@ -37,7 +36,7 @@ export function MatchControls({
 }) {
   const { t } = useI18n();
   const window = priorityWindow(game);
-  const effectView = getEffectView(review);
+  const stackVisible = Boolean(getActionStackView(game, review));
   const forcedPass =
     !review && legal.length === 1 && legal[0].category === "pass";
   const card = findCard(selectedCardId(game, selected));
@@ -105,7 +104,9 @@ export function MatchControls({
   const hint = paused
     ? "Resume when you are ready."
     : review
-      ? (review.frames[review.index]?.label ?? "Resolving effects")
+      ? stackVisible
+        ? "Watch the cards at the center of the table."
+        : (review.frames[review.index]?.label ?? "Resolving effects")
       : busy
         ? "Watch the highlighted cards. Your turn follows automatically."
         : opening
@@ -136,54 +137,50 @@ export function MatchControls({
       className={`match-controls window-${window} ${review || busy ? "is-busy" : ""}`}
       aria-label={t("Game controls")}
     >
-      {effectView ? (
-        <EffectAnnouncement review={review} paused={paused} />
-      ) : (
-        <div className="decision-copy" role="status" aria-live="polite">
-          <span className="decision-kicker">
-            {t(
-              opening
-                ? "Opening hand"
-                : busy || review
-                  ? "Resolving effects"
-                  : "Your next move",
-            )}
-          </span>
-          <strong>
-            {card && !busy && !review && !paused ? card.name : t(title)}
-            {!card &&
-              !review &&
-              ending?.category === "pass" &&
-              effectCard &&
-              ` · ${effectCard.name}`}
-            {card && !busy && !review && !paused && (
-              <span className="card-cost-note">
-                {t(card.type)} · {card.energy ?? 0} {t("ENERGY")} ·{" "}
-                {card.power ?? 0} {t("power")}
-              </span>
-            )}
-          </strong>
-          <p>
-            {game.combat &&
-              !review &&
-              game.phase === "damage" &&
-              `${t("Damage remaining: {count}", { count: game.combat.remaining[0] })} · `}
-            {movement && !review && !paused && !busy
-              ? t("{count} selected → {destination}. {instruction}", {
-                  count: movement.unitIds.length,
-                  destination: destination ?? "",
-                  instruction: t(
-                    !movement.unitIds.length
-                      ? "Click a ready unit to add it."
-                      : !confirm
-                        ? "Cannot pay for this group. Remove a unit or cancel."
-                        : "Click units to change the group, then confirm.",
-                  ),
-                })
-              : t(hint)}
-          </p>
-        </div>
-      )}
+      <div className="decision-copy" role="status" aria-live="polite">
+        <span className="decision-kicker">
+          {t(
+            opening
+              ? "Opening hand"
+              : busy || review
+                ? "Resolving effects"
+                : "Your next move",
+          )}
+        </span>
+        <strong>
+          {card && !busy && !review && !paused ? card.name : t(title)}
+          {!card &&
+            !review &&
+            ending?.category === "pass" &&
+            effectCard &&
+            ` · ${effectCard.name}`}
+          {card && !busy && !review && !paused && (
+            <span className="card-cost-note">
+              {t(card.type)} · {card.energy ?? 0} {t("ENERGY")} ·{" "}
+              {card.power ?? 0} {t("power")}
+            </span>
+          )}
+        </strong>
+        <p>
+          {game.combat &&
+            !review &&
+            game.phase === "damage" &&
+            `${t("Damage remaining: {count}", { count: game.combat.remaining[0] })} · `}
+          {movement && !review && !paused && !busy
+            ? t("{count} selected → {destination}. {instruction}", {
+                count: movement.unitIds.length,
+                destination: destination ?? "",
+                instruction: t(
+                  !movement.unitIds.length
+                    ? "Click a ready unit to add it."
+                    : !confirm
+                      ? "Cannot pay for this group. Remove a unit or cancel."
+                      : "Click units to change the group, then confirm.",
+                ),
+              })
+            : t(hint)}
+        </p>
+      </div>
       {selected && !busy && !review && !opening && (
         <button
           className="cancel-selection"

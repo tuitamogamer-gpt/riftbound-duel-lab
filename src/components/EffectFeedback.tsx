@@ -128,6 +128,7 @@ export function EffectTrails({ review }: { review: Review | null }) {
             )
           : undefined;
       const source =
+        locate("data-stack-card", view.source?.id) ??
         locate("data-unit-id", view.effect?.sourceId) ??
         locate("data-field-source", view.fieldId) ??
         locate("data-effect-player", String(view.player));

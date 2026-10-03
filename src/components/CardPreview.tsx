@@ -1,4 +1,12 @@
-import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Shield, Zap } from "lucide-react";
@@ -13,6 +21,8 @@ import { RulesErrata } from "./RulesErrata";
 
 type Preview = { card: CatalogCard; anchor: HTMLElement };
 const triggerSelector = "[data-card-preview]";
+const CardPreviewActive = createContext(false);
+export const useCardPreviewActive = () => useContext(CardPreviewActive);
 
 function isAvailable(anchor: HTMLElement) {
   if (!anchor.isConnected || !anchor.getClientRects().length) return false;
@@ -199,7 +209,7 @@ export function CardPreviewProvider({ children }: { children: ReactNode }) {
   }, [preview?.anchor]);
 
   return (
-    <>
+    <CardPreviewActive.Provider value={Boolean(preview)}>
       {children}
       {preview &&
         createPortal(
@@ -210,7 +220,7 @@ export function CardPreviewProvider({ children }: { children: ReactNode }) {
           />,
           document.body,
         )}
-    </>
+    </CardPreviewActive.Provider>
   );
 }
 

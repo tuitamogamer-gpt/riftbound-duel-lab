@@ -1,0 +1,82 @@
+/* Explicit dimensions keep WebKit from using a card image's intrinsic width
+   for its flex wrapper. The card, power badge and details button share one
+   physical footprint even when crowded rows overlap. */
+.app.is-game .battlefield > .field-heading {
+  grid-row: 1;
+  grid-column: 1;
+}
+.app.is-game .battlefield > .field-half.enemy-side {
+  grid-row: 2;
+  grid-column: 1;
+}
+.app.is-game .battlefield > .field-divider {
+  grid-row: 3;
+  grid-column: 1;
+}
+.app.is-game .battlefield > .field-half:not(.enemy-side) {
+  grid-row: 4;
+  grid-column: 1;
+}
+.app.is-game .battlefield > .field-half {
+  --unit-card-height: min(calc(100cqh - 4px), 112px);
+  --unit-card-width: calc(var(--unit-card-height) * 744 / 1039);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 8px 12px 12px;
+  gap: 10px;
+}
+.app.is-game .base-units {
+  --unit-card-height: min(calc(100cqh - 14px), 112px);
+  --unit-card-width: calc(var(--unit-card-height) * 744 / 1039);
+}
+.app.is-game :is(.field-half, .base-units) > .unit-wrap {
+  height: var(--unit-card-height);
+  width: var(--unit-card-width);
+  flex: 0 1 var(--unit-card-width);
+  min-width: 0;
+  position: relative;
+}
+.app.is-game :is(.field-half, .base-units) > .unit-wrap:last-of-type {
+  flex-shrink: 0;
+}
+.app.is-game :is(.field-half, .base-units) > .unit-wrap > .game-card.small {
+  width: var(--unit-card-width);
+  height: var(--unit-card-height);
+  max-width: none;
+  aspect-ratio: 744 / 1039;
+}
+.app.is-game :is(.field-half, .base-units) > .unit-wrap > .unit-power {
+  left: calc(var(--unit-card-width) / 2);
+}
+.app.is-game :is(.field-half, .base-units) > .unit-wrap > .unit-info {
+  left: calc(var(--unit-card-width) - 8px);
+  right: auto;
+}
+.app.is-game :is(.field-half, .base-units) > .unit-wrap.event-highlight:after {
+  left: calc(var(--unit-card-width) / 2);
+}
+@media (max-width: 650px) {
+  .app.is-game .battlefield > .field-half {
+    padding: 6px 8px 10px;
+    gap: 4px;
+  }
+}
+/* A short landscape viewport cannot fit every zone at a useful card size.
+   Scroll the table within its own track while keeping the decision bar visible. */
+@media (max-height: 500px) {
+  .app.is-game .match-content {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .app.is-game .playmat {
+    height: auto;
+    min-height: 440px;
+    padding: 4px;
+    gap: 4px;
+    grid-template-rows: 20px 48px 44px minmax(172px, 1fr) 44px 20px 62px;
+  }
+}

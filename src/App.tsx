@@ -61,6 +61,8 @@ import { MatchControls } from "./components/MatchControls";
 import { TurnFlow, ShowdownCue, CombatReadout } from "./components/TurnFlow";
 import { reviewDelay, automaticDelay } from "./game/presentation";
 import { EffectTrails, FieldEffect } from "./components/EffectFeedback";
+import { ActionStack } from "./components/ActionStack";
+import { useCardPreviewActive } from "./components/CardPreview";
 import { runeOutcomeLabels, type RuneEvent } from "./game/rune-presentation";
 import { decks } from "./data/decks";
 import {
@@ -119,6 +121,7 @@ function sound() {
 
 export default function App() {
   const { t } = useI18n();
+  const previewActive = useCardPreviewActive();
   const [screen, setScreen] = useState<"lobby" | "game" | "library">("lobby");
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -137,6 +140,42 @@ export default function App() {
     return () => document.removeEventListener("visibilitychange", update);
   }, []);
   const game = review?.frames[review.index]?.state || match;
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    Object.assign(window, {
+      render_game_to_text: () =>
+        JSON.stringify({
+          screen,
+          coordinates:
+            "DOM table: opponent top, player bottom, chain centered between battlefields",
+          paused,
+          previewActive,
+          turn: game?.turn,
+          phase: game?.phase,
+          priorityPlayer: game?.priorityPlayer,
+          players: game?.players.map((player) => ({
+            id: player.id,
+            points: player.points,
+            handCount: player.hand.length,
+            ...(player.id === 0 ? { hand: player.hand } : {}),
+          })),
+          units: game?.units,
+          fields: game?.fields,
+          chain: game?.stack.map(({ id, player, cardId, kind }) => ({
+            id,
+            player,
+            cardId,
+            kind,
+          })),
+          review: review
+            ? { index: review.index, label: review.frames[review.index]?.label }
+            : null,
+        }),
+    });
+    return () => {
+      Reflect.deleteProperty(window, "render_game_to_text");
+    };
+  }, [screen, game, review, paused, previewActive]);
   const highlights = useMemo(() => getHighlights(review), [review]);
   const [importedDecks, setImportedDecks] = useState<StarterDeck[]>(() =>
     loadImportedDecks(),
@@ -213,6 +252,7 @@ export default function App() {
       !match ||
       screen !== "game" ||
       paused ||
+      previewActive ||
       !visible ||
       help ||
       inspected ||
@@ -245,6 +285,7 @@ export default function App() {
     review,
     screen,
     paused,
+    previewActive,
     visible,
     help,
     inspected,
@@ -578,6 +619,12 @@ export default function App() {
                     inspect={setInspected}
                   />
                   <div className="battlefields">
+                    <ActionStack
+                      game={game}
+                      review={review}
+                      paused={paused}
+                      inspect={setInspected}
+                    />
                     {game.fields.map((field, i) => {
                       const c = findCard(field.cardId);
                       return (

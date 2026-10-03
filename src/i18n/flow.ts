@@ -1,4 +1,34 @@
 export const flowMessages: Record<string, [string, string, string]> = {
+  "Action chain": ["Action chain", "Lanac akcija", "Catena di azioni"],
+  "Resolves first": [
+    "Resolves first",
+    "Izvršava se prva",
+    "Si risolve per prima",
+  ],
+  Response: ["Response", "Reakcija", "Risposta"],
+  Waiting: ["Waiting", "Na čekanju", "In attesa"],
+  "Playing card": ["Playing card", "Odigravanje karte", "Carta giocata"],
+  "Triggered ability": [
+    "Triggered ability",
+    "Pokrenuta sposobnost",
+    "Abilità innescata",
+  ],
+  "Activated ability": [
+    "Activated ability",
+    "Aktivirana sposobnost",
+    "Abilità attivata",
+  ],
+  "Inspect {card}": ["Inspect {card}", "Pogledaj {card}", "Esamina {card}"],
+  "Last played resolves first": [
+    "Last played resolves first",
+    "Posljednja odigrana karta izvršava se prva",
+    "L’ultima carta giocata si risolve per prima",
+  ],
+  "Watch the cards at the center of the table.": [
+    "Watch the cards at the center of the table.",
+    "Prati karte na sredini stola.",
+    "Segui le carte al centro del tavolo.",
+  ],
   "Rune effect": ["Rune effect", "Efekat runa", "Effetto delle rune"],
   Channeled: ["Channeled", "Channel", "Canalizzata"],
   Recycled: ["Recycled", "Reciklirana", "Riciclata"],

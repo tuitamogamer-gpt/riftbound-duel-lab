@@ -2,17 +2,21 @@
   position: fixed;
   z-index: 1000;
   display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
-  width: min(480px, calc(100vw - 24px));
+  grid-template-columns: min(
+      26vw,
+      360px,
+      calc((100dvh - 100px) * 0.714)
+    ) minmax(0, 1fr);
+  width: min(840px, 56vw, calc(100vw - 24px));
   max-height: calc(100dvh - 24px);
   overflow: auto;
   overscroll-behavior: contain;
-  padding: 10px;
-  gap: 16px;
+  padding: 20px;
+  gap: 24px;
   color: #f5f1e9;
-  background: linear-gradient(140deg, #202832, #101820 65%);
+  background: linear-gradient(140deg, #183640, #0c202b 65%);
   border: 1px solid color-mix(in srgb, var(--preview-accent) 60%, #ffffff20);
-  border-radius: 12px;
+  border-radius: 22px 8px 22px 8px;
   box-shadow:
     0 20px 70px #000b,
     0 0 0 1px #050a10;
@@ -38,7 +42,7 @@
 }
 .card-preview-art.is-exhausted > img,
 .card-preview-art.is-exhausted > .card-preview-fallback {
-  filter: grayscale(1) brightness(0.62);
+  filter: none;
 }
 .card-preview-art > .exhausted-token {
   right: 7px;
@@ -69,7 +73,7 @@
   margin: 5px 0 7px;
   color: #fff8e8;
   font-family: "Barlow Condensed", sans-serif;
-  font-size: 27px;
+  font-size: 34px;
   line-height: 1.05;
 }
 .card-preview-domains,
@@ -78,7 +82,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px 10px;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.45;
 }
 .card-preview-stats {
@@ -98,8 +102,8 @@
   white-space: pre-line;
   overflow-wrap: anywhere;
   color: #e8edf2;
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.7;
 }
 .card-preview-state {
   padding: 8px 0;
@@ -148,8 +152,21 @@
     opacity: 1;
   }
 }
+@media (max-width: 900px) and (min-width: 551px) {
+  .card-preview {
+    width: min(720px, calc(100vw - 24px));
+    grid-template-columns: min(
+        38vw,
+        300px,
+        calc((100dvh - 100px) * 0.714)
+      ) minmax(0, 1fr);
+    gap: 18px;
+    padding: 16px;
+  }
+}
 @media (max-width: 550px) {
   .card-preview {
+    width: calc(100vw - 24px);
     grid-template-columns: 120px minmax(0, 1fr);
     gap: 12px;
     padding: 8px;
@@ -162,6 +179,16 @@
   }
   .card-preview-rules {
     font-size: 12px;
+  }
+}
+@media (max-height: 500px) and (min-width: 551px) {
+  .card-preview {
+    width: min(720px, calc(100vw - 24px));
+    padding: 12px;
+    gap: 16px;
+  }
+  .card-preview-art > img {
+    min-height: 0;
   }
 }
 @media (max-width: 360px) {

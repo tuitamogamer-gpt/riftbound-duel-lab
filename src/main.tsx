@@ -20,6 +20,7 @@ import "./marvel-theme.css";
 import "./game-theme.css";
 import "./i18n/language.css";
 import "./match-layout.css";
+import "./battlefield-layout.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <LanguageProvider>

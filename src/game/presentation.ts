@@ -31,7 +31,13 @@ export function reviewDelay(review: Review): number {
   if (frame.combat?.stage === "start" || frame.combat?.stage === "impact")
     return humanTurn ? 1900 : 1200;
   if (frame.combat) return humanTurn ? 1350 : 750;
-  if (frame.effect) return humanTurn ? 1800 : 1100;
+  if (frame.effect) return humanTurn ? 1800 : 1400;
+  // Public cards cross the table before settling; leave enough time to read them.
+  if (
+    review.action.category === "play" &&
+    !review.action.id.startsWith("hide:")
+  )
+    return humanTurn ? 1650 : 1400;
   if (getRuneChanges(review).length) return humanTurn ? 1700 : 700;
   if (visibleTurnStep(frame.state) !== "main") return humanTurn ? 1500 : 450;
   if (frame.state.stack.length || frame.state.phase === "showdown")

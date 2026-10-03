@@ -1,0 +1,383 @@
+.app.is-game .battlefields {
+  position: relative;
+}
+/* Reserve a center lane while cards are on the chain. Battlefield targets
+   remain beside it, including crowded rows and narrow touch viewports. */
+.app.is-game .battlefields:has(> .action-stack) {
+  grid-template-columns: minmax(0, 1fr) clamp(180px, 21vw, 330px) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  container-type: size;
+}
+.app.is-game .battlefields:has(> .action-stack) > .battlefield {
+  grid-row: 1;
+  min-width: 0;
+}
+.app.is-game .battlefields > .action-stack + .battlefield {
+  grid-column: 1;
+}
+.app.is-game .battlefields:has(> .action-stack) > .battlefield:last-child {
+  grid-column: 3;
+}
+.action-stack {
+  --stack-card-width: min(clamp(80px, 7.6vw, 116px), max(34px, calc((100cqh - 110px) * 744 / 1039)));
+  position: relative;
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  z-index: 22;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  pointer-events: none;
+  color: #fff2d0;
+  filter: drop-shadow(0 8px 15px #0009);
+}
+.action-stack-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto 8px;
+  border: 1px solid #e8c77980;
+  border-radius: 5px;
+  padding: 5px 9px;
+  background: #0a1c27f5;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.action-stack-heading > span {
+  font-size: 8px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #b6c8ca;
+}
+.action-stack-cards {
+  display: flex;
+  align-items: flex-start;
+  justify-content: safe center;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0 4px 4px;
+  max-width: 100%;
+  overflow-x: auto;
+  pointer-events: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #dcb87455 transparent;
+}
+.app.is-game .action-stack-entry {
+  --stack-accent: #80d5c4;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  flex: 0 0 var(--stack-card-width);
+  width: var(--stack-card-width);
+  min-width: 0;
+  text-align: center;
+}
+.action-stack-entry.player-1 {
+  --stack-accent: #ed9e9d;
+}
+.action-stack-owner {
+  display: block;
+  min-height: 14px;
+  font-size: 8px;
+  color: var(--stack-accent);
+  padding-bottom: 3px;
+  line-height: 1.15;
+  text-shadow: 0 1px 4px #000;
+}
+.action-stack-card {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 744 / 1039;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 2px solid var(--stack-accent);
+  border-radius: 7px;
+  background: #0b1620;
+  overflow: hidden;
+  cursor: zoom-in;
+  pointer-events: auto;
+  box-shadow: 0 5px 15px #000b;
+}
+.action-stack-card > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.action-stack-card:focus-visible {
+  outline: 3px solid #fff7db;
+  outline-offset: 3px;
+}
+.action-stack-card:hover {
+  box-shadow: 0 0 15px var(--stack-accent);
+}
+.action-stack-order {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #f0d293;
+  border-radius: 50%;
+  background: #14252df2;
+  color: #ffe0a5;
+  font-weight: 900;
+  font-size: 12px;
+}
+.action-stack-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  color: #fff1cc;
+  background: radial-gradient(ellipse at 50% 25%, #354e5f, #0a1720);
+  font-size: 12px;
+}
+.action-stack-name {
+  display: block;
+  margin-top: 4px;
+  padding: 3px 4px 0;
+  font:
+    700 10px/1.12 "Exo 2",
+    sans-serif;
+  background: #0a1c27ee;
+  border-radius: 4px 4px 0 0;
+  overflow-wrap: anywhere;
+}
+.action-stack-status {
+  display: block;
+  min-height: 17px;
+  padding: 3px 3px 4px;
+  border-radius: 0 0 4px 4px;
+  background: #0a1c27ee;
+  color: #b6c8ca;
+  font-size: 8px;
+}
+.action-stack-entry.is-next .action-stack-status,
+.action-stack-entry.is-resolving .action-stack-status {
+  color: #ffe0a5;
+}
+.action-stack-entry.is-resolving .action-stack-card {
+  border-color: #f4d18a;
+  box-shadow:
+    0 0 18px #eabf6870,
+    0 5px 15px #000b;
+}
+.action-stack-entry.is-waiting .action-stack-card {
+  border-width: 1px;
+}
+.action-stack-outcomes,
+.action-stack-priority {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 3px 7px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 4px auto 0;
+  padding: 4px 7px;
+  background: #091c28f0;
+  border: 1px solid #8bd9c755;
+  border-radius: 4px;
+  font-size: 9px;
+  line-height: 1.25;
+  color: #aee4d7;
+}
+.action-stack-outcomes .outcome-damage,
+.action-stack-outcomes .outcome-destroy {
+  color: #ffb197;
+}
+.action-stack-outcomes .outcome-score {
+  color: #ffe0a5;
+}
+.action-stack-flight {
+  position: absolute;
+  border: 2px solid #80d5c4;
+  border-radius: 7px;
+  overflow: hidden;
+  pointer-events: none;
+  box-shadow: 0 4px 25px #80d5c470;
+  animation: stack-play-from-you 650ms cubic-bezier(0.18, 0.75, 0.28, 1) both;
+}
+.action-stack-flight > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.action-stack-flight.player-1 {
+  border-color: #ed9e9d;
+  box-shadow: 0 4px 25px #ed9e9d70;
+  animation-name: stack-play-from-ai;
+}
+.action-stack-entry.is-entering .action-stack-card {
+  animation: stack-card-reveal 650ms ease-out both;
+}
+.action-stack.is-paused .action-stack-card {
+  animation: none;
+}
+@keyframes stack-card-reveal {
+  from,
+  55% {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes stack-play-from-you {
+  from {
+    opacity: 0;
+    transform: translateY(110px) rotate(-12deg) scale(0.55);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-8px) rotate(2deg) scale(1.05);
+  }
+  to {
+    opacity: 0;
+    transform: none;
+  }
+}
+@keyframes stack-play-from-ai {
+  from {
+    opacity: 0;
+    transform: translateY(-110px) rotate(12deg) scale(0.55);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(8px) rotate(-2deg) scale(1.05);
+  }
+  to {
+    opacity: 0;
+    transform: none;
+  }
+}
+@media (max-width: 650px) {
+  .app.is-game .battlefields:has(> .action-stack) {
+    grid-template-columns: minmax(0, 1fr) clamp(88px, 24vw, 140px) minmax(0, 1fr);
+    gap: 4px;
+  }
+  .app.is-game .battlefields:has(> .action-stack) .field-heading {
+    flex-wrap: wrap;
+    align-content: center;
+    gap: 1px;
+  }
+  .app.is-game .battlefields:has(> .action-stack) .field-heading > div {
+    max-width: 100%;
+  }
+  .action-stack {
+    --stack-card-width: min(62px, max(34px, calc((100cqh - 90px) * 744 / 1039)));
+  }
+  .action-stack-heading {
+    font-size: 7px;
+    letter-spacing: 0.6px;
+    gap: 2px 4px;
+    padding: 3px 5px;
+    margin-bottom: 3px;
+  }
+  .action-stack-heading > span {
+    font-size: 6px;
+  }
+  .action-stack-cards {
+    gap: 5px;
+    padding: 0 2px 2px;
+  }
+  .action-stack-owner {
+    font-size: 6px;
+    min-height: 11px;
+    padding-bottom: 2px;
+  }
+  .action-stack-card {
+    border-radius: 4px;
+  }
+  .action-stack-order {
+    width: 16px;
+    height: 16px;
+    font-size: 9px;
+    right: 2px;
+    bottom: 2px;
+  }
+  .action-stack-name {
+    font-size: 7px;
+    padding: 2px 2px 0;
+    margin-top: 2px;
+  }
+  .action-stack-status {
+    font-size: 6px;
+    min-height: 12px;
+    padding: 2px;
+  }
+  .action-stack-outcomes,
+  .action-stack-priority {
+    font-size: 7px;
+    padding: 3px 5px;
+    margin-top: 2px;
+  }
+}
+@container (max-height: 220px) {
+  .action-stack {
+    --stack-card-width: min(clamp(62px, 7.6vw, 116px), max(34px, calc((100cqh - 90px) * 744 / 1039)));
+  }
+  .action-stack-heading {
+    padding: 3px 5px;
+    margin-bottom: 3px;
+    font-size: 8px;
+    line-height: 1.2;
+  }
+  .action-stack-heading > span {
+    display: none;
+  }
+  .action-stack-owner {
+    font-size: 6px;
+    min-height: 10px;
+    padding-bottom: 2px;
+  }
+  .action-stack-name {
+    font-size: 8px;
+    margin-top: 3px;
+    padding: 2px 2px 0;
+  }
+  .action-stack-status {
+    font-size: 6px;
+    min-height: 11px;
+    padding: 2px;
+  }
+  .action-stack-outcomes,
+  .action-stack-priority {
+    font-size: 7px;
+    padding: 3px 5px;
+    margin-top: 3px;
+  }
+}
+@container (max-width: 650px) {
+  .action-stack {
+    --stack-card-width: min(62px, max(34px, calc((100cqh - 90px) * 744 / 1039)));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .action-stack-entry.is-entering .action-stack-card {
+    animation: none;
+  }
+  .action-stack-flight {
+    display: none;
+  }
+}
