@@ -52,6 +52,7 @@ Precon effects extend this with explicit discard, recycle, retrieval and Vision 
 ## Native match flow
 
 - The complete table and one bottom decision bar fit the viewport. Both battlefields, bases, hands, runes, Legends and Champions stay visible. Cards overlap when rows are crowded instead of adding page or hand scrolling.
+- Desktop windows from 1100 × 650 use a dedicated table layout: Legend/Champion zones in the left rail, bases beside two tall battlefields, and a wide hand along the bottom. Card sizes grow with the available height, including on Full HD, 1440p and 4K screens; smaller windows retain the compact layout.
 - Select up to two cards directly in your opening hand, then confirm the replacement or keep the hand.
 - Select a glowing card to see its name, type, cost and legal plays in the bottom bar. Select an available target or destination directly on the table, or use the matching action button. A selection can be cancelled with Escape.
 - Select a ready unit and a battlefield; add or remove units directly on the table, then confirm the group move. During combat, click highlighted enemies to assign damage. Remaining damage is shown in the decision bar.

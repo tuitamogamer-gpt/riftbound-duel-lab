@@ -1329,7 +1329,7 @@ function BoardZone({
   const { t } = useI18n();
   const units = game.units.filter((u) => u.location === location);
   return (
-    <section className="base-zone">
+    <section className="base-zone" data-location={location}>
       <span className="zone-label">{t(title)}</span>
       <Destination location={location} />
       <div className="base-units">
