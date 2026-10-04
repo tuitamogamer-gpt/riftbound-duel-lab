@@ -1,5 +1,15 @@
 # Validation evidence
 
+## Fifth card wave and website deck codes — 4 October 2026
+
+The integrated working tree passed **1,331 tests in 51 files**, including the 169 ordered precon pairings. After the final test-fixture typing and translation corrections, the 75 focused card-wave, deck-source and translation tests passed again. `npm run build`, `npm run cards:check`, and `git diff --check` passed. The existing Vite catalog chunk-size warning remains. The refreshed catalog has **1,456 registered entries (1,451 provider printings plus five tokens), 1,063 executable and 393 unsupported**. The fifth wave adds 25 explicit faces and 34 executable printings.
+
+The new 55-case rules suite covers every newly registered face plus behavior for double target/Deflect selection, immunity and partial resolution, Hidden target restrictions, raw Might swaps, unit-sourced damage, damage prevention and multipliers, battlefield permissions, moving Kayn, Weaponmaster declaration and removed-target revalidation, Leona/Jax triggers, Janna's optional enemy, Reckoner's Arena, Sigil and Faefolk. Pending target and rune choices and temporary statuses are restored through serialization.
+
+The 13 deck-code tests exercise real upstream codec packets for all four practice decks, missing-champion resolution, signed and R/SP card numbers, whitespace, v5 quantity counts, sideboard preservation/export/reload and limits, malformed/truncated/oversized packets, additional-legend rejection and URL guidance. Existing text-import and storage tests still pass.
+
+Browser checks at `http://127.0.0.1:5175/` pasted a generated Piltover code into the actual import dialog, named and saved **Annie · Piltover import**, and verified the imported option in both player selectors after a clean reload. The preview showed 40 cards, 12 runes and all 16 unique rules faces supported. At 390×844, the dialog and save control remained accessible without horizontal overflow. A clean reload after source edits produced no new console errors or warnings; Vite had reported a transient circular-module hot-reload failure during the simultaneous engine edits before that reload. The existing saved duel was not overwritten. See the [import screenshot](screenshots/deck-code-import.png).
+
 ## Fourth card wave and visible precon selection — 2 October 2026
 
 Acceptance at **20:32 Sarajevo time**: **1,245 tests in 46 files passed**, including all 169 ordered precon pairings and the mixed-expansion games. TypeScript and production bundling passed. The registry contains 1,456 entries: **1,029 executable and 427 unsupported**. This wave adds 94 previously unsupported printings and withdraws two incomplete hybrid Patched Porobot records, a net gain of 92. The three wave4 suites cover 63 Origins/Spiritforged, 49 Unleashed and 52 Vendetta scenarios; existing suites also test the new shared engine behavior.
