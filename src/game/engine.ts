@@ -222,6 +222,21 @@ export function getKeywords(s: GameState, u: Unit) {
   return filtered;
 }
 /** The actual damage contribution used by combat, including zero-power units. */
+function damageToKill(s: GameState, u: Unit) {
+  if (
+    u.preventNextDamageTurn === s.turn ||
+    getKeywords(s, u).includes("Prevent all damage")
+  )
+    return Number.MAX_SAFE_INTEGER;
+  const multiplier =
+    u.doubleDamageTurn === s.turn ? 2 ** (u.damageDoublings ?? 1) : 1;
+  return Math.max(
+    1,
+    Math.ceil(
+      (getMight(s, u) - u.damage + (u.preventDamage ?? 0)) / multiplier,
+    ),
+  );
+}
 export function getCombatPower(s: GameState, u: Unit): number {
   if (!s.combat || u.location !== s.combat.fieldId || u.stunned) return 0;
   if (getKeywords(s, u).includes("No combat damage")) return 0;
@@ -260,7 +275,7 @@ export function getCombatPreview(s: GameState): CombatPreview | null {
       power: getCombatPower(s, u),
       incoming: c.assignments[otherPlayer(u.owner)][u.id] ?? 0,
       prevention: u.preventDamage ?? 0,
-      lethalAt: Math.max(1, getMight(s, u) - u.damage + (u.preventDamage ?? 0)),
+      lethalAt: damageToKill(s, u),
       keywords: getKeywords(s, u),
     })),
   };
@@ -327,7 +342,9 @@ function alternateCost(
   power: number,
   useSpellEnergy = true,
 ) {
-  c.spellEnergy = useSpellEnergy ? Math.min(s.players[p].spellEnergy ?? 0, energy) : 0;
+  c.spellEnergy = useSpellEnergy
+    ? Math.min(s.players[p].spellEnergy ?? 0, energy)
+    : 0;
   c.energy = energy - c.spellEnergy;
   c.power = power;
 }
@@ -336,16 +353,26 @@ type PowerGroup = { power: number; domains: string[] };
 function powerPayment(s: GameState, p: PlayerId, groups: PowerGroup[]) {
   const player = s.players[p];
   const required = groups.reduce((n, group) => n + group.power, 0);
-  const typedCount = Object.values(player.typedPower ?? {}).reduce((a, b) => a + b, 0);
-  if (required > player.runes.length + (player.power ?? 0) + typedCount) return null;
+  const typedCount = Object.values(player.typedPower ?? {}).reduce(
+    (a, b) => a + b,
+    0,
+  );
+  if (required > player.runes.length + (player.power ?? 0) + typedCount)
+    return null;
   const slots = groups.flatMap((group) =>
     Array.from({ length: group.power }, () => group.domains),
   );
   const resources = [
     ...Object.entries(player.typedPower ?? {}).flatMap(([domain, amount]) =>
-      Array.from({ length: Math.min(required, amount) }, () => ({ id: "", domain })),
+      Array.from({ length: Math.min(required, amount) }, () => ({
+        id: "",
+        domain,
+      })),
     ),
-    ...Array.from({ length: Math.min(required, player.power ?? 0) }, () => ({ id: "", domain: "" })),
+    ...Array.from({ length: Math.min(required, player.power ?? 0) }, () => ({
+      id: "",
+      domain: "",
+    })),
     ...[...player.runes]
       .sort((a, b) => Number(a.ready) - Number(b.ready))
       .map((r) => ({ id: r.id, domain: r.domain })),
@@ -381,9 +408,17 @@ function canPay(
   additionalPower: PowerGroup[] = [],
 ) {
   const x = s.players[p];
-  return x.energy + (s.combat ? (x.showdownEnergy ?? 0) : 0) + x.runes.filter((r) => r.ready).length >= energy && powerPayment(s, p, [
-    { power, domains }, { power: anyPower, domains: [] }, ...additionalPower,
-  ]) !== null;
+  return (
+    x.energy +
+      (s.combat ? (x.showdownEnergy ?? 0) : 0) +
+      x.runes.filter((r) => r.ready).length >=
+      energy &&
+    powerPayment(s, p, [
+      { power, domains },
+      { power: anyPower, domains: [] },
+      ...additionalPower,
+    ]) !== null
+  );
 }
 function pay(
   s: GameState,
@@ -402,10 +437,15 @@ function pay(
   x.energy -= stored;
   energy -= stored;
   for (const r of x.runes) {
-    if (energy > 0 && r.ready) { r.ready = false; energy--; }
+    if (energy > 0 && r.ready) {
+      r.ready = false;
+      energy--;
+    }
   }
   const selected = powerPayment(s, p, [
-    { power, domains }, { power: anyPower, domains: [] }, ...additionalPower,
+    { power, domains },
+    { power: anyPower, domains: [] },
+    ...additionalPower,
   ]);
   if (!selected || energy > 0) throw new Error("Unpayable cost");
   const ids = new Set(selected.map((r) => r.id).filter(Boolean));
@@ -702,7 +742,10 @@ function beginTurn(s: GameState, p: PlayerId) {
     x.power = 0;
   }
   const x = s.players[p];
-  const readied = s.units.filter((u) => u.owner === p && !u.ready && !getKeywords(s, u).includes("Cannot ready"));
+  const readied = s.units.filter(
+    (u) =>
+      u.owner === p && !u.ready && !getKeywords(s, u).includes("Cannot ready"),
+  );
   for (const r of x.runes) r.ready = true;
   for (const u of s.units.filter((u) => u.owner === p)) {
     if (!getKeywords(s, u).includes("Cannot ready")) u.ready = true;
@@ -888,7 +931,8 @@ function effectTargetMatches(
   const location = "location" in object ? object.location : base(object.owner);
   const source = s.units.find((u) => u.id === sourceId);
   return (
-    (!e.targetDomain || c.domains.some((domain) => domain === e.targetDomain)) &&
+    (!e.targetDomain ||
+      c.domains.some((domain) => domain === e.targetDomain)) &&
     (!e.targetLocations || e.targetLocations.includes(location)) &&
     (e.targetEmpowered === undefined ||
       Boolean(object.empowered) === e.targetEmpowered) &&
@@ -896,7 +940,9 @@ function effectTargetMatches(
       (source && location !== source.location)) &&
     (!e.excludeTag || !c.tags.includes(e.excludeTag)) &&
     (!e.lessMightThanSource ||
-      (source && "location" in object && getMight(s, object) < getMight(s, source)))
+      (source &&
+        "location" in object &&
+        getMight(s, object) < getMight(s, source)))
   );
 }
 function targets(
@@ -922,12 +968,52 @@ function targets(
       )
       .map((item) => item.id);
   if (e.target === "battlefield") return s.fields.map((f) => f.id);
+  if (e.target === "upToOneEnemyUnitHere")
+    return [
+      undefined,
+      ...units
+        .filter(
+          (u) =>
+            u.owner !== p && u.location === location && !protectedFrom(s, u, p),
+        )
+        .map((u) => u.id),
+    ];
+  if (e.target === "twoUnitChoices") {
+    const eligible = units.filter((u) => !protectedFrom(s, u, p));
+    return eligible.flatMap((a) => eligible.map((b) => `${a.id}~${b.id}`));
+  }
+  if (
+    e.target === "twoUnitsSameBattlefield" ||
+    e.target === "twoFriendlyDifferentLocations"
+  ) {
+    const eligible = units.filter(
+      (u) =>
+        !protectedFrom(s, u, p) &&
+        (e.target === "twoUnitsSameBattlefield"
+          ? u.location.startsWith("field:")
+          : u.owner === p),
+    );
+    return eligible.flatMap((a, i) =>
+      (e.target === "twoFriendlyDifferentLocations"
+        ? eligible.filter((b) => b.id !== a.id)
+        : eligible.slice(i + 1)
+      )
+        .filter((b) =>
+          e.target === "twoUnitsSameBattlefield"
+            ? a.location === b.location
+            : a.location !== b.location,
+        )
+        .map((b) => `${a.id}~${b.id}`),
+    );
+  }
   if (e.target === "twoGear")
     return gears.flatMap((a, index) =>
       gears.slice(index + 1).map((b) => `${a.id}~${b.id}`),
     );
   if (
-    ["anyTwoUnits", "orderedTwoUnits", "orderedTwoFriendlyUnits"].includes(e.target!)
+    ["anyTwoUnits", "orderedTwoUnits", "orderedTwoFriendlyUnits"].includes(
+      e.target!,
+    )
   ) {
     const eligible = units.filter(
       (u) =>
@@ -1009,19 +1095,27 @@ function targets(
               u.owner !== p &&
               !protectedFrom(s, u, p) &&
               (e.target !== "duelSameBattlefield" ||
-                (a.location.startsWith("field:") && u.location === a.location)) &&
+                (a.location.startsWith("field:") &&
+                  u.location === a.location)) &&
               (e.target !== "duelEnemyAtBattlefield" ||
                 u.location.startsWith("field:")) &&
-              (e.target !== "friendlyAndEnemyHere" || u.location === a.location),
+              (e.target !== "friendlyAndEnemyHere" ||
+                u.location === a.location),
           )
           .map((b) => a.id + "~" + b.id),
       );
-  if (e.target === "enemyGear" || e.target === "anyGear")
+  if (
+    e.target === "enemyGear" ||
+    e.target === "anyGear" ||
+    e.target === "friendlyEquipment"
+  )
     return [
       ...gears
         .filter(
           (g) =>
-            (e.target === "anyGear" || g.owner !== p) &&
+            (e.target === "friendlyEquipment"
+              ? g.owner === p && getCard(g.cardId).tags.includes("Equipment")
+              : e.target === "anyGear" || g.owner !== p) &&
             (e.maxEnergy === undefined ||
               (getCard(g.cardId).energy ?? 0) <= e.maxEnergy),
         )
@@ -1034,7 +1128,8 @@ function targets(
 }
 function targetLabel(s: GameState, id?: string): string {
   if (!id) return "";
-  if (id.startsWith("field:") && !id.includes("~")) return " → " + locationName(id as LocationId);
+  if (id.startsWith("field:") && !id.includes("~"))
+    return " → " + locationName(id as LocationId);
   if (id.includes("~"))
     return id
       .split("~")
@@ -1064,7 +1159,10 @@ function canMove(s: GameState, u: Unit, to: LocationId) {
 }
 function extendedAdditionalCost(sc: CardScript | undefined) {
   const extra = sc?.additionalCost;
-  return Boolean(extra && (extra.xp || extra.energyReduction || extra.condition || extra.enterReady));
+  return Boolean(
+    extra &&
+    (extra.xp || extra.energyReduction || extra.condition || extra.enterReady),
+  );
 }
 function addPlayVariants(s: GameState, p: PlayerId, actions: GameAction[]) {
   const out: GameAction[] = [];
@@ -1083,7 +1181,14 @@ function addPlayVariants(s: GameState, p: PlayerId, actions: GameAction[]) {
       const cost = costFor(s, p, c, a.targetId);
       if (a.sourceId?.startsWith("hidden:")) alternateCost(s, p, cost, 0, 0);
       if (a.sourceId?.startsWith("trash:") && sc.flow)
-        alternateCost(s, p, cost, sc.flow.energy, sc.flow.power, c.type === "Spell");
+        alternateCost(
+          s,
+          p,
+          cost,
+          sc.flow.energy,
+          sc.flow.power,
+          c.type === "Spell",
+        );
       const accelerated = a.id.includes("|accelerate");
       const extraSpellEnergy =
         c.type === "Spell"
@@ -1400,10 +1505,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
         for (const locationId of [
           base(u.owner),
           ...s.fields.map((f) => f.id),
-        ].filter(
-          (id) =>
-            id !== u.location,
-        ))
+        ].filter((id) => id !== u.location))
           add({
             id: `choose-destination:${locationId}`,
             label: `Move to ${locationName(locationId)}`,
@@ -1486,12 +1588,16 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
       (u) =>
         u.owner !== p &&
         u.location === c.fieldId &&
-        (c.assignments[p][u.id] ?? 0) <
-          Math.max(1, getMight(s, u) - u.damage + (u.preventDamage ?? 0)),
+        (c.assignments[p][u.id] ?? 0) < damageToKill(s, u),
     );
     const remainingTargets = enemies.length;
     const tanks = enemies.filter((u) => getKeywords(s, u).includes("Tank"));
-    const ignoresTank = s.units.some((u) => u.owner === p && u.location === c.fieldId && getKeywords(s, u).includes("Ignore Tank"));
+    const ignoresTank = s.units.some(
+      (u) =>
+        u.owner === p &&
+        u.location === c.fieldId &&
+        getKeywords(s, u).includes("Ignore Tank"),
+    );
     if (tanks.length && !ignoresTank) enemies = tanks;
     else if (enemies.some((u) => !getKeywords(s, u).includes("Backline")))
       enemies = enemies.filter((u) => !getKeywords(s, u).includes("Backline"));
@@ -1501,13 +1607,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
           ? c.remaining[p]
           : Math.min(
               c.remaining[p],
-              Math.max(
-                1,
-                getMight(s, u) -
-                  u.damage +
-                  (u.preventDamage ?? 0) -
-                  (c.assignments[p][u.id] ?? 0),
-              ),
+              Math.max(1, damageToKill(s, u) - (c.assignments[p][u.id] ?? 0)),
             );
       if (amount > 0)
         add({
@@ -1534,7 +1634,9 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
       if (getScript(id)?.hidden && canPay(s, p, 0, 0, [], 1))
         for (const f of s.fields.filter(
           (f) =>
-            f.controller === p && !s.hidden?.some((h) => h.location === f.id),
+            f.controller === p &&
+            (s.hidden?.filter((h) => h.location === f.id).length ?? 0) <
+              (f.cardId === "ogn-278-298" ? 2 : 1),
         ))
           add({
             id: `hide:${i}:${f.id}`,
@@ -1557,22 +1659,24 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
         ? [{ id, source: `trash:${i}` }]
         : [];
     }),
-  ].flatMap<{
-    id: string;
-    source: string;
-    mode?: { label: string; effects: Effect[] };
-    modeIndex?: number;
-    paidAdditional?: boolean;
-  }>((entry) => {
-    const modes = getScript(entry.id)?.spellModes;
-    return modes?.length
-      ? modes.map((mode, modeIndex) => ({ ...entry, mode, modeIndex }))
-      : [{ ...entry, mode: undefined, modeIndex: undefined }];
-  }).flatMap((entry) =>
-    extendedAdditionalCost(getScript(entry.id)!)
-      ? [entry, { ...entry, paidAdditional: true }]
-      : [entry],
-  );
+  ]
+    .flatMap<{
+      id: string;
+      source: string;
+      mode?: { label: string; effects: Effect[] };
+      modeIndex?: number;
+      paidAdditional?: boolean;
+    }>((entry) => {
+      const modes = getScript(entry.id)?.spellModes;
+      return modes?.length
+        ? modes.map((mode, modeIndex) => ({ ...entry, mode, modeIndex }))
+        : [{ ...entry, mode: undefined, modeIndex: undefined }];
+    })
+    .flatMap((entry) =>
+      extendedAdditionalCost(getScript(entry.id)!)
+        ? [entry, { ...entry, paidAdditional: true }]
+        : [entry],
+    );
   for (const entry of playable) {
     const c = getCard(entry.id),
       script = getScript(c.id);
@@ -1588,6 +1692,16 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
     const hidden = (s.hidden ?? []).find(
       (h) => entry.source === `hidden:${h.id}`,
     );
+    if (
+      hidden &&
+      s.units.some(
+        (u) =>
+          u.owner !== p &&
+          u.cardId === "ogn-018-298" &&
+          u.location === hidden.location,
+      )
+    )
+      continue;
     const ambushEnemy = script.keywords?.includes("AmbushEnemyOccupied");
     const ambushAt = (u: Unit) =>
       (script.ambush && u.owner === p) || (ambushEnemy && u.owner !== p);
@@ -1627,6 +1741,11 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
         c.set === "VEN" && [34, 148].includes(c.collectorNumber);
       if (
         hidden &&
+        !(
+          c.id === "unl-083-219" &&
+          s.units.find((u) => u.id === targetId?.split("~")[0])?.location ===
+            hidden.location
+        ) &&
         !(c.set === "VEN" && c.collectorNumber === 34) &&
         targetId &&
         targetId.split("~").some((id) => {
@@ -1650,8 +1769,10 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
         );
       if (entry.paidAdditional) {
         cost.energy =
-          Math.max(0, cost.energy - (script.additionalCost?.energyReduction ?? 0)) +
-          (script.additionalCost?.energy ?? 0);
+          Math.max(
+            0,
+            cost.energy - (script.additionalCost?.energyReduction ?? 0),
+          ) + (script.additionalCost?.energy ?? 0);
         cost.power += script.additionalCost?.power ?? 0;
       }
       if (
@@ -1677,13 +1798,25 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
                 .filter(
                   (f) =>
                     f.controller === p ||
-                    (script.keywords?.includes("Play to open battlefields") &&
+                    ((script.keywords?.includes("Play to open battlefields") ||
+                      s.units.some(
+                        (u) => u.owner === p && u.cardId === "ogn-193-298",
+                      )) &&
                       f.controller === null &&
                       !s.units.some((u) => u.location === f.id)) ||
+                    (script.keywords?.includes(
+                      "Play to attacking battlefield",
+                    ) &&
+                      s.combat?.attacker === p &&
+                      s.combat.fieldId === f.id) ||
                     (script.keywords?.includes("Play to enemy battlefields") &&
-                      s.units.some((u) => u.owner !== p && u.location === f.id)) ||
+                      s.units.some(
+                        (u) => u.owner !== p && u.location === f.id,
+                      )) ||
                     (s.units.filter((u) => u.location === f.id).length === 1 &&
-                      s.units.some((u) => u.owner !== p && u.location === f.id) &&
+                      s.units.some(
+                        (u) => u.owner !== p && u.location === f.id,
+                      ) &&
                       (script.keywords?.includes("Play against lone enemy") ||
                         s.units.some(
                           (u) =>
@@ -2499,7 +2632,18 @@ function playUnit(
   if (sc?.onPlay) trigger(s, p, cardId, unit.id, sc.onPlay, location);
   return unit;
 }
-function dealDamage(s: GameState, u: Unit, n: number) {
+function dealDamage(s: GameState, u: Unit, n: number, unitDamage = false) {
+  if (
+    n <= 0 ||
+    (!unitDamage && s.preventEffectDamageTurn === s.turn) ||
+    getKeywords(s, u).includes("Prevent all damage")
+  )
+    return;
+  if (u.preventNextDamageTurn === s.turn) {
+    delete u.preventNextDamageTurn;
+    return;
+  }
+  if (u.doubleDamageTurn === s.turn) n *= 2 ** (u.damageDoublings ?? 1);
   if (
     getKeywords(s, u).includes("Prevent damage while not in combat") &&
     !(
@@ -2633,6 +2777,8 @@ function moveUnit(
   )
     return;
   const previousLocation = u.location;
+  u.movesThisTurn = (u.movesTurn === s.turn ? (u.movesThisTurn ?? 0) : 0) + 1;
+  u.movesTurn = s.turn;
   u.location = destination;
   event(s, "move", actor, u.cardId, u.id, destination, { previousLocation });
   const effects = getScript(u.cardId)?.onMove;
@@ -2790,6 +2936,7 @@ function executeEffects(
     const targetPlayer = e.who === "opponent" ? otherPlayer(p) : p;
     if (
       (e.target === "anyGear" ||
+        e.target === "friendlyEquipment" ||
         e.target === "enemyGear" ||
         e.target === "enemyUnitOrGear") &&
       !targets(s, p, [e], locationId, sourceId).includes(targetId)
@@ -2812,6 +2959,10 @@ function executeEffects(
         "duelEnemyAtBattlefield",
         "friendlyAndEnemyHere",
         "enemyUnitAndBattlefield",
+        "twoUnitsSameBattlefield",
+        "twoUnitChoices",
+        "upToOneEnemyUnitHere",
+        "twoFriendlyDifferentLocations",
         "orderedTwoUnits",
         "orderedTwoFriendlyUnits",
         "enemyUnitOrGear",
@@ -2819,6 +2970,7 @@ function executeEffects(
         "twoFriendlyUnits",
         "unitOrGear",
         "anyGear",
+        "friendlyEquipment",
         "twoGear",
         "enemyGear",
         "upToTwoUnits",
@@ -2861,12 +3013,15 @@ function executeEffects(
           dealDamage(
             s,
             u,
-            n +
-              bonusDamage(s, p) +
-              (s.fields.find((f) => f.id === u.location)?.cardId ===
-              "ogn-296-298"
-                ? 1
-                : 0),
+            e.damageSource === "unit"
+              ? n
+              : n +
+                  bonusDamage(s, p) +
+                  (s.fields.find((f) => f.id === u.location)?.cardId ===
+                  "ogn-296-298"
+                    ? 1
+                    : 0),
+            e.damageSource === "unit",
           );
           const lethal = u.damage >= getMight(s, u);
           if (u.damage > 0 && lethal && e.condition === "drawOnKill") {
@@ -2895,8 +3050,8 @@ function executeEffects(
         ) {
           const a = getMight(s, first),
             b = getMight(s, second);
-          dealDamage(s, first, b);
-          dealDamage(s, second, a);
+          dealDamage(s, first, b, true);
+          dealDamage(s, second, a, true);
         }
         break;
       }
@@ -3501,7 +3656,8 @@ function trigger(
   effects = effects
     .filter(
       (effect) =>
-        effect.condition !== "runesAtMostFour" || s.players[p].runes.length <= 4,
+        effect.condition !== "runesAtMostFour" ||
+        s.players[p].runes.length <= 4,
     )
     .map((effect) =>
       effect.condition === "runesAtMostFour"
@@ -3648,7 +3804,8 @@ function syncCombatParticipants(s: GameState) {
     ...new Set([...previous, ...present.map((u) => u.id)]),
   ];
   for (const u of arriving) {
-    if (u.owner === combat.attacker) event(s, "attack", u.owner, u.cardId, u.id, field);
+    if (u.owner === combat.attacker)
+      event(s, "attack", u.owner, u.cardId, u.id, field);
     const effects =
       u.owner === combat.attacker
         ? getScript(u.cardId)?.onAttack
@@ -3784,8 +3941,7 @@ function advanceAssignment(s: GameState) {
       (u) =>
         u.owner !== p &&
         u.location === c.fieldId &&
-        (c.assignments[p][u.id] ?? 0) <
-          Math.max(1, getMight(s, u) - u.damage + (u.preventDamage ?? 0)),
+        (c.assignments[p][u.id] ?? 0) < damageToKill(s, u),
     );
   if (done(c.assigningPlayer)) {
     if (c.assigningPlayer === c.attacker) {
@@ -3802,16 +3958,7 @@ function resolveCombatDamage(s: GameState) {
   s.lastExcessDamage = Object.entries(c.assignments[c.attacker]).reduce(
     (total, [id, n]) => {
       const u = s.units.find((u) => u.id === id);
-      return (
-        total +
-        Math.max(
-          0,
-          n -
-            (u
-              ? Math.max(1, getMight(s, u) - u.damage + (u.preventDamage ?? 0))
-              : 0),
-        )
-      );
+      return total + Math.max(0, n - (u ? damageToKill(s, u) : 0));
     },
     0,
   );
@@ -3821,7 +3968,7 @@ function resolveCombatDamage(s: GameState) {
       if (u) {
         const damageBefore = u.damage;
         const might = getMight(s, u);
-        dealDamage(s, u, n);
+        dealDamage(s, u, n, true);
         hits.push({
           unitId: u.id,
           cardId: u.cardId,
@@ -3829,7 +3976,7 @@ function resolveCombatDamage(s: GameState) {
           assigned: n,
           damageBefore,
           damageAfter: u.damage,
-          prevented: n - (u.damage - damageBefore),
+          prevented: Math.max(0, n - (u.damage - damageBefore)),
           might,
         });
       }
@@ -4185,7 +4332,10 @@ function applyActionInternal(
     const u = s.units.find((u) => u.id === legal.targetId);
     if (u) {
       if (choice.kind === "sacrifice") killUnits(s, [u.id]);
-      else { u.buff--; event(s, "spendBuff", p, u.cardId, u.id, u.location); }
+      else {
+        u.buff--;
+        event(s, "spendBuff", p, u.cardId, u.id, u.location);
+      }
     }
     resumeChoice(s, !!u);
     return s;
@@ -4415,7 +4565,14 @@ function applyActionInternal(
     if (hidden) alternateCost(s, p, cost, 0, 0);
     const flowed = legal.sourceId?.startsWith("trash:");
     if (flowed && script.flow)
-      alternateCost(s, p, cost, script.flow.energy, script.flow.power, c.type === "Spell");
+      alternateCost(
+        s,
+        p,
+        cost,
+        script.flow.energy,
+        script.flow.power,
+        c.type === "Spell",
+      );
     if (legal.cardIndices?.length && c.id === "ogn-002-298")
       cost.energy = Math.max(0, cost.energy - 2);
     const extra = legal.additionalCostPaid
@@ -4424,7 +4581,10 @@ function applyActionInternal(
         ? script.repeat
         : undefined;
     if (legal.additionalCostPaid) {
-      cost.energy = Math.max(0, cost.energy - (script.additionalCost?.energyReduction ?? 0));
+      cost.energy = Math.max(
+        0,
+        cost.energy - (script.additionalCost?.energyReduction ?? 0),
+      );
       x.xp = (x.xp ?? 0) - (script.additionalCost?.xp ?? 0);
     }
     cost.energy += extra?.energy ?? 0;
@@ -4476,7 +4636,8 @@ function applyActionInternal(
     if (discarded.length) discardCards(s, p, discarded);
     x.cardsPlayedThisTurn++;
     const playOrdinal = x.cardsPlayedThisTurn;
-    if (c.type === "Spell") x.spellsPlayedThisTurn = (x.spellsPlayedThisTurn ?? 0) + 1;
+    if (c.type === "Spell")
+      x.spellsPlayedThisTurn = (x.spellsPlayedThisTurn ?? 0) + 1;
     log(
       s,
       `${x.name} plays ${cardName(c.id)}${targetLabel(s, legal.targetId)}.`,
@@ -4492,7 +4653,9 @@ function applyActionInternal(
         location: legal.locationId!,
         ready:
           accelerated ||
-          Boolean(legal.additionalCostPaid && script.additionalCost?.enterReady) ||
+          Boolean(
+            legal.additionalCostPaid && script.additionalCost?.enterReady,
+          ) ||
           !!script.keywords?.includes("Enters ready") ||
           s.players[p].unitsEnterReadyTurn === s.turn ||
           s.units.some((u) => u.owner === p && u.cardId === "ogn-011-298"),
@@ -4638,7 +4801,10 @@ function applyActionInternal(
     );
     const unit = s.units.find((u) => u.id === source);
     const object = unit ?? s.gears.find((g) => g.id === source);
-    if (ability.spendBuff && unit) { unit.buff--; event(s, "spendBuff", p, unit.cardId, unit.id, unit.location); }
+    if (ability.spendBuff && unit) {
+      unit.buff--;
+      event(s, "spendBuff", p, unit.cardId, unit.id, unit.location);
+    }
     if (ability.oncePerTurn && object)
       (object.usedAbilities ??= []).push(String(index));
     if (ability.recycleCost) {
@@ -4656,7 +4822,9 @@ function applyActionInternal(
         if (target) target.ready = false;
       }
     }
-    if (ability.effects.every((e) => e.type === "energy" || e.type === "power")) {
+    if (
+      ability.effects.every((e) => e.type === "energy" || e.type === "power")
+    ) {
       runEffects(s, p, ability.effects, legal.targetId, source, unit?.location);
       return s;
     }
@@ -4740,7 +4908,10 @@ export function getGameView(s: GameState, viewer: PlayerId): PublicGameView {
   return {
     ...clone,
     hidden: clone.hidden?.map((h) =>
-      h.owner === viewer || s.players[viewer].canLookAtEnemyHiddenTurn === s.turn ? h : { ...h, cardId: "hidden" },
+      h.owner === viewer ||
+      s.players[viewer].canLookAtEnemyHiddenTurn === s.turn
+        ? h
+        : { ...h, cardId: "hidden" },
     ),
     pendingChoice:
       clone.pendingChoice?.player !== viewer && clone.pendingChoice

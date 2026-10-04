@@ -1,8 +1,18 @@
 # Card import and executable coverage
 
-The catalog was fetched again on 2 October 2026. It contains every printing returned by the paginated Riftcodex API: 1,451 printings in eight sets, plus five local rules tokens. Provider completeness is checked against both pagination totals and each set's card count. It is not independent evidence that Riftcodex has every Riot publication or preview; its latest reported record update was 21 July 2026. No Radiance set is returned in this snapshot.
+The catalog was fetched again on 4 October 2026. It contains every printing returned by the paginated Riftcodex API: 1,451 printings in eight sets, plus five local rules tokens. Provider completeness is checked against both pagination totals and each set's card count. It is not independent evidence that Riftcodex has every Riot publication or preview; its latest reported record update was 21 July 2026. No Radiance set is returned in this snapshot.
 
-Current checked snapshot: **1,029 executable entries and 427 unsupported entries**, including the five local rules tokens. These counts refer to printings, not unique gameplay cards. The [validation log](VALIDATION.md) records the current full-suite acceptance, including 169 precon pairings and 16 mixed-expansion integration games.
+Current checked snapshot: **1,063 executable entries and 393 unsupported entries**, including the five local rules tokens. These counts refer to printings, not unique gameplay cards. The [validation log](VALIDATION.md) records the current full-suite acceptance, including 169 precon pairings and 16 mixed-expansion integration games.
+
+## Fifth implementation wave and website deck import — 4 October 2026
+
+This continuation adds 25 explicit card faces in `card-wave5.ts`, making **34 previously unsupported printings** executable through their equivalent variants. New support includes Falling Star, Facebreaker, Last Breath, Leona, Janna, Kayn, Miss Fortune, Ornn, Jax, Weaponmaster units, Counter Strike, Lotus Trap, Switcheroo, Smoke and Mirrors, Irresistible Faefolk, and battlefield/Hidden rules. The catalog refresh returned the same 1,451 provider records; no card text was changed.
+
+Shared behavior now includes repeated target selection and Deflect payments, unit-sourced damage, one-event damage prevention, damage doubling, movement-count protection, a second Hidden slot at Bandle Tree, and upfront Equipment selection for Weaponmaster (including existing precons). Pending choices and new turn-scoped effects survive save/load. Janna and Falling Star use the official Spiritforged errata shown beside the original printed text.
+
+The website importer uses the upstream Piltover Archive codec locally, with strict bounded packet validation for versions 1–6. It accepts text exports with names or set codes, retains sideboards, and asks for a chosen champion when old codes omit it. Page URLs need an export first; additional-legend formats and unsupported in-game effects remain explicit errors. Sideboards are validated and preserved but are not playable in the single-game Duel flow.
+
+The remaining **393 printings are not scripted**. In particular, public-trash targeting still needs durable object identities before Dr. Mundo, Guardian's Passage, Aspiring Chronomancer and Starhound Pack can be advertised as supported. Variable-size target declarations still block cards such as Azir, Ascendant. Unknown effects continue to fail closed.
 
 ## Fourth implementation wave
 
@@ -10,7 +20,7 @@ This continuation implements **94 previously unsupported printings** through 55 
 
 The wave adds typed Power, showdown-only Energy, optional XP play costs, compound targets and destination declarations, new movement and readying restrictions, Temporary-trigger suppression, and turn-limited permission to inspect an opponent's Hidden cards. Defender of Tomorrow's abilities use the shared activation pipeline, including Heimerdinger's copied abilities. Focused suites cover costs before responses, target revalidation, partial resolution, private choices, and save restoration. Raw Might arithmetic is retained for increase/doubling effects before applying the normal zero floor.
 
-Official corrections for Deathgrip, Guards!, Tideturner, Tianna Crownguard and Rengar appear beside the preserved printed text in card inspection. See [rules research](RULES-RESEARCH.md) for the source links and tested differences. Brynhir, Facebreaker and Rockfall Path remain unsupported pending the required general engine support.
+Official corrections for Deathgrip, Guards!, Tideturner, Tianna Crownguard and Rengar appear beside the preserved printed text in card inspection. See [rules research](RULES-RESEARCH.md) for the source links and tested differences. At that checkpoint, Brynhir, Facebreaker and Rockfall Path remained unsupported pending the required general engine support.
 
 All 13 retail precons are now visible by default. Separate grouped selectors expose every deck for both players regardless of the current gallery filter. The match toolbar's **Decks** button returns to the picker. The local launcher rebuilds before opening so it cannot silently reuse an old distribution.
 

@@ -24,6 +24,8 @@ export interface StarterDeck {
   battlefieldId: string;
   main: DeckEntry[];
   runes: DeckEntry[];
+  /** Preserved for exchange; not shuffled into a single Duel. */
+  sideboard?: DeckEntry[];
   source:
     "Curated practice deck" | "Official preconstructed deck" | "Imported deck";
   battlefieldIds?: string[];

@@ -14,6 +14,7 @@ const statusLabel = {
   next: "Resolves first",
   resolving: "Resolving now",
   playing: "Playing card",
+  choosing: "Choose an effect",
 };
 
 function StackCard({
@@ -28,13 +29,15 @@ function StackCard({
   const { t } = useI18n();
   const [failed, setFailed] = useState(false);
   const kind =
-    entry.kind === "trigger"
-      ? "Triggered ability"
-      : entry.kind === "ability"
-        ? "Activated ability"
-        : entry.response
-          ? "Response"
-          : entry.card.type;
+    entry.status === "choosing"
+      ? "Ability choice"
+      : entry.kind === "trigger"
+        ? "Triggered ability"
+        : entry.kind === "ability"
+          ? "Activated ability"
+          : entry.response
+            ? "Response"
+            : entry.card.type;
   return (
     <li
       className={`action-stack-entry player-${entry.player} is-${entry.status} ${entry.entering ? "is-entering" : ""}`}
@@ -152,6 +155,7 @@ export function ActionStack({
   if (!view) return null;
   const hasChain = view.cards.some((entry) => entry.status !== "playing");
   const resolving = view.cards.some((entry) => entry.status === "resolving");
+  const choosing = view.cards.some((entry) => entry.status === "choosing");
   return (
     <section
       ref={root}
@@ -161,18 +165,28 @@ export function ActionStack({
     >
       <header className="action-stack-heading">
         <Layers3 size={13} />
-        <strong>{t(hasChain ? "Action chain" : "Playing card")}</strong>
+        <strong>
+          {t(
+            choosing
+              ? "Choose an effect"
+              : hasChain
+                ? "Action chain"
+                : "Playing card",
+          )}
+        </strong>
         <span>
           {t(
             paused
               ? "Game paused"
-              : resolving
-                ? "Resolving now"
-                : hasChain
-                  ? "Last played resolves first"
-                  : view.cards[0].player === 0
-                    ? "Ti"
-                    : "AI",
+              : choosing
+                ? "Waiting for a choice"
+                : resolving
+                  ? "Resolving now"
+                  : hasChain
+                    ? "Last played resolves first"
+                    : view.cards[0].player === 0
+                      ? "Ti"
+                      : "AI",
           )}
         </span>
       </header>
@@ -213,7 +227,8 @@ export function ActionStack({
         </div>
       ) : hasChain && !review ? (
         <span className="action-stack-priority" role="status">
-          <ArrowDown size={11} /> {t("Reaction window")} ·{" "}
+          <ArrowDown size={11} />{" "}
+          {t(choosing ? "Choose an effect" : "Reaction window")} ·{" "}
           {t(view.priorityPlayer === 0 ? "Ti" : "AI")}
         </span>
       ) : null}

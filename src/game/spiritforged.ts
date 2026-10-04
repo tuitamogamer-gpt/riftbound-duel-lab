@@ -27,7 +27,7 @@ const spell = (
 });
 const weaponmaster = {
   ...plain,
-  onPlay: [sf("weaponmaster")],
+  onPlay: [sf("weaponmaster", { target: "friendlyEquipment", optional: true })],
   keywords: ["Weaponmaster"],
 };
 /** Gear Might and inherited effects checked against Riot's card images; see PRECON-SOURCES.md. */
@@ -357,50 +357,19 @@ export const spiritforgedModule: ExpansionModule = {
           false,
         );
         break;
-      case "weaponmaster":
-        if (source)
-          choose(
-            s,
-            p,
-            ctx,
-            s.gears
-              .filter((g) => {
-                const cost = weaponmasterCost(s, g.cardId, source, ctx);
-                return (
-                  g.owner === p &&
-                  hasEquip(getCard(g.cardId)) &&
-                  cost &&
-                  ctx.canPay(
-                    s,
-                    p,
-                    cost.energy,
-                    cost.power,
-                    getCard(g.cardId).domains,
-                  )
-                );
-              })
-              .map((g) =>
-                option(
-                  p,
-                  `weaponmaster:${g.id}`,
-                  `Equip ${getCard(g.cardId).name}`,
-                  [sf(`equip-weaponmaster|${g.id}|${source.id}`)],
-                ),
-              ),
-          );
-        break;
-      case "equip-weaponmaster": {
-        const g = s.gears.find((g) => g.id === arg[0] && g.owner === p),
-          u = s.units.find((u) => u.id === arg[1] && u.owner === p);
-        if (!g || !u) break;
-        const cost = weaponmasterCost(s, g.cardId, u, ctx);
+      case "weaponmaster": {
+        // Equipment is declared while the trigger is finalized. Its discounted
+        // payment is an instruction on resolution, not a leading trigger cost.
+        const g = s.gears.find((g) => g.id === ctx.targetId && g.owner === p);
+        if (!source || !g || !hasEquip(getCard(g.cardId))) break;
+        const cost = weaponmasterCost(s, g.cardId, source, ctx);
         if (
           cost &&
           ctx.canPay(s, p, cost.energy, cost.power, getCard(g.cardId).domains)
         ) {
           if (cost.energy || cost.power)
             ctx.pay(s, p, cost.energy, cost.power, getCard(g.cardId).domains);
-          attach(s, g.id, u.id, ctx);
+          attach(s, g.id, source.id, ctx);
         }
         break;
       }
@@ -517,7 +486,14 @@ export const spiritforgedModule: ExpansionModule = {
         ctx.runEffects(
           s,
           p,
-          [{ type: "damage", amount: ctx.getMight(s, u), target: "enemyUnit" }],
+          [
+            {
+              type: "damage",
+              amount: ctx.getMight(s, u),
+              damageSource: "unit",
+              target: "enemyUnit",
+            },
+          ],
           v.id,
           u.id,
         );

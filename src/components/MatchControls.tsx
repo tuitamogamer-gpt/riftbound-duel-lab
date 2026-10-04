@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
-import { findCard } from "../catalog";
+import { findCard, type CatalogCard } from "../catalog";
+import { cardArtUrl } from "../data/art";
+import { Card } from "./Card";
+import { CardPiles, type PileView } from "./CardPiles";
 import { readableText } from "../data/cards";
 import { decisionActions, selectedCardId, sourceActions } from "../game/flow";
 import type { GameAction, GameState } from "../game/types";
 import { useI18n } from "../i18n";
 import type { Review } from "./StepFlow";
 import { priorityWindow } from "../game/presentation";
-import { getActionStackView } from "../game/stack-presentation";
+import {
+  getActionStackView,
+  pendingChoiceCardId,
+} from "../game/stack-presentation";
 
 export function MatchControls({
   game,
@@ -21,6 +27,8 @@ export function MatchControls({
   paused,
   resume,
   mulligan,
+  inspect,
+  openPile,
 }: {
   game: GameState;
   legal: GameAction[];
@@ -33,14 +41,20 @@ export function MatchControls({
   paused: boolean;
   resume: () => void;
   mulligan: number[];
+  inspect: (card: CatalogCard) => void;
+  openPile: (view: PileView) => void;
 }) {
   const { t } = useI18n();
   const window = priorityWindow(game);
-  const stackVisible = Boolean(getActionStackView(game, review));
+  const stackView = getActionStackView(game, review);
   const forcedPass =
     !review && legal.length === 1 && legal[0].category === "pass";
   const card = findCard(selectedCardId(game, selected));
   const effectCard = findCard(game.stack.at(-1)?.cardId);
+  const choiceCard = findCard(pendingChoiceCardId(game));
+  const sourceCard = review
+    ? stackView?.cards[0]?.card
+    : (choiceCard ?? card ?? stackView?.cards[0]?.card);
   const available = sourceActions(game, legal, selected).filter(
     (action) =>
       !target ||
@@ -104,9 +118,7 @@ export function MatchControls({
   const hint = paused
     ? "Resume when you are ready."
     : review
-      ? stackVisible
-        ? "Watch the cards at the center of the table."
-        : (review.frames[review.index]?.label ?? "Resolving effects")
+      ? (review.frames[review.index]?.label ?? "Resolving effects")
       : busy
         ? "Watch the highlighted cards. Your turn follows automatically."
         : opening
@@ -134,22 +146,29 @@ export function MatchControls({
                       : "Click a glowing card to play it, or a ready unit to move. End your turn when finished.";
   return (
     <section
-      className={`match-controls window-${window} ${review || busy ? "is-busy" : ""}`}
+      className={`match-controls visual-controls window-${window} ${sourceCard ? "has-source" : ""} ${review || busy ? "is-busy" : ""}`}
       aria-label={t("Game controls")}
     >
+      {sourceCard && (
+        <div className="decision-source" data-decision-card={sourceCard.id}>
+          <Card card={sourceCard} onClick={() => inspect(sourceCard)} />
+        </div>
+      )}
       <div className="decision-copy" role="status" aria-live="polite">
         <span className="decision-kicker">
           {t(
             opening
               ? "Opening hand"
-              : busy || review
-                ? "Resolving effects"
-                : "Your next move",
+              : game.pendingChoice
+                ? "Choose an effect"
+                : busy || review
+                  ? "Resolving effects"
+                  : "Your next move",
           )}
         </span>
         <strong>
-          {card && !busy && !review && !paused ? card.name : t(title)}
-          {!card &&
+          {sourceCard && !paused ? sourceCard.name : t(title)}
+          {!sourceCard &&
             !review &&
             ending?.category === "pass" &&
             effectCard &&
@@ -217,17 +236,42 @@ export function MatchControls({
         ) : (
           <>
             <div className="context-actions">
-              {actions.slice(page * 3, page * 3 + 3).map((action) => (
-                <button
-                  key={action.id}
-                  className="context-action"
-                  onClick={() => act(action)}
-                  title={t(action.detail)}
-                >
-                  <strong>{t(action.label)}</strong>
-                  {action.detail && <small>{t(action.detail)}</small>}
-                </button>
-              ))}
+              {actions.slice(page * 3, page * 3 + 3).map((action) => {
+                const optionCard = findCard(
+                  game.units.find((unit) => unit.id === action.targetId)
+                    ?.cardId ??
+                    game.gears.find((gear) => gear.id === action.targetId)
+                      ?.cardId ??
+                    game.stack.find((item) => item.id === action.targetId)
+                      ?.cardId ??
+                    (game.pendingChoice?.kind === "predict" &&
+                    game.pendingChoice.player === 0
+                      ? game.players[0].deck[0]
+                      : undefined) ??
+                    action.cardId,
+                );
+                return (
+                  <button
+                    key={action.id}
+                    className="context-action"
+                    onClick={() => act(action)}
+                    title={t(action.detail)}
+                  >
+                    {optionCard?.image && (
+                      <img
+                        className="decision-option-art"
+                        src={cardArtUrl(optionCard)}
+                        alt={optionCard.name}
+                        data-card-preview={optionCard.id}
+                      />
+                    )}
+                    <span>
+                      <strong>{t(action.label)}</strong>
+                      {action.detail && <small>{t(action.detail)}</small>}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
             {pageCount > 1 && (
               <div className="action-pages">
@@ -264,7 +308,13 @@ export function MatchControls({
                 disabled={!confirm}
                 onClick={() => confirm && act(confirm)}
               >
-                {t(movement ? "Confirm movement" : confirm!.label)}{" "}
+                {movement
+                  ? movement.unitIds.length === 1
+                    ? t("Move 1 unit")
+                    : t("Move {count} units", {
+                        count: movement.unitIds.length,
+                      })
+                  : t(confirm!.label)}{" "}
                 <ArrowRight size={17} />
               </button>
             )}
@@ -286,6 +336,7 @@ export function MatchControls({
           </>
         )}
       </div>
+      <CardPiles game={game} open={openPile} />
     </section>
   );
 }

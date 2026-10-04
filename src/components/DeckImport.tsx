@@ -2,7 +2,8 @@ import { useMemo, useRef, useState } from "react";
 import { useI18n } from "../i18n";
 import { ArrowRight, Check, FileUp, Shield, X } from "lucide-react";
 import type { StarterDeck } from "../data/decks";
-import { exportDeckText, parseDeckText } from "../game/deck-import";
+import { exportDeckText } from "../game/deck-import";
+import { importDeckSource } from "../game/deck-sources";
 import "./DeckImport.css";
 
 export interface DeckImportProps {
@@ -21,13 +22,20 @@ export function DeckImport({
   const [text, setText] = useState(initialText);
   const [fileError, setFileError] = useState("");
   const [historical, setHistorical] = useState(false);
+  const [name, setName] = useState("");
+  const [championId, setChampionId] = useState("");
   const [reading, setReading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const request = useRef(0);
+  const detected = useMemo(() => importDeckSource(text), [text]);
   const result = useMemo(
     () =>
-      parseDeckText(text, historical ? { format: "historical-precon" } : {}),
-    [text, historical],
+      importDeckSource(text, {
+        ...(historical ? { format: "historical-precon" as const } : {}),
+        ...(name.trim() ? { name } : {}),
+        ...(championId ? { championId } : {}),
+      }),
+    [text, historical, name, championId],
   );
   const hasText = text.trim().length > 0;
   const errors = result.issues.filter((issue) => issue.severity === "error");
@@ -57,9 +65,41 @@ export function DeckImport({
       <h2 id="deck-import-title">{t("Tvoj špil. Tvoja strategija.")}</h2>
       <p>
         {t(
-          "Zalijepi listu ili otvori tekstualni fajl. Podržani su nazivi karata, ID-jevi i količine poput „3x Card Name”.",
+          "Zalijepi Piltover Archive deck kod ili tekstualni izvoz sa deck-building sajta. Karte se provjeravaju prije čuvanja.",
         )}
       </p>
+      <div className="deck-import-sites">
+        <a
+          href="https://piltoverarchive.com/deckbuilder"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Piltover Archive ↗
+        </a>
+        <a
+          href="https://riftbound.gg/deckbuilder/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Riftbound.gg ↗
+        </a>
+        <p>
+          {t(
+            "Na sajtu otvori svoj špil, izaberi Export i kopiraj Deck code ili Text. Ovdje zalijepi sadržaj izvoza.",
+          )}
+        </p>
+      </div>
+      <label className="deck-import-label" htmlFor="deck-import-name">
+        {t("Naziv špila (opcionalno)")}
+      </label>
+      <input
+        id="deck-import-name"
+        className="deck-import-name"
+        value={name}
+        maxLength={120}
+        onChange={(event) => setName(event.target.value)}
+        placeholder={t("Moj špil")}
+      />
       <div className="deck-import-tools">
         <button
           className="outline-button"
@@ -76,6 +116,7 @@ export function DeckImport({
               setReading(false);
               setFileError("");
               setText(exportDeckText(exampleDeck));
+              setChampionId("");
             }}
           >
             {t("Učitaj primjer: {name}", { name: t(exampleDeck.name) })}
@@ -100,7 +141,10 @@ export function DeckImport({
             setReading(true);
             try {
               const value = await file.text();
-              if (version === request.current) setText(value);
+              if (version === request.current) {
+                setText(value);
+                setChampionId("");
+              }
             } catch {
               if (version === request.current)
                 setFileError(
@@ -113,7 +157,7 @@ export function DeckImport({
         />
       </div>
       <label className="deck-import-label" htmlFor="deck-import-text">
-        {t("Lista špila")}
+        {t("Deck kod ili lista karata")}
       </label>
       <textarea
         id="deck-import-text"
@@ -128,9 +172,39 @@ export function DeckImport({
           request.current++;
           setReading(false);
           setText(event.target.value);
+          setChampionId("");
           setFileError("");
         }}
       />
+      {detected.championCandidates.length > 0 && (
+        <div className="deck-import-champion">
+          <label className="deck-import-label" htmlFor="deck-import-champion">
+            {t("Odaberi championa za ovu listu")}
+          </label>
+          <select
+            id="deck-import-champion"
+            value={championId}
+            onChange={(event) => setChampionId(event.target.value)}
+          >
+            <option value="">{t("Izaberi odabranog championa…")}</option>
+            {detected.championCandidates.map((card) => (
+              <option key={card.id} value={card.id}>
+                {card.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+      {hasText &&
+        result.sourceFormat === "piltover-code" &&
+        result.normalizedText && (
+          <details className="deck-import-decoded">
+            <summary>
+              {t("Prepoznat Piltover Archive kod · pogledaj listu")}
+            </summary>
+            <pre>{result.normalizedText}</pre>
+          </details>
+        )}
       <p className="deck-import-hint">
         {t(
           "Sekcije: Legend, Champion, Main Deck, Runes i Battlefields. Glavni špil: 39 karata + champion. Rune: 12. Bojišta: 1 za Duel ili komplet od 3.",

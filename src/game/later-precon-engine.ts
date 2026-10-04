@@ -1,4 +1,5 @@
 import { originsWave4Module } from "./origins-wave4";
+import { cardWave5Module } from "./card-wave5";
 import { vendettaWave4Module } from "./vendetta-wave4";
 import { unleashedWave4Module } from "./unleashed-wave4";
 import { vendettaWave3Module } from "./vendetta-wave3";
@@ -206,6 +207,7 @@ function modules(): ExpansionModule[] {
     originsWave4Module,
     vendettaWave4Module,
     unleashedWave4Module,
+    cardWave5Module,
   ];
 }
 export function laterMight(s: GameState, u: Unit, value: number) {

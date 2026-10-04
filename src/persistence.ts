@@ -78,6 +78,10 @@ const effectTypes = new Set([
   "special",
 ]);
 const targetFilters = new Set([
+  "twoUnitChoices",
+  "upToOneEnemyUnitHere",
+  "twoUnitsSameBattlefield",
+  "twoFriendlyDifferentLocations",
   "anyTwoUnits",
   "orderedTwoUnits",
   "orderedTwoFriendlyUnits",
@@ -98,6 +102,7 @@ const targetFilters = new Set([
   "friendlyBuffableUnit",
   "enemyGear",
   "anyGear",
+  "friendlyEquipment",
   "twoGear",
   "friendlyDamagedUnit",
   "friendlyReadyUnit",
@@ -152,8 +157,10 @@ const effects = (x: unknown, depth = 0): boolean =>
       ].every((k) => optionalBoolean(e[k])) &&
       (e.chosenTargetId === null || optionalString(e.chosenTargetId)) &&
       (e.runeIds === undefined || stringArray(e.runeIds)) &&
+      (e.damageSource === undefined || e.damageSource === "unit") &&
       (e.type !== "power" ||
-        ((e.domain === undefined || domain(e.domain)) && optionalCount(e.amount))) &&
+        ((e.domain === undefined || domain(e.domain)) &&
+          optionalCount(e.amount))) &&
       (e.targetLocations === undefined ||
         (Array.isArray(e.targetLocations) &&
           e.targetLocations.every(location))) &&
@@ -193,6 +200,11 @@ const validUnit = (u: unknown): boolean =>
   finite(u.temporaryAssault) &&
   [
     "preventDamage",
+    "preventNextDamageTurn",
+    "doubleDamageTurn",
+    "damageDoublings",
+    "movesTurn",
+    "movesThisTurn",
     "baseMightOverride",
     "moveLockedTurn",
     "deathReplacementTurn",
@@ -523,6 +535,7 @@ export function validState(x: unknown, actionable = true): x is GameState {
     (x.stagedFields !== undefined &&
       (!Array.isArray(x.stagedFields) || !x.stagedFields.every(location))) ||
     !optionalCount(x.unitDiedTurn) ||
+    !optionalCount(x.preventEffectDamageTurn) ||
     !optionalCount(x.lastExcessDamage) ||
     !optionalBoolean(x.pendingCombatFinish) ||
     (x.pendingBeginning !== undefined && !playerId(x.pendingBeginning)) ||
@@ -634,11 +647,19 @@ export function parseSession(raw: string | null): SavedSession {
           isObject(f) &&
           typeof f.label === "string" &&
           (f.combat === undefined || combatStep(f.combat)) &&
-          (f.effect === undefined || (isObject(f.effect) && playerId(f.effect.player) &&
-            (f.effect.cardId === undefined || cardId(f.effect.cardId)) &&
-            optionalString(f.effect.sourceId) && optionalString(f.effect.targetId) && optionalString(f.effect.type) &&
-            (f.effect.locationId === undefined || location(f.effect.locationId)) &&
-            (f.effect.stage === undefined || ["announced", "resolving", "applied"].includes(f.effect.stage)))) &&
+          (f.effect === undefined ||
+            (isObject(f.effect) &&
+              playerId(f.effect.player) &&
+              (f.effect.cardId === undefined || cardId(f.effect.cardId)) &&
+              optionalString(f.effect.sourceId) &&
+              optionalString(f.effect.targetId) &&
+              optionalString(f.effect.type) &&
+              (f.effect.locationId === undefined ||
+                location(f.effect.locationId)) &&
+              (f.effect.stage === undefined ||
+                ["announced", "resolving", "applied"].includes(
+                  f.effect.stage,
+                )))) &&
           validState(f.state, false),
       ) &&
       Number.isInteger(r.index) &&

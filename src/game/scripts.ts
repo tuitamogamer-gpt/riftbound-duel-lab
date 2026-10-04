@@ -1,4 +1,5 @@
 import { originsWave4Scripts } from "./origins-wave4";
+import { cardWave5Scripts } from "./card-wave5";
 import { vendettaWave4Scripts } from "./vendetta-wave4";
 import { unleashedWave4Scripts } from "./unleashed-wave4";
 import { vendettaWave3Scripts } from "./vendetta-wave3";
@@ -205,6 +206,7 @@ Object.assign(
   vendettaWave4Scripts,
   unleashedWave4Scripts,
   unleashedExtraScripts,
+  cardWave5Scripts,
 );
 map["token-tentacle"] = plain;
 map["token-mech"] = plain;

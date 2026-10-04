@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "catalogFetchedAt": "2026-10-02T09:03:43.729Z",
+  "catalogFetchedAt": "2026-10-04T11:25:25.600Z",
   "provider": "Riftcodex",
   "providerPrintings": 1451,
   "registered": 1456,
-  "playable": 1029,
+  "playable": 1063,
   "statuses": {
-    "scripted": 779,
+    "scripted": 804,
     "compiled": 37,
-    "alias": 213,
-    "unsupported": 427
+    "alias": 222,
+    "unsupported": 393
   },
   "sets": {
     "JDG": {
@@ -19,8 +19,8 @@
     },
     "OGN": {
       "total": 352,
-      "playable": 260,
-      "unsupported": 92
+      "playable": 275,
+      "unsupported": 77
     },
     "OGS": {
       "total": 24,
@@ -29,23 +29,23 @@
     },
     "OPP": {
       "total": 133,
-      "playable": 101,
-      "unsupported": 32
+      "playable": 104,
+      "unsupported": 29
     },
     "PR": {
       "total": 13,
-      "playable": 9,
-      "unsupported": 4
+      "playable": 10,
+      "unsupported": 3
     },
     "SFD": {
       "total": 288,
-      "playable": 166,
-      "unsupported": 122
+      "playable": 178,
+      "unsupported": 110
     },
     "UNL": {
       "total": 280,
-      "playable": 195,
-      "unsupported": 85
+      "playable": 198,
+      "unsupported": 82
     },
     "VEN": {
       "total": 358,
@@ -382,8 +382,10 @@
       "type": "Unit",
       "cardId": "ogn-018-298",
       "rulesCardId": "ogn-018-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Raging Soul",
@@ -544,8 +546,17 @@
       "type": "Spell",
       "cardId": "ogn-029-298",
       "rulesCardId": "ogn-029-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave5:falling-star",
+            "target": "twoUnitChoices"
+          }
+        ]
+      }
     },
     {
       "name": "Jinx - Demolitionist",
@@ -2659,8 +2670,17 @@
       "type": "Spell",
       "cardId": "ogn-145-298",
       "rulesCardId": "ogn-145-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave5:prevent-effects"
+          }
+        ],
+        "reaction": true
+      }
     },
     {
       "name": "Wallop",
@@ -2978,8 +2998,14 @@
       "type": "Unit",
       "cardId": "ogn-161-298",
       "rulesCardId": "ogn-161-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "deflect": 1,
+        "keywords": [
+          "Play to enemy battlefields"
+        ]
+      }
     },
     {
       "name": "Miss Fortune - Captain",
@@ -3538,8 +3564,13 @@
       "type": "Unit",
       "cardId": "ogn-189-298",
       "rulesCardId": "ogn-189-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Ganking"
+        ]
+      }
     },
     {
       "name": "Kog'Maw - Caustic",
@@ -3601,8 +3632,13 @@
       "type": "Unit",
       "cardId": "ogn-193-298",
       "rulesCardId": "ogn-193-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Play to open battlefields"
+        ]
+      }
     },
     {
       "name": "Miss Fortune - Buccaneer (Alternate Art)",
@@ -3610,8 +3646,13 @@
       "type": "Unit",
       "cardId": "ogn-193a-298",
       "rulesCardId": "ogn-193-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Play to open battlefields"
+        ]
+      }
     },
     {
       "name": "Nocturne - Horrifying",
@@ -4040,8 +4081,19 @@
       "type": "Spell",
       "cardId": "ogn-220-298",
       "rulesCardId": "ogn-220-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave5:facebreaker",
+            "target": "duelSameBattlefield"
+          }
+        ],
+        "action": true,
+        "hidden": true
+      }
     },
     {
       "name": "Imperial Decree",
@@ -4639,8 +4691,18 @@
       "type": "Spell",
       "cardId": "ogn-260-298",
       "rulesCardId": "ogn-260-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave5:last-breath",
+            "target": "duelEnemyAtBattlefield"
+          }
+        ],
+        "action": true
+      }
     },
     {
       "name": "Leona - Radiant Dawn",
@@ -4648,8 +4710,10 @@
       "type": "Legend",
       "cardId": "ogn-261-298",
       "rulesCardId": "ogn-261-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Zenith Blade",
@@ -4856,8 +4920,10 @@
       "type": "Battlefield",
       "cardId": "ogn-278-298",
       "rulesCardId": "ogn-278-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Fortified Position",
@@ -4982,8 +5048,10 @@
       "type": "Battlefield",
       "cardId": "ogn-286-298",
       "rulesCardId": "ogn-286-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Sigil of the Storm",
@@ -4991,8 +5059,16 @@
       "type": "Battlefield",
       "cardId": "ogn-287-298",
       "rulesCardId": "ogn-287-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onConquer": [
+          {
+            "type": "special",
+            "custom": "wave5:recycle-rune"
+          }
+        ]
+      }
     },
     {
       "name": "Startipped Peak",
@@ -5327,8 +5403,10 @@
       "type": "Legend",
       "cardId": "ogn-306-298",
       "rulesCardId": "ogn-261-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Leona - Radiant Dawn (Signature)",
@@ -5336,8 +5414,10 @@
       "type": "Legend",
       "cardId": "ogn-306*-298",
       "rulesCardId": "ogn-261-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Teemo - Swift Scout (Overnumbered)",
@@ -6910,7 +6990,9 @@
         "onPlay": [
           {
             "type": "special",
-            "custom": "sfd:weaponmaster"
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
           }
         ],
         "keywords": [
@@ -7305,8 +7387,13 @@
       "type": "Unit",
       "cardId": "opp-193-298",
       "rulesCardId": "ogn-193-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Play to open battlefields"
+        ]
+      }
     },
     {
       "name": "Irelia - Blade Dancer (Metal)",
@@ -7659,8 +7746,10 @@
       "type": "Legend",
       "cardId": "opp-261-298--69bc5befd308c64675ca89ce",
       "rulesCardId": "ogn-261-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Leona - Radiant Dawn (Metal)",
@@ -7668,8 +7757,10 @@
       "type": "Legend",
       "cardId": "opp-261-298--69bc5bf2d308c64675ca89f8",
       "rulesCardId": "ogn-261-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Teemo - Swift Scout",
@@ -7978,8 +8069,10 @@
       "type": "Battlefield",
       "cardId": "pr-278a-298",
       "rulesCardId": "ogn-278-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "The Grand Plaza",
@@ -8017,8 +8110,22 @@
       "type": "Unit",
       "cardId": "sfd-002-221",
       "rulesCardId": "sfd-002-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Weaponmaster"
+        ],
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
+          }
+        ],
+        "accelerating": true
+      }
     },
     {
       "name": "Blood Rush",
@@ -8120,8 +8227,21 @@
       "type": "Unit",
       "cardId": "sfd-008-221",
       "rulesCardId": "sfd-008-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Weaponmaster"
+        ],
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
+          }
+        ]
+      }
     },
     {
       "name": "Serrated Dirk",
@@ -8397,8 +8517,16 @@
       "type": "Unit",
       "cardId": "sfd-025-221",
       "rulesCardId": "sfd-025-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "reaction": true,
+        "assault": 2,
+        "keywords": [
+          "Assault 2",
+          "Play to attacking battlefield"
+        ]
+      }
     },
     {
       "name": "Rumble - Hotheaded",
@@ -8879,8 +9007,18 @@
       "type": "Unit",
       "cardId": "sfd-053-221",
       "rulesCardId": "sfd-053-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "reaction": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "wave5:janna",
+            "target": "upToOneEnemyUnitHere"
+          }
+        ]
+      }
     },
     {
       "name": "Jax - Unmatched",
@@ -9459,8 +9597,22 @@
       "type": "Unit",
       "cardId": "sfd-085-221",
       "rulesCardId": "sfd-085-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Weaponmaster"
+        ],
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
+          }
+        ],
+        "deflect": 2
+      }
     },
     {
       "name": "Ornn - Forge God (Alternate Art)",
@@ -9468,8 +9620,22 @@
       "type": "Unit",
       "cardId": "sfd-085a-221",
       "rulesCardId": "sfd-085-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Weaponmaster"
+        ],
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
+          }
+        ],
+        "deflect": 2
+      }
     },
     {
       "name": "World Atlas",
@@ -9647,8 +9813,21 @@
       "type": "Unit",
       "cardId": "sfd-092-221",
       "rulesCardId": "sfd-092-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Weaponmaster"
+        ],
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
+          }
+        ]
+      }
     },
     {
       "name": "Dauntless Vanguard",
@@ -9751,7 +9930,9 @@
         "onPlay": [
           {
             "type": "special",
-            "custom": "sfd:weaponmaster"
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
           }
         ],
         "keywords": [
@@ -9935,7 +10116,9 @@
         "onPlay": [
           {
             "type": "special",
-            "custom": "sfd:weaponmaster"
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
           }
         ],
         "keywords": [
@@ -9961,7 +10144,9 @@
         "onPlay": [
           {
             "type": "special",
-            "custom": "sfd:weaponmaster"
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
           }
         ],
         "keywords": [
@@ -10017,7 +10202,9 @@
         "onPlay": [
           {
             "type": "special",
-            "custom": "sfd:weaponmaster"
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
           }
         ],
         "keywords": [
@@ -10051,8 +10238,21 @@
       "type": "Unit",
       "cardId": "sfd-119-221",
       "rulesCardId": "sfd-119-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Weaponmaster"
+        ],
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
+          }
+        ]
+      }
     },
     {
       "name": "Jax - Unrelenting (Alternate Art)",
@@ -10060,8 +10260,21 @@
       "type": "Unit",
       "cardId": "sfd-119a-221",
       "rulesCardId": "sfd-119-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Weaponmaster"
+        ],
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
+          }
+        ]
+      }
     },
     {
       "name": "Sivir - Ambitious",
@@ -10194,8 +10407,21 @@
       "type": "Unit",
       "cardId": "sfd-127-221",
       "rulesCardId": "sfd-127-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Weaponmaster"
+        ],
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
+          }
+        ]
+      }
     },
     {
       "name": "Overzealous Fan",
@@ -10426,8 +10652,19 @@
       "type": "Spell",
       "cardId": "sfd-145-221",
       "rulesCardId": "sfd-145-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave5:swap-might",
+            "target": "twoUnitsSameBattlefield"
+          }
+        ],
+        "action": true,
+        "hidden": true
+      }
     },
     {
       "name": "Vex - Cheerless",
@@ -11126,8 +11363,21 @@
       "type": "Spell",
       "cardId": "sfd-194-221",
       "rulesCardId": "sfd-194-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave5:prevent-next",
+            "target": "anyUnit"
+          },
+          {
+            "type": "draw"
+          }
+        ],
+        "reaction": true
+      }
     },
     {
       "name": "Irelia - Blade Dancer",
@@ -11744,7 +11994,9 @@
         "onPlay": [
           {
             "type": "special",
-            "custom": "sfd:weaponmaster"
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
           }
         ],
         "keywords": [
@@ -11764,7 +12016,9 @@
         "onPlay": [
           {
             "type": "special",
-            "custom": "sfd:weaponmaster"
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
           }
         ],
         "keywords": [
@@ -12289,8 +12543,19 @@
       "type": "Spell",
       "cardId": "unl-013-219",
       "rulesCardId": "unl-013-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave5:double-damage",
+            "target": "anyUnit"
+          }
+        ],
+        "reaction": true,
+        "hidden": true
+      }
     },
     {
       "name": "Monster Harpoon",
@@ -13666,8 +13931,22 @@
       "type": "Spell",
       "cardId": "unl-083-219",
       "rulesCardId": "unl-083-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave5:smoke-mirrors",
+            "target": "twoFriendlyDifferentLocations"
+          },
+          {
+            "type": "draw"
+          }
+        ],
+        "action": true,
+        "hidden": true
+      }
     },
     {
       "name": "Sprite Queen",
@@ -14143,8 +14422,19 @@
       "type": "Unit",
       "cardId": "unl-112-219",
       "rulesCardId": "unl-112-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onMove": [
+          {
+            "type": "special",
+            "custom": "wave5:faefolk",
+            "target": "enemyUnit",
+            "condition": "atBattlefield",
+            "optional": true
+          }
+        ]
+      }
     },
     {
       "name": "Master Yi - Tempered",

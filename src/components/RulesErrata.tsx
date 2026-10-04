@@ -7,6 +7,14 @@ const spiritforged =
 const unleashed =
   "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-errata-updates/";
 const updates: Record<string, { text: string; url: string }> = {
+  "janna savior": {
+    text: "Janna heals friendly units here even without an enemy. Moving up to one enemy unit is optional.",
+    url: spiritforged,
+  },
+  "falling star": {
+    text: "Choose both targets before responses. The same unit can be chosen twice; pay Deflect for each choice.",
+    url: spiritforged,
+  },
   tideturner: {
     text: "Tideturner's swap must choose a unit you control at a different location.",
     url: "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata/",

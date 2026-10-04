@@ -1,0 +1,450 @@
+/* One decision area: source card, available moves, and permanent player piles. */
+.app.is-game .game-layout {
+  grid-template-rows: 36px 42px minmax(0, 1fr) 126px;
+}
+.app.is-game .visual-controls {
+  display: grid;
+  grid-template-columns: 0 minmax(150px, 1fr) minmax(0, 1.65fr) 132px;
+  grid-template-rows: minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 14px;
+  position: relative;
+  background: linear-gradient(110deg, #15343f, #0e232e 65%);
+  border-color: #5d8a92;
+  border-top-color: #94d8c4;
+  border-radius: 9px;
+}
+.app.is-game .visual-controls.has-source {
+  grid-template-columns: 74px minmax(150px, 1fr) minmax(0, 1.65fr) 132px;
+}
+.decision-source {
+  grid-area: 1 / 1;
+  align-self: center;
+}
+.app.is-game .decision-source .game-card {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 744 / 1039;
+  max-width: none;
+  border-radius: 6px;
+  box-shadow:
+    0 4px 18px #0008,
+    0 0 0 1px #dfc78d80;
+}
+.app.is-game .visual-controls .decision-copy {
+  grid-area: 1 / 2;
+  padding-right: 12px;
+}
+.app.is-game .visual-controls .decision-copy > strong {
+  font-size: clamp(15px, 1.15vw, 24px);
+  line-height: 1.2;
+}
+.app.is-game .visual-controls .decision-copy p {
+  margin: 5px 0 0;
+  font-size: clamp(10px, 0.8vw, 14px);
+  -webkit-line-clamp: 3;
+}
+.app.is-game .visual-controls .card-cost-note {
+  display: block;
+  margin: 4px 0 0;
+  font-size: 10px;
+}
+.app.is-game .visual-controls .cancel-selection {
+  position: absolute;
+  right: 160px;
+  top: 4px;
+  width: 25px;
+  height: 25px;
+  padding: 4px;
+  z-index: 1;
+}
+.app.is-game .visual-controls .decision-actions {
+  grid-area: 1 / 3;
+  width: 100%;
+  height: auto;
+  gap: 8px;
+}
+.app.is-game .visual-controls .context-actions {
+  min-width: 0;
+}
+.app.is-game .visual-controls .context-action {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  background: #1a4144;
+  border: 1px solid #648f8e;
+  border-radius: 7px;
+  min-height: 52px;
+}
+.app.is-game .visual-controls .context-action:hover {
+  background: #295c58;
+  border-color: #b7ebd3;
+}
+.context-action > span {
+  min-width: 0;
+}
+.app.is-game .visual-controls .context-action strong {
+  font-size: 11px;
+}
+.app.is-game .visual-controls .context-action small {
+  font-size: 10px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.decision-option-art {
+  width: 33px;
+  height: 46px;
+  object-fit: contain;
+  flex: none;
+  border-radius: 3px;
+}
+.app.is-game .visual-controls .gold-button {
+  font-size: 12px;
+  padding: 10px 12px;
+  gap: 6px;
+}
+.card-piles {
+  grid-area: 1 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  height: 100%;
+  padding-left: 12px;
+  border-left: 1px solid #688b9050;
+}
+.pile-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 52px;
+  padding: 0;
+  color: #e0eee9;
+  flex: none;
+}
+.pile-art {
+  width: 50px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 1px solid #8aa6a5;
+  border-radius: 5px;
+  background: #0b1c26;
+  color: #8ca7ad;
+  overflow: hidden;
+}
+.pile-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.pile-back {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 6px, #d8bc8220 6px 7px),
+    #142a35;
+  color: #e3c58a;
+  border-color: #b49b6e;
+  box-shadow:
+    2px 2px 0 #10232d,
+    3px 3px 0 #8c7d5f,
+    5px 5px 0 #10232d,
+    6px 6px 0 #5b6057;
+}
+.pile-back > svg {
+  opacity: 0.35;
+  position: absolute;
+}
+.pile-back > b {
+  font:
+    600 30px "Cinzel",
+    serif;
+}
+.pile-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 4px;
+}
+.pile-caption strong {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.pile-caption b {
+  font-size: 13px;
+  color: #f0d49b;
+}
+.pile-button:hover .pile-art {
+  border-color: #fff0c8;
+  transform: translateY(-2px);
+}
+.trash-pile.is-empty .pile-art {
+  border-style: dashed;
+}
+.trash-pile.has-cards .pile-art {
+  box-shadow: 3px 3px 0 #263d44;
+}
+.app.is-game .pile-dialog {
+  width: min(880px, 94vw);
+  padding: 26px;
+  background: #102734;
+  color: #e8efec;
+  border: 1px solid #789498;
+}
+.pile-dialog h2 {
+  margin: 6px 0 18px;
+}
+.app.is-game .pile-dialog h2,
+.app.is-game .pile-dialog .close-button {
+  color: #ecf1eb;
+}
+.app.is-game .pile-dialog p,
+.app.is-game .pile-dialog .eyebrow {
+  color: #b5cbd1;
+}
+.app.is-game .pile-dialog .close-button {
+  background: #ffffff0a;
+}
+.pile-dialog h2 > span {
+  color: #ddc28d;
+  font-size: 0.7em;
+}
+.pile-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 22px;
+}
+.pile-tabs > span {
+  flex: 1;
+}
+.pile-tabs button,
+.pile-play {
+  border: 1px solid #6b9298;
+  border-radius: 5px;
+  padding: 8px 14px;
+  font-size: 12px;
+}
+.pile-tabs button[aria-pressed="true"],
+.pile-play {
+  background: #285048;
+  color: #c7f9e3;
+}
+.pile-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+  gap: 22px 16px;
+}
+.pile-card-entry {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.app.is-game .pile-card-entry .game-card {
+  width: 100%;
+  max-width: 180px;
+  height: auto;
+  aspect-ratio: 744 / 1039;
+}
+.pile-card-entry > strong {
+  font-size: 12px;
+  text-align: center;
+}
+.pile-empty {
+  padding: 35px 12px;
+  color: #acbec7;
+  text-align: center;
+}
+.pile-empty h3 {
+  margin: 12px 0 8px;
+  color: #e5eeed;
+}
+.pile-empty p,
+.deck-summary p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.deck-summary {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 26px 8px;
+}
+.deck-summary > .pile-art {
+  width: 96px;
+  height: 134px;
+  flex: none;
+}
+.deck-summary strong {
+  font-size: 22px;
+}
+.deck-summary small {
+  display: block;
+  margin-top: 16px;
+  color: #ddc28d;
+}
+.visual-controls button:focus-visible,
+.pile-dialog button:focus-visible {
+  outline: 2px solid #e7cd95;
+  outline-offset: 3px;
+}
+
+@media (min-width: 1100px) and (min-height: 850px) {
+  .app.is-game .game-layout {
+    grid-template-rows: 40px 44px minmax(0, 1fr) clamp(126px, 13dvh, 170px);
+  }
+  .app.is-game .visual-controls {
+    grid-template-columns: 0 minmax(160px, 1fr) minmax(0, 1.65fr) 154px;
+  }
+  .app.is-game .visual-controls.has-source {
+    grid-template-columns:
+      clamp(74px, 8dvh, 104px) minmax(160px, 1fr) minmax(0, 1.65fr)
+      154px;
+  }
+  .pile-button {
+    width: 60px;
+  }
+  .pile-art {
+    width: 58px;
+    height: 81px;
+  }
+  .app.is-game .visual-controls .cancel-selection {
+    right: 180px;
+  }
+}
+@media (max-width: 1000px) {
+  .app.is-game .visual-controls {
+    grid-template-columns: 0 minmax(120px, 1fr) minmax(0, 1.4fr) 118px;
+    gap: 8px;
+    padding: 8px;
+  }
+  .app.is-game .visual-controls.has-source {
+    grid-template-columns: 66px minmax(120px, 1fr) minmax(0, 1.4fr) 118px;
+  }
+  .card-piles {
+    gap: 8px;
+    padding-left: 8px;
+  }
+  .app.is-game .visual-controls .gold-button {
+    font-size: 10px;
+    padding: 8px;
+  }
+  .app.is-game .visual-controls .cancel-selection {
+    right: 134px;
+  }
+}
+@media (max-width: 750px) {
+  .app.is-game .game-layout {
+    grid-template-rows: 32px 58px minmax(0, 1fr) 170px;
+  }
+  .app.is-game .visual-controls,
+  .app.is-game .visual-controls.has-source {
+    grid-template-columns: 0 minmax(0, 1fr) 102px;
+    grid-template-rows: minmax(0, 1fr) 62px;
+    gap: 7px;
+    padding: 8px;
+  }
+  .app.is-game .visual-controls.has-source {
+    grid-template-columns: 56px minmax(0, 1fr) 102px;
+  }
+  .app.is-game .visual-controls .decision-copy {
+    padding-right: 0;
+  }
+  .app.is-game .visual-controls .decision-copy > strong {
+    font-size: 14px;
+  }
+  .app.is-game .visual-controls .decision-copy p {
+    font-size: 10px;
+    -webkit-line-clamp: 3;
+  }
+  .app.is-game .visual-controls .decision-actions {
+    grid-area: 2 / 1 / 3 / -1;
+    justify-content: flex-end;
+    gap: 5px;
+  }
+  .app.is-game .visual-controls .context-actions {
+    flex: 1;
+    gap: 4px;
+  }
+  .app.is-game .visual-controls .context-action {
+    min-height: 48px;
+    padding: 5px;
+    gap: 4px;
+  }
+  .app.is-game .visual-controls .context-action strong {
+    font-size: 10px;
+  }
+  .app.is-game .visual-controls .context-action small {
+    font-size: 8px;
+  }
+  .decision-option-art {
+    width: 25px;
+    height: 35px;
+  }
+  .card-piles {
+    grid-area: 1 / 3;
+    gap: 9px;
+    padding-left: 8px;
+  }
+  .pile-button {
+    width: 40px;
+  }
+  .pile-art {
+    width: 39px;
+    height: 55px;
+  }
+  .pile-caption strong {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+  .pile-caption b {
+    font-size: 11px;
+  }
+  .app.is-game .visual-controls .cancel-selection {
+    left: 49px;
+    top: 2px;
+    right: auto;
+    background: #15333e;
+    border-radius: 50%;
+  }
+  .app.is-game .visual-controls .card-cost-note {
+    font-size: 8px;
+  }
+  .app.is-game .pile-dialog {
+    padding: 20px 16px;
+  }
+  .pile-card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 16px 10px;
+  }
+  .deck-summary {
+    gap: 20px;
+  }
+  .deck-summary strong {
+    font-size: 18px;
+  }
+}
+@media (max-height: 600px) and (min-width: 751px) {
+  .app.is-game .game-layout {
+    grid-template-rows: 30px 34px minmax(0, 1fr) 100px;
+  }
+  .app.is-game .visual-controls.has-source {
+    grid-template-columns: 52px minmax(120px, 1fr) minmax(0, 1.65fr) 118px;
+  }
+  .pile-art {
+    height: 52px;
+    width: 38px;
+  }
+  .app.is-game .visual-controls .decision-copy p {
+    -webkit-line-clamp: 2;
+  }
+}

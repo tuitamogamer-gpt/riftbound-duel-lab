@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Decision cards and piles QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Synthetic match; open only on a separate development origin.
+      import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
+      import { SAVE_KEY, parseSession } from "/src/persistence.ts";
+      import { LANGUAGE_KEY } from "/src/i18n/core.ts";
+      const match = createCombatFixture();
+      match.phase = "choice";
+      match.turnStep = "main";
+      match.combat = null;
+      match.units = [
+        {
+          ...combatUnit("ability-source", 0, 4, "ogn-147-298"),
+          location: "base:0",
+        },
+        {
+          ...combatUnit("buff-target", 0, 4, "ogn-049-298"),
+          buff: 1,
+          ready: true,
+        },
+        combatUnit("enemy", 1, 5, "ogn-088-298"),
+      ];
+      match.players[0].hand = [
+        "ogn-009-298",
+        "ogn-058-298",
+        "ogn-049-298",
+        "ogn-083-298",
+      ];
+      match.players[0].discard = ["ogn-009-298", "ogn-049-298", "ogn-058-298"];
+      match.players[1].discard = ["ogn-088-298"];
+      for (const player of match.players) {
+        player.runes = Array.from({ length: 6 }, (_, i) => ({
+          id: `rune-${player.id}-${i}`,
+          domain: i % 2 ? "Fury" : "Calm",
+          ready: true,
+        }));
+        player.energy = 5;
+      }
+      match.pendingChoice = {
+        kind: "spendBuff",
+        player: 0,
+        remaining: 1,
+        sourceId: "ability-source",
+        returnPhase: "main",
+        returnPriority: 0,
+        effect: {
+          type: "spendBuff",
+          optional: true,
+          effects: [
+            { type: "buff", condition: "self" },
+            { type: "ready", condition: "self" },
+          ],
+        },
+      };
+      const session = { match, review: null };
+      if (!parseSession(JSON.stringify(session)).match)
+        throw new Error("Invalid decision fixture");
+      localStorage.setItem(LANGUAGE_KEY, "en");
+      localStorage.setItem(SAVE_KEY, JSON.stringify(session));
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

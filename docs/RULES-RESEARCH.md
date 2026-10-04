@@ -2,6 +2,14 @@
 
 Verified on 2026-10-02. This is an implementation brief, not a reproduction of the rulebook. The current official core rules are dated **2026-07-16**; the later **2026-08-14 Vendetta FAQ** prevails where it explicitly corrects them. The Rules Hub lists constructed bans updated **2026-09-18**. A complete implementation must treat card text, official errata, and current FAQ rulings as authoritative over ordinary rules.
 
+## Fifth-wave checks — 4 October 2026
+
+- [Spiritforged FAQ](https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq/): Falling Star declares both choices before responses, including separate Deflect payments if the same unit is chosen twice. Janna heals friendly units here and may move up to one enemy; an absent enemy does not prevent healing.
+- [Core Rules](https://cmsassets.rgpub.io/sanity/files/dsfx7636/news_live/e9ac8e3d33e0f78cef296f5945aba7bc1313b086.pdf), 821.1: Weaponmaster chooses Equipment before responses. The discounted Equip payment happens as the trigger resolves; destroyed Equipment cannot be replaced with a new target. It does not activate Equip or target the receiving unit.
+- Core 417.6: damage explicitly dealt by a unit, including Last Breath and Strike Down, is unit damage. Unyielding Spirit's spell/ability protection and spell damage bonuses do not modify that source.
+- Core 433/437: swaps use the raw Might difference, including negative values; combat cannot allocate lethal damage to a fully protected unit. Core 811.1.d.2.a restricts only Smoke and Mirrors' first target to the Hidden battlefield.
+- [Piltover Archive's published codec](https://github.com/Piltover-Archive/RiftboundDeckCodes), package `@piltoverarchive/riftbound-deck-codes` 1.5.0: deck-code versions, chosen champion, sideboard, signed and R/SP numbering. This is a community interchange format, separate from Riot rules. The app bounds and validates packets before calling the decoder.
+
 ## Primary sources
 
 - [Official Rules Hub](https://playriftbound.com/en-us/rules-hub/)

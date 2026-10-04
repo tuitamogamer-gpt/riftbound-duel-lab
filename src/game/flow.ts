@@ -71,6 +71,10 @@ export function sourceActions(
 export function selectedCardId(game: GameState, selected: string | null) {
   if (selected?.startsWith("hand:"))
     return game.players[0].hand[Number(selected.slice(5))];
+  if (selected?.startsWith("trash:"))
+    return game.players[0].discard[Number(selected.slice(6))];
+  if (selected?.startsWith("field:"))
+    return game.fields.find((field) => field.id === selected)?.cardId;
   if (selected === "champion") return game.players[0].championId;
   if (selected === "legend") return game.players[0].legendId;
   if (selected?.startsWith("hidden:"))

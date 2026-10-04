@@ -10,7 +10,8 @@ import { gameplayFingerprint, hasUnlimitedCopies } from "../data/card-identity";
 export const IMPORTED_DECKS_KEY = "riftbound-imported-decks-v1";
 const MAX_TEXT_LENGTH = 100_000;
 const MAX_DECKS = 50;
-type Section = "legend" | "champion" | "main" | "runes" | "battlefields";
+type Section =
+  "legend" | "champion" | "main" | "runes" | "battlefields" | "sideboard";
 export interface DeckIssue {
   code: string;
   message: string;
@@ -26,6 +27,7 @@ export interface DeckScriptCoverage {
 }
 export interface DeckImportOptions {
   name?: string;
+  championId?: string;
   format?: "standard" | "historical-precon";
 }
 export interface DeckImportResult {
@@ -62,7 +64,8 @@ const sectionType = (section: Section | null, card: Card) => {
     return card.type === "Unit" && card.supertype === "Champion";
   if (section === "runes") return card.type === "Rune";
   if (section === "battlefields") return card.type === "Battlefield";
-  if (section === "main") return ["Unit", "Gear", "Spell"].includes(card.type);
+  if (section === "main" || section === "sideboard")
+    return ["Unit", "Gear", "Spell"].includes(card.type);
   return true;
 };
 
@@ -83,23 +86,33 @@ function uniqueRulesFaces(matches: Card[]): Card[] {
   }
   return [...unique.values()];
 }
-function resolveCard(value: string, section: Section | null): Card[] {
+export function resolveImportCard(
+  value: string,
+  section: Section | null = null,
+): Card[] {
   const lower = value.trim().toLowerCase().replace(/\//g, "-");
   const exact = cardsById[lower];
   if (exact) return [exact];
   const sameId = cards.filter((card) => card.riftboundId === lower);
   if (sameId.length) return uniqueRulesFaces(sameId);
-  if (/^[a-z]{3,5}-\d{1,4}$/.test(lower)) {
+  if (/^[a-z]{3,5}-(?:r|sp)?\d{1,4}[a-z*]?$/.test(lower)) {
     const [set, number] = lower.split("-");
     return uniqueRulesFaces(
       cards.filter(
         (card) =>
-          !card.variant &&
           card.set.toLowerCase() === set &&
-          card.collectorNumber === Number(number),
+          card.id.split("-")[1] === number.replace(/s$/, "*"),
       ),
     );
   }
+  const annotated = value.match(
+    /^(.+?)\s+[[(]([a-z]{3,5}-(?:r|sp)?\d{1,4}[a-z*]?(?:-[\w-]+)?)[\])]$/i,
+  );
+  if (annotated)
+    return resolveImportCard(annotated[2], section).filter(
+      (card) =>
+        canonicalCardName(card.name) === canonicalCardName(annotated[1]),
+    );
   const setSuffix = value.match(/^(.+?)\s+\(([a-z]{3,5})\)\s+(\d{1,4})$/i);
   if (setSuffix)
     return uniqueRulesFaces(
@@ -148,6 +161,7 @@ function sectionHeader(line: string): Section | null {
     legenda: "legend",
     champion: "champion",
     "chosen champion": "champion",
+    "champion legend": "legend",
     "champion unit": "champion",
     šampion: "champion",
     main: "main",
@@ -160,11 +174,14 @@ function sectionHeader(line: string): Section | null {
     rune: "runes",
     runes: "runes",
     "rune deck": "runes",
+    "rune pool": "runes",
     runešpil: "runes",
     battlefield: "battlefields",
     battlefields: "battlefields",
     bojišta: "battlefields",
     bojište: "battlefields",
+    sideboard: "sideboard",
+    "side board": "sideboard",
   };
   return aliases[header] ?? null;
 }
@@ -184,6 +201,7 @@ function stableId(
     | "battlefieldId"
     | "battlefieldIds"
     | "format"
+    | "sideboard"
   >,
 ) {
   const content = JSON.stringify([
@@ -194,6 +212,9 @@ function stableId(
     deck.format ?? "standard",
     [...deck.main].sort((a, b) => a.cardId.localeCompare(b.cardId)),
     [...deck.runes].sort((a, b) => a.cardId.localeCompare(b.cardId)),
+    ...(deck.sideboard?.length
+      ? [[...deck.sideboard].sort((a, b) => a.cardId.localeCompare(b.cardId))]
+      : []),
   ]);
   let hash = 2166136261;
   for (let i = 0; i < content.length; i++)
@@ -206,7 +227,7 @@ export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
   const issues: DeckIssue[] = [];
   const legend = cardsById[deck.legendId],
     champion = cardsById[deck.championId];
-  const entries = [...deck.main, ...deck.runes];
+  const entries = [...deck.main, ...deck.runes, ...(deck.sideboard ?? [])];
   const allIds = [
     deck.legendId,
     deck.championId,
@@ -257,6 +278,10 @@ export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
         "rune-count",
         `Rune deck mora imati 12 runa; trenutno ${sum(deck.runes)}.`,
       ),
+    );
+  if (sum(deck.sideboard ?? []) > 10)
+    issues.push(
+      issue("sideboard-count", "Sideboard može imati najviše 10 karata."),
     );
   if (legend?.type !== "Legend")
     issues.push(issue("legend-type", "Potrebna je tačno jedna Legend karta."));
@@ -339,7 +364,7 @@ export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
     champion ? [[canonicalCardName(champion.name), 1]] : [],
   );
   const unlimited = new Set<string>();
-  for (const entry of deck.main) {
+  for (const entry of [...deck.main, ...(deck.sideboard ?? [])]) {
     const card = cardsById[entry.cardId];
     if (!card) continue;
     if (
@@ -372,7 +397,11 @@ export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
         ),
       );
   let signatures = 0;
-  for (const entry of [{ cardId: deck.championId, count: 1 }, ...deck.main]) {
+  for (const entry of [
+    { cardId: deck.championId, count: 1 },
+    ...deck.main,
+    ...(deck.sideboard ?? []),
+  ]) {
     const card = cardsById[entry.cardId];
     if (!card) continue;
     if (
@@ -452,6 +481,7 @@ export function parseDeckText(
     main: [],
     runes: [],
     battlefields: [],
+    sideboard: [],
   };
   let section: Section | null = null;
   let name = options.name?.trim() || "";
@@ -492,7 +522,7 @@ export function parseDeckText(
       continue;
     }
     const inline = raw.match(
-      /^(legend|champion|chosen champion|battlefield)\s*:\s*(.+)$/i,
+      /^(legend|champion legend|champion|chosen champion|battlefield)\s*:\s*(.+)$/i,
     );
     const activeSection = inline ? sectionHeader(inline[1]) : section;
     let value = (inline ? inline[2] : raw)
@@ -520,7 +550,7 @@ export function parseDeckText(
       );
       continue;
     }
-    const matches = resolveCard(value, activeSection);
+    const matches = resolveImportCard(value, activeSection);
     if (matches.length !== 1) {
       issues.push(
         issue(
@@ -558,6 +588,8 @@ export function parseDeckText(
   }
   for (const key of Object.keys(sections) as Section[])
     sections[key] = aggregate(sections[key]);
+  if (!sections.champion.length && options.championId)
+    sections.champion = [{ cardId: options.championId, count: 1 }];
   if (sum(sections.legend) !== 1)
     issues.push(
       issue("legend-count", "Navedi tačno jednu kartu u sekciji Legend."),
@@ -579,7 +611,13 @@ export function parseDeckText(
     return { deck: null, issues, coverage: null, playable: false };
   // Some list exporters include the chosen champion among all 40 main cards.
   if (sum(sections.main) === 40) {
-    const entry = sections.main.find((entry) => entry.cardId === champion.id);
+    const entry =
+      sections.main.find((entry) => entry.cardId === champion.id) ??
+      sections.main.find(
+        (entry) =>
+          gameplayFingerprint(cardsById[entry.cardId]) ===
+          gameplayFingerprint(champion),
+      );
     if (entry) {
       entry.count--;
       sections.main = sections.main.filter((entry) => entry.count > 0);
@@ -611,11 +649,20 @@ export function parseDeckText(
     battlefieldIds: battlefields,
     main: sections.main,
     runes: sections.runes,
+    ...(sections.sideboard.length ? { sideboard: sections.sideboard } : {}),
     source: "Imported deck",
     format,
   };
   draft.id = stableId(draft);
   issues.push(...validateImportedDeck(draft));
+  if (draft.sideboard?.length)
+    issues.push(
+      issue(
+        "sideboard-saved",
+        "Sideboard je sačuvan za izvoz; ne koristi se u pojedinačnom Duelu.",
+        { severity: "warning" },
+      ),
+    );
   const coverage = getDeckScriptCoverage(draft);
   const valid = !issues.some((item) => item.severity === "error");
   return {
@@ -635,7 +682,7 @@ export function exportDeckText(deck: StarterDeck): string {
           `${entry.count} ${entry.cardId} # ${cardsById[entry.cardId]?.name ?? entry.cardId}`,
       )
       .join("\n");
-  return `Name: ${deck.name}\nFormat: ${deck.format ?? "standard"}\n\nLegend\n${lines([{ cardId: deck.legendId, count: 1 }])}\n\nChampion\n${lines([{ cardId: deck.championId, count: 1 }])}\n\nMain Deck\n${lines(deck.main)}\n\nRunes\n${lines(deck.runes)}\n\nBattlefields\n${lines(fieldIds(deck).map((cardId) => ({ cardId, count: 1 })))}\n`;
+  return `Name: ${deck.name}\nFormat: ${deck.format ?? "standard"}\n\nLegend\n${lines([{ cardId: deck.legendId, count: 1 }])}\n\nChampion\n${lines([{ cardId: deck.championId, count: 1 }])}\n\nMain Deck\n${lines(deck.main)}\n\nRunes\n${lines(deck.runes)}\n\nBattlefields\n${lines(fieldIds(deck).map((cardId) => ({ cardId, count: 1 })))}\n${deck.sideboard?.length ? `\nSideboard\n${lines(deck.sideboard)}\n` : ""}`;
 }
 
 export interface DeckStorage {

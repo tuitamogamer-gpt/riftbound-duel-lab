@@ -9,9 +9,26 @@ export interface PresentedStackCard {
   card: CatalogCard;
   player: PlayerId;
   kind: StackItem["kind"] | "play";
-  status: "waiting" | "next" | "resolving" | "playing";
+  status: "waiting" | "next" | "resolving" | "playing" | "choosing";
   response: boolean;
   entering: boolean;
+}
+
+/** A choice can outlive the stack item that caused it, especially for abilities. */
+export function pendingChoiceCardId(game: GameState) {
+  const choice = game.pendingChoice;
+  if (!choice) return;
+  return (
+    choice.cardId ??
+    choice.sourceSnapshot?.cardId ??
+    game.units.find((unit) => unit.id === choice.sourceId)?.cardId ??
+    game.gears.find((gear) => gear.id === choice.sourceId)?.cardId ??
+    game.fields.find((field) => field.id === choice.sourceId)?.cardId ??
+    (choice.sourceId === "legend"
+      ? game.players[choice.actor ?? choice.player].legendId
+      : undefined) ??
+    game.resolving?.at(-1)?.cardId
+  );
 }
 
 /** The visible frame is the only authority during playback, never review.final. */
@@ -112,6 +129,18 @@ export function getActionStackView(game: GameState, review: Review | null) {
       });
   }
 
+  const choiceCard = findCard(pendingChoiceCardId(visible));
+  if (choiceCard && !cards.some((entry) => entry.card.id === choiceCard.id))
+    cards.push({
+      id: `choice:${choiceCard.id}:${visible.pendingChoice!.sourceId ?? ""}`,
+      card: choiceCard,
+      player: visible.pendingChoice!.actor ?? visible.pendingChoice!.player,
+      kind: visible.pendingChoice!.kind === "trigger" ? "trigger" : "ability",
+      status: "resolving",
+      response: false,
+      entering: false,
+    });
+
   // Array order in the engine is oldest first; present the next resolution
   // first, followed by every remaining public action and reaction.
   for (let i = visible.stack.length - 1; i >= 0; i--)
@@ -143,6 +172,10 @@ export function getActionStackView(game: GameState, review: Review | null) {
     });
 
   if (!cards.length) return null;
+  if (choiceCard) {
+    const source = cards.find((entry) => entry.card.id === choiceCard.id);
+    if (source) source.status = "choosing";
+  }
   return {
     cards,
     feedback,

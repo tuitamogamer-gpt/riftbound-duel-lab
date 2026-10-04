@@ -252,10 +252,9 @@ describe("Spiritforged preconstructed rules", () => {
       },
     ];
     ctx.sourceId = fresh.id;
+    ctx.targetId = "g";
     module.effect!(s, 0, special("weaponmaster"), ctx);
-    expect(ctx.openChoice).toHaveBeenCalledOnce();
-    expect(s.gears[0].attachedTo).toBe("old");
-    module.effect!(s, 0, special("attach|g|new"), ctx);
+    expect(ctx.openChoice).not.toHaveBeenCalled();
     expect(old.gear).toEqual([]);
     expect(fresh.gear).toEqual(["g"]);
     expect(ctx.pay).not.toHaveBeenCalled();

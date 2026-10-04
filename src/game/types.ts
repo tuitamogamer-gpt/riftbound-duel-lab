@@ -29,6 +29,11 @@ export interface Unit {
   additionalCostPaid?: boolean;
   playedFromHidden?: boolean;
   preventDamage?: number;
+  preventNextDamageTurn?: number;
+  doubleDamageTurn?: number;
+  damageDoublings?: number;
+  movesTurn?: number;
+  movesThisTurn?: number;
   untargetableByEnemy?: boolean;
   baseMightOverride?: number;
   moveLockedTurn?: number;
@@ -137,6 +142,7 @@ export interface GameState {
   stagedFields?: LocationId[];
   version: 1;
   unitDiedTurn?: number;
+  preventEffectDamageTurn?: number;
   lastExcessDamage?: number;
   seed: number;
   rng: number;
@@ -242,6 +248,10 @@ export interface GameAction {
   repeatedEffects?: Effect[];
 }
 export type TargetFilter =
+  | "twoUnitChoices"
+  | "upToOneEnemyUnitHere"
+  | "twoUnitsSameBattlefield"
+  | "twoFriendlyDifferentLocations"
   | "anyTwoUnits"
   | "orderedTwoUnits"
   | "orderedTwoFriendlyUnits"
@@ -257,6 +267,7 @@ export type TargetFilter =
   | "friendlyBuffableUnit"
   | "enemyGear"
   | "anyGear"
+  | "friendlyEquipment"
   | "twoGear"
   | "friendlyDamagedUnit"
   | "friendlyReadyUnit"
@@ -330,6 +341,7 @@ export type Effect = {
   lessMightThanSource?: boolean;
   who?: "self" | "opponent" | "all";
   cardName?: string;
+  damageSource?: "unit";
   location?: "base" | "target" | "here";
   maxMight?: number;
   maxEnergy?: number;

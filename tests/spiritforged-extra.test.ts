@@ -600,10 +600,13 @@ describe("additional Spiritforged rules through the engine", () => {
     expect(runes.players.every((p) => !p.runes[0].ready)).toBe(true);
   });
   it.each([2, 8, 85, 92, 127])(
-    "does not advertise Weaponmaster before equipment targets can be finalized (%i)",
+    "uses the fifth-wave Weaponmaster with equipment declared before responses (%i)",
     (n) => {
       expect(scripts[id(n)]).toBeUndefined();
-      expect(getScript(id(n))?.implemented ?? false).toBe(false);
+      expect(getScript(id(n))?.onPlay?.[0]).toMatchObject({
+        target: "friendlyEquipment",
+        optional: true,
+      });
     },
   );
   it("Downwell returns all units simultaneously before loss of aura can kill a wounded unit", () => {

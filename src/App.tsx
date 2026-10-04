@@ -58,6 +58,7 @@ import {
   sourceActions,
 } from "./game/flow";
 import { MatchControls } from "./components/MatchControls";
+import { PileDialog, type PileView } from "./components/CardPiles";
 import { TurnFlow, ShowdownCue, CombatReadout } from "./components/TurnFlow";
 import { reviewDelay, automaticDelay } from "./game/presentation";
 import { EffectTrails, FieldEffect } from "./components/EffectFeedback";
@@ -187,6 +188,7 @@ export default function App() {
   const [playerDeck, setPlayerDeck] = useState(decks[0]?.id || "");
   const [botDeck, setBotDeck] = useState(decks[1]?.id || decks[0]?.id || "");
   const [inspected, setInspected] = useState<CatalogCard | null>(null);
+  const [pileView, setPileView] = useState<PileView | null>(null);
   const [help, setHelp] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -256,6 +258,7 @@ export default function App() {
       !visible ||
       help ||
       inspected ||
+      pileView ||
       confirmNew ||
       logOpen
     )
@@ -289,6 +292,7 @@ export default function App() {
     visible,
     help,
     inspected,
+    pileView,
     confirmNew,
     logOpen,
     difficulty,
@@ -820,8 +824,21 @@ export default function App() {
                 paused={paused}
                 resume={() => setPaused(false)}
                 mulligan={mulligan}
+                inspect={setInspected}
+                openPile={setPileView}
               />
             </BoardInteraction.Provider>
+            {pileView && (
+              <PileDialog
+                game={game}
+                view={pileView}
+                setView={setPileView}
+                legal={legal}
+                close={() => setPileView(null)}
+                inspect={setInspected}
+                select={selectCard}
+              />
+            )}
             {logOpen && (
               <div className="modal-backdrop" onClick={() => setLogOpen(false)}>
                 <section
@@ -936,6 +953,7 @@ export default function App() {
                   },
                   { title: "Glavni špil", entries: deckDetails.main },
                   { title: "Runes", entries: deckDetails.runes },
+                  ...(deckDetails.sideboard?.length ? [{ title: "Sideboard", entries: deckDetails.sideboard }] : []),
                   {
                     title: "Bojišta",
                     entries: (

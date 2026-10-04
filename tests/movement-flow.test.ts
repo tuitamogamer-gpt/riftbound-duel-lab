@@ -84,6 +84,8 @@ describe("board-first movement selection", () => {
         LanguageProvider,
         null,
         createElement(MatchControls, {
+          inspect: () => {},
+          openPile: () => {},
           game,
           legal,
           selected: null,
@@ -98,7 +100,7 @@ describe("board-first movement selection", () => {
         }),
       ),
     );
-    expect(html).toContain("Confirm movement");
+    expect(html).toContain("Move 1 unit");
     expect(html).toContain("Cancel movement");
     expect(html).toContain("1 selected");
     expect(html).not.toContain("More options");
@@ -125,6 +127,8 @@ describe("board-first movement selection", () => {
         LanguageProvider,
         null,
         createElement(MatchControls, {
+          inspect: () => {},
+          openPile: () => {},
           game,
           legal,
           selected: null,

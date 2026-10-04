@@ -1,4 +1,67 @@
 export const flowMessages: Record<string, [string, string, string]> = {
+  "Ability choice": ["Ability choice", "Izbor sposobnosti", "Scelta abilità"],
+  "Waiting for a choice": [
+    "Waiting for a choice",
+    "Čeka tvoj izbor",
+    "In attesa di una scelta",
+  ],
+  "Move 1 unit": ["Move 1 unit", "Pomjeri 1 jedinicu", "Muovi 1 unità"],
+  "Your deck and trash": [
+    "Your deck and trash",
+    "Tvoj špil i trash",
+    "Il tuo mazzo e gli scarti",
+  ],
+  "Your deck · {count} cards": [
+    "Your deck · {count} cards",
+    "Tvoj špil · {count} karata",
+    "Il tuo mazzo · {count} carte",
+  ],
+  "Your trash · {count} cards": [
+    "Your trash · {count} cards",
+    "Tvoj trash · {count} karata",
+    "I tuoi scarti · {count} carte",
+  ],
+  Deck: ["Deck", "Špil", "Mazzo"],
+  Trash: ["Trash", "Trash", "Scarti"],
+  "Your cards": ["Your cards", "Tvoje karte", "Le tue carte"],
+  "Opponent cards": ["Opponent cards", "Protivničke karte", "Carte avversarie"],
+  "Card zones": ["Card zones", "Zone karata", "Zone delle carte"],
+  "Play from trash": [
+    "Play from trash",
+    "Igraj iz trasha",
+    "Gioca dagli scarti",
+  ],
+  "Trash is empty": [
+    "Trash is empty",
+    "Trash je prazan",
+    "Gli scarti sono vuoti",
+  ],
+  "Discarded and destroyed cards appear here.": [
+    "Discarded and destroyed cards appear here.",
+    "Odbačene i uništene karte se nalaze ovdje.",
+    "Le carte scartate e distrutte appaiono qui.",
+  ],
+  "{count} cards remaining": [
+    "{count} cards remaining",
+    "Preostalo karata: {count}",
+    "{count} carte rimanenti",
+  ],
+  "Cards in the deck stay face down. Draw them during play.": [
+    "Cards in the deck stay face down. Draw them during play.",
+    "Karte u špilu su okrenute licem prema dolje. Vučeš ih tokom igre.",
+    "Le carte nel mazzo restano coperte. Pescale durante la partita.",
+  ],
+  "Rune deck · {count} runes": [
+    "Rune deck · {count} runes",
+    "Špil runa · {count} runa",
+    "Mazzo rune · {count} rune",
+  ],
+  "Move {count} units": [
+    "Move {count} units",
+    "Pomjeri jedinice: {count}",
+    "Muovi {count} unità",
+  ],
+
   "Action chain": ["Action chain", "Lanac akcija", "Catena di azioni"],
   "Resolves first": [
     "Resolves first",

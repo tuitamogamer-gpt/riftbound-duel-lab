@@ -1,5 +1,87 @@
 // UI copy and deck metadata. Product and card names retain their canonical names.
 export const lobbyMessages: Record<string, [string, string, string]> = {
+  "Zalijepi Piltover Archive deck kod ili tekstualni izvoz sa deck-building sajta. Karte se provjeravaju prije čuvanja.":
+    [
+      "Paste a Piltover Archive deck code or a text export from a deck-building site. Cards are checked before saving.",
+      "Zalijepi Piltover Archive deck kod ili tekstualni izvoz sa deck-building sajta. Karte se provjeravaju prije čuvanja.",
+      "Incolla un codice mazzo Piltover Archive o una lista esportata da un sito. Le carte vengono controllate prima del salvataggio.",
+    ],
+  "Na sajtu otvori svoj špil, izaberi Export i kopiraj Deck code ili Text. Ovdje zalijepi sadržaj izvoza.":
+    [
+      "Open your deck on the site, choose Export, and copy Deck code or Text. Paste the exported content here.",
+      "Na sajtu otvori svoj špil, izaberi Export i kopiraj Deck code ili Text. Ovdje zalijepi sadržaj izvoza.",
+      "Apri il mazzo sul sito, scegli Export e copia Deck code o Text. Incolla qui il contenuto esportato.",
+    ],
+  "Naziv špila (opcionalno)": [
+    "Deck name (optional)",
+    "Naziv špila (opcionalno)",
+    "Nome del mazzo (facoltativo)",
+  ],
+  "Deck kod ili lista karata": [
+    "Deck code or card list",
+    "Deck kod ili lista karata",
+    "Codice mazzo o lista di carte",
+  ],
+  "Odaberi championa za ovu listu": [
+    "Select the chosen champion for this list",
+    "Odaberi championa za ovu listu",
+    "Seleziona il campione prescelto per questa lista",
+  ],
+  "Izaberi odabranog championa…": [
+    "Choose a champion…",
+    "Izaberi odabranog championa…",
+    "Scegli un campione…",
+  ],
+  "Prepoznat Piltover Archive kod · pogledaj listu": [
+    "Piltover Archive code recognized · view list",
+    "Prepoznat Piltover Archive kod · pogledaj listu",
+    "Codice Piltover Archive riconosciuto · mostra lista",
+  ],
+  "Sideboard može imati najviše 10 karata.": [
+    "The sideboard can contain at most 10 cards.",
+    "Sideboard može imati najviše 10 karata.",
+    "Il sideboard può contenere al massimo 10 carte.",
+  ],
+  "Sideboard je sačuvan za izvoz; ne koristi se u pojedinačnom Duelu.": [
+    "Sideboard saved for export; it is not used in a single Duel.",
+    "Sideboard je sačuvan za izvoz; ne koristi se u pojedinačnom Duelu.",
+    "Sideboard salvato per l’esportazione; non viene usato in un singolo Duello.",
+  ],
+  "Otvori špil na sajtu i kopiraj Export → Deck code ili Text. Sam link stranice nije lista karata.":
+    [
+      "Open the deck on its site and copy Export → Deck code or Text. A page link does not contain the card list.",
+      "Otvori špil na sajtu i kopiraj Export → Deck code ili Text. Sam link stranice nije lista karata.",
+      "Apri il mazzo sul sito e copia Export → Deck code o Text. Un link non contiene la lista di carte.",
+    ],
+  "Deck kod je predugačak.": [
+    "The deck code is too long.",
+    "Deck kod je predugačak.",
+    "Il codice del mazzo è troppo lungo.",
+  ],
+  "Ovaj špil zahtijeva dodatne legende koje Duel još ne podržava.": [
+    "This deck requires additional legends that Duel does not yet support.",
+    "Ovaj špil zahtijeva dodatne legende koje Duel još ne podržava.",
+    "Questo mazzo richiede leggende aggiuntive non ancora supportate da Duello.",
+  ],
+  "Deck kod nije ispravan ili koristi nepodržanu verziju. Kopiraj cijeli kod ili koristi tekstualni izvoz.":
+    [
+      "The deck code is invalid or uses an unsupported version. Copy the complete code or use a text export.",
+      "Deck kod nije ispravan ili koristi nepodržanu verziju. Kopiraj cijeli kod ili koristi tekstualni izvoz.",
+      "Il codice non è valido o usa una versione non supportata. Copia il codice completo o esporta il testo.",
+    ],
+  "Janna heals friendly units here even without an enemy. Moving up to one enemy unit is optional.":
+    [
+      "Janna heals friendly units here even without an enemy. Moving up to one enemy unit is optional.",
+      "Janna liječi prijateljske jedinice ovdje i bez neprijatelja. Pomjeranje do jedne neprijateljske jedinice je opcionalno.",
+      "Janna cura le unità alleate qui anche senza nemici. Spostare fino a un’unità nemica è facoltativo.",
+    ],
+  "Choose both targets before responses. The same unit can be chosen twice; pay Deflect for each choice.":
+    [
+      "Choose both targets before responses. The same unit can be chosen twice; pay Deflect for each choice.",
+      "Izaberi obje mete prije reakcija. Ista jedinica može biti izabrana dvaput; plati Deflect za svaki izbor.",
+      "Scegli entrambi i bersagli prima delle risposte. Puoi scegliere la stessa unità due volte; paga Deflect per ogni scelta.",
+    ],
+
   // Import headers and card names are canonical parser syntax in every language.
   "Name: {name}\n\nLegend\n1 Annie - Dark Child (Starter)\n\nChampion\n1 Annie - Fiery\n\nMain Deck\n3 ogn-001-298\n…\n\nRunes\n6 Fury Rune\n6 Chaos Rune\n\nBattlefields\n1 Reaver’s Row":
     [
@@ -116,7 +198,7 @@ export const lobbyMessages: Record<string, [string, string, string]> = {
   ],
   "Svi preconi": ["All precons", "Svi preconi", "Tutti i precostruiti"],
   "Tvoj špil": ["Your deck", "Tvoj špil", "Il tuo mazzo"],
-  "Špilovi": ["Decks", "Špilovi", "Mazzi"],
+  Špilovi: ["Decks", "Špilovi", "Mazzi"],
   "{count} precona iz svih izdanja. Izaberi špil iz liste ili karticu ispod.": [
     "{count} precons across all sets. Choose a deck from the list or a card below.",
     "{count} precona iz svih izdanja. Izaberi špil iz liste ili karticu ispod.",
