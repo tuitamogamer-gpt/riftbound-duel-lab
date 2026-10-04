@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Riftbound · Signature collection</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 42px;
+        background: radial-gradient(ellipse at top, #23363b, #090f19 70%);
+        color: #eed8aa;
+        font-family: Georgia, serif;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        border-bottom: 1px solid #9b865844;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+      }
+      h1 {
+        font-weight: 400;
+        letter-spacing: 3px;
+        margin: 8px 0;
+        font-size: 34px;
+      }
+      small {
+        font:
+          11px Arial,
+          sans-serif;
+        letter-spacing: 4px;
+        color: #b29d78;
+      }
+      header p {
+        color: #b6bcc1;
+        font:
+          12px Arial,
+          sans-serif;
+      }
+      main {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 24px 18px;
+      }
+      figure {
+        margin: 0;
+      }
+      img {
+        display: block;
+        width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 8px 28px #0009;
+      }
+      figcaption {
+        text-align: center;
+        font-size: 13px;
+        margin-top: 12px;
+      }
+      figcaption small {
+        display: block;
+        font-size: 7px;
+        letter-spacing: 1.6px;
+        line-height: 1.5;
+        margin-top: 6px;
+      }
+      @media (max-width: 750px) {
+        body {
+          padding: 22px;
+        }
+        main {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        header {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <small>RIFTBOUND / DUEL LAB</small>
+        <h1>Signature collection</h1>
+      </div>
+      <p>13 champions. One signature for every deck.</p>
+    </header>
+    <main></main>
+    <script type="module">
+      import sleeves from "/src/data/signature-sleeves.json";
+      for (const [key, s] of Object.entries(sleeves)) {
+        const figure = document.createElement("figure"),
+          image = document.createElement("img"),
+          caption = document.createElement("figcaption"),
+          title = document.createElement("small");
+        image.src = `/art/sleeves/${key}.svg`;
+        image.alt = `${s.name} signature sleeve`;
+        caption.textContent = s.name;
+        title.textContent = s.title;
+        caption.append(title);
+        figure.append(image, caption);
+        document.querySelector("main").append(figure);
+      }
+    </script>
+  </body>
+</html>

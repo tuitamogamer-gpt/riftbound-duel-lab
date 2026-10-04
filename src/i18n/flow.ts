@@ -1,4 +1,46 @@
 export const flowMessages: Record<string, [string, string, string]> = {
+  "Reveal now": ["Reveal now", "Otkrij sada", "Rivela ora"],
+  "Next turn": ["Next turn", "Od sljedećeg poteza", "Dal prossimo turno"],
+  Blocked: ["Blocked", "Blokirano", "Bloccata"],
+  Unavailable: ["Unavailable", "Trenutno nedostupno", "Non disponibile"],
+  "Hidden · base cost ignored": [
+    "Hidden · base cost ignored",
+    "Hidden · bez osnovne cijene",
+    "Hidden · costo base ignorato",
+  ],
+  "Play this Hidden card as a Reaction. Its base cost is ignored; additional costs still apply.":
+    [
+      "Play this Hidden card as a Reaction. Its base cost is ignored; additional costs still apply.",
+      "Odigraj ovu Hidden kartu kao reakciju. Osnovna cijena se ne plaća; dodatni troškovi i dalje važe.",
+      "Gioca questa carta Hidden come Reazione. Il costo base è ignorato; i costi aggiuntivi si applicano.",
+    ],
+  "This card was hidden this turn. It can be played starting next turn, including your opponent's turn.":
+    [
+      "This card was hidden this turn. It can be played starting next turn, including your opponent's turn.",
+      "Karta je sakrivena u ovom potezu. Može se odigrati od sljedećeg poteza, uključujući protivnikov.",
+      "La carta è stata nascosta in questo turno. Puoi giocarla dal prossimo turno, anche durante quello avversario.",
+    ],
+  "Noxus Saboteur prevents revealing Hidden cards at this battlefield.": [
+    "Noxus Saboteur prevents revealing Hidden cards at this battlefield.",
+    "Noxus Saboteur sprečava otkrivanje Hidden karata na ovom bojištu.",
+    "Noxus Saboteur impedisce di rivelare carte Hidden in questo campo di battaglia.",
+  ],
+  "Waiting for your Action or Reaction window.": [
+    "Waiting for your Action or Reaction window.",
+    "Čeka se tvoja prilika za akciju ili reakciju.",
+    "In attesa della tua finestra di Azione o Reazione.",
+  ],
+  "No legal Hidden play now. Check targets at this battlefield and any additional costs or play restrictions.":
+    [
+      "No legal Hidden play now. Check targets at this battlefield and any additional costs or play restrictions.",
+      "Hidden karta se trenutno ne može odigrati. Provjeri mete na ovom bojištu, dodatne troškove i ograničenja.",
+      "Nessuna giocata Hidden valida. Controlla i bersagli in questo campo, i costi aggiuntivi e le restrizioni.",
+    ],
+  "A Hidden card is ready. Reveal it below or select it on the battlefield.": [
+    "A Hidden card is ready. Reveal it below or select it on the battlefield.",
+    "Hidden karta je spremna. Otkrij je ispod ili je odaberi na bojištu.",
+    "Una carta Hidden è pronta. Rivelala qui sotto o selezionala sul campo.",
+  ],
   "Ability choice": ["Ability choice", "Izbor sposobnosti", "Scelta abilità"],
   "Waiting for a choice": [
     "Waiting for a choice",

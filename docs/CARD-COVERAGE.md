@@ -2,7 +2,15 @@
 
 The catalog was fetched again on 4 October 2026. It contains every printing returned by the paginated Riftcodex API: 1,451 printings in eight sets, plus five local rules tokens. Provider completeness is checked against both pagination totals and each set's card count. It is not independent evidence that Riftcodex has every Riot publication or preview; its latest reported record update was 21 July 2026. No Radiance set is returned in this snapshot.
 
-Current checked snapshot: **1,063 executable entries and 393 unsupported entries**, including the five local rules tokens. These counts refer to printings, not unique gameplay cards. The [validation log](VALIDATION.md) records the current full-suite acceptance, including 169 precon pairings and 16 mixed-expansion integration games.
+Current checked snapshot: **1,102 executable entries and 354 unsupported entries**, including the five local rules tokens. These counts refer to printings, not unique gameplay cards. The [validation log](VALIDATION.md) records the current full-suite acceptance, including 169 precon pairings and 16 mixed-expansion integration games.
+
+## Sixth implementation wave — 4 October 2026
+
+This wave adds **29 card faces and 39 executable printings** through `card-wave6.ts`. New support includes Brynhir, Blitzcrank, Karthus, Stormbringer, Yasuo's Legend, Showstopper, Piercing Light, Bellows Breath, Fae Dragon, Temptation, Beast Below, Imposing Challenger, Stare Down, Moonfall, Ol' Poro, Sandstone Chimera, Decree of Focus, Riven, Helm of Suppression, Applied Researchers, Stargazer and Public Execution. The battlefield rules cover Aspirant's Climb, Forgotten Monument, Marai Spire, Rockfall Path, Heisho, Mystic Vortex and Sandswept Tomb.
+
+The shared cost pipeline applies alternative and additional costs before taxes and discounts, including colored Repeat costs, Deflect, Hidden, Flow, Ambush and spell-only Energy. Limited discounts keep their one-Energy floor, and universal Power discounts can cover additional costs. Group targets and movement destinations are declared before responses; Bellows can select a legal subset of its original targets after they separate. Simultaneous damage preserves Karthus's additional Deathknell triggers when Karthus dies with the other units. The match score display follows Aspirant's Climb's changed victory threshold.
+
+There are **354 unsupported printings** left. Unknown effects still fail closed; Syndra's multiple Repeat instances, public-trash identities and unrestricted-size target groups remain separate implementation work. The provider catalog and card text are unchanged by this wave. Existing deck imports automatically use the expanded executable registry.
 
 ## Fifth implementation wave and website deck import — 4 October 2026
 
@@ -12,7 +20,7 @@ Shared behavior now includes repeated target selection and Deflect payments, uni
 
 The website importer uses the upstream Piltover Archive codec locally, with strict bounded packet validation for versions 1–6. It accepts text exports with names or set codes, retains sideboards, and asks for a chosen champion when old codes omit it. Page URLs need an export first; additional-legend formats and unsupported in-game effects remain explicit errors. Sideboards are validated and preserved but are not playable in the single-game Duel flow.
 
-The remaining **393 printings are not scripted**. In particular, public-trash targeting still needs durable object identities before Dr. Mundo, Guardian's Passage, Aspiring Chronomancer and Starhound Pack can be advertised as supported. Variable-size target declarations still block cards such as Azir, Ascendant. Unknown effects continue to fail closed.
+At the fifth-wave checkpoint, **393 printings were not scripted**. In particular, public-trash targeting still needs durable object identities before Dr. Mundo, Guardian's Passage, Aspiring Chronomancer and Starhound Pack can be advertised as supported. Variable-size target declarations still block cards such as Azir, Ascendant. Unknown effects continue to fail closed.
 
 ## Fourth implementation wave
 

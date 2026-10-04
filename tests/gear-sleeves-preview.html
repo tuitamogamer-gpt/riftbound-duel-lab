@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gear and signature sleeves QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Synthetic fixture on a separate local origin; never the user's live save.
+      import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      const match = createCombatFixture();
+      match.phase = "main";
+      match.turnStep = "main";
+      match.combat = null;
+      match.units = [
+        {
+          ...combatUnit("own-base", 0, 3, "ogn-010-298"),
+          location: "base:0",
+          ready: true,
+        },
+        {
+          ...combatUnit("enemy-base", 1, 3, "ogn-219-298"),
+          location: "base:1",
+        },
+        { ...combatUnit("equipped", 0, 5, "ogn-049-298"), gear: ["equipment"] },
+        combatUnit("enemy-field", 1, 4, "ogn-088-298"),
+      ];
+      match.gears = [
+        { id: "ballista", owner: 0, cardId: "ogn-017-298", ready: true },
+        { id: "conduit", owner: 0, cardId: "ogn-098-298", ready: false },
+        {
+          id: "equipment",
+          owner: 0,
+          cardId: "sfd-108-221",
+          ready: true,
+          attachedTo: "equipped",
+        },
+        { id: "enemy-gear", owner: 1, cardId: "ogn-090-298", ready: true },
+        { id: "enemy-gear-2", owner: 1, cardId: "ogn-120-298", ready: false },
+      ];
+      const count = Number(
+        new URLSearchParams(location.search).get("crowded") || 0,
+      );
+      for (let i = 0; i < count; i++)
+        match.gears.push({
+          id: `extra-${i}`,
+          owner: 0,
+          cardId: "ogn-017-298",
+          ready: true,
+        });
+      match.players[0].hand = ["ogn-098-298", "ogn-017-298", "ogn-083-298"];
+      match.players[1].hand = ["ogn-219-298", "ogn-088-298", "ogn-090-298"];
+      for (const player of match.players) {
+        player.championAvailable = true;
+        player.energy = 8;
+        player.power = 4;
+        player.runes = [
+          { id: `rune-${player.id}`, domain: "Fury", ready: true },
+        ];
+      }
+      match.fields[0].controller = 0;
+      match.hidden = [
+        {
+          id: "enemy-hidden",
+          owner: 1,
+          cardId: "ogn-199-298",
+          location: "field:1",
+          hiddenTurn: 4,
+        },
+      ];
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review: null }));
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

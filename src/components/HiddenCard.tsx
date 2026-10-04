@@ -1,15 +1,21 @@
 import { findCard, type CatalogCard } from "../catalog";
-import type { GameState } from "../game/types";
+import type { GameAction, GameState } from "../game/types";
+import { hiddenCardStatus } from "../game/hidden-presentation";
 import { useI18n } from "../i18n";
+import { CardSleeve } from "./CardSleeve";
 
 export function HiddenCard({
   game,
   hidden,
+  legal = [],
+  selected = false,
   select,
   inspect,
 }: {
   game: GameState;
   hidden: NonNullable<GameState["hidden"]>[number];
+  legal?: GameAction[];
+  selected?: boolean;
   select: (id: string) => void;
   inspect: (card: CatalogCard) => void;
 }) {
@@ -17,9 +23,19 @@ export function HiddenCard({
   const own = hidden.owner === 0;
   const canLook = own || game.players[0].canLookAtEnemyHiddenTurn === game.turn;
   const card = canLook ? findCard(hidden.cardId) : undefined;
+  const status = own ? hiddenCardStatus(game, hidden, legal) : undefined;
+  const label = card
+    ? t(own ? "Tvoja Hidden: {card}" : "Protivnička Hidden: {card}", {
+        card: card.name,
+      })
+    : t("AI · Hidden karta");
   return (
     <button
-      className="hidden-card"
+      className={`hidden-card${status?.ready ? " is-playable" : ""}${selected ? " is-selected" : ""}`}
+      aria-pressed={own ? selected : undefined}
+      aria-label={`${label}${status ? ` · ${t(status.label)}` : ""}`}
+      data-hidden-source={own ? `hidden:${hidden.id}` : undefined}
+      title={status ? t(status.hint) : undefined}
       data-card-preview={card?.id}
       disabled={!canLook}
       onClick={() => {
@@ -27,11 +43,9 @@ export function HiddenCard({
         else if (card) inspect(card);
       }}
     >
-      {card
-        ? t(own ? "Tvoja Hidden: {card}" : "Protivnička Hidden: {card}", {
-            card: card.name,
-          })
-        : t("AI · Hidden karta")}
+      <CardSleeve player={game.players[hidden.owner]} />
+      <span>{own && card ? card.name : label}</span>
+      {status && <small>{t(status.label)}</small>}
     </button>
   );
 }

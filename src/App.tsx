@@ -1,3 +1,4 @@
+import { getVictoryScore } from "./game/board-rules";
 import { LanguageSelector, useI18n } from "./i18n";
 import {
   createContext,
@@ -43,7 +44,8 @@ import {
 } from "./game/deck-import";
 import { Card, CardDetail } from "./components/Card";
 import { RuneCard } from "./components/RuneCard";
-import { GearChip } from "./components/GearChip";
+import { GearRow } from "./components/GearRow";
+import { CardSleeve } from "./components/CardSleeve";
 import { CombatPanel } from "./components/CombatPanel";
 import { ChampionZone } from "./components/ChampionZone";
 import {
@@ -595,7 +597,7 @@ export default function App() {
                       >
                         {game.players[1].hand.slice(0, 12).map((_, i) => (
                           <div className="card-back" key={i}>
-                            <span>ϟ</span>
+                            <CardSleeve player={game.players[1]} />
                           </div>
                         ))}
                         <span>
@@ -695,6 +697,8 @@ export default function App() {
                                     key={h.id}
                                     game={game}
                                     hidden={h}
+                                    legal={legal}
+                                    selected={selected === `hidden:${h.id}`}
                                     select={selectCard}
                                     inspect={setInspected}
                                   />
@@ -924,6 +928,17 @@ export default function App() {
                 {t(deckDetails.product ?? "LOKALNI ŠPIL")}
               </div>
               <h2>{t(deckDetails.name)}</h2>
+              <div className="deck-sleeve-preview">
+                <CardSleeve player={deckDetails} />
+                <div>
+                  <strong>
+                    {deckDetails.champion} · {t("Signature sleeve")}
+                  </strong>
+                  <p>
+                    {t("Automatically used on your deck and face-down cards.")}
+                  </p>
+                </div>
+              </div>
               <p>
                 {t("40 karata · 12 runa ·")}{" "}
                 {
@@ -953,7 +968,9 @@ export default function App() {
                   },
                   { title: "Glavni špil", entries: deckDetails.main },
                   { title: "Runes", entries: deckDetails.runes },
-                  ...(deckDetails.sideboard?.length ? [{ title: "Sideboard", entries: deckDetails.sideboard }] : []),
+                  ...(deckDetails.sideboard?.length
+                    ? [{ title: "Sideboard", entries: deckDetails.sideboard }]
+                    : []),
                   {
                     title: "Bojišta",
                     entries: (
@@ -1110,9 +1127,9 @@ function PlayerBar({
           </span>
         )}
         <span>{p.points}</span>
-        <small>/ 8</small>
+        <small>/ {getVictoryScore(game)}</small>
         <div className="score-pips">
-          {Array.from({ length: 8 }, (_, i) => (
+          {Array.from({ length: getVictoryScore(game) }, (_, i) => (
             <i key={i} className={i < p.points ? "filled" : ""} />
           ))}
         </div>
@@ -1346,8 +1363,14 @@ function BoardZone({
 }) {
   const { t } = useI18n();
   const units = game.units.filter((u) => u.location === location);
+  const interaction = useContext(BoardInteraction);
+  const player = location === "base:0" ? 0 : 1;
+  const hasGear = game.gears.some((gear) => gear.owner === player);
   return (
-    <section className="base-zone" data-location={location}>
+    <section
+      className={`base-zone${hasGear ? " has-gear" : ""}`}
+      data-location={location}
+    >
       <span className="zone-label">{t(title)}</span>
       <Destination location={location} />
       <div className="base-units">
@@ -1364,20 +1387,16 @@ function BoardZone({
             )}{" "}
           </span>
         )}
-        {game.gears
-          .filter((g) => g.owner === (location === "base:0" ? 0 : 1))
-          .map((g) => {
-            const c = findCard(g.cardId);
-            return c ? (
-              <GearChip
-                card={c}
-                ready={g.ready}
-                key={g.id}
-                onClick={() => select(g.id)}
-              />
-            ) : null;
-          })}
       </div>
+      <GearRow
+        game={game}
+        player={player}
+        legal={interaction.legal}
+        actions={interaction.actions}
+        selected={selected}
+        select={select}
+        inspect={inspect}
+      />
     </section>
   );
 }

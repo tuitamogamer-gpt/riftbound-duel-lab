@@ -1,0 +1,64 @@
+// Original sleeve frames and signature emblems around the existing local champion art.
+// Regenerate with: node scripts/build-signature-sleeves.mjs
+import { readFile, writeFile, mkdir } from "node:fs/promises";
+const root = new URL("../", import.meta.url);
+const sleeves = JSON.parse(
+  await readFile(new URL("src/data/signature-sleeves.json", root), "utf8"),
+);
+await mkdir(new URL("public/art/sleeves/", root), { recursive: true });
+const generic = {
+  name: "Riftbound",
+  title: "DUEL LAB",
+  color: "#e6cf95",
+  secondary: "#478d9d",
+  mark: "M50 8L80 50L50 92L20 50Z M50 25L65 50L50 75L35 50Z",
+};
+for (const [key, sleeve] of [
+  ...Object.entries(sleeves),
+  ["riftbound", generic],
+]) {
+  const portrait =
+    key === "riftbound"
+      ? ""
+      : await readFile(
+          new URL(`public/art/champions/${key}.jpg`, root),
+          "base64",
+        );
+  const { name, title, color, secondary, mark } = sleeve;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="744" height="1039" viewBox="0 0 744 1039">
+  <title>${name} — ${title} signature sleeve</title>
+  <defs>
+    <linearGradient id="base" x2="1" y2="1"><stop stop-color="${secondary}"/><stop offset=".45" stop-color="#101722"/><stop offset="1" stop-color="#03080f"/></linearGradient>
+    <linearGradient id="foil" x2=".8" y2="1"><stop stop-color="${color}"/><stop offset=".26" stop-color="#fff1cd"/><stop offset=".5" stop-color="${secondary}"/><stop offset=".72" stop-color="${color}"/><stop offset="1" stop-color="#f8e4b3"/></linearGradient>
+    <linearGradient id="veil" x2="0" y2="1"><stop stop-color="#071018" stop-opacity=".15"/><stop offset=".36" stop-color="#071018" stop-opacity=".1"/><stop offset=".74" stop-color="#071018" stop-opacity=".97"/><stop offset="1" stop-color="#071018"/></linearGradient>
+    <radialGradient id="glow"><stop stop-color="${color}" stop-opacity=".4"/><stop offset="1" stop-color="${secondary}" stop-opacity="0"/></radialGradient>
+    <pattern id="etch" width="38" height="38" patternUnits="userSpaceOnUse"><path d="M19 0L38 19L19 38L0 19Z" fill="none" stroke="${color}" stroke-opacity=".09"/></pattern>
+    <clipPath id="cut"><rect x="19" y="19" width="706" height="1001" rx="29"/></clipPath>
+  </defs>
+  <rect width="744" height="1039" rx="38" fill="#080e17"/>
+  <g clip-path="url(#cut)">
+    <rect width="744" height="1039" fill="url(#base)"/>
+    ${portrait ? `<image href="data:image/jpeg;base64,${portrait}" x="25" y="45" width="694" height="825" preserveAspectRatio="xMidYMid slice" opacity=".8"/>` : ""}
+    <rect width="744" height="1039" fill="url(#veil)"/>
+    <rect width="744" height="1039" fill="url(#etch)"/>
+    <ellipse cx="372" cy="640" rx="360" ry="330" fill="url(#glow)"/>
+    <path d="M40 352L120 420V715L40 795 M704 352L624 420V715L704 795" fill="none" stroke="${color}" stroke-opacity=".55" stroke-width="2"/>
+    <path d="M372 435L544 642L372 849L200 642Z" fill="#08131c" fill-opacity=".7" stroke="url(#foil)" stroke-width="3"/>
+    <path d="M372 455L527 642L372 829L217 642Z" fill="none" stroke="${color}" stroke-opacity=".35"/>
+    <g transform="translate(257 527) scale(2.3)" fill="none" stroke="${color}" stroke-width="8" opacity=".16"><path d="${mark}"/></g>
+    <g transform="translate(257 527) scale(2.3)" fill="none" stroke="url(#foil)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><path d="${mark}"/></g>
+  </g>
+  <rect x="14" y="14" width="716" height="1011" rx="30" fill="none" stroke="url(#foil)" stroke-width="5"/>
+  <path d="M43 186V72L72 43H279L372 75L465 43H672L701 72V186 M43 853V967L72 996H279L372 964L465 996H672L701 967V853" fill="none" stroke="url(#foil)" stroke-width="2"/>
+  <path d="M28 226L58 253L28 280 M716 226L686 253L716 280 M28 760L58 787L28 814 M716 760L686 787L716 814" fill="none" stroke="${color}" stroke-width="3"/>
+  <text x="372" y="132" text-anchor="middle" fill="#f6e6bc" font-family="Georgia,serif" font-size="25" letter-spacing="11">RIFTBOUND</text>
+  <path d="M285 152H459 M345 167H399" stroke="${color}" stroke-opacity=".7"/>
+  <text x="372" y="898" text-anchor="middle" fill="#fff0d3" font-family="Georgia,serif" font-size="${name.length > 8 ? 44 : 56}" letter-spacing="7">${name.toUpperCase()}</text>
+  <text x="372" y="936" text-anchor="middle" fill="${color}" font-family="Arial,sans-serif" font-size="17" letter-spacing="4">${title}</text>
+  <path d="M372 978L382 990L372 1002L362 990Z" fill="${color}"/>
+</svg>`;
+  await writeFile(new URL(`public/art/sleeves/${key}.svg`, root), svg);
+}
+console.log(
+  `Saved ${Object.keys(sleeves).length} champion sleeves and the universal sleeve.`,
+);

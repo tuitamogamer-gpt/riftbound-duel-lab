@@ -3663,3 +3663,46 @@ select {
   cursor: default;
   opacity: 1;
 }
+.hidden-card span,
+.hidden-card small {
+  display: block;
+}
+.hidden-card span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hidden-card small {
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #d6c9f3;
+}
+.hidden-card.is-playable {
+  border-color: #dac170;
+  box-shadow:
+    0 0 0 1px #dac170,
+    0 0 16px #dac17055;
+}
+.hidden-card.is-playable small {
+  color: #ffe59b;
+}
+.hidden-card.is-selected {
+  outline: 2px solid #fff0b5;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .app.is-game .hidden-zone {
+    max-width: calc(100% - 10px);
+    gap: 3px;
+  }
+  .hidden-card {
+    min-width: 0;
+    padding: 3px 5px;
+    font-size: 9px;
+  }
+  .hidden-card small {
+    margin-top: 1px;
+    font-size: 8px;
+  }
+}

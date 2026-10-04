@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hidden reactions QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Synthetic QA only: run on a separate local origin from the user's match.
+      import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      const match = createCombatFixture();
+      match.phase = "main";
+      match.combat = null;
+      match.currentPlayer = 1;
+      match.priorityPlayer = 0;
+      match.units = [
+        combatUnit("guard", 0, 5, "ogn-049-298"),
+        combatUnit("enemy", 1, 5, "ogn-219-298"),
+        {
+          ...combatUnit("other-guard", 0, 5, "ogn-142-298"),
+          location: "field:1",
+        },
+        { ...combatUnit("elsewhere", 1, 5, "ogn-052-298"), location: "base:1" },
+      ];
+      match.fields.forEach((f) => (f.controller = 0));
+      match.hidden = [
+        {
+          id: "fae",
+          owner: 0,
+          cardId: "ogn-097-298",
+          location: "field:0",
+          hiddenTurn: match.turn - 1,
+        },
+        {
+          id: "fresh",
+          owner: 0,
+          cardId: "ogn-083-298",
+          location: "field:1",
+          hiddenTurn: match.turn,
+        },
+      ];
+      match.stack = [
+        {
+          id: "test-chain",
+          player: 1,
+          cardId: "ogn-083-298",
+          kind: "spell",
+          effects: [{ type: "draw", amount: 2 }],
+        },
+      ];
+      match.chainStarter = 1;
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review: null }));
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

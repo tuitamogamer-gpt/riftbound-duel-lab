@@ -1,3 +1,4 @@
+import { canPlayCard } from "./board-rules";
 import { getCard } from "../data/cards";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
 import type {
@@ -949,6 +950,7 @@ export const unleashedExtraModule: ExpansionModule = {
         const champion = action.sourceId === "champion";
         if (
           !action.locationId ||
+          !canPlayCard(s, p, getCard(id(89)), action.locationId) ||
           (champion
             ? !s.players[p].championAvailable ||
               s.players[p].championId !== id(89)

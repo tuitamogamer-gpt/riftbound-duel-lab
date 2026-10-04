@@ -10,6 +10,7 @@ import type { GameAction, GameState } from "../game/types";
 import { useI18n } from "../i18n";
 import type { Review } from "./StepFlow";
 import { priorityWindow } from "../game/presentation";
+import { hiddenCardStatus } from "../game/hidden-presentation";
 import {
   getActionStackView,
   pendingChoiceCardId,
@@ -50,6 +51,14 @@ export function MatchControls({
   const forcedPass =
     !review && legal.length === 1 && legal[0].category === "pass";
   const card = findCard(selectedCardId(game, selected));
+  const hidden = game.hidden?.find(
+    (h) => h.owner === 0 && selected === `hidden:${h.id}`,
+  );
+  const hiddenStatus = hidden
+    ? hiddenCardStatus(game, hidden, legal)
+    : undefined;
+  const hiddenAvailable =
+    !selected && legal.some((a) => a.sourceId?.startsWith("hidden:"));
   const effectCard = findCard(game.stack.at(-1)?.cardId);
   const choiceCard = findCard(pendingChoiceCardId(game));
   const sourceCard = review
@@ -124,13 +133,15 @@ export function MatchControls({
         : opening
           ? "Click up to two cards in your hand to replace them, or keep your hand."
           : card
-            ? actions.length
-              ? actions.some((action) => action.targetId)
-                ? "Choose a highlighted target or a move below."
-                : readableText(card.text) || "Choose a move below."
-              : ownUnit && !ownUnit.ready
-                ? "This unit is exhausted. It readies at the start of your turn."
-                : "No legal play now. Check the cost, timing and available targets."
+            ? hiddenStatus
+              ? hiddenStatus.hint
+              : actions.length
+                ? actions.some((action) => action.targetId)
+                  ? "Choose a highlighted target or a move below."
+                  : readableText(card.text) || "Choose a move below."
+                : ownUnit && !ownUnit.ready
+                  ? "This unit is exhausted. It readies at the start of your turn."
+                  : "No legal play now. Check the cost, timing and available targets."
             : game.phase === "damage"
               ? "Click a highlighted enemy to assign your damage."
               : game.phase === "move"
@@ -139,11 +150,13 @@ export function MatchControls({
                   ? "Choose one of the available effects below."
                   : forcedPass
                     ? "No available response. Passing priority shortly."
-                    : ending?.category === "pass"
-                      ? window === "reaction"
-                        ? "Play a highlighted card to respond, or let the effect resolve."
-                        : "Play an Action or Reaction, or pass focus to continue the showdown."
-                      : "Click a glowing card to play it, or a ready unit to move. End your turn when finished.";
+                    : hiddenAvailable
+                      ? "A Hidden card is ready. Reveal it below or select it on the battlefield."
+                      : ending?.category === "pass"
+                        ? window === "reaction"
+                          ? "Play a highlighted card to respond, or let the effect resolve."
+                          : "Play an Action or Reaction, or pass focus to continue the showdown."
+                        : "Click a glowing card to play it, or a ready unit to move. End your turn when finished.";
   return (
     <section
       className={`match-controls visual-controls window-${window} ${sourceCard ? "has-source" : ""} ${review || busy ? "is-busy" : ""}`}
@@ -175,8 +188,14 @@ export function MatchControls({
             ` · ${effectCard.name}`}
           {card && !busy && !review && !paused && (
             <span className="card-cost-note">
-              {t(card.type)} · {card.energy ?? 0} {t("ENERGY")} ·{" "}
-              {card.power ?? 0} {t("power")}
+              {hidden ? (
+                t("Hidden · base cost ignored")
+              ) : (
+                <>
+                  {t(card.type)} · {card.energy ?? 0} {t("ENERGY")} ·{" "}
+                  {card.power ?? 0} {t("power")}
+                </>
+              )}
             </span>
           )}
         </strong>

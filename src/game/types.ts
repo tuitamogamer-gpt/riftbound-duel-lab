@@ -75,6 +75,7 @@ export interface PlayerState {
   power?: number;
   unitsEnterReadyTurn?: number;
   cannotPlaySpellsTurn?: number;
+  cannotPlayCardsTurn?: number;
   points: number;
   conqueredThisTurn: number[];
   cardsPlayedThisTurn: number;
@@ -248,6 +249,17 @@ export interface GameAction {
   repeatedEffects?: Effect[];
 }
 export type TargetFilter =
+  | "upToThreeUnitsSameLocation"
+  | "upToFourFriendlyUnits"
+  | "friendlyAndWeakerEnemy"
+  | "friendlyUnitThreatenedByFury"
+  | "friendlyBaseAndBattlefield"
+  | "friendlyUnitAndBattlefield"
+  | "friendlyUnitAndBaseMove"
+  | "enemyUnitAndOccupiedLocation"
+  | "enemyHereAndDifferentBattlefield"
+  | "friendlyBattlefieldAndOptionalEnemy"
+  | "battlefieldUnitAndOptionalOther"
   | "twoUnitChoices"
   | "upToOneEnemyUnitHere"
   | "twoUnitsSameBattlefield"

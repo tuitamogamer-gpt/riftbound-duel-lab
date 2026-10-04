@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sixth card wave QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Synthetic fixture only; use an isolated origin to preserve saved duels.
+      import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      const match = createCombatFixture();
+      match.turn = 7;
+      match.phase = "main";
+      match.combat = null;
+      match.currentPlayer = match.priorityPlayer = match.focusPlayer = 0;
+      match.fields[0].cardId = "ogn-276-298";
+      match.fields[1].cardId = "sfd-211-221";
+      match.fields.forEach((f) => (f.controller = 0));
+      match.players[0].points = 8;
+      match.players[0].hand = ["sfd-080-221", "ogn-270-298", "sfd-101-221"];
+      match.players[0].energy = 20;
+      match.players[0].power = 10;
+      match.players[0].championAvailable = false;
+      match.players[1].hand = [];
+      match.players[1].championAvailable = false;
+      match.units = [
+        { ...combatUnit("friend", 0, 5, "ogn-049-298"), location: "base:0" },
+        combatUnit("enemy-a", 1, 5, "ogn-049-298"),
+        combatUnit("enemy-b", 1, 5, "ogn-049-298"),
+      ];
+      match.stack = [];
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review: null }));
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

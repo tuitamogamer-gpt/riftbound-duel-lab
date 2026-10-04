@@ -1,3 +1,4 @@
+import { cardWave6Module } from "./card-wave6";
 import { originsWave4Module } from "./origins-wave4";
 import { cardWave5Module } from "./card-wave5";
 import { vendettaWave4Module } from "./vendetta-wave4";
@@ -83,6 +84,7 @@ export interface PreconContext {
   ) => void;
   killUnits: (s: GameState, ids: string[]) => void;
   getMight: (s: GameState, u: Unit, clamp?: boolean) => number;
+  canTargetUnit?: (s: GameState, p: PlayerId, u: Unit) => boolean;
   channel: (s: GameState, p: PlayerId, count: number, ready?: boolean) => void;
   moveUnit: (
     s: GameState,
@@ -113,7 +115,7 @@ export interface PreconContext {
     cardId: string,
     location: LocationId,
     ready?: boolean,
-  ) => Unit;
+  ) => Unit | undefined;
   discardCards: (s: GameState, p: PlayerId, ids: string[]) => void;
   spellPlayed: (s: GameState, p: PlayerId, cardId: string) => void;
   openChoice: (
@@ -208,6 +210,7 @@ function modules(): ExpansionModule[] {
     vendettaWave4Module,
     unleashedWave4Module,
     cardWave5Module,
+    cardWave6Module,
   ];
 }
 export function laterMight(s: GameState, u: Unit, value: number) {

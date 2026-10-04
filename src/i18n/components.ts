@@ -1,5 +1,35 @@
 // UI labels and review summaries. Printed card rules and proper names stay in English.
 export const componentMessages: Record<string, [string, string, string]> = {
+  "Your gear and equipment": [
+    "Your gear and equipment",
+    "Tvoj gear i equipment",
+    "I tuoi oggetti ed equipaggiamenti",
+  ],
+  "Opponent gear and equipment": [
+    "Opponent gear and equipment",
+    "Protivnički gear i equipment",
+    "Oggetti ed equipaggiamenti avversari",
+  ],
+  "Gear & equipment": [
+    "Gear & equipment",
+    "Gear i equipment",
+    "Oggetti ed equipaggiamenti",
+  ],
+  "Attached to {card}": [
+    "Attached to {card}",
+    "Priključeno: {card}",
+    "Assegnato a {card}",
+  ],
+  "Signature sleeve": [
+    "Signature sleeve",
+    "Signature sleeve",
+    "Dorso esclusivo",
+  ],
+  "Automatically used on your deck and face-down cards.": [
+    "Automatically used on your deck and face-down cards.",
+    "Automatski postavljen na špil i karte okrenute licem prema dolje.",
+    "Applicato automaticamente al mazzo e alle carte coperte.",
+  ],
   "{count} Energy for spells": [
     "{count} Energy for spells",
     "{count} energije za čarolije",

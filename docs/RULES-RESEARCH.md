@@ -2,6 +2,18 @@
 
 Verified on 2026-10-02. This is an implementation brief, not a reproduction of the rulebook. The current official core rules are dated **2026-07-16**; the later **2026-08-14 Vendetta FAQ** prevails where it explicitly corrects them. The Rules Hub lists constructed bans updated **2026-09-18**. A complete implementation must treat card text, official errata, and current FAQ rulings as authoritative over ordinary rules.
 
+## Sixth-wave implementation checks — 4 October 2026
+
+The [official Core Rules PDF](https://cmsassets.rgpub.io/sanity/files/dsfx7636/news_live/e9ac8e3d33e0f78cef296f5945aba7bc1313b086.pdf) and the official [Origins](https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-faq/), [Spiritforged](https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq/) and [Vendetta](https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications/) FAQs were consulted alongside preserved catalog text.
+
+- **185 / restrictions:** tokens are not cards. Brynhir prohibits opposing card plays for the turn but permits tokens and abilities; Rockfall Path prohibits all unit plays there, including tokens, while movement remains permitted. Ol' Poro counts its controller's own turns.
+- **355.4 / 355.11–13:** destinations and all initial targets are declared before reactions. Optional target counts include zero. If Bellows Breath's original targets no longer share a location, its controller selects a legal subset from those same targets; no new targets or additional Deflect payments are introduced. Saved mid-resolution choices restore correctly.
+- **356.1–4:** Hidden ignores base cost only; additional costs and increases still apply. General discounts follow additional costs and increases and may reduce Deflect/Repeat costs. Marai's component discount applies to Repeat before general discounts. Each one-Energy minimum applies to that discount; an unrestricted discount can then lower the cost further. Universal discounts retain a payable allocation across colored and universal Power groups.
+- **359.3:** relative references use the live source. Blitzcrank requires its current battlefield for the pull; Imposing Challenger rechecks its Might and location before moving the enemy. Declared targets that become illegal are skipped without substituting new ones.
+- **Simultaneous damage:** Stormbringer and Bellows apply one damage event to their affected group before death checks. Karthus's extra Deathknell occurrence is captured before simultaneously dying units leave.
+
+All 29 newly implemented faces have focused engine coverage. Full multiple-instance Repeat and public-trash object identities are not claimed as implemented.
+
 ## Fifth-wave checks — 4 October 2026
 
 - [Spiritforged FAQ](https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq/): Falling Star declares both choices before responses, including separate Deflect payments if the same unit is chosen twice. Janna heals friendly units here and may move up to one enemy; an absent enemy does not prevent healing.

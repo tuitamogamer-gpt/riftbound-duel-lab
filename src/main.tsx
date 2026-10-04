@@ -23,6 +23,7 @@ import "./match-layout.css";
 import "./battlefield-layout.css";
 import "./desktop-table.css";
 import "./components/MatchControls.css";
+import "./equipment-sleeves.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <LanguageProvider>

@@ -1,3 +1,4 @@
+import { canPlayCard } from "./board-rules";
 import { cards, getCard, type Card } from "../data/cards";
 import type {
   CardScript,
@@ -622,6 +623,7 @@ export const spiritforgedModule: ExpansionModule = {
           !u ||
           u.owner !== p ||
           index < 0 ||
+          !canPlayCard(s, p, c, loc as LocationId) ||
           !ctx.canPay(s, p, e.amount ?? 0, c.power ?? 0, c.domains)
         )
           break;

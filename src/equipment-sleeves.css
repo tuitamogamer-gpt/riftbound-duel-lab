@@ -1,0 +1,319 @@
+/* Public gear is a separate row of real card faces. Row overflow stays local. */
+.app.is-game .base-zone.has-gear {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: stretch;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 5px;
+}
+.app.is-game .has-gear .base-units {
+  container-type: size;
+  height: 100%;
+  --unit-card-height: min(
+    calc(100cqh - 8px),
+    calc((100cqw - 4px) * 1039 / 744)
+  );
+}
+.gear-zone {
+  display: grid;
+  position: relative;
+  grid-template-rows: minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  border-top: 1px solid #b89d6255;
+  padding-top: 14px;
+}
+.gear-zone-heading {
+  position: absolute;
+  top: 1px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #ddc28e;
+  font-size: 9px;
+  line-height: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.gear-zone-heading b {
+  margin-left: auto;
+}
+.gear-slots {
+  container-type: size;
+  --gear-height: min(
+    100cqh,
+    140px,
+    max(
+      54px,
+      calc(
+        (100cqw - (var(--gear-count) - 1) * 7px) / var(--gear-count) * 1039 /
+          744
+      )
+    )
+  );
+  --gear-width: calc(var(--gear-height) * 744 / 1039);
+  display: flex;
+  align-items: start;
+  gap: 7px;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 3px 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #a28d63 #132830;
+  overscroll-behavior-x: contain;
+}
+.gear-slot {
+  position: relative;
+  flex: 0 0 var(--gear-width);
+  width: var(--gear-width);
+  height: var(--gear-height);
+  border-radius: 4px;
+  background: #0a1720;
+  box-shadow: 0 0 0 1px #9b865860;
+}
+.app.is-game .gear-slot > .game-card.small {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+  transform: none;
+  aspect-ratio: 744 / 1039;
+}
+.gear-slot .game-card > img {
+  object-fit: contain;
+}
+.gear-inspect {
+  position: absolute;
+  z-index: 2;
+  top: 2px;
+  right: 2px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #ddc28e66;
+  border-radius: 50%;
+  padding: 0;
+  color: #fff0cc;
+  background: #06121dee;
+}
+.gear-attachment {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 3px 2px;
+  border: 1px solid #bc9b5d;
+  border-radius: 0 0 4px 4px;
+  background: #192d32ee;
+  color: #ffe2a8;
+  font-size: 8px;
+}
+.gear-attachment span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gear-attachment svg {
+  flex: none;
+}
+.gear-slot .exhausted-token {
+  width: 26px;
+  height: 26px;
+}
+.gear-slot .card-zoom {
+  display: none;
+}
+
+/* The sleeve itself is a complete local asset, shared by every face-down zone. */
+img.signature-sleeve {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+}
+.app.is-game .card-back {
+  padding: 0;
+  background: #08101b;
+  overflow: hidden;
+}
+.app.is-game .pile-art.pile-back {
+  background: #08101b;
+  border-color: #dac28e;
+}
+.app.is-game .deck-summary > .pile-back {
+  width: 128px;
+  height: 179px;
+  flex: none;
+}
+.sleeve-credit {
+  display: block;
+  margin-top: 10px;
+  color: #d2b87f;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+.hidden-card {
+  position: relative;
+  padding-left: 36px;
+  min-height: 42px;
+}
+.hidden-card > .signature-sleeve {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: 25px;
+  height: calc(100% - 6px);
+  object-fit: contain;
+}
+.deck-sleeve-preview {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding: 14px;
+  margin: 18px 0;
+  background: #122432;
+  border: 1px solid #a48d6455;
+  border-radius: 8px;
+}
+.deck-sleeve-preview > .signature-sleeve {
+  width: 92px;
+  height: 129px;
+  border-radius: 5px;
+}
+.deck-sleeve-preview strong {
+  color: #eed5a2;
+}
+.deck-sleeve-preview p {
+  font-size: 12px;
+  max-width: 34ch;
+}
+
+@media (min-width: 1100px) and (min-height: 650px) {
+  .app.is-game .base-zone.has-gear {
+    padding-bottom: 7px;
+    grid-template-rows: minmax(0, 0.8fr) minmax(0, 1.3fr);
+  }
+  .app.is-game .base-zone.has-gear[data-location="base:1"] {
+    padding-top: 70px;
+  }
+  .app.is-game .opponent-cards > .opponent-hand-section {
+    height: 36px;
+  }
+  .app.is-game .card-back {
+    width: 22px;
+    height: 31px;
+  }
+  .app.is-game .player-cards .enemy-hand {
+    flex-wrap: nowrap;
+    flex-basis: 120px;
+  }
+  .app.is-game .player-cards .enemy-hand > span {
+    flex: 1;
+    font-size: 9px;
+    margin: 0;
+  }
+  .app.is-game .base-zone.has-gear:has(.base-units > .empty-base) {
+    grid-template-rows: 18px minmax(0, 1fr);
+  }
+  .app.is-game .has-gear .empty-base {
+    font-size: 9px;
+    line-height: 1;
+    max-width: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+@media (max-width: 1099px), (max-height: 649px) {
+  .app.is-game .playmat:has(.has-gear) {
+    grid-template-rows:
+      23px minmax(44px, 0.95fr) minmax(112px, 1.65fr) minmax(150px, 3fr)
+      minmax(112px, 1.65fr) 23px minmax(64px, 1.35fr);
+  }
+  .app.is-game .base-zone.has-gear {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    grid-template-rows: minmax(0, 1fr);
+    padding-top: 8px;
+    gap: 8px;
+  }
+  .gear-zone {
+    padding-top: 11px;
+  }
+  .gear-zone-heading {
+    font-size: 7px;
+    line-height: 9px;
+    letter-spacing: 0.5px;
+  }
+  .gear-slots {
+    gap: 6px;
+  }
+  .gear-inspect {
+    width: 18px;
+    height: 18px;
+  }
+  .gear-slot .exhausted-token {
+    width: 20px;
+    height: 20px;
+  }
+}
+/* Shorter desktop tables retain full card faces by placing the two lanes beside
+   one another. Tall screens keep equipment directly below the unit row. */
+@media (min-width: 1100px) and (min-height: 650px) and (max-height: 940px) {
+  .app.is-game .base-zone.has-gear,
+  .app.is-game .base-zone.has-gear:has(.base-units > .empty-base) {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .app.is-game .base-zone.has-gear[data-location="base:1"] {
+    padding-top: 63px;
+  }
+  .app.is-game .opponent-cards > .opponent-hand-section {
+    margin-top: 23px;
+  }
+  .gear-zone-heading {
+    font-size: 8px;
+    letter-spacing: 0.3px;
+  }
+}
+@media (max-width: 650px) {
+  .hidden-card {
+    padding-left: 25px;
+    min-height: 30px;
+  }
+  .hidden-card > .signature-sleeve {
+    width: 18px;
+  }
+  .app.is-game .enemy-hand .card-back:first-child {
+    display: block;
+    width: 18px;
+    height: 25px;
+    flex: none;
+  }
+  .app.is-game .player-cards .enemy-hand {
+    flex-wrap: nowrap;
+  }
+  .app.is-game .player-cards .enemy-hand > span {
+    font-size: 6px;
+  }
+}
+@media (max-height: 740px) and (max-width: 1099px), (max-height: 600px) {
+  .app.is-game .match-content:has(.has-gear) {
+    overflow-y: auto;
+  }
+  .app.is-game .playmat:has(.has-gear) {
+    min-height: 555px;
+  }
+}

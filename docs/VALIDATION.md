@@ -1,5 +1,13 @@
 # Validation evidence
 
+## Sixth card wave — 4 October 2026
+
+At 14:14 Sarajevo time, the integrated working tree passed **1,387 tests in 53 files**, including all 169 ordered precon pairings and the existing mixed-expansion games. The new wave has **47 focused tests**. TypeScript/production bundling, `npm run cards:check` and `git diff --check` passed; the existing catalog chunk-size warning remains. Registry coverage is **1,102 executable / 354 unsupported** out of 1,456 entries, a gain of 39 printings from 29 card faces. The provider catalog and original text were not changed.
+
+Tests cover every new face and shared interactions: card-versus-token restrictions, own-turn counting, one-rune Channel phases, dynamic ninth-point victory and final-conquest replacement, duplicate Deathknell on simultaneous deaths, upfront compound declarations, partial resolution, live-source movement, group subset choice/reload, buff-spend Gold triggers, Fury threat checks, Hidden/Flow/Ambush taxes, Repeat discounts, colored/universal payment allocation, Deflect reductions and limited Energy floors. Unknown effects remain excluded from playable decks.
+
+Browser verification used the synthetic `tests/card-wave6-preview.html` fixture on an isolated origin (`127.0.0.1:5286`). The real UI resumed the fixture at **8/9** with Aspirant's Climb, offered Bellows target/Repeat choices with Marai's discount, and played Bellows through the normal controls. After resolution the target showed one damage, the card was in trash, resources had changed from 20 Energy / 10 Power to 19 / 9, and the next-action controls were available again. No console warnings or errors were captured. [Screenshot](screenshots/card-wave6.jpg).
+
 ## Fifth card wave and website deck codes — 4 October 2026
 
 The integrated working tree passed **1,331 tests in 51 files**, including the 169 ordered precon pairings. After the final test-fixture typing and translation corrections, the 75 focused card-wave, deck-source and translation tests passed again. `npm run build`, `npm run cards:check`, and `git diff --check` passed. The existing Vite catalog chunk-size warning remains. The refreshed catalog has **1,456 registered entries (1,451 provider printings plus five tokens), 1,063 executable and 393 unsupported**. The fifth wave adds 25 explicit faces and 34 executable printings.

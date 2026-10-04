@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Layers3, Trash2, X } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import { findCard, type CatalogCard } from "../catalog";
 import { cardArtUrl } from "../data/art";
 import type { GameAction, GameState, PlayerId } from "../game/types";
 import { useI18n } from "../i18n";
 import { Card } from "./Card";
+import { CardSleeve } from "./CardSleeve";
+import { getSignatureSleeve } from "../data/sleeves";
 
 export type PileView = { player: PlayerId; zone: "deck" | "trash" };
 
@@ -30,8 +32,7 @@ export function CardPiles({
         })}
       >
         <span className="pile-art pile-back" aria-hidden="true">
-          <Layers3 size={22} />
-          <b>R</b>
+          <CardSleeve player={player} />
         </span>
         <span className="pile-caption">
           <strong>{t("Deck")}</strong>
@@ -201,11 +202,14 @@ export function PileDialog({
         ) : (
           <div className="deck-summary">
             <span className="pile-art pile-back" aria-hidden="true">
-              <Layers3 size={32} />
-              <b>R</b>
+              <CardSleeve player={player} />
             </span>
             <div>
               <strong>{t("{count} cards remaining", { count })}</strong>
+              <span className="sleeve-credit">
+                {getSignatureSleeve(player).name} ·{" "}
+                {getSignatureSleeve(player).title}
+              </span>
               <p>
                 {t("Cards in the deck stay face down. Draw them during play.")}
               </p>

@@ -63,6 +63,7 @@ export function sourceActions(
   return choices.filter(
     (action) =>
       !action.sourceId ||
+      action.sourceId.startsWith("hidden:") ||
       action.sourceId.startsWith("trash:") ||
       action.sourceId.startsWith("field:"),
   );

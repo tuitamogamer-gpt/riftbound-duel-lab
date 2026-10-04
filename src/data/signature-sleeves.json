@@ -1,0 +1,93 @@
+{
+  "annie": {
+    "name": "Annie",
+    "title": "EMBERHEART",
+    "color": "#ff7947",
+    "secondary": "#a63055",
+    "mark": "M50 8C64 30 78 33 76 56C74 81 29 85 24 61C19 40 38 35 38 20C47 29 42 42 51 48C59 37 49 29 50 8Z M49 50C66 66 59 77 49 77C38 77 34 63 49 50Z"
+  },
+  "lux": {
+    "name": "Lux",
+    "title": "FIRST LIGHT",
+    "color": "#f4da98",
+    "secondary": "#929bff",
+    "mark": "M50 8L59 38L89 48L59 58L50 89L41 58L11 48L41 38Z M50 31L65 48L50 65L35 48Z"
+  },
+  "garen": {
+    "name": "Garen",
+    "title": "CROWN OF DEMACIA",
+    "color": "#f4c667",
+    "secondary": "#437dce",
+    "mark": "M50 7L59 22L55 63H72L65 71H54V83L50 91L46 83V71H35L28 63H45L41 22Z M16 31L31 42V61L17 52Z M84 31L69 42V61L83 52Z"
+  },
+  "master-yi": {
+    "name": "Master Yi",
+    "title": "WAY OF WUJU",
+    "color": "#b8e484",
+    "secondary": "#30a79b",
+    "mark": "M50 6L56 25L53 75L50 88L47 75L44 25Z M25 16L37 30L39 76L32 69L28 34Z M75 16L63 30L61 76L68 69L72 34Z M22 78H78"
+  },
+  "jinx": {
+    "name": "Jinx",
+    "title": "BEAUTIFUL CHAOS",
+    "color": "#f67bc8",
+    "secondary": "#38cfee",
+    "mark": "M50 8C65 22 66 41 62 57L72 72L57 69L50 86L43 69L28 72L38 57C34 41 35 22 50 8Z M43 39A7 7 0 1 0 57 39A7 7 0 1 0 43 39 M18 22L24 29L14 38 M80 40L87 50L75 59"
+  },
+  "viktor": {
+    "name": "Viktor",
+    "title": "GLORIOUS EVOLUTION",
+    "color": "#dfacfc",
+    "secondary": "#548cff",
+    "mark": "M50 8L83 27V65L50 84L17 65V27Z M50 25L68 35V57L50 67L32 57V35Z M50 25V8 M68 57L83 65 M32 57L17 65 M50 38L58 46L50 54L42 46Z"
+  },
+  "lee-sin": {
+    "name": "Lee Sin",
+    "title": "DRAGON SPIRIT",
+    "color": "#f5c16b",
+    "secondary": "#da5d43",
+    "mark": "M62 13C27 7 10 41 25 68C38 93 75 83 80 59C84 38 60 27 48 40C36 53 51 70 62 60C73 48 59 39 54 45 M31 18L27 9 M20 28L10 23 M73 76L83 84"
+  },
+  "fiora": {
+    "name": "Fiora",
+    "title": "THE PERFECT DUEL",
+    "color": "#f0bbd3",
+    "secondary": "#876fca",
+    "mark": "M50 6L54 52L70 66L64 75L54 66L54 80L50 90L46 80V66L36 75L30 66L46 52Z M24 32L14 46L24 60 M76 32L86 46L76 60"
+  },
+  "rumble": {
+    "name": "Rumble",
+    "title": "OVERDRIVE",
+    "color": "#ffc263",
+    "secondary": "#f06b35",
+    "mark": "M40 13H60L63 24L73 29L84 27L94 44L85 52V62L89 72L74 84L63 77L53 82L49 92L29 87L29 74L21 67L9 67L6 47L18 42L23 32L22 20Z M35 52A15 15 0 1 0 65 52A15 15 0 1 0 35 52"
+  },
+  "vi": {
+    "name": "Vi",
+    "title": "HEXTECH IMPACT",
+    "color": "#ff9dc3",
+    "secondary": "#46bfe0",
+    "mark": "M25 24L36 18L46 22L56 16L67 22L78 20L86 30L83 56L67 76H34L21 59L13 45L17 34L28 40Z M34 76V88H66V76 M36 27V43 M50 26V43 M65 27V43"
+  },
+  "vex": {
+    "name": "Vex",
+    "title": "ENDLESS GLOOM",
+    "color": "#ad92ed",
+    "secondary": "#4cdbb2",
+    "mark": "M69 14C45 10 20 29 20 52C20 79 50 91 73 77C49 77 38 62 42 44C46 27 58 20 69 14Z M59 44L71 49L59 55Z M78 41L87 46L78 52Z"
+  },
+  "shen": {
+    "name": "Shen",
+    "title": "TWILIGHT BALANCE",
+    "color": "#a9afff",
+    "secondary": "#ab72c3",
+    "mark": "M36 9L43 25L40 69L36 82L32 69L29 25Z M64 9L71 25L68 69L64 82L60 69L57 25Z M20 63H49 M51 63H80 M12 43Q50 9 88 43Q50 77 12 43Z"
+  },
+  "zed": {
+    "name": "Zed",
+    "title": "SHADOW ORDER",
+    "color": "#f58686",
+    "secondary": "#9f465a",
+    "mark": "M50 6L59 34L88 20L69 47L93 65L64 63L61 92L47 69L20 88L34 59L7 47L36 40Z M42 49A8 8 0 1 0 58 49A8 8 0 1 0 42 49"
+  }
+}
