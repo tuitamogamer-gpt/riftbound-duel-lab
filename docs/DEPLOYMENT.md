@@ -24,13 +24,22 @@ The public application loaded the lobby and started an Annie versus Lux duel. Ke
 
 ## Future updates
 
-This release was pushed with GitHub CLI and deployed with Vercel CLI. Automatic deployment on GitHub push has **not** been configured. The existing Vercel GitHub integrations were not changed.
+The first release was pushed with GitHub CLI and deployed with Vercel CLI. Since then the Vercel project deploys automatically from GitHub: every push to `main` builds and publishes to the production URL, so a release is complete once the commit is on `main`.
 
 From the repository root, after tests and the build pass:
 
 ```sh
 git push origin main
+```
+
+The Vercel CLI remains available for a manual production deploy when needed:
+
+```sh
 /Users/boro/.local/share/riftbound-publish/vercel-cli/node_modules/.bin/vercel deploy --prod --yes --scope tuitamogamer-7851s-projects
 ```
 
-The local `.vercel/` project link and `.env.local` are ignored by Git. Credentials remain in the CLI's normal authentication storage and are not committed. The documentation commit recording this verification does not change the deployed application.
+The local `.vercel/` project link and `.env.local` are ignored by Git. Credentials remain in the CLI's normal authentication storage and are not committed. Documentation-only commits still trigger a build but do not change the application.
+
+## Release history
+
+- 2026-10-05, commit `786f5f7`: visual system pass (match table skin, lobby and dialog polish); see [DESIGN-REVIEW.md](DESIGN-REVIEW.md). Deployed automatically from `main`.
