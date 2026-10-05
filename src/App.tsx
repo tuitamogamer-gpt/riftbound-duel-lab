@@ -536,7 +536,18 @@ export default function App() {
               <strong className="match-brand">
                 RIFTBOUND <small>DUEL LAB</small>
               </strong>
-              <div className="turn-indicator">
+              <div
+                className="turn-indicator"
+                data-state={
+                  game.winner !== null
+                    ? "ended"
+                    : review
+                      ? "resolving"
+                      : thinking
+                        ? "opponent"
+                        : "you"
+                }
+              >
                 {t(
                   game.winner !== null
                     ? "Meč završen"

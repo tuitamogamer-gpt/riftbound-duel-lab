@@ -97,4 +97,4 @@ Riftbound Duel Lab isn't endorsed by Riot Games and doesn't reflect the views or
 
 ## Generated art
 
-Three original imagegen backgrounds are saved in `assets/originals/` and optimized in `public/art/`. Full prompts, style decisions, and asset paths are in [docs/ART-DIRECTION.md](docs/ART-DIRECTION.md). The interface uses a League of Legends inspired navy, antique gold, and arcane cyan style with locally bundled Cinzel headings.
+Three original imagegen backgrounds are saved in `assets/originals/` and optimized in `public/art/`. Full prompts, style decisions, and asset paths are in [docs/ART-DIRECTION.md](docs/ART-DIRECTION.md). The lobby, library and dialogs use a paper-and-ink comic layout with teal and gold accents; the match table is a dark ink surface over the Rift terrace art with gold battlefield frames, teal for your side and rose for the opponent. Display type is locally bundled Exo 2 with DM Sans for text. The current visual system is recorded in [docs/DESIGN-REVIEW.md](docs/DESIGN-REVIEW.md).

@@ -1,4 +1,6 @@
-/* Match table: ink navy, clearly separated sides, and readable action controls. */
+/* Match table base: ink navy, clearly separated sides, readable controls.
+   Colour, surfaces and chrome are refined by src/match-skin.css, which loads
+   after every layout sheet; keep geometry here and visual polish there. */
 .app.is-game {
   background: #10202d;
   color: #eef3f5;

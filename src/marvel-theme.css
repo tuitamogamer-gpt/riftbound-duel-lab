@@ -510,21 +510,25 @@ body {
 }
 .rift-champions {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 11px;
+  grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
+  gap: 12px;
 }
 .rift-champion {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  height: 250px;
+  height: 240px;
   text-align: left;
   border: 2px solid #172632;
-  border-radius: 5px;
+  border-radius: 6px;
   box-shadow: 2px 4px 0 #17263228;
   background: #162632;
   padding: 0;
   color: #fff;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    border-color 0.2s;
 }
 .rift-champion:after {
   position: absolute;
@@ -551,7 +555,8 @@ body {
   transition: transform 0.3s;
 }
 .rift-champion:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
+  box-shadow: 3px 7px 0 #17263240;
 }
 .rift-champion:hover img {
   transform: scale(1.05);
@@ -561,6 +566,15 @@ body {
   outline: 2px solid #087b83;
   outline-offset: 2px;
   box-shadow: 3px 6px 0 #172632;
+}
+.rift-champion.is-selected:after {
+  background: linear-gradient(
+    0deg,
+    #0d3034 0%,
+    #0d3034f2 18%,
+    #14263130 57%,
+    transparent 80%
+  );
 }
 .rift-selection-check {
   display: none;
@@ -744,11 +758,14 @@ body {
   margin: 8px 0 16px;
 }
 .rift-opponent {
+  position: sticky;
+  top: 20px;
   padding: 24px 22px 19px;
   border: 2px solid #172632;
   border-top: 5px solid #087b83;
   border-radius: 6px;
-  background: #172a39;
+  background:
+    radial-gradient(80% 40% at 50% 0%, #087b8322, transparent 70%), #172a39;
   color: #f5f4ee;
   box-shadow: 4px 5px 0 #17263230;
 }
@@ -1040,6 +1057,25 @@ body {
 }
 .app .library .catalog-card-name strong {
   color: #172632;
+  font-size: 12px;
+  font-weight: 700;
+}
+.app .library .scripted-badge,
+.app .library .catalog-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+.app .library .catalog-grid .game-card {
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+.app .library .catalog-grid .game-card:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    4px 7px 0 #17263240,
+    0 0 0 2px #087b83;
 }
 .app .library .scripted-badge {
   color: #08635d;
@@ -1115,8 +1151,83 @@ body {
 .app .deck-list-modal pre,
 .app .deck-import textarea {
   color: #233844;
-  border-color: #829595;
-  background: #eeeade;
+  border: 1.5px solid #172632;
+  border-radius: 4px;
+  background: #fffdf5;
+}
+.app .deck-import-name,
+.app .deck-import-champion select {
+  color: #172632;
+  border: 1.5px solid #172632;
+  border-radius: 4px;
+  background: #fffdf5;
+}
+.app .deck-import-name::placeholder,
+.app .deck-import textarea::placeholder {
+  color: #7d8a90;
+}
+.app .deck-import-sites {
+  background: #e6efea;
+  border: 1px solid #087b8344;
+  border-radius: 4px;
+}
+.app .deck-import-sites a {
+  color: #08747c;
+  font-weight: 700;
+}
+.app .deck-import-success,
+.app .deck-import-coverage {
+  border: 1.5px solid #17263225;
+  border-radius: 4px;
+  background: #fffdf5;
+}
+.app .deck-import-success {
+  color: #086c60;
+  background: #e6efea;
+}
+.app .deck-import-errors {
+  background: #fbeae8;
+  border-color: #a6323555;
+}
+.app .deck-sleeve-preview {
+  background: #fffdf5;
+  border: 1.5px solid #172632;
+  border-radius: 6px;
+  box-shadow: 2px 3px 0 #17263220;
+}
+.app .deck-sleeve-preview strong {
+  color: #172632;
+}
+.app .deck-sleeve-preview p {
+  color: #52636d;
+}
+.app .deck-preview-list {
+  background: #fffdf5;
+  border: 1.5px solid #172632;
+  border-radius: 6px;
+  box-shadow: 2px 3px 0 #17263220;
+}
+.app .deck-preview-list h3 {
+  color: #08747c;
+  font-weight: 800;
+}
+.app .deck-preview-list button {
+  color: #172632;
+  border-bottom: 1px solid #17263218;
+}
+.app .deck-preview-list button:hover,
+.app .deck-preview-list button:focus-visible {
+  background: #e2ebe7;
+  color: #172632;
+  outline: 2px solid #087b83;
+  outline-offset: -2px;
+}
+.app .deck-preview-list button span {
+  color: #08747c;
+  font-weight: 800;
+}
+.app .deck-preview-list button svg {
+  color: #087b83;
 }
 .app .deck-source-links a,
 .app .deck-import-label {
@@ -1191,10 +1302,10 @@ body {
     font-size: 8px;
   }
   .rift-champions {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
   .rift-champion {
-    height: 240px;
+    height: 224px;
   }
   .rift-step-heading small {
     display: none;
@@ -1465,6 +1576,7 @@ body {
     font-size: 10px;
   }
   .rift-opponent {
+    position: static;
     padding: 22px;
   }
   .rift-opponent .rift-step-heading h3 {

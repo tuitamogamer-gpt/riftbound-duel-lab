@@ -2,11 +2,9 @@
   position: fixed;
   z-index: 1000;
   display: grid;
-  grid-template-columns: min(
-      26vw,
-      360px,
-      calc((100dvh - 100px) * 0.714)
-    ) minmax(0, 1fr);
+  grid-template-columns:
+    min(26vw, 360px, calc((100dvh - 100px) * 0.714))
+    minmax(0, 1fr);
   width: min(840px, 56vw, calc(100vw - 24px));
   max-height: calc(100dvh - 24px);
   overflow: auto;
@@ -16,10 +14,11 @@
   color: #f5f1e9;
   background: linear-gradient(140deg, #183640, #0c202b 65%);
   border: 1px solid color-mix(in srgb, var(--preview-accent) 60%, #ffffff20);
-  border-radius: 22px 8px 22px 8px;
+  border-radius: 14px;
   box-shadow:
     0 20px 70px #000b,
-    0 0 0 1px #050a10;
+    0 0 0 1px #050a10,
+    0 0 0 5px color-mix(in srgb, var(--preview-accent) 18%, transparent);
   font-family: "DM Sans", sans-serif;
   text-align: left;
   animation: card-preview-appear 140ms ease-out both;
@@ -155,11 +154,9 @@
 @media (max-width: 900px) and (min-width: 551px) {
   .card-preview {
     width: min(720px, calc(100vw - 24px));
-    grid-template-columns: min(
-        38vw,
-        300px,
-        calc((100dvh - 100px) * 0.714)
-      ) minmax(0, 1fr);
+    grid-template-columns:
+      min(38vw, 300px, calc((100dvh - 100px) * 0.714))
+      minmax(0, 1fr);
     gap: 18px;
     padding: 16px;
   }

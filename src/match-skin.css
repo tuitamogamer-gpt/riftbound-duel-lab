@@ -1,0 +1,1278 @@
+/* Match table skin. Loads last on purpose: the layout sheets (match-layout,
+   battlefield-layout, desktop-table, MatchControls) own geometry, this sheet
+   owns colour, surface, type and chrome so the table reads as one object.
+   Hierarchy: battlefields > hand > bases > runes and setup zones > chrome. */
+.app.is-game {
+  --ink-0: #050b11;
+  --ink-1: #0a151e;
+  --ink-2: #0f1f2b;
+  --ink-3: #152a38;
+  --ink-4: #1c3647;
+  --line-soft: #ffffff10;
+  --line: #ffffff1c;
+  --line-strong: #ffffff30;
+  --gold: #e9c97b;
+  --gold-bright: #f6dd9a;
+  --gold-deep: #b48f45;
+  --gold-line: #c9a85c66;
+  --you: #5ad8c6;
+  --you-deep: #1f6f68;
+  --you-line: #5ad8c666;
+  --foe: #f29a9a;
+  --foe-deep: #7a3b47;
+  --foe-line: #f29a9a66;
+  --violet: #c7a8ff;
+  --text: #eff4f6;
+  --text-2: #bccad3;
+  --text-3: #8c9ea8;
+  --display: "Exo 2", "DM Sans", sans-serif;
+  --body: "DM Sans", sans-serif;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --glass: #0b1822cc;
+  --shadow-panel: 0 10px 30px #02070c80;
+  color: var(--text);
+  background:
+    radial-gradient(60% 45% at 100% 0%, #c9a85c10, transparent 70%),
+    radial-gradient(55% 50% at 0% 100%, #1f6f6818, transparent 70%),
+    var(--ink-0);
+}
+.app.is-game ::selection {
+  background: #e9c97b55;
+}
+.app.is-game button {
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.15s;
+}
+.app.is-game button:focus-visible,
+.app.is-game select:focus-visible,
+.app.is-game [data-card-preview]:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+}
+
+/* ---------- Header: toolbar and turn sequence ---------- */
+.app.is-game .match-toolbar {
+  color: var(--text-3);
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  border-bottom: 0;
+}
+.app.is-game .match-toolbar > span {
+  padding: 0 10px;
+  border-right: 0;
+  color: var(--text-2);
+  font-weight: 600;
+}
+.app.is-game .match-toolbar .text-button {
+  color: var(--text-2);
+  font-size: 11px;
+  gap: 6px;
+  padding: 6px 10px 6px 6px;
+  border-radius: 999px;
+}
+.app.is-game .match-toolbar .text-button:hover {
+  color: var(--gold-bright);
+  background: var(--line-soft);
+}
+.app.is-game .match-brand {
+  font:
+    italic 800 16px/1 var(--display),
+    sans-serif;
+  letter-spacing: 1.2px;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+.app.is-game .match-brand small {
+  margin-left: 4px;
+  font:
+    700 8px/1 var(--body),
+    sans-serif;
+  letter-spacing: 2.2px;
+  color: var(--text-3);
+}
+.app.is-game .turn-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--ink-2);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.app.is-game .turn-indicator:before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--you);
+  box-shadow: 0 0 8px var(--you);
+}
+.app.is-game .turn-indicator[data-state="opponent"]:before {
+  background: var(--foe);
+  box-shadow: 0 0 8px var(--foe);
+}
+.app.is-game .turn-indicator[data-state="resolving"]:before {
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+  animation: pulse 1.1s infinite;
+}
+.app.is-game .turn-indicator[data-state="ended"]:before {
+  background: var(--text-3);
+  box-shadow: none;
+}
+.app.is-game .match-toolbar .icon-button {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: var(--text-2);
+}
+.app.is-game .match-toolbar .icon-button:hover {
+  color: var(--gold-bright);
+  background: var(--line-soft);
+}
+.app.is-game .match-toolbar .language-selector select {
+  border-color: var(--line);
+  border-radius: 8px;
+  color: var(--text-2);
+  background: var(--ink-2);
+  font-size: 10px;
+}
+.app.is-game .turn-flow {
+  background: linear-gradient(90deg, var(--ink-2), var(--ink-1));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 4px 14px;
+  gap: 20px;
+  box-shadow: inset 0 1px 0 #ffffff08;
+}
+.app.is-game .turn-owner {
+  font:
+    italic 800 12px/1 var(--display),
+    sans-serif;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--you);
+}
+.app.is-game .turn-owner.is-opponent {
+  color: var(--foe);
+}
+.app.is-game .turn-steps {
+  gap: 4px;
+}
+.app.is-game .turn-steps li {
+  gap: 7px;
+  padding: 3px 9px 3px 4px;
+  border-radius: 999px;
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 500;
+}
+.app.is-game .turn-steps b {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--line-strong);
+  background: var(--ink-1);
+  color: var(--text-2);
+  font-size: 10px;
+  font-weight: 700;
+}
+.app.is-game .turn-steps .is-complete {
+  color: var(--text-3);
+}
+.app.is-game .turn-steps .is-complete b {
+  border-color: var(--you-line);
+  color: var(--you);
+  background: #1f6f6833;
+}
+.app.is-game .turn-steps .is-current {
+  background: #e9c97b14;
+  color: var(--gold-bright);
+  font-weight: 700;
+}
+.app.is-game .turn-steps .is-current b {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold-deep));
+  color: #1a1407;
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 12px #e9c97b66;
+}
+.app.is-game .priority-window {
+  border-left: 1px solid var(--line);
+  color: var(--gold);
+  padding-left: 16px;
+}
+.app.is-game .priority-window strong {
+  font:
+    italic 800 12px/1.2 var(--display),
+    sans-serif;
+  letter-spacing: 0.5px;
+  color: var(--gold-bright);
+}
+.app.is-game .priority-window small {
+  color: var(--text-2);
+  font-size: 10px;
+}
+.app.is-game .turn-flow.window-reaction .priority-window {
+  color: var(--violet);
+}
+.app.is-game .turn-flow.window-reaction .priority-window strong {
+  color: var(--violet);
+}
+.app.is-game .turn-flow.window-damage .priority-window strong {
+  color: #ffb28a;
+}
+
+/* ---------- Playmat ---------- */
+.app.is-game .playmat {
+  isolation: isolate;
+  overflow: visible;
+  border: 1px solid var(--gold-line);
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      180deg,
+      #0a151ee6 0%,
+      #0a151ea8 30%,
+      #0a151ea8 70%,
+      #0a151ef0
+    ),
+    url("/art/rift-terrace.webp") center 42% / cover no-repeat,
+    var(--ink-1);
+  box-shadow:
+    inset 0 0 0 1px #ffffff08,
+    inset 0 0 90px #02070c99,
+    0 24px 60px #02070c99;
+}
+.app.is-game .playmat:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 60% at 50% 50%, transparent 40%, #05090e8c 100%),
+    linear-gradient(
+      90deg,
+      #05090e66,
+      transparent 18%,
+      transparent 82%,
+      #05090e66
+    );
+}
+
+/* ---------- Player identity ---------- */
+.app.is-game .player-bar {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--ink-3), var(--ink-2));
+  box-shadow: inset 0 1px 0 #ffffff08;
+}
+.app.is-game .player-bar:before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--you);
+  box-shadow: 0 0 14px var(--you);
+}
+.app.is-game .player-bar.player-1 {
+  background: linear-gradient(90deg, #2a1f2a, var(--ink-2));
+  border-color: #f29a9a33;
+}
+.app.is-game .player-bar.player-1:before {
+  background: var(--foe);
+  box-shadow: 0 0 14px var(--foe);
+}
+.app.is-game .player-bar.player-0 {
+  border-color: #5ad8c633;
+}
+.app.is-game .legend-portrait {
+  border: 2px solid var(--gold-deep);
+  box-shadow:
+    0 0 0 2px var(--ink-1),
+    0 0 0 3px var(--gold-line);
+}
+.app.is-game .player-name strong {
+  font:
+    italic 800 12px/1.2 var(--display),
+    sans-serif;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text);
+  text-shadow: none;
+}
+.app.is-game .player-name small {
+  color: var(--text-3);
+  font-size: 10px;
+}
+.app.is-game .score {
+  border-left: 0;
+}
+.app.is-game .score > span {
+  font:
+    italic 800 22px/1 var(--display),
+    sans-serif;
+  color: var(--you);
+  text-shadow: 0 0 16px #5ad8c655;
+}
+.app.is-game .player-1 .score > span {
+  color: var(--foe);
+  text-shadow: 0 0 16px #f29a9a55;
+}
+.app.is-game .score > small {
+  color: var(--text-3);
+  font-size: 10px;
+  font-weight: 600;
+}
+.app.is-game .score-pips i {
+  background: var(--line-strong);
+}
+.app.is-game .score-pips i.filled {
+  background: var(--gold);
+}
+.app.is-game .player-bar.event-highlight {
+  background: linear-gradient(90deg, #4a3a1e, var(--ink-2));
+  outline-color: var(--gold) !important;
+}
+
+/* ---------- Setup zones: legend and champion ---------- */
+.app.is-game .setup-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #0f1f2bcc;
+  box-shadow: inset 0 1px 0 #ffffff06;
+}
+.app.is-game .legend-zone {
+  border-color: var(--gold-line);
+  background: linear-gradient(160deg, #2a2616cc, #0f1f2bcc 60%);
+}
+.app.is-game .setup-card.is-selected {
+  border-color: var(--gold);
+  box-shadow:
+    0 0 0 1px var(--gold-line),
+    0 0 18px #e9c97b33;
+}
+.app.is-game .setup-card-heading {
+  color: var(--text-3);
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+.app.is-game .legend-zone .setup-card-heading > span:first-child {
+  color: var(--gold);
+}
+.app.is-game .setup-status {
+  color: var(--text-3);
+}
+.app.is-game .setup-status.is-ready {
+  color: var(--you);
+}
+.app.is-game .setup-card-name {
+  color: var(--text);
+  font-weight: 600;
+}
+.app.is-game .setup-empty-art {
+  border: 1px dashed var(--line-strong);
+  border-radius: 5px;
+  background: #0a151e99;
+  color: var(--text-3);
+}
+.app.is-game .setup-empty-art:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+/* ---------- Hidden hand and runes ---------- */
+.app.is-game .player-cards .enemy-hand {
+  background: transparent;
+}
+.app.is-game .player-cards .enemy-hand > span {
+  color: var(--text-3);
+}
+.app.is-game .card-back {
+  border: 1px solid var(--gold-line);
+  border-radius: 3px;
+  box-shadow: 0 2px 6px #0008;
+}
+.app.is-game .rune-zone,
+.app.is-game .player-cards > .rune-zone {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #0f1f2bb3;
+  box-shadow: inset 0 1px 0 #ffffff06;
+}
+.app.is-game .opponent-hand-section .rune-zone {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.app.is-game .rune-zone-heading > span {
+  color: var(--text-3);
+  font-size: 10px;
+  letter-spacing: 1.2px;
+}
+.app.is-game .rune-zone-heading small,
+.app.is-game .player-cards > .rune-zone .rune-zone-heading small {
+  color: var(--text-2);
+}
+.app.is-game .rune-card {
+  border: 1px solid color-mix(in srgb, var(--rune-color) 70%, #ffffff00);
+  background: var(--ink-1);
+  box-shadow: 0 2px 6px #0007;
+}
+.app.is-game .rune-card.spent {
+  border-color: var(--line-strong);
+}
+.app.is-game .rune-card:hover,
+.app.is-game .rune-card:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--gold),
+    0 4px 12px #000a;
+}
+
+/* ---------- Bases ---------- */
+.app.is-game .base-zone {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: #0a151e73;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.app.is-game .base-zone:has(.destination-button),
+.app.is-game .base-zone:has(.movement-destination) {
+  border-style: solid;
+  border-color: var(--you);
+  box-shadow:
+    inset 0 0 30px #5ad8c61f,
+    0 0 0 1px #5ad8c633;
+}
+.app.is-game .zone-label {
+  top: 8px;
+  left: 10px;
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--glass);
+  color: var(--text-2);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+.app.is-game .empty-base,
+.app.is-game .empty-field {
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.1px;
+  text-shadow: 0 1px 6px #000c;
+  max-width: 26ch;
+}
+.app.is-game .empty-base:before,
+.app.is-game .empty-field:before {
+  content: "◇";
+  display: block;
+  margin-bottom: 4px;
+  color: var(--gold-line);
+  font-size: 14px;
+  line-height: 1;
+}
+.app.is-game .gear-zone {
+  border-top: 1px solid var(--gold-line);
+}
+.app.is-game .gear-zone-heading {
+  color: var(--gold);
+}
+.app.is-game .gear-slot {
+  border-radius: 5px;
+  box-shadow: 0 0 0 1px var(--gold-line);
+}
+
+/* ---------- Battlefields ---------- */
+.app.is-game .battlefield {
+  border: 1px solid var(--gold-line);
+  border-radius: var(--radius);
+  background: var(--ink-1);
+  box-shadow:
+    inset 0 0 0 1px #ffffff0a,
+    0 10px 30px #02070c99;
+}
+.app.is-game .battlefield .field-art {
+  opacity: 0.82 !important;
+  filter: saturate(0.95) contrast(1.02);
+  transition: opacity 0.4s;
+}
+.app.is-game .battlefield:after {
+  background: linear-gradient(
+    180deg,
+    #060d14b8 0%,
+    #060d1440 22%,
+    #060d1424 50%,
+    #060d1440 78%,
+    #060d14b8 100%
+  );
+}
+.app.is-game .battlefield.owned {
+  border-color: var(--you);
+  box-shadow:
+    inset 0 0 0 1px #5ad8c633,
+    0 0 0 1px #5ad8c62e,
+    0 0 28px #5ad8c62a,
+    0 10px 30px #02070c99;
+}
+.app.is-game .battlefield.enemy-owned {
+  border-color: var(--foe);
+  box-shadow:
+    inset 0 0 0 1px #f29a9a33,
+    0 0 0 1px #f29a9a2e,
+    0 0 28px #f29a9a26,
+    0 10px 30px #02070c99;
+}
+.app.is-game .battlefield.in-combat {
+  border-color: #f5b86a;
+  box-shadow:
+    inset 0 0 60px #f0902c2a,
+    0 0 0 1px #f5b86a44,
+    0 0 34px #f5b86a40,
+    0 10px 30px #02070c99;
+}
+.app.is-game .battlefield:has(.destination-button) {
+  border-color: var(--you);
+  box-shadow:
+    inset 0 0 40px #5ad8c624,
+    0 0 0 1px #5ad8c655,
+    0 0 26px #5ad8c640;
+}
+.app.is-game .field-heading {
+  background: linear-gradient(180deg, #060d14d9, #060d1480);
+  border-bottom: 1px solid #ffffff14;
+}
+.app.is-game .field-heading .eyebrow {
+  color: var(--gold);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+}
+.app.is-game .field-heading button {
+  font:
+    italic 800 clamp(13px, 1.05vw, 20px) / 1.15 var(--display),
+    sans-serif;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  color: var(--text);
+  text-shadow: 0 2px 10px #000;
+}
+.app.is-game .field-heading button:hover {
+  color: var(--gold-bright);
+}
+.app.is-game .control-badge {
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 4px 9px;
+  background: var(--glass);
+  color: var(--text-2);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.app.is-game .owned .control-badge {
+  background: #1f6f6855;
+  color: #baf5ea;
+  border-color: var(--you-line);
+}
+.app.is-game .enemy-owned .control-badge {
+  background: #7a3b4755;
+  color: #ffd2d2;
+  border-color: var(--foe-line);
+}
+.app.is-game .field-divider {
+  color: var(--gold);
+}
+.app.is-game .field-divider span {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #e9c97b66 40%,
+    #e9c97b66 60%,
+    transparent
+  );
+}
+.app.is-game .field-divider > svg {
+  padding: 4px;
+  box-sizing: content-box;
+  border: 1px solid var(--gold-line);
+  border-radius: 50%;
+  background: var(--glass);
+}
+.app.is-game .in-combat .field-divider {
+  color: #ffe4ac;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #4a2a1cc0 30%,
+    #4a2a1cc0 70%,
+    transparent
+  );
+  border-radius: 999px;
+}
+.app.is-game .combat-readout b {
+  font:
+    italic 800 12px/1 var(--display),
+    sans-serif;
+}
+.app.is-game .combat-readout small {
+  color: var(--gold);
+}
+.app.is-game .empty-field {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #060d1466;
+}
+.app.is-game .destination-button,
+.app.is-game .movement-destination {
+  border: 1px solid var(--you);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #1f6f68, #154f4a);
+  color: #e6fff9;
+  font-weight: 700;
+  box-shadow:
+    0 0 0 3px #5ad8c62a,
+    0 6px 18px #000a;
+}
+.app.is-game .destination-button:hover {
+  background: linear-gradient(180deg, #2b8d84, #1f6f68);
+  transform: translateY(-1px);
+}
+.app.is-game .showdown-cue strong {
+  color: var(--gold-bright);
+  text-shadow: 0 0 30px #f5b86a99;
+}
+
+/* ---------- Units ---------- */
+.app.is-game .game-layout .game-card {
+  border-radius: 6px;
+  outline: 1px solid #ffffff1a;
+  box-shadow: 0 6px 14px #02070c99;
+}
+.app.is-game .game-layout .game-card.small {
+  border-radius: 5px;
+}
+.app.is-game .game-card.playable {
+  outline: 1.5px solid var(--you);
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 4px #5ad8c61f,
+    0 0 18px #5ad8c655,
+    0 6px 14px #02070c99;
+}
+.app.is-game .game-layout .game-card.selected {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 5px #e9c97b22,
+    0 0 24px #e9c97b66,
+    0 8px 18px #02070c99;
+}
+.app.is-game .game-card:hover {
+  transform: translateY(-4px);
+}
+.app.is-game .unit-power {
+  border: 1px solid var(--gold-deep);
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--ink-3), var(--ink-1));
+  color: var(--gold-bright);
+  font-weight: 700;
+  box-shadow: 0 2px 6px #000a;
+}
+.app.is-game .unit-info,
+.app.is-game .card-info-button {
+  color: var(--gold-bright);
+  background: var(--glass);
+  border: 1px solid var(--gold-line);
+}
+.app.is-game .move-selection-badge {
+  background: var(--you-deep);
+  border-color: #e6fff9;
+}
+.app.is-game .damage-badge {
+  background: #d8414b;
+  border: 1px solid #ffb1b1;
+  box-shadow: 0 2px 8px #000a;
+}
+.app.is-game .hidden-card {
+  border-color: #a78ce0;
+  background: linear-gradient(180deg, #2a2347, #1b1830);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Hand tray ---------- */
+.app.is-game .hand-section,
+.app.is-game .player-cards > .hand-section {
+  border: 1px solid #5ad8c633;
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, #5ad8c60d, transparent 40%),
+    linear-gradient(135deg, var(--ink-3), var(--ink-2));
+  box-shadow:
+    inset 0 1px 0 #ffffff0a,
+    var(--shadow-panel);
+}
+.app.is-game .hand-title {
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+.app.is-game .hand-title b {
+  color: var(--gold);
+  padding-left: 6px;
+}
+.app.is-game .hand-title span:last-child {
+  color: var(--text-3);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.app.is-game .hand .game-card:hover {
+  transform: translateY(-10px);
+}
+.app.is-game .hand .game-card.selected {
+  transform: translateY(-10px);
+}
+
+/* ---------- Action chain ---------- */
+.app.is-game .action-stack-heading {
+  border: 1px solid var(--gold-line);
+  border-radius: 999px;
+  background: var(--glass);
+  color: var(--gold-bright);
+  font-weight: 700;
+}
+.app.is-game .action-stack-entry {
+  --stack-accent: var(--you);
+}
+.app.is-game .action-stack-entry.player-1 {
+  --stack-accent: var(--foe);
+}
+.app.is-game .action-stack-name,
+.app.is-game .action-stack-status {
+  background: var(--glass);
+}
+.app.is-game .action-stack-outcomes,
+.app.is-game .action-stack-priority {
+  background: var(--glass);
+  border-color: var(--you-line);
+  border-radius: 999px;
+}
+
+/* ---------- Decision bar ---------- */
+.app.is-game .match-controls,
+.app.is-game .visual-controls {
+  border: 1px solid var(--line-strong);
+  border-top: 2px solid var(--you);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, #5ad8c60a, transparent 35%),
+    linear-gradient(110deg, var(--ink-3), var(--ink-2) 60%);
+  box-shadow:
+    inset 0 1px 0 #ffffff0a,
+    0 -8px 30px #02070c66;
+}
+.app.is-game .match-controls.is-busy {
+  border-top-color: var(--gold);
+  background:
+    linear-gradient(180deg, #e9c97b0c, transparent 35%),
+    linear-gradient(110deg, var(--ink-3), var(--ink-2) 60%);
+}
+.app.is-game .match-controls.window-reaction {
+  border-top-color: var(--violet);
+  background:
+    linear-gradient(180deg, #c7a8ff12, transparent 35%),
+    linear-gradient(110deg, #2a2340, var(--ink-2) 60%);
+}
+.app.is-game .match-controls.window-damage {
+  border-top-color: #ffb28a;
+}
+.app.is-game .decision-kicker {
+  color: var(--you);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+}
+.app.is-game .is-busy .decision-kicker {
+  color: var(--gold);
+}
+.app.is-game .window-reaction .decision-kicker {
+  color: var(--violet);
+}
+.app.is-game .decision-copy strong,
+.app.is-game .visual-controls .decision-copy > strong {
+  font-family: var(--display);
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: 0.2px;
+  color: var(--text);
+}
+.app.is-game .decision-copy p,
+.app.is-game .visual-controls .decision-copy p {
+  color: var(--text-2);
+}
+.app.is-game .card-cost-note,
+.app.is-game .visual-controls .card-cost-note {
+  color: var(--gold);
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.app.is-game .decision-source .game-card {
+  outline: 1px solid var(--gold-line);
+  box-shadow:
+    0 0 0 3px #e9c97b14,
+    0 8px 22px #02070c99;
+}
+.app.is-game .visual-controls .context-action,
+.app.is-game .context-action {
+  border: 1px solid #3f8f86;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #1b4e4a, #143c3b);
+  color: #e9fbf5;
+  box-shadow: inset 0 1px 0 #ffffff10;
+}
+.app.is-game .visual-controls .context-action:hover,
+.app.is-game .context-action:hover {
+  background: linear-gradient(180deg, #2a6e67, #1f5551);
+  border-color: var(--you);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 #ffffff14,
+    0 6px 16px #5ad8c62a;
+}
+.app.is-game .context-action strong {
+  color: #f4fffc;
+}
+.app.is-game .context-action small {
+  color: #b6e6dc;
+}
+.app.is-game .decision-option-art {
+  border: 1px solid #ffffff2a;
+  box-shadow: 0 2px 6px #0008;
+}
+.app.is-game .game-layout .gold-button,
+.app.is-game .match-controls .gold-button,
+.app.is-game .visual-controls .gold-button {
+  border: 1px solid var(--gold-bright);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #f6dd9a 0%, #e0bb66 55%, #c9a24f 100%);
+  color: #1a1407;
+  font:
+    italic 800 13px/1 var(--display),
+    sans-serif;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 #ffffff55;
+  box-shadow:
+    inset 0 1px 0 #fff4cc,
+    0 2px 0 #8a6a2a,
+    0 8px 20px #e9c97b2e;
+}
+.app.is-game .game-layout .gold-button:hover:not(:disabled) {
+  background: linear-gradient(180deg, #fff0b8 0%, #ecc877 55%, #d5ae5a 100%);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 #fff8dd,
+    0 3px 0 #8a6a2a,
+    0 10px 26px #e9c97b44;
+}
+.app.is-game .game-layout .gold-button:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 1px 0 #fff4cc,
+    0 1px 0 #8a6a2a;
+}
+.app.is-game .game-layout .gold-button:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+.app.is-game .match-controls .secondary-ending,
+.app.is-game .game-layout .outline-button,
+.app.is-game .secondary-decision {
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--ink-4);
+  color: var(--text);
+  font:
+    700 12px/1.2 var(--body),
+    sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+  text-shadow: none;
+  box-shadow: inset 0 1px 0 #ffffff0a;
+}
+.app.is-game .match-controls .secondary-ending:hover,
+.app.is-game .game-layout .outline-button:hover,
+.app.is-game .secondary-decision:hover {
+  background: #244457;
+  border-color: var(--text-3);
+}
+.app.is-game .cancel-selection,
+.app.is-game .visual-controls .cancel-selection {
+  color: var(--text-2);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--ink-2);
+}
+.app.is-game .cancel-selection:hover {
+  color: var(--text);
+  border-color: var(--text-3);
+}
+.app.is-game .action-pages {
+  color: var(--text-3);
+}
+.app.is-game .playing-indicator i {
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+}
+.app.is-game .card-piles {
+  border-left: 1px solid var(--line);
+}
+.app.is-game .pile-button {
+  color: var(--text-2);
+}
+.app.is-game .pile-art {
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--ink-1);
+}
+.app.is-game .pile-art.pile-back {
+  border-color: var(--gold-deep);
+  box-shadow:
+    2px 2px 0 var(--ink-1),
+    3px 3px 0 var(--gold-deep),
+    5px 5px 0 var(--ink-1),
+    6px 6px 0 #6b5630;
+}
+.app.is-game .pile-caption strong {
+  color: var(--text-3);
+}
+.app.is-game .pile-caption b {
+  color: var(--gold-bright);
+  font:
+    italic 800 13px/1 var(--display),
+    sans-serif;
+}
+.app.is-game .pile-button:hover .pile-art {
+  border-color: var(--gold-bright);
+}
+.app.is-game .effect-announcement > img {
+  border-radius: 5px;
+  border: 1px solid #ffffff22;
+}
+
+/* ---------- Dialogs inside the match stay on the dark table ---------- */
+.app.is-game .modal,
+.app.is-game .pile-dialog,
+.app.is-game .deck-import {
+  --gold: #e9c97b;
+  --teal: #5ad8c6;
+  --muted: #9fb1bb;
+  color: var(--text);
+  background: linear-gradient(145deg, #15293a, #0b1822 70%);
+  border: 1px solid var(--gold-line);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 #ffffff0a,
+    0 40px 100px #000c;
+}
+.app.is-game .modal h2,
+.app.is-game .modal h3,
+.app.is-game .pile-dialog h2 {
+  color: var(--text);
+}
+.app.is-game .modal h2 {
+  font:
+    italic 800 clamp(24px, 2.4vw, 32px) / 1.15 var(--display),
+    sans-serif;
+}
+.app.is-game .modal p,
+.app.is-game .pile-dialog p {
+  color: var(--text-2);
+}
+.app.is-game .modal .eyebrow,
+.app.is-game .pile-dialog .eyebrow {
+  color: var(--gold);
+}
+.app.is-game .modal .close-button {
+  color: var(--text-2);
+  background: var(--line-soft);
+  border-radius: 8px;
+}
+.app.is-game .modal .close-button:hover {
+  color: var(--text);
+  background: var(--line);
+}
+.app.is-game .match-history > p {
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--text-2);
+}
+.app.is-game .match-history > p b {
+  color: var(--gold);
+  font-weight: 700;
+}
+.app.is-game .modal .detail-tags > span {
+  background: var(--ink-3);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+.app.is-game .modal .rules-text {
+  color: var(--text);
+}
+.app.is-game .modal .stat-row {
+  color: var(--gold);
+  border-color: var(--line);
+}
+.app.is-game .modal .support-status.supported {
+  color: var(--you);
+}
+.app.is-game .modal .help-grid h3 {
+  color: var(--text);
+}
+.app.is-game .modal .help-grid > div > span {
+  color: var(--gold);
+}
+.app.is-game .modal .help-note,
+.app.is-game .modal .scope-note {
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  border-radius: 8px;
+}
+.app.is-game .modal .scope-note p {
+  color: var(--text-2);
+}
+.app.is-game .modal .gold-button,
+.app.is-game .modal .outline-button {
+  border-radius: 8px;
+  clip-path: none;
+}
+.app.is-game .modal .gold-button {
+  border: 1px solid var(--gold-bright);
+  background: linear-gradient(180deg, #f6dd9a, #d9b35f);
+  color: #1a1407;
+  font:
+    italic 800 13px/1 var(--display),
+    sans-serif;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  box-shadow:
+    0 2px 0 #8a6a2a,
+    0 8px 20px #e9c97b2e;
+}
+.app.is-game .modal .outline-button {
+  border: 1px solid var(--line-strong);
+  background: var(--ink-3);
+  color: var(--text);
+  font-family: var(--body);
+}
+.app.is-game .modal .text-button {
+  color: var(--gold);
+}
+.app.is-game .pile-tabs button,
+.app.is-game .pile-play {
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--text-2);
+  background: var(--ink-2);
+}
+.app.is-game .pile-tabs button[aria-pressed="true"],
+.app.is-game .pile-play {
+  background: var(--you-deep);
+  border-color: var(--you);
+  color: #e6fff9;
+}
+.app.is-game .combat-panel {
+  border: 1px solid var(--gold-line);
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--ink-3), var(--ink-1) 60%, #2a1f2a);
+}
+.app.is-game .combat-panel h2 {
+  font:
+    italic 800 16px/1.2 var(--display),
+    sans-serif;
+  color: var(--text);
+}
+.app.is-game .combat-team {
+  --team-color: var(--you);
+}
+.app.is-game .combat-owner-1 {
+  --team-color: var(--foe);
+}
+.app.is-game .combat-total strong {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 800;
+}
+
+/* ---------- Result banner ---------- */
+.app.is-game .result-banner {
+  border: 1px solid var(--gold);
+  border-radius: 16px;
+  background:
+    radial-gradient(70% 50% at 50% 0%, #e9c97b1f, transparent 70%),
+    linear-gradient(160deg, #17303fee, #0b1822f8);
+  box-shadow:
+    inset 0 1px 0 #ffffff14,
+    0 0 0 6px #e9c97b14,
+    0 40px 140px #000;
+}
+.app.is-game .result-banner > svg {
+  color: var(--gold-bright);
+  filter: drop-shadow(0 0 18px #e9c97b88);
+}
+.app.is-game .result-banner .eyebrow {
+  color: var(--gold);
+  letter-spacing: 2px;
+}
+.app.is-game .result-banner h2 {
+  font:
+    italic 800 clamp(26px, 3vw, 38px) / 1.15 var(--display),
+    sans-serif;
+  color: var(--text);
+  text-transform: none;
+}
+.app.is-game .result-banner p {
+  color: var(--text-2);
+  font-size: 13px;
+}
+.app.is-game .result-banner .text-button {
+  color: var(--text-2);
+}
+.app.is-game .result-banner .text-button:hover {
+  color: var(--gold-bright);
+}
+.app.is-game .error-toast {
+  border-radius: 10px;
+  background: #4a1f2c;
+  border-color: #ff7f94;
+  box-shadow: 0 16px 40px #000a;
+}
+
+/* ---------- Density tweaks ---------- */
+@media (min-width: 1100px) and (min-height: 650px) {
+  .app.is-game .player-bar {
+    height: 48px;
+    padding: 6px 12px 6px 14px;
+  }
+  .app.is-game .legend-portrait {
+    width: 34px;
+    height: 34px;
+  }
+  .app.is-game .player-name strong {
+    font-size: 13px;
+    line-height: 16px;
+  }
+  .app.is-game .player-name small {
+    font-size: 10px;
+    line-height: 13px;
+  }
+  .app.is-game .score > span {
+    font-size: 26px;
+  }
+  .app.is-game .zone-label {
+    font-size: 10px;
+  }
+  .app.is-game .setup-card-heading {
+    font-size: 9px;
+  }
+  .app.is-game .setup-card-name {
+    font-size: 11px;
+  }
+  .app.is-game .hand-title {
+    font-size: 11px;
+  }
+  .app.is-game .rune-zone-heading > span {
+    font-size: 10px;
+  }
+  .app.is-game .player-cards .hand {
+    justify-content: center;
+  }
+  .app.is-game .player-cards > .rune-zone .rune-orbs {
+    justify-content: center;
+  }
+}
+@media (max-width: 650px) {
+  .app.is-game .playmat {
+    border-radius: 10px;
+  }
+  .app.is-game .turn-flow,
+  .app.is-game .match-controls {
+    border-radius: 8px;
+  }
+  .app.is-game .zone-label {
+    top: -8px;
+    padding: 2px 7px;
+    font-size: 8px;
+  }
+  .app.is-game .control-badge {
+    font-size: 7px;
+    padding: 2px 6px;
+    letter-spacing: 0.4px;
+  }
+  .app.is-game .field-heading button {
+    font-size: 11px;
+  }
+  .app.is-game .empty-base,
+  .app.is-game .empty-field {
+    font-size: 9px;
+  }
+  .app.is-game .empty-base:before,
+  .app.is-game .empty-field:before {
+    display: none;
+  }
+  .app.is-game .empty-field {
+    padding: 3px 8px;
+  }
+  .app.is-game .turn-steps li {
+    padding: 2px 5px 2px 2px;
+  }
+  .app.is-game .turn-owner {
+    font-size: 9px;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    width: auto;
+    min-width: 0;
+  }
+  .app.is-game .priority-window strong {
+    font-size: 10px;
+  }
+  .app.is-game .turn-indicator {
+    display: none;
+  }
+  .app.is-game .player-name strong {
+    font-size: 10px;
+  }
+  .app.is-game .score > span {
+    font-size: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app.is-game button,
+  .app.is-game .battlefield .field-art {
+    transition: none;
+  }
+  .app.is-game .turn-indicator[data-state="resolving"]:before {
+    animation: none;
+  }
+}
