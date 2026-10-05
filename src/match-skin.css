@@ -1276,3 +1276,27 @@
     animation: none;
   }
 }
+
+/* Compact tables (narrow or short viewports) have no room for the marker or
+   for multi-line setup names: keep each zone's text inside its own box. */
+@media (max-width: 1099px), (max-height: 649px) {
+  .app.is-game .empty-base:before,
+  .app.is-game .empty-field:before {
+    display: none;
+  }
+  .app.is-game .empty-base,
+  .app.is-game .empty-field {
+    font-size: 10px;
+    line-height: 1.35;
+    max-width: 44ch;
+  }
+  .app.is-game .player-cards .setup-card {
+    overflow: hidden;
+  }
+  .app.is-game .player-cards .setup-card-name {
+    display: none;
+  }
+  .app.is-game .player-cards .setup-card-heading {
+    margin: 0;
+  }
+}
