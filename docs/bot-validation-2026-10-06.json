@@ -131,5 +131,6 @@
       "screenshots/bot-expert-ended.png",
       "screenshots/bot-mobile-explanation.png"
     ]
-  }
+  },
+  "sourceScope": "Original bot implementation checkpoint before integration of card-engine commit 62d8da8. These source hashes and measurements are historical; release validation is recorded separately."
 }

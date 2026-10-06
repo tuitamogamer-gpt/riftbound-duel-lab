@@ -24,7 +24,7 @@ The public application loaded the lobby and started an Annie versus Lux duel. Ke
 
 ## Future updates
 
-The first release was pushed with GitHub CLI and deployed with Vercel CLI. Since then the Vercel project deploys automatically from GitHub: every push to `main` builds and publishes to the production URL, so a release is complete once the commit is on `main`.
+The first release was pushed with GitHub CLI and deployed with Vercel CLI. The Vercel project now builds production from pushes to `main`. A release is complete only after the deployment for that exact commit reaches READY, the public alias points to it, and the public game passes its smoke test.
 
 From the repository root, after tests and the build pass:
 

@@ -2746,5 +2746,6 @@
     "src/game/types.ts": "300dc6d867433084b2d9f2888ae7b27a75c9175ae5c52b721f25f60239417f4d",
     "src/hooks/useBotDecision.ts": "77f89eb3f8148245a27cd59d3f0d3f71d2c9f3e0cbb108f89d85378b4672e608",
     "tests/ai-acceptance.test.ts": "0cdda1ce12196d68b6bd4b69d33e01cf00aed1c8e2700f000cc6e89a6a85d200"
-  }
+  },
+  "sourceScope": "Original 1,102-entry executable registry before card-engine commit 62d8da8. The expanded release has a separate 24-game compatibility sample; do not treat these historical win rates as fresh release measurements."
 }
