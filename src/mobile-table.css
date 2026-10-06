@@ -1,0 +1,854 @@
+/* Phones use one readable zone at a time. The hand and decisions stay in view. */
+.mobile-board-nav,
+.mobile-resource-count,
+.mobile-player-label,
+.mobile-unit-name {
+  display: none;
+}
+.mobile-base-panel {
+  display: contents;
+}
+
+@media (max-width: 800px), (max-width: 1000px) and (max-height: 500px) {
+  .app.is-game .game-layout {
+    grid-template-rows: 40px 42px minmax(0, 1fr);
+    padding: 0 5px max(5px, env(safe-area-inset-bottom));
+    gap: 4px;
+  }
+  .app.is-game .match-toolbar {
+    height: 40px;
+    gap: 4px;
+  }
+  .app.is-game .match-toolbar .icon-button {
+    width: 36px;
+    height: 40px;
+    min-width: 36px;
+  }
+  .app.is-game .match-toolbar .text-button {
+    min-height: 40px;
+    font-size: 12px;
+  }
+  .app.is-game .match-toolbar .language-selector select {
+    min-width: 48px;
+    width: 48px;
+    min-height: 36px;
+    font-size: 11px;
+  }
+  .app.is-game .match-toolbar > span {
+    font-size: 10px;
+  }
+  .app.is-game .match-brand,
+  .app.is-game .turn-indicator,
+  .app.is-game .bot-difficulty-label {
+    display: none;
+  }
+  .app.is-game .turn-flow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 9px;
+    gap: 8px;
+  }
+  .app.is-game .turn-owner,
+  .app.is-game .priority-window strong {
+    font-size: 11px;
+  }
+  .app.is-game .turn-steps {
+    display: none;
+  }
+  .app.is-game .priority-window {
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+  .app.is-game .priority-window small {
+    font-size: 10px;
+  }
+  .app.is-game .match-content {
+    overflow: visible;
+  }
+  .app.is-game .playmat {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: 30px 50px minmax(0, 1fr) clamp(110px, 18dvh, 150px) auto;
+    grid-template-areas:
+      "player opponent"
+      "zones zones"
+      "table table"
+      "hand hand"
+      "decisions decisions";
+    height: 100%;
+    min-height: 0;
+    padding: 4px;
+    gap: 5px;
+  }
+  .app.is-game .victory-track {
+    display: none;
+  }
+  .app.is-game .playmat:has(.hand:empty) {
+    grid-template-rows: 30px 50px minmax(0, 1fr) 32px auto;
+  }
+  .app.is-game .player-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    padding: 2px 5px;
+    gap: 5px;
+    border-radius: 5px;
+    background: #183533;
+  }
+  .app.is-game .player-bar.player-1 {
+    background: #302632;
+  }
+  .app.is-game .player-name strong {
+    font-size: 11px;
+  }
+  .app.is-game .legend-portrait {
+    width: 24px;
+    height: 24px;
+    flex: none;
+  }
+  .app.is-game .score {
+    margin-left: auto;
+    gap: 2px;
+    flex: none;
+    white-space: nowrap;
+  }
+  .app.is-game .score > span {
+    font-size: 20px;
+  }
+  .app.is-game .score > small {
+    font-size: 10px;
+  }
+  .mobile-resource-count {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    color: #dfc586;
+    font-size: 12px;
+    white-space: nowrap;
+    flex: none;
+  }
+  .app.is-game .full-player-label,
+  .app.is-game .player-name small,
+  .app.is-game .player-cards .hand-title span:last-child,
+  .app.is-game .playback-speed > svg {
+    display: none;
+  }
+  .mobile-player-label {
+    display: inline;
+  }
+  .mobile-resource-count small {
+    font-size: 10px;
+  }
+  .mobile-board-nav {
+    grid-area: zones;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .mobile-board-nav button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+    min-height: 48px;
+    padding: 5px 3px;
+    border: 1px solid #69878b60;
+    border-radius: 6px;
+    background: #102330;
+    color: #b6c9ce;
+  }
+  .mobile-board-nav button[aria-pressed="true"] {
+    color: #fff0cb;
+    border-color: #e9c97b;
+    background: #354138;
+    box-shadow: inset 0 -2px #e9c97b;
+  }
+  .mobile-board-nav button.has-target {
+    border-color: #67ddba;
+  }
+  .mobile-board-nav button.has-combat .mobile-zone-counts > svg {
+    color: #ffbb7b;
+  }
+  .mobile-zone-name {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 12px;
+  }
+  .mobile-zone-counts {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    line-height: 12px;
+  }
+  .friendly-count {
+    color: #94ecd5;
+  }
+  .enemy-count {
+    color: #ffb4bd;
+  }
+  .mobile-target-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #67ddba;
+  }
+
+  /* Only the selected base or battlefield occupies the central table track. */
+  .app.is-game .mobile-base-panel,
+  .app.is-game .battlefields,
+  .app.is-game .battlefields:has(> .action-stack) {
+    grid-area: table;
+    display: none;
+    min-width: 0;
+    min-height: 0;
+  }
+  .app.is-game .playmat[data-mobile-zone="base:0"] .own-base-panel,
+  .app.is-game .playmat[data-mobile-zone="base:1"] .opponent-base-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 64px minmax(0, 1fr) 42px;
+    grid-template-areas: "setup" "base" "resources";
+    gap: 5px;
+  }
+  .app.is-game .mobile-base-panel .champion-zone {
+    grid-area: setup;
+    height: 100%;
+    gap: 6px;
+  }
+  .app.is-game .mobile-base-panel .setup-card {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 3px;
+    gap: 6px;
+  }
+  .app.is-game .mobile-base-panel .champion-zone .game-card.small,
+  .app.is-game .mobile-base-panel .setup-empty-art {
+    width: 40px;
+    height: 56px;
+    max-width: none;
+  }
+  .app.is-game .mobile-base-panel .setup-card-heading {
+    font-size: 9px;
+  }
+  .app.is-game .mobile-base-panel .setup-status {
+    font-size: 10px;
+  }
+  .app.is-game .mobile-base-panel .setup-card-name {
+    display: block;
+    font-size: 11px;
+    text-align: left;
+    line-height: 1.15;
+  }
+  .app.is-game .mobile-base-panel .base-zone {
+    grid-area: base;
+    padding: 22px 4px 4px;
+    height: 100%;
+  }
+  .app.is-game .mobile-base-panel .base-zone.has-gear {
+    padding-top: 28px;
+  }
+  .app.is-game .gear-zone-heading {
+    top: -26px;
+    font-size: 9px;
+  }
+  .app.is-game .gear-navigation button {
+    width: 24px;
+    height: 24px;
+  }
+  .app.is-game .gear-inspect {
+    width: 32px;
+    height: 32px;
+  }
+  .app.is-game .gear-inspect > svg {
+    width: 16px;
+    height: 16px;
+  }
+  .app.is-game .zone-label {
+    font-size: 10px;
+    line-height: 15px;
+    top: 4px;
+    left: 8px;
+  }
+  .app.is-game .empty-base,
+  .app.is-game .empty-field {
+    font-size: 12px;
+    padding: 6px;
+  }
+  .app.is-game .mobile-base-panel .rune-zone {
+    grid-area: resources;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+  }
+  .app.is-game .mobile-base-panel .rune-zone-heading {
+    flex: 0 1 48%;
+    min-width: 0;
+    max-width: none;
+  }
+  .app.is-game .mobile-base-panel .rune-zone .rune-zone-heading small {
+    font-size: 11px;
+  }
+  .app.is-game .mobile-base-panel .rune-orbs {
+    flex: 1;
+    overflow-x: auto;
+    gap: 3px;
+  }
+  .app.is-game .mobile-base-panel .rune-card {
+    width: 24px;
+    height: 34px;
+    flex: 0 0 24px;
+  }
+  .app.is-game .mobile-base-panel .rune-card-art {
+    width: 24px;
+  }
+  .app.is-game .opponent-base-panel .enemy-hand {
+    grid-area: enemy-hand;
+    display: flex;
+  }
+  .app.is-game .playmat[data-mobile-zone="base:1"] .opponent-base-panel {
+    grid-template-rows: 20px 64px minmax(0, 1fr) 42px;
+    grid-template-areas: "enemy-hand" "setup" "base" "resources";
+  }
+  .app.is-game .opponent-base-panel .enemy-hand > span {
+    font-size: 11px;
+  }
+  .app.is-game .playmat[data-mobile-zone^="field:"] .battlefields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 4px;
+  }
+  .app.is-game
+    :is(.battlefields, .battlefields:has(> .action-stack))
+    > .battlefield {
+    --mobile-field-footer: 0px;
+    grid-area: 2 / 1;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: 28px 32px minmax(0, 1fr) var(--mobile-field-footer);
+  }
+  .app.is-game
+    :is(.battlefields, .battlefields:has(> .action-stack))
+    > .battlefield.in-combat {
+    grid-template-rows: 28px 44px minmax(0, 1fr) var(--mobile-field-footer);
+  }
+  .app.is-game
+    .battlefields
+    > .battlefield:has(
+      > .hidden-zone,
+      > .destination-button,
+      > .movement-destination
+    ) {
+    --mobile-field-footer: 44px;
+  }
+  .app.is-game .battlefield > .hidden-zone {
+    position: static;
+    grid-area: 4 / 1 / 5 / -1;
+    justify-content: flex-start;
+    align-self: center;
+    padding: 3px 6px;
+    max-width: 100%;
+  }
+  .app.is-game
+    .battlefield:has(> .destination-button, > .movement-destination)
+    > .hidden-zone {
+    grid-column: 1;
+  }
+  .app.is-game .hidden-card {
+    min-height: 36px;
+    font-size: 11px;
+  }
+  .app.is-game .hidden-card small {
+    font-size: 10px;
+  }
+  .app.is-game .battlefield > .destination-button,
+  .app.is-game .battlefield > .movement-destination {
+    position: static;
+    grid-area: 4 / 2;
+    justify-self: end;
+    align-self: center;
+    margin: 3px 6px;
+    max-width: 100%;
+  }
+  .app.is-game .base-zone:has(> .destination-button, > .movement-destination) {
+    padding-bottom: 42px;
+  }
+  .app.is-game .battlefield > .field-heading {
+    grid-area: 1 / 1 / 2 / -1;
+  }
+  .app.is-game .battlefield > .field-divider {
+    grid-area: 2 / 1 / 3 / -1;
+  }
+  .app.is-game .battlefield > .field-half.enemy-side {
+    grid-area: 3 / 1;
+    background: #462a332b;
+    border-right: 1px solid #d6b46c55;
+  }
+  .app.is-game .battlefield > .field-half:not(.enemy-side) {
+    grid-area: 3 / 2;
+    background: #153d362b;
+  }
+  .app.is-game .battlefields > .battlefield[data-mobile-active="false"] {
+    display: none;
+  }
+  .app.is-game .field-heading {
+    display: flex;
+    padding: 4px 8px;
+    flex-direction: row;
+    align-items: center;
+  }
+  .app.is-game .field-heading button {
+    font-size: 13px;
+    white-space: nowrap;
+    min-height: 22px;
+  }
+  .app.is-game .control-badge {
+    display: block;
+    font-size: 8px;
+  }
+  .app.is-game .battlefield > .field-half,
+  .app.is-game .base-units {
+    --unit-card-height: min(100cqh, 150px);
+    --unit-card-width: max(72px, calc(var(--unit-card-height) * 744 / 1039));
+    justify-content: safe center;
+    align-items: center;
+    padding: 4px 5px 16px;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+  .app.is-game :is(.field-half, .base-units) > .unit-wrap {
+    flex: 0 0 var(--unit-card-width);
+    margin: 0;
+  }
+  .app.is-game .base-units > .unit-wrap:not(:last-of-type) {
+    margin-right: 0;
+  }
+  .app.is-game .battlefield > .field-half {
+    --unit-card-width: min(100px, max(72px, calc((100cqw - 10px) / 2)));
+    --unit-card-height: min(100cqh, calc(var(--unit-card-width) * 1039 / 744));
+  }
+  .app.is-game :is(.field-half, .base-units) > .unit-wrap > .game-card {
+    transform: none;
+  }
+  .app.is-game :is(.field-half, .base-units) > .unit-wrap > .game-card img {
+    object-fit: cover;
+    object-position: center 20%;
+  }
+  .mobile-unit-name {
+    display: block;
+    position: absolute;
+    left: 1px;
+    right: 1px;
+    bottom: 12px;
+    padding: 3px;
+    background: #081721e8;
+    color: #fff4d6;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 11px;
+    text-align: center;
+    pointer-events: none;
+  }
+  .app.is-game :is(.field-half, .base-units) > .unit-wrap > .unit-power {
+    left: 0;
+    bottom: -12px;
+    transform: none;
+    font-size: 15px;
+    line-height: 20px;
+    padding: 1px 6px;
+    z-index: 3;
+  }
+  .app.is-game :is(.field-half, .base-units) > .unit-wrap > .unit-info {
+    top: auto;
+    left: auto;
+    right: -3px;
+    bottom: -12px;
+    width: 32px;
+    height: 32px;
+    font-size: 22px;
+    z-index: 4;
+  }
+  .app.is-game .unit-wrap .exhausted-token {
+    top: 4px;
+    right: 4px;
+    bottom: auto;
+  }
+  .app.is-game .field-might-side {
+    padding: 1px 9px;
+  }
+  .app.is-game .field-might-side b {
+    font-size: 20px;
+    line-height: 23px;
+  }
+  .app.is-game .field-might-side small,
+  .app.is-game .field-might-label small {
+    font-size: 10px;
+  }
+  .app.is-game .field-might-label > svg {
+    display: block;
+  }
+  .app.is-game .destination-button {
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .app.is-game .movement-destination {
+    font-size: 11px;
+  }
+
+  /* Resolve cards in a short strip above the field, leaving targets uncovered. */
+  .app.is-game .action-stack {
+    position: relative;
+    grid-area: 1 / 1;
+    left: auto;
+    transform: none;
+    width: 100%;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .app.is-game .action-stack-heading {
+    font-size: 9px;
+    flex: 0 0 65px;
+    margin: 0;
+    padding: 4px;
+    letter-spacing: 0;
+  }
+  .app.is-game .action-stack-cards {
+    flex: 1;
+    min-width: 0;
+    justify-content: flex-start;
+    padding: 2px;
+  }
+  .app.is-game .action-stack-entry {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    grid-template-rows: 18px 30px;
+    column-gap: 5px;
+    flex: 0 0 148px;
+    width: 148px;
+    text-align: left;
+  }
+  .app.is-game .action-stack-card {
+    grid-area: 1 / 1 / 3 / 2;
+  }
+  .app.is-game .action-stack-owner {
+    grid-area: 1 / 2;
+    font-size: 10px;
+  }
+  .app.is-game .action-stack-name {
+    grid-area: 2 / 2;
+    font-size: 11px;
+    padding: 0;
+    margin: 0;
+  }
+  .app.is-game .action-stack-outcomes,
+  .app.is-game .action-stack-priority {
+    display: none;
+  }
+
+  /* Cards keep their size; a horizontal hand replaces the tiny overlapping fan. */
+  .app.is-game .player-cards > .hand-section {
+    --hand-card-height: calc(100cqh - 28px);
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 22px minmax(0, 1fr);
+    padding: 2px 5px 4px;
+    gap: 0;
+  }
+  .app.is-game .hand-title {
+    font-size: 11px;
+    line-height: 22px;
+  }
+  .app.is-game .hand-section > .card-piles {
+    grid-area: 1 / 2;
+    padding: 0;
+    border: 0;
+    gap: 10px;
+  }
+  .app.is-game .hand-section .pile-button {
+    display: block;
+    width: auto;
+    min-height: 24px;
+  }
+  .app.is-game .hand-section .pile-art {
+    display: none;
+  }
+  .app.is-game .hand-section .pile-caption {
+    line-height: 22px;
+    gap: 5px;
+  }
+  .app.is-game .hand-section .pile-caption strong {
+    font-size: 10px;
+  }
+  .app.is-game .hand-section .pile-caption b {
+    font-size: 13px;
+  }
+  .app.is-game .player-cards .hand {
+    grid-area: 2 / 1 / 3 / -1;
+    gap: 10px;
+    padding: 3px 3px 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    align-items: flex-start;
+  }
+  .app.is-game .player-cards .hand-card-wrap,
+  .app.is-game .player-cards .hand-card-wrap:last-child {
+    flex: 0 0 calc(var(--hand-card-height) * 744 / 1039);
+    width: calc(var(--hand-card-height) * 744 / 1039);
+    max-width: none;
+  }
+  .app.is-game .hand-card-wrap .card-info-button {
+    left: auto;
+    right: 0;
+    bottom: 0;
+    width: 32px;
+    height: 32px;
+    line-height: 30px;
+    font-size: 22px;
+  }
+  .app.is-game .game-card:hover {
+    transform: none;
+  }
+
+  .app.is-game .playmat > .visual-controls,
+  .app.is-game .playmat > .visual-controls.has-source {
+    height: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 5px;
+    padding: 7px;
+  }
+  .app.is-game .visual-controls .decision-source {
+    display: block;
+    grid-area: 1 / 1;
+    height: 50px;
+  }
+  .app.is-game .playmat > .visual-controls.has-source {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+  .app.is-game .visual-controls.has-source .decision-copy {
+    grid-area: 1 / 2;
+  }
+  .app.is-game .visual-controls .decision-copy {
+    grid-area: 1 / 1;
+    padding-right: 32px;
+    min-width: 0;
+  }
+  .app.is-game .visual-controls .decision-kicker {
+    font-size: 9px;
+    margin: 0 0 2px;
+  }
+  .app.is-game .visual-controls .decision-copy > strong {
+    font-size: 14px;
+  }
+  .app.is-game .visual-controls .decision-copy p {
+    font-size: 11px;
+    margin: 2px 0 0;
+    -webkit-line-clamp: 2;
+  }
+  .app.is-game .visual-controls .card-cost-note {
+    display: inline;
+    margin-left: 6px;
+    font-size: 10px;
+  }
+  .app.is-game .visual-controls .cancel-selection {
+    left: auto;
+    right: 4px;
+    top: 4px;
+    width: 32px;
+    height: 32px;
+  }
+  .app.is-game .visual-controls .decision-actions {
+    grid-area: 2 / 1 / 3 / -1;
+    display: flex;
+    align-items: stretch;
+    gap: 5px;
+    padding: 0;
+    flex-wrap: nowrap;
+  }
+  .app.is-game .visual-controls .context-actions {
+    flex: 1 1 0;
+    overflow-x: auto;
+  }
+  .app.is-game .visual-controls .context-actions:empty {
+    display: none;
+  }
+  .app.is-game .visual-controls .context-action {
+    min-height: 44px;
+    min-width: 110px;
+    flex: 1 0 110px;
+    padding: 5px;
+  }
+  .app.is-game .visual-controls .context-action strong {
+    font-size: 11px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .app.is-game .visual-controls .context-action small {
+    display: none;
+  }
+  .app.is-game
+    .visual-controls
+    .decision-actions:has(.context-action)
+    > .gold-button {
+    max-width: 48%;
+    white-space: normal;
+  }
+  .app.is-game .visual-controls .gold-button,
+  .app.is-game .visual-controls .secondary-decision {
+    min-height: 44px;
+    font-size: 12px;
+    padding: 7px 10px;
+    flex: 0 1 auto;
+  }
+  .app.is-game .visual-controls .action-pages {
+    margin-right: auto;
+  }
+  .app.is-game .visual-controls .action-pages button {
+    width: 32px;
+    height: 44px;
+  }
+  .app.is-game .visual-controls.is-busy:not(:has(.gold-button)) {
+    grid-template-columns: minmax(0, 1fr) 32px;
+    grid-template-rows: auto;
+  }
+  .app.is-game .visual-controls.has-source.is-busy:not(:has(.gold-button)) {
+    grid-template-columns: 36px minmax(0, 1fr) 32px;
+  }
+  .app.is-game
+    .visual-controls.is-busy:not(:has(.gold-button))
+    .decision-actions {
+    grid-area: 1 / 2;
+  }
+  .app.is-game
+    .visual-controls.has-source.is-busy:not(:has(.gold-button))
+    .decision-actions {
+    grid-area: 1 / 3;
+  }
+  .app.is-game .playing-indicator {
+    gap: 4px;
+  }
+  .app.is-game .visual-controls .gold-button.secondary-ending {
+    background: #20343d;
+    color: #f1d8a5;
+    border: 1px solid #bba56b;
+  }
+  .app.is-game .playing-indicator i {
+    width: 5px;
+    height: 5px;
+  }
+  .app.is-game
+    .visual-controls:not(.has-source):has(.end-turn):not(
+      :has(.context-action)
+    ) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto;
+  }
+  .app.is-game
+    .visual-controls:not(.has-source):has(.end-turn):not(:has(.context-action))
+    .decision-actions {
+    grid-area: 1 / 2;
+    align-items: center;
+  }
+  .app.is-game
+    .visual-controls:not(.has-source):has(.end-turn):not(:has(.context-action))
+    .decision-copy {
+    grid-area: 1 / 1;
+    padding-right: 0;
+  }
+}
+
+/* Browser chrome leaves less space on short phones, especially during a reaction. */
+@media (max-width: 800px) and (max-height: 700px) and (max-aspect-ratio: 3/2) {
+  .app.is-game .game-layout {
+    grid-template-rows: 40px 38px minmax(0, 1fr);
+  }
+  .app.is-game .playmat {
+    grid-template-rows: 30px 50px minmax(0, 1fr) 112px auto;
+  }
+  .app.is-game .visual-controls .decision-kicker {
+    display: none;
+  }
+  .app.is-game .action-stack {
+    height: 50px;
+  }
+  .app.is-game .action-stack-heading {
+    min-height: 0;
+  }
+  .app.is-game .action-stack-entry {
+    grid-template-columns: 32px minmax(0, 1fr);
+    grid-template-rows: 16px 28px;
+  }
+}
+
+/* In landscape the hand and decisions share a side rail with the full-height board. */
+@media (max-width: 1000px) and (max-height: 500px) and (min-aspect-ratio: 3/2) {
+  .app.is-game .game-layout {
+    grid-template-rows: 36px minmax(0, 1fr);
+    padding-left: max(5px, env(safe-area-inset-left));
+    padding-right: max(5px, env(safe-area-inset-right));
+  }
+  .app.is-game .turn-flow {
+    display: none;
+  }
+  .app.is-game .match-toolbar {
+    height: 36px;
+  }
+  .app.is-game .playmat {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(220px, 0.95fr);
+    grid-template-rows: 30px 48px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "player opponent hand"
+      "zones zones hand"
+      "table table hand"
+      "table table decisions";
+  }
+  .app.is-game .playmat:has(.hand:empty) {
+    grid-template-rows: 30px 48px minmax(0, 1fr) auto;
+  }
+  .app.is-game .player-cards > .hand-section {
+    --hand-card-height: min(calc(100cqh - 30px), 120px);
+  }
+  .app.is-game .visual-controls .decision-copy p {
+    -webkit-line-clamp: 1;
+  }
+  .app.is-game .playmat[data-mobile-zone^="base:"] .mobile-base-panel {
+    grid-template-columns: 120px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 46px;
+    grid-template-areas: "setup base" "resources resources";
+  }
+  .app.is-game .playmat[data-mobile-zone="base:1"] .opponent-base-panel {
+    grid-template-rows: 20px minmax(0, 1fr) 46px;
+    grid-template-areas: "enemy-hand enemy-hand" "setup base" "resources resources";
+  }
+  .app.is-game .mobile-base-panel .champion-zone {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .app.is-game .mobile-base-panel .champion-zone .game-card.small,
+  .app.is-game .mobile-base-panel .setup-empty-art {
+    width: 36px;
+    height: 50px;
+  }
+  .app.is-game .mobile-base-panel .setup-card-name {
+    font-size: 10px;
+  }
+}

@@ -1,4 +1,22 @@
 export const tableMessages: Record<string, [string, string, string]> = {
+  "Table zones": ["Table zones", "Zone stola", "Zone del tavolo"],
+  "Your base": ["Your base", "Tvoja baza", "La tua base"],
+  "AI base": ["AI base", "AI baza", "Base IA"],
+  "{own} friendly · {enemy} enemy units": [
+    "{own} friendly · {enemy} enemy units",
+    "{own} tvojih · {enemy} protivničkih jedinica",
+    "{own} unità alleate · {enemy} unità nemiche",
+  ],
+  "Available target": [
+    "Available target",
+    "Dostupna meta",
+    "Bersaglio disponibile",
+  ],
+  "{ready} ready runes · {energy} energy": [
+    "{ready} ready runes · {energy} energy",
+    "{ready} spremnih runa · {energy} energije",
+    "{ready} rune pronte · {energy} energia",
+  ],
   "Battlefield Might": [
     "Battlefield Might",
     "Might na bojištu",

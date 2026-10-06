@@ -1,0 +1,1172 @@
+{
+  "date": "2026-10-06",
+  "environment": "Local development server, synthetic games, emulated touch viewports; no physical iPhone or production deployment.",
+  "build": "passed (existing bundle-size warning)",
+  "focused_tests": {
+    "files": 8,
+    "passed": 56,
+    "command": "npm test -- tests/native-flow.test.ts tests/movement-flow.test.ts tests/decision-presentation.test.ts tests/champion-zone.test.ts tests/hidden-card-view.test.ts tests/combat-panel.test.ts tests/i18n.test.ts tests/exhausted-surfaces.test.ts"
+  },
+  "browser_checks": 50,
+  "runs": {
+    "chromium": {
+      "report": [
+        {
+          "check": "layout",
+          "zone": "base:1",
+          "viewport": [
+            390,
+            664
+          ],
+          "page": [
+            390,
+            664
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 10,
+            "y": 587.421875,
+            "right": 380,
+            "bottom": 654,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "base:0",
+          "viewport": [
+            390,
+            664
+          ],
+          "page": [
+            390,
+            664
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 10,
+            "y": 587.421875,
+            "right": 380,
+            "bottom": 654,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:0",
+          "viewport": [
+            390,
+            664
+          ],
+          "page": [
+            390,
+            664
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 82,
+              "height": 115
+            },
+            {
+              "width": 82,
+              "height": 115
+            }
+          ],
+          "dock": {
+            "x": 10,
+            "y": 587.421875,
+            "right": 380,
+            "bottom": 654,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:1",
+          "viewport": [
+            390,
+            664
+          ],
+          "page": [
+            390,
+            664
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 72,
+              "height": 101
+            },
+            {
+              "width": 72,
+              "height": 101
+            }
+          ],
+          "dock": {
+            "x": 10,
+            "y": 587.421875,
+            "right": 380,
+            "bottom": 654,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "base:1",
+          "viewport": [
+            360,
+            640
+          ],
+          "page": [
+            360,
+            640
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 10,
+            "y": 563.421875,
+            "right": 350,
+            "bottom": 630,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "base:0",
+          "viewport": [
+            360,
+            640
+          ],
+          "page": [
+            360,
+            640
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 10,
+            "y": 563.421875,
+            "right": 350,
+            "bottom": 630,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:0",
+          "viewport": [
+            360,
+            640
+          ],
+          "page": [
+            360,
+            640
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 75,
+              "height": 104
+            },
+            {
+              "width": 75,
+              "height": 104
+            }
+          ],
+          "dock": {
+            "x": 10,
+            "y": 563.421875,
+            "right": 350,
+            "bottom": 630,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:1",
+          "viewport": [
+            360,
+            640
+          ],
+          "page": [
+            360,
+            640
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 72,
+              "height": 101
+            },
+            {
+              "width": 72,
+              "height": 101
+            }
+          ],
+          "dock": {
+            "x": 10,
+            "y": 563.421875,
+            "right": 350,
+            "bottom": 630,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "base:1",
+          "viewport": [
+            430,
+            932
+          ],
+          "page": [
+            430,
+            932
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 10,
+            "y": 841.421875,
+            "right": 420,
+            "bottom": 922,
+            "height": 80.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "base:0",
+          "viewport": [
+            430,
+            932
+          ],
+          "page": [
+            430,
+            932
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 10,
+            "y": 841.421875,
+            "right": 420,
+            "bottom": 922,
+            "height": 80.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:0",
+          "viewport": [
+            430,
+            932
+          ],
+          "page": [
+            430,
+            932
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 92,
+              "height": 128
+            },
+            {
+              "width": 92,
+              "height": 128
+            }
+          ],
+          "dock": {
+            "x": 10,
+            "y": 841.421875,
+            "right": 420,
+            "bottom": 922,
+            "height": 80.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:1",
+          "viewport": [
+            430,
+            932
+          ],
+          "page": [
+            430,
+            932
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 72,
+              "height": 101
+            },
+            {
+              "width": 72,
+              "height": 101
+            }
+          ],
+          "dock": {
+            "x": 10,
+            "y": 841.421875,
+            "right": 420,
+            "bottom": 922,
+            "height": 80.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "base:1",
+          "viewport": [
+            844,
+            390
+          ],
+          "page": [
+            844,
+            390
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 571.859375,
+            "y": 314.8125,
+            "right": 833.984375,
+            "bottom": 380,
+            "height": 65.1875
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "base:0",
+          "viewport": [
+            844,
+            390
+          ],
+          "page": [
+            844,
+            390
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 571.859375,
+            "y": 314.8125,
+            "right": 833.984375,
+            "bottom": 380,
+            "height": 65.1875
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:0",
+          "viewport": [
+            844,
+            390
+          ],
+          "page": [
+            844,
+            390
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 100,
+              "height": 140
+            },
+            {
+              "width": 100,
+              "height": 140
+            }
+          ],
+          "dock": {
+            "x": 571.859375,
+            "y": 314.8125,
+            "right": 833.984375,
+            "bottom": 380,
+            "height": 65.1875
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:1",
+          "viewport": [
+            844,
+            390
+          ],
+          "page": [
+            844,
+            390
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 72,
+              "height": 101
+            },
+            {
+              "width": 72,
+              "height": 101
+            }
+          ],
+          "dock": {
+            "x": 571.859375,
+            "y": 314.8125,
+            "right": 833.984375,
+            "bottom": 380,
+            "height": 65.1875
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "last crowded base unit selectable",
+          "passed": true
+        },
+        {
+          "check": "card inspection, last hand card and deck dialog",
+          "passed": true
+        },
+        {
+          "check": "three units moved across mobile zones",
+          "passed": true
+        },
+        {
+          "check": "combat auto-focus and direct damage target",
+          "passed": true
+        },
+        {
+          "check": "desktop retained",
+          "viewport": [
+            1440,
+            900
+          ],
+          "page": [
+            1440,
+            900
+          ],
+          "zones": 2,
+          "cards": [
+            {
+              "width": 41,
+              "height": 58
+            },
+            {
+              "width": 41,
+              "height": 58
+            },
+            {
+              "width": 41,
+              "height": 58
+            },
+            {
+              "width": 41,
+              "height": 58
+            }
+          ],
+          "dock": {
+            "x": 25,
+            "y": 489.375,
+            "right": 1331,
+            "bottom": 577.375,
+            "height": 88
+          },
+          "toolbarOverflow": false
+        }
+      ],
+      "errors": []
+    },
+    "webkit": {
+      "report": [
+        {
+          "check": "layout",
+          "zone": "base:1",
+          "viewport": [
+            390,
+            664
+          ],
+          "page": [
+            390,
+            664
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 10,
+            "y": 587.421875,
+            "right": 380,
+            "bottom": 654,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "base:0",
+          "viewport": [
+            390,
+            664
+          ],
+          "page": [
+            390,
+            664
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 10,
+            "y": 587.421875,
+            "right": 380,
+            "bottom": 654,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:0",
+          "viewport": [
+            390,
+            664
+          ],
+          "page": [
+            390,
+            664
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 82,
+              "height": 115
+            },
+            {
+              "width": 82,
+              "height": 115
+            }
+          ],
+          "dock": {
+            "x": 10,
+            "y": 587.421875,
+            "right": 380,
+            "bottom": 654,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:1",
+          "viewport": [
+            390,
+            664
+          ],
+          "page": [
+            390,
+            664
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 72,
+              "height": 101
+            },
+            {
+              "width": 72,
+              "height": 101
+            }
+          ],
+          "dock": {
+            "x": 10,
+            "y": 587.421875,
+            "right": 380,
+            "bottom": 654,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "base:1",
+          "viewport": [
+            360,
+            640
+          ],
+          "page": [
+            360,
+            640
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 10,
+            "y": 563.421875,
+            "right": 350,
+            "bottom": 630,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "base:0",
+          "viewport": [
+            360,
+            640
+          ],
+          "page": [
+            360,
+            640
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 10,
+            "y": 563.421875,
+            "right": 350,
+            "bottom": 630,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:0",
+          "viewport": [
+            360,
+            640
+          ],
+          "page": [
+            360,
+            640
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 75,
+              "height": 104
+            },
+            {
+              "width": 75,
+              "height": 104
+            }
+          ],
+          "dock": {
+            "x": 10,
+            "y": 563.421875,
+            "right": 350,
+            "bottom": 630,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:1",
+          "viewport": [
+            360,
+            640
+          ],
+          "page": [
+            360,
+            640
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 72,
+              "height": 101
+            },
+            {
+              "width": 72,
+              "height": 101
+            }
+          ],
+          "dock": {
+            "x": 10,
+            "y": 563.421875,
+            "right": 350,
+            "bottom": 630,
+            "height": 66.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "base:1",
+          "viewport": [
+            430,
+            932
+          ],
+          "page": [
+            430,
+            932
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 10,
+            "y": 841.421875,
+            "right": 420,
+            "bottom": 922,
+            "height": 80.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "base:0",
+          "viewport": [
+            430,
+            932
+          ],
+          "page": [
+            430,
+            932
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 10,
+            "y": 841.421875,
+            "right": 420,
+            "bottom": 922,
+            "height": 80.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:0",
+          "viewport": [
+            430,
+            932
+          ],
+          "page": [
+            430,
+            932
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 92,
+              "height": 128
+            },
+            {
+              "width": 92,
+              "height": 128
+            }
+          ],
+          "dock": {
+            "x": 10,
+            "y": 841.421875,
+            "right": 420,
+            "bottom": 922,
+            "height": 80.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:1",
+          "viewport": [
+            430,
+            932
+          ],
+          "page": [
+            430,
+            932
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 72,
+              "height": 101
+            },
+            {
+              "width": 72,
+              "height": 101
+            }
+          ],
+          "dock": {
+            "x": 10,
+            "y": 841.421875,
+            "right": 420,
+            "bottom": 922,
+            "height": 80.578125
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "base:1",
+          "viewport": [
+            844,
+            390
+          ],
+          "page": [
+            844,
+            390
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 571.859375,
+            "y": 314.8125,
+            "right": 833.984375,
+            "bottom": 380,
+            "height": 65.1875
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "base:0",
+          "viewport": [
+            844,
+            390
+          ],
+          "page": [
+            844,
+            390
+          ],
+          "zones": 0,
+          "cards": [],
+          "dock": {
+            "x": 571.859375,
+            "y": 314.8125,
+            "right": 833.984375,
+            "bottom": 380,
+            "height": 65.1875
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:0",
+          "viewport": [
+            844,
+            390
+          ],
+          "page": [
+            844,
+            390
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 100,
+              "height": 140
+            },
+            {
+              "width": 100,
+              "height": 140
+            }
+          ],
+          "dock": {
+            "x": 571.859375,
+            "y": 314.8125,
+            "right": 833.984375,
+            "bottom": 380,
+            "height": 65.1875
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "layout",
+          "zone": "field:1",
+          "viewport": [
+            844,
+            390
+          ],
+          "page": [
+            844,
+            390
+          ],
+          "zones": 1,
+          "cards": [
+            {
+              "width": 72,
+              "height": 101
+            },
+            {
+              "width": 72,
+              "height": 101
+            }
+          ],
+          "dock": {
+            "x": 571.859375,
+            "y": 314.8125,
+            "right": 833.984375,
+            "bottom": 380,
+            "height": 65.1875
+          },
+          "toolbarOverflow": false
+        },
+        {
+          "check": "last crowded base unit selectable",
+          "passed": true
+        },
+        {
+          "check": "card inspection, last hand card and deck dialog",
+          "passed": true
+        },
+        {
+          "check": "three units moved across mobile zones",
+          "passed": true
+        },
+        {
+          "check": "combat auto-focus and direct damage target",
+          "passed": true
+        },
+        {
+          "check": "desktop retained",
+          "viewport": [
+            1440,
+            900
+          ],
+          "page": [
+            1440,
+            900
+          ],
+          "zones": 2,
+          "cards": [
+            {
+              "width": 41,
+              "height": 58
+            },
+            {
+              "width": 41,
+              "height": 58
+            },
+            {
+              "width": 41,
+              "height": 58
+            },
+            {
+              "width": 41,
+              "height": 58
+            }
+          ],
+          "dock": {
+            "x": 25,
+            "y": 489.375,
+            "right": 1330.984375,
+            "bottom": 577.375,
+            "height": 88
+          },
+          "toolbarOverflow": false
+        }
+      ],
+      "errors": []
+    },
+    "webkit_additional": {
+      "report": [
+        {
+          "fixture": "hidden-preview.html",
+          "viewport": [
+            390,
+            664
+          ],
+          "page": [
+            390,
+            664
+          ],
+          "dock": [
+            10,
+            380,
+            654
+          ],
+          "cards": [
+            {
+              "w": 82,
+              "h": 114
+            },
+            {
+              "w": 82,
+              "h": 115
+            }
+          ]
+        },
+        {
+          "fixture": "gear-sleeves-preview.html?crowded=7&units=6",
+          "viewport": [
+            390,
+            664
+          ],
+          "page": [
+            390,
+            664
+          ],
+          "dock": [
+            10,
+            380,
+            654
+          ],
+          "cards": []
+        },
+        {
+          "fixture": "playback-preview.html",
+          "viewport": [
+            390,
+            664
+          ],
+          "page": [
+            390,
+            664
+          ],
+          "dock": [
+            10,
+            380,
+            654
+          ],
+          "cards": []
+        },
+        {
+          "fixture": "playback-preview.html?mode=reaction",
+          "viewport": [
+            390,
+            664
+          ],
+          "page": [
+            390,
+            664
+          ],
+          "dock": [
+            10,
+            380,
+            654
+          ],
+          "cards": [
+            {
+              "w": 82,
+              "h": 87
+            },
+            {
+              "w": 82,
+              "h": 87
+            },
+            {
+              "w": 82,
+              "h": 87
+            },
+            {
+              "w": 82,
+              "h": 87
+            }
+          ]
+        },
+        {
+          "fixture": "hidden-preview.html",
+          "viewport": [
+            360,
+            640
+          ],
+          "page": [
+            360,
+            640
+          ],
+          "dock": [
+            10,
+            350,
+            630
+          ],
+          "cards": [
+            {
+              "w": 74,
+              "h": 103
+            },
+            {
+              "w": 75,
+              "h": 104
+            }
+          ]
+        },
+        {
+          "fixture": "gear-sleeves-preview.html?crowded=7&units=6",
+          "viewport": [
+            360,
+            640
+          ],
+          "page": [
+            360,
+            640
+          ],
+          "dock": [
+            10,
+            350,
+            630
+          ],
+          "cards": []
+        },
+        {
+          "fixture": "playback-preview.html",
+          "viewport": [
+            360,
+            640
+          ],
+          "page": [
+            360,
+            640
+          ],
+          "dock": [
+            10,
+            350,
+            630
+          ],
+          "cards": []
+        },
+        {
+          "fixture": "playback-preview.html?mode=reaction",
+          "viewport": [
+            360,
+            640
+          ],
+          "page": [
+            360,
+            640
+          ],
+          "dock": [
+            10,
+            350,
+            630
+          ],
+          "cards": [
+            {
+              "w": 74,
+              "h": 63
+            },
+            {
+              "w": 74,
+              "h": 63
+            },
+            {
+              "w": 75,
+              "h": 63
+            },
+            {
+              "w": 75,
+              "h": 63
+            }
+          ]
+        }
+      ],
+      "errors": []
+    }
+  }
+}

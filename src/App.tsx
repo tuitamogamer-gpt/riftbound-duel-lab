@@ -70,6 +70,10 @@ import { EffectTrails, FieldEffect } from "./components/EffectFeedback";
 import { ActionStack } from "./components/ActionStack";
 import { BattlefieldMight } from "./components/BattlefieldMight";
 import {
+  MobileBoardNav,
+  useMobileBoardZone,
+} from "./components/MobileBoardNav";
+import {
   TableMoment,
   ScoreTrack,
   FieldScoring,
@@ -185,6 +189,7 @@ export default function App() {
     return () => document.removeEventListener("visibilitychange", update);
   }, []);
   const game = review?.frames[review.index]?.state || match;
+  const [mobileZone, setMobileZone] = useMobileBoardZone(game, review);
   const status = game
     ? matchStatus(game, { paused, reviewing: !!review })
     : null;
@@ -773,46 +778,58 @@ export default function App() {
               }}
             >
               <div className="match-content">
-                <div className="playmat">
+                <div className="playmat" data-mobile-zone={mobileZone}>
+                  <MobileBoardNav
+                    game={game}
+                    zone={mobileZone}
+                    select={setMobileZone}
+                    actions={currentActions}
+                  />
                   <ScoreTrack game={game} review={review} />
                   <PlayerBar game={game} player={1} inspect={setInspected} />
-                  <div className="player-cards opponent-cards">
-                    <div className="opponent-hand-section">
-                      <div
-                        className="enemy-hand"
-                        aria-label={t("{count} skrivenih karata protivnika", {
-                          count: game.players[1].hand.length,
-                        })}
-                      >
-                        {game.players[1].hand.slice(0, 12).map((_, i) => (
-                          <div className="card-back" key={i}>
-                            <CardSleeve player={game.players[1]} />
-                          </div>
-                        ))}
-                        <span>
-                          {game.players[1].hand.length} {t("u ruci ·")}{" "}
-                          {game.players[1].deck.length} {t("u špilu")}{" "}
-                        </span>
+                  <div className="mobile-base-panel opponent-base-panel">
+                    <div className="player-cards opponent-cards">
+                      <div className="opponent-hand-section">
+                        <div
+                          className="enemy-hand"
+                          aria-label={t("{count} skrivenih karata protivnika", {
+                            count: game.players[1].hand.length,
+                          })}
+                        >
+                          {game.players[1].hand.slice(0, 12).map((_, i) => (
+                            <div className="card-back" key={i}>
+                              <CardSleeve player={game.players[1]} />
+                            </div>
+                          ))}
+                          <span>
+                            {game.players[1].hand.length} {t("u ruci ·")}{" "}
+                            {game.players[1].deck.length} {t("u špilu")}{" "}
+                          </span>
+                        </div>
+                        <RuneZone
+                          game={game}
+                          player={1}
+                          inspect={setInspected}
+                        />
                       </div>
-                      <RuneZone game={game} player={1} inspect={setInspected} />
+                      <ChampionZone
+                        game={game}
+                        player={1}
+                        legal={legal}
+                        selected={selected}
+                        select={selectCard}
+                        inspect={setInspected}
+                      />
                     </div>
-                    <ChampionZone
+                    <BoardZone
                       game={game}
-                      player={1}
-                      legal={legal}
-                      selected={selected}
+                      location="base:1"
+                      title={t("PROTIVNIČKA BAZA")}
                       select={selectCard}
+                      selected={selected}
                       inspect={setInspected}
                     />
                   </div>
-                  <BoardZone
-                    game={game}
-                    location="base:1"
-                    title={t("PROTIVNIČKA BAZA")}
-                    select={selectCard}
-                    selected={selected}
-                    inspect={setInspected}
-                  />
                   <div className="battlefields">
                     <ActionStack
                       game={game}
@@ -827,6 +844,7 @@ export default function App() {
                           className={`battlefield ${field.controller === 0 ? "owned" : field.controller === 1 ? "enemy-owned" : ""} ${game.combat?.fieldId === field.id ? "in-combat" : ""}`}
                           key={field.id}
                           data-field-id={field.id}
+                          data-mobile-active={mobileZone === field.id}
                         >
                           <div
                             className="field-art"
@@ -945,14 +963,25 @@ export default function App() {
                     mulligan={mulligan}
                     inspect={setInspected}
                   />
-                  <BoardZone
-                    game={game}
-                    location="base:0"
-                    title={t("TVOJA BAZA")}
-                    select={selectCard}
-                    selected={selected}
-                    inspect={setInspected}
-                  />
+                  <div className="player-cards mobile-base-panel own-base-panel">
+                    <BoardZone
+                      game={game}
+                      location="base:0"
+                      title={t("TVOJA BAZA")}
+                      select={selectCard}
+                      selected={selected}
+                      inspect={setInspected}
+                    />
+                    <RuneZone game={game} player={0} inspect={setInspected} />
+                    <ChampionZone
+                      game={game}
+                      player={0}
+                      legal={legal}
+                      selected={selected}
+                      select={selectCard}
+                      inspect={setInspected}
+                    />
+                  </div>
                   <PlayerBar game={game} player={0} inspect={setInspected} />
                   <div className="player-cards">
                     <section className="hand-section">
@@ -1023,15 +1052,6 @@ export default function App() {
                       </div>
                       <CardPiles game={game} open={setPileView} />
                     </section>
-                    <RuneZone game={game} player={0} inspect={setInspected} />
-                    <ChampionZone
-                      game={game}
-                      player={0}
-                      legal={legal}
-                      selected={selected}
-                      select={selectCard}
-                      inspect={setInspected}
-                    />
                   </div>
                   <TableMoment
                     game={game}
@@ -1340,9 +1360,30 @@ function PlayerBar({
         {legend && <img src={cardArtUrl(legend)} alt={legend.name} />}
       </button>
       <div className="player-name">
-        <strong>{player === 0 ? t("Ti") : t("Sparring AI")}</strong>
+        <strong>
+          <span className="full-player-label">
+            {player === 0 ? t("Ti") : t("Sparring AI")}
+          </span>
+          <span className="mobile-player-label">
+            {t(player === 0 ? "Ti" : "AI")}
+          </span>
+        </strong>
         <small>{legend?.name}</small>
       </div>
+      <span
+        className="mobile-resource-count"
+        title={t("{ready} ready runes · {energy} energy", {
+          ready: p.runes.filter((rune) => rune.ready).length,
+          energy: p.energy,
+        })}
+        aria-label={t("{ready} ready runes · {energy} energy", {
+          ready: p.runes.filter((rune) => rune.ready).length,
+          energy: p.energy,
+        })}
+      >
+        <Zap size={12} /> {p.runes.filter((rune) => rune.ready).length}
+        {p.energy > 0 && <small>+{p.energy}</small>}
+      </span>
       <div className="score">
         {highlights.playerEvents.has(player) && (
           <span className="player-effect-label">
@@ -1513,6 +1554,9 @@ function UnitRow({
               }
               onClick={() => select(u.id)}
             />
+            <span className="mobile-unit-name" aria-hidden="true">
+              {c.name}
+            </span>
             {interaction.game?.pendingMove?.player === 0 &&
               interaction.game.pendingMove.unitIds.includes(u.id) && (
                 <span

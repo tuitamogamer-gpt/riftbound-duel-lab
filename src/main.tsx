@@ -26,6 +26,7 @@ import "./equipment-sleeves.css";
 import "./match-skin.css";
 import "./desktop-table.css";
 import "./components/PlaybackSpeed.css";
+import "./mobile-table.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <LanguageProvider>
