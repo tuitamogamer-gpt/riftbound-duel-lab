@@ -1,4 +1,5 @@
 import { cardWave6Module } from "./card-wave6";
+import { cardWave7Module } from "./card-wave7";
 import { originsWave4Module } from "./origins-wave4";
 import { cardWave5Module } from "./card-wave5";
 import { vendettaWave4Module } from "./vendetta-wave4";
@@ -26,6 +27,9 @@ import type {
   Unit,
 } from "./types";
 export interface PreconContext {
+  playSource?: "hand" | "champion" | "hidden" | "trash" | "effect";
+  abilityEnergyCost?: number;
+  readyForbidden?: (s: GameState, owner: PlayerId) => boolean;
   choosingKind?: "spell" | "ability" | "trigger";
   amount?: number;
   empower?: (s: GameState, p: PlayerId, sourceId: string) => void;
@@ -137,6 +141,8 @@ export interface PreconContext {
   ) => void;
 }
 export type PreconEvent =
+  | "abilityActivated"
+  | "discardBatch"
   | "attack"
   | "spendBuff"
   | "draw"
@@ -211,6 +217,7 @@ function modules(): ExpansionModule[] {
     unleashedWave4Module,
     cardWave5Module,
     cardWave6Module,
+    cardWave7Module,
   ];
 }
 export function laterMight(s: GameState, u: Unit, value: number) {

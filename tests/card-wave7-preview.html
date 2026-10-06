@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Seventh card wave QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      import { addToTrash } from "/src/game/trash.ts";
+      import { cards } from "/src/data/cards.ts";
+      // Synthetic fixture on an isolated origin; reload preserves pending choices.
+      const scenario =
+        new URLSearchParams(location.search).get("scenario") ?? "trash";
+      const seedKey = `wave7-${scenario}-seeded`;
+      if (!sessionStorage.getItem(seedKey)) {
+        const match = createCombatFixture();
+        match.turn = 7;
+        match.phase = "main";
+        match.combat = null;
+        match.currentPlayer = match.priorityPlayer = match.focusPlayer = 0;
+        match.fields.forEach((f) => {
+          f.cardId = "ogn-279-298";
+          f.controller = null;
+        });
+        const shadows = cards.find(
+          (c) => c.set === "VEN" && c.collectorNumber === 103 && !c.variant,
+        ).id;
+        match.players[0].legendId = "ogn-263-298";
+        match.players[0].hand = [shadows, "ogn-264-298", "sfd-061-221"];
+        for (const p of match.players) {
+          p.discard = [];
+          p.energy = 20;
+          p.power = 10;
+          p.championAvailable = false;
+        }
+        match.players[1].hand = [];
+        if (scenario === "resources") {
+          match.players[0].legendId = "ogn-247-298";
+          match.players[0].power = 0;
+          match.players[0].hand = ["ogn-050-298", "sfd-061-221"];
+        }
+        match.units = [
+          { ...combatUnit("mundo", 0, 6, "ogn-109-298"), location: "base:0" },
+          {
+            ...combatUnit("opponent", 1, 3, "ogn-049-298"),
+            location: "base:1",
+          },
+        ];
+        addToTrash(match, 0, "ogn-197-298", "sfd-095-221");
+        addToTrash(match, 1, "ogn-052-298", "ogn-049-298");
+        match.stack = [];
+        localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review: null }));
+        sessionStorage.setItem(seedKey, "1");
+      }
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

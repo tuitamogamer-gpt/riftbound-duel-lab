@@ -257,10 +257,13 @@ describe("additional Spiritforged rules through the engine", () => {
     expect(end.gears.some((g) => g.id === "large")).toBe(true);
     expect(end.gears.some((g) => g.token)).toBe(true);
   });
-  it.each([35, 61])("does not advertise late trash targeting (%i)", (n) => {
-    expect(scripts[id(n)]).toBeUndefined();
-    expect(getScript(id(n))?.implemented ?? false).toBe(false);
-  });
+  it.each([35, 61])(
+    "delegates public trash targets to the shared implementation (%i)",
+    (n) => {
+      expect(scripts[id(n)]).toBeUndefined();
+      expect(getScript(id(n))?.implemented).toBe(true);
+    },
+  );
   it("Lonely Poro remembers whether it died alone", () => {
     for (const other of [false, true]) {
       const s = fixture(),

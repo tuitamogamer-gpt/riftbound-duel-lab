@@ -358,6 +358,16 @@ export const appMessages: Record<string, [string, string, string]> = {
     " · {count} potere universale",
   ],
   Empowered: ["Empowered", "Osnažena", "Potenziata"],
+  "{count} Power for spells": [
+    "{count} Power for spells",
+    "{count} moći za čarolije",
+    "{count} potere per magie",
+  ],
+  "{count} Energy for units": [
+    "{count} Energy for units",
+    "{count} energije za jedinice",
+    "{count} energia per unità",
+  ],
   "Jedinice ulaze iscrpljene. Pripremi ih za sljedeći potez.": [
     "Units enter exhausted. Ready them for your next turn.",
     "Jedinice ulaze iscrpljene. Pripremi ih za sljedeći potez.",

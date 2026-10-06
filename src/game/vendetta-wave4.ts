@@ -1,3 +1,4 @@
+import { readyForbidden, disempower } from "./board-rules";
 import { cards, getCard } from "../data/cards";
 import { getKeywords } from "./engine";
 import type {
@@ -486,7 +487,7 @@ export const vendettaWave4Module: ExpansionModule = {
       case "sanction":
         if (target) {
           if (e.amount) ctx.empower!(s, p, target.id);
-          else target.empowered = false;
+          else disempower(target);
           data(s).sanctions.push({
             id: target.id,
             empower: !e.amount,
@@ -499,7 +500,7 @@ export const vendettaWave4Module: ExpansionModule = {
         const unit = s.units.find((u) => u.id === e.cardName);
         if (unit) {
           if (e.amount) ctx.empower!(s, p, unit.id);
-          else unit.empowered = false;
+          else disempower(unit);
         }
         break;
       }
@@ -525,7 +526,7 @@ export const vendettaWave4Module: ExpansionModule = {
       case "ready-gear": {
         for (const id of new Set((ctx.targetId ?? "").split("~"))) {
           const gear = s.gears.find((g) => g.id === id);
-          if (gear && !gear.ready) {
+          if (gear && !gear.ready && !readyForbidden(s, gear.owner)) {
             gear.ready = true;
             ctx.cardEvent(
               s,

@@ -2,6 +2,16 @@
 
 Verified on 2026-10-02. This is an implementation brief, not a reproduction of the rulebook. The current official core rules are dated **2026-07-16**; the later **2026-08-14 Vendetta FAQ** prevails where it explicitly corrects them. The Rules Hub lists constructed bans updated **2026-09-18**. A complete implementation must treat card text, official errata, and current FAQ rulings as authoritative over ordinary rules.
 
+## Seventh-wave implementation checks — 6 October 2026
+
+The [Core Rules, 16 July 2026](https://cmsassets.rgpub.io/sanity/files/dsfx7636/news_live/e9ac8e3d33e0f78cef296f5945aba7bc1313b086.pdf), [Origins FAQ](https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-faq/) and [Vendetta FAQ](https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications/) were checked against the preserved catalog text.
+
+- **355 / 359.3.e.3–4:** public trash targets are declared before reactions. A card that leaves and re-enters trash is a new object; identical names and shifted array positions cannot replace the original target. Optional target groups allow zero, and invalid members are skipped individually on resolution.
+- **377.2.a / 419.4:** Prize of Progress and Nasus observe a resolved activated ability. Kennen's legend observes a resolved card play from outside hand. Countering those chain items prevents their play triggers; resource abilities finish immediately. A saved pending choice keeps the originating ability until all instructions finish.
+- **135.2.e.6 / 206 / 356:** restricted resources retain their spending limits. Kai'Sa's Power can pay a spell's colored or additional Power costs; Renekton's Energy can pay unit plays or unit activated abilities. Nasus checks printed card cost. Kennen's granted Flow retains the chosen spell's base cost and domain choices, ordinary timing, taxes, and the replacement that banishes it when it leaves the chain.
+- **Vendetta FAQ:** Kayle can retain up to three Empowered statuses, and disempowering removes one. An additional empowerment activation at the cap is legal but does not add a fourth status. Hwei's type-based result is a separate reflexive trigger with its own response window; the unit, spell and gear branches are tested. Hybrid Unit/Gear Patched Porobot remains unsupported.
+- **Card restrictions:** Mageseeker Warden prevents opposing unit plays to battlefields and effect-driven readying of opposing units and gear, while normal Awaken and entering ready are allowed. Esteemed Hierophant's seven-rune protection distinguishes enemy spell/ability damage from friendly effects and unit damage.
+
 ## Sixth-wave implementation checks — 4 October 2026
 
 The [official Core Rules PDF](https://cmsassets.rgpub.io/sanity/files/dsfx7636/news_live/e9ac8e3d33e0f78cef296f5945aba7bc1313b086.pdf) and the official [Origins](https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-faq/), [Spiritforged](https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq/) and [Vendetta](https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications/) FAQs were consulted alongside preserved catalog text.

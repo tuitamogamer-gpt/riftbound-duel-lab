@@ -78,6 +78,12 @@ const effectTypes = new Set([
   "special",
 ]);
 const targetFilters = new Set([
+  "enemyChainItemChoosingFriendly",
+  "friendlyUnitAndEnemyChainItem",
+  "trashCards",
+  "exhaustedOther",
+  "ownTeemo",
+  "unitAndEquipment",
   "twoUnitChoices",
   "upToOneEnemyUnitHere",
   "twoUnitsSameBattlefield",
@@ -145,6 +151,14 @@ const effects = (x: unknown, depth = 0): boolean =>
       ["amount", "minMight", "maxMight", "maxEnergy", "maxPower"].every(
         (k) => e[k] === undefined || finite(e[k]),
       ) &&
+      optionalCount(e.targetCount) &&
+      optionalBoolean(e.upTo) &&
+      (e.cardTypes === undefined ||
+        (stringArray(e.cardTypes) &&
+          e.cardTypes.every((type) =>
+            ["Unit", "Spell", "Gear"].includes(type),
+          ))) &&
+      (e.cardTags === undefined || stringArray(e.cardTags)) &&
       [
         "custom",
         "cardName",
@@ -220,6 +234,7 @@ const validUnit = (u: unknown): boolean =>
     "moveLockedTurn",
     "deathReplacementTurn",
     "combatShield",
+    "empowerCount",
   ].every((k) => optionalCount(u[k])) &&
   [
     "empowered",
@@ -242,11 +257,13 @@ const validStackItem = (s: unknown): boolean =>
   effects(s.effects) &&
   optionalString(s.sourceId) &&
   optionalString(s.targetId) &&
-  ["playOrdinal", "energySpent"].every(
+  ["playOrdinal", "energySpent", "abilityEnergyCost"].every(
     (k) => s[k] === undefined || nonnegative(s[k]),
   ) &&
+  (s.playSource === undefined ||
+    ["hand", "champion", "hidden", "trash", "effect"].includes(s.playSource)) &&
   (s.locationId === undefined || location(s.locationId)) &&
-  ["flowed", "fromHidden", "additionalCostPaid"].every((k) =>
+  ["flowed", "grantedFlow", "fromHidden", "additionalCostPaid"].every((k) =>
     optionalBoolean(s[k]),
   ) &&
   (s.sourceSnapshot === undefined || validUnit(s.sourceSnapshot));
@@ -349,6 +366,7 @@ const choice = (x: unknown): boolean =>
     "optional",
     "move",
     "custom",
+    "trashTargets",
   ].includes(x.kind) &&
   count(x.remaining) &&
   phase(x.returnPhase) &&
@@ -356,6 +374,23 @@ const choice = (x: unknown): boolean =>
   optionalString(x.sourceId) &&
   optionalString(x.targetId) &&
   optionalCount(x.lastDiscardEnergy) &&
+  optionalString(x.lastDiscardType) &&
+  optionalCount(x.discardBatchCount) &&
+  (x.discardBatchCardId === undefined || cardId(x.discardBatchCardId)) &&
+  (x.trashSelection === undefined ||
+    (isObject(x.trashSelection) &&
+      stringArray(x.trashSelection.selected) &&
+      new Set(x.trashSelection.selected).size ===
+        x.trashSelection.selected.length &&
+      validAction(x.trashSelection.action) &&
+      (x.trashSelection.trigger === undefined ||
+        validStackItem({
+          ...x.trashSelection.trigger,
+          id: "draft",
+          kind: "trigger",
+        })))) &&
+  (x.kind !== "trashTargets" ||
+    (isObject(x.trashSelection) && x.effect?.target === "trashCards")) &&
   (x.sourceSnapshot === undefined || validUnit(x.sourceSnapshot)) &&
   (x.cardId === undefined || cardId(x.cardId)) &&
   (x.effects === undefined || effects(x.effects)) &&
@@ -430,6 +465,18 @@ export function validState(x: unknown, actionable = true): x is GameState {
         ["hand", "deck", "discard", "banished"].every(
           (k) => Array.isArray(p[k]) && p[k].every(cardId),
         ) &&
+        (p.trashCards === undefined ||
+          (Array.isArray(p.trashCards) &&
+            p.trashCards.length === p.discard.length &&
+            new Set(p.trashCards.map((card: any) => card?.id)).size ===
+              p.trashCards.length &&
+            p.trashCards.every(
+              (card: any, index: number) =>
+                isObject(card) &&
+                typeof card.id === "string" &&
+                card.id.startsWith(`trash:${p.id}:`) &&
+                card.cardId === p.discard[index],
+            ))) &&
         ["scoredFieldsThisTurn", "conqueredThisTurn"].every(
           (k) =>
             Array.isArray(p[k]) &&
@@ -456,6 +503,8 @@ export function validState(x: unknown, actionable = true): x is GameState {
           "endReadyRunes",
           "power",
           "spellEnergy",
+          "spellPower",
+          "unitEnergy",
           "showdownEnergy",
           "spellsPlayedThisTurn",
           "canLookAtEnemyHiddenTurn",
@@ -463,7 +512,19 @@ export function validState(x: unknown, actionable = true): x is GameState {
           "cannotPlaySpellsTurn",
           "cannotPlayCardsTurn",
           "firstDeathTurn",
+          "powerSpentThisTurn",
+          "firstGearPlayedTurn",
+          "freeHideTurn",
         ].every((k) => optionalCount(p[k])) &&
+        (p.grantedFlow === undefined ||
+          (Array.isArray(p.grantedFlow) &&
+            p.grantedFlow.every(
+              (grant: unknown) =>
+                isObject(grant) &&
+                typeof grant.trashId === "string" &&
+                grant.trashId.startsWith(`trash:${p.id}:`) &&
+                count(grant.turn),
+            ))) &&
         (p.typedPower === undefined ||
           (isObject(p.typedPower) &&
             Object.entries(p.typedPower).every(
@@ -504,6 +565,13 @@ export function validState(x: unknown, actionable = true): x is GameState {
         !x.resolving.every(
           (item: unknown) =>
             validStackItem(item) && (item as { kind: string }).kind === "spell",
+        ))) ||
+    (x.resolvingAbilities !== undefined &&
+      (!Array.isArray(x.resolvingAbilities) ||
+        !x.resolvingAbilities.every(
+          (item: unknown) =>
+            validStackItem(item) &&
+            (item as { kind: string }).kind === "ability",
         ))) ||
     !x.log.every(
       (l: unknown) =>
@@ -558,9 +626,11 @@ export function validState(x: unknown, actionable = true): x is GameState {
     return false;
 
   if (actionable) {
-    const stackIds = [...x.stack, ...(x.resolving ?? [])].map(
-      (item: { id: string }) => item.id,
-    );
+    const stackIds = [
+      ...x.stack,
+      ...(x.resolving ?? []),
+      ...(x.resolvingAbilities ?? []),
+    ].map((item: { id: string }) => item.id);
     const boardIds = [...x.units, ...x.gears, ...(x.hidden ?? [])].map(
       (item: { id: string }) => item.id,
     );
@@ -569,7 +639,11 @@ export function validState(x: unknown, actionable = true): x is GameState {
       new Set(boardIds).size !== boardIds.length
     )
       return false;
-    if (x.resolving?.length && !x.pendingChoice && x.winner === null)
+    if (
+      (x.resolving?.length || x.resolvingAbilities?.length) &&
+      !x.pendingChoice &&
+      x.winner === null
+    )
       return false;
     if (
       (x.phase === "move" &&
@@ -626,6 +700,7 @@ function validAction(x: unknown): boolean {
     optionalString(x.detail) &&
     optionalBoolean(x.repeated) &&
     optionalBoolean(x.additionalCostPaid) &&
+    optionalBoolean(x.targetsFinalized) &&
     (x.cardId === undefined || cardId(x.cardId)) &&
     (x.locationId === undefined || location(x.locationId)) &&
     (x.unitIds === undefined || stringArray(x.unitIds)) &&

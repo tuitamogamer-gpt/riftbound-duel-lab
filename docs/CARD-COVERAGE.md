@@ -1,8 +1,18 @@
 # Card import and executable coverage
 
-The catalog was fetched again on 4 October 2026. It contains every printing returned by the paginated Riftcodex API: 1,451 printings in eight sets, plus five local rules tokens. Provider completeness is checked against both pagination totals and each set's card count. It is not independent evidence that Riftcodex has every Riot publication or preview; its latest reported record update was 21 July 2026. No Radiance set is returned in this snapshot.
+The catalog was fetched again on 6 October 2026. It contains every printing returned by the paginated Riftcodex API: 1,451 printings in eight sets, plus five local rules tokens. Provider completeness is checked against both pagination totals and each set's card count. It is not independent evidence that Riftcodex has every Riot publication or preview; its latest reported record update was 21 July 2026. No Radiance set is returned in this snapshot.
 
-Current checked snapshot: **1,102 executable entries and 354 unsupported entries**, including the five local rules tokens. These counts refer to printings, not unique gameplay cards. The [validation log](VALIDATION.md) records the current full-suite acceptance, including 169 precon pairings and 16 mixed-expansion integration games.
+Current checked snapshot: **1,186 executable entries and 270 unsupported entries**, including the five local rules tokens. These counts refer to printings, not unique gameplay cards. The [validation log](VALIDATION.md) records the current full-suite acceptance, including 169 precon pairings and 16 mixed-expansion integration games.
+
+## Seventh implementation wave — 6 October 2026
+
+This continuation adds **28 card faces** in `card-wave7.ts`. Together with reviewed alternate printings, **84 previously unsupported entries** are executable. Heroes include Dr. Mundo, Miss Fortune, Jinx, Teemo, Jax, Sivir, Hwei, Jayce, Kayle, Kai'Sa, Renekton, Nasus and Kennen. The other new faces are Mageseeker Warden, Forge of the Future, Guerilla Warfare, Guardian of the Passage, Aspiring Engineer, Prize of Progress, Angle Shot, Disposal Order, Starhound, Esteemed Hierophant, Shadows of the Past, Not So Fast and Repulse.
+
+Trash cards now retain a physical identity for each visit to that zone. Public targets are declared before payment and responses, and losing one selected copy does not substitute an identical copy. Multi-card declarations use a staged selection with a persistent confirm button, including zero targets where allowed, and survive save/load. Candidate generation stays linear for large trashes. Older saves retain their existing discard arrays and are reconciled without mutating read-only queries.
+
+The shared engine records discard batches, resolves activated-ability play triggers after the ability finishes, and preserves such an ability through its saved intermediate choices. It supports restricted spell Power and unit Energy, Kennen's turn-limited Flow on a specific trash card, optional readying of other objects, repeated Kayle empowerment, Teemo's alternative hide payment, and Jax's dynamic Quick-Draw. Not So Fast and Repulse can counter appropriate spells and abilities without trashing the ability's source. Reviewed premium aliases ignore only reminder formatting for an explicit face list; type, tags, costs and all other gameplay attributes must still match.
+
+All provider records and printed rules text remain unchanged. The remaining **270 unsupported printings** include effect-directed card plays, control changes, copy effects, multiple Repeat instances, unrestricted board target groups and Equipment with missing attachment panels. They remain unavailable to playable decks until the whole effect is implemented.
 
 ## Sixth implementation wave — 4 October 2026
 
@@ -10,7 +20,7 @@ This wave adds **29 card faces and 39 executable printings** through `card-wave6
 
 The shared cost pipeline applies alternative and additional costs before taxes and discounts, including colored Repeat costs, Deflect, Hidden, Flow, Ambush and spell-only Energy. Limited discounts keep their one-Energy floor, and universal Power discounts can cover additional costs. Group targets and movement destinations are declared before responses; Bellows can select a legal subset of its original targets after they separate. Simultaneous damage preserves Karthus's additional Deathknell triggers when Karthus dies with the other units. The match score display follows Aspirant's Climb's changed victory threshold.
 
-There are **354 unsupported printings** left. Unknown effects still fail closed; Syndra's multiple Repeat instances, public-trash identities and unrestricted-size target groups remain separate implementation work. The provider catalog and card text are unchanged by this wave. Existing deck imports automatically use the expanded executable registry.
+At the sixth-wave checkpoint, **354 printings were unsupported**. Unknown effects still failed closed; Syndra's multiple Repeat instances, public-trash identities and unrestricted-size target groups remained separate implementation work. The provider catalog and card text were unchanged by that wave. Existing deck imports automatically use the expanded executable registry.
 
 ## Fifth implementation wave and website deck import — 4 October 2026
 
@@ -61,7 +71,7 @@ Every printing and local rules token is registered by `src/game/card-registry.ts
 - `alias`: an equivalent printing shares an executable rules face.
 - `unsupported`: the required full effect is not implemented; the reason remains visible in the inventory.
 
-The compiler never marks a recognized prefix as a complete card. Unknown text, unsupported conditions, independently selected multiple targets and equipment with a missing printed effect panel are rejected. Explicit scripts take precedence. Aliases require matching rules text, type, costs, Might, domains and tags as well as the normalized name. A matching collector number alone is insufficient.
+The compiler never marks a recognized prefix as a complete card. Unknown text, unsupported conditions, independently selected multiple targets and equipment with a missing printed effect panel are rejected. Explicit scripts take precedence. Aliases require matching rules text, type, costs, Might, domains and tags as well as the normalized name; only an explicit reviewed face list permits reminder-text formatting differences. A matching collector number alone is insufficient.
 
 The deck importer preserves the selected printing for storage and export. Match initialization converts equivalent printings to the rules ID so exact-ID engine hooks still execute. Printed variants share name-based copy limits. The engine itself rejects an unsupported deck even when a caller bypasses the lobby.
 
@@ -73,4 +83,4 @@ Compiler and expansion tests execute real legal actions and assert costs, target
 
 The expanded modules cover Origins, Spiritforged, Unleashed and Vendetta. Shared regressions cover countering the selected spell, Flow banishment on counter, modes declared before responses, rune targets chosen before their trigger resolves, Empower events, no-combat-damage and movement restrictions, optional battlefield triggers, Spiderling's unlimited-copy rule, and play ordinals retained across reactions. Countered spells do not fire resolved-play triggers. Read-only queries do not mutate a match, and mixed-expansion games conserve cards and restore pending choices.
 
-Remaining work includes cards needing a generalized additional-cost/effect-play pipeline, sacrifice/self-recycle trigger costs, public-zone and independent multi-target choices, ownership changes, replacement/prevention effects, extra turns, and equipment panels absent from the provider's text. Those cards are present in the catalog and registry with `unsupported` status. Importing all provider records is complete; implementing every card effect is not.
+Remaining work includes cards needing a generalized additional-cost/effect-play pipeline, sacrifice/self-recycle trigger costs, unrestricted board and independent multi-target choices, ownership changes, copy and replacement effects, extra turns, and equipment panels absent from the provider's text. Those cards are present in the catalog and registry with `unsupported` status. Importing all provider records is complete; implementing every card effect is not.

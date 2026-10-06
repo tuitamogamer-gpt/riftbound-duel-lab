@@ -1,5 +1,17 @@
 # Validation evidence
 
+## Seventh card wave — 6 October 2026
+
+At **15:20 Sarajevo time**, the isolated `card-engine-import` working tree passed **1,444 tests in 55 files**, including all 169 ordered precon pairings and 16 mixed-expansion integration games. The seventh wave has **49 focused tests**. `npm run build`, `npm run cards:check` and `git diff --check` passed. The existing Vite catalog chunk-size warning and Node test-environment localStorage warning remain. The refreshed provider snapshot is unchanged at 1,451 records in eight sets, plus five local tokens. Executable coverage is **1,186 / 1,456**, a gain of **84 printings** from 28 new card faces and reviewed equivalent printings; **270 remain unsupported**.
+
+Focused tests cover physical trash visits and identical copies, reactions removing targets, independent owners, declarations before costs, zero targets, linear selection from 100-card trashes, saved selection drafts and malformed saves. They also exercise discard batches, Hwei's separate reflexive effects, first-play/move conditions, restricted resource allocation and expiry, Kennen's Flow identity/timing/costs, three-stage Kayle empowerment, Teemo hiding, Jax's dynamic Quick-Draw and Equip, Warden readying restrictions, Hierophant damage protection, targeted ability counters and ability completion through a saved multi-token choice. Renekton's restricted Energy also pays for existing expansion unit abilities, with Nasus checking their actual Energy cost after resolution. Incomplete Equipment and incompatible-tag aliases remain rejected.
+
+Browser verification used the synthetic `tests/card-wave7-preview.html` fixture on the isolated origin **127.0.0.1:5297**. Through the real controls, Shadows of the Past selected Teemo from the player's trash and Stalwart Poro from the opponent's trash. Reloading and resuming preserved both selections. Confirming returned each card to its owner's hand, put Shadows in its owner's trash and changed resources from **20 Energy / 10 Power to 17 / 9**. The next-action controls returned. See [selection](screenshots/card-wave7-selection.png) and [resolved board](screenshots/card-wave7-resolved.png).
+
+The `?scenario=resources` fixture also activated Kai'Sa through the Legend control. Her exhausted state and **1 Power for spells** appeared while universal Power stayed zero. Rune Prison became playable using that pool, while the unit requiring Power remained unavailable. Playing Rune Prison consumed the restricted Power, spent two Energy, stunned the opposing unit and finished with an empty chain. No browser errors or error overlays were recorded. See [restricted resource display](screenshots/card-wave7-resources.png).
+
+The work is isolated because another active task is refactoring the bot in `/Users/boro/Downloads/Igra`. This verification covers the card-import worktree, not an unverified merge with that concurrent refactor.
+
 ## Sixth card wave — 4 October 2026
 
 At 14:14 Sarajevo time, the integrated working tree passed **1,387 tests in 53 files**, including all 169 ordered precon pairings and the existing mixed-expansion games. The new wave has **47 focused tests**. TypeScript/production bundling, `npm run cards:check` and `git diff --check` passed; the existing catalog chunk-size warning remains. Registry coverage is **1,102 executable / 354 unsupported** out of 1,456 entries, a gain of 39 printings from 29 card faces. The provider catalog and original text were not changed.

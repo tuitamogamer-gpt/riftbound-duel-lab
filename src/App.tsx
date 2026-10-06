@@ -236,7 +236,8 @@ export default function App() {
           : [{ state: result.state, label: action.label }];
         setGame(result.state);
         setReview(
-          isMovementSelection(action)
+          isMovementSelection(action) ||
+            result.state.pendingChoice?.kind === "trashTargets"
             ? null
             : {
                 before: match,
@@ -1281,6 +1282,12 @@ function RuneZone({
               : ""}
             {p.spellEnergy
               ? ` · ${t("{count} Energy for spells", { count: p.spellEnergy })}`
+              : ""}
+            {p.spellPower
+              ? ` · ${t("{count} Power for spells", { count: p.spellPower })}`
+              : ""}
+            {p.unitEnergy
+              ? ` · ${t("{count} Energy for units", { count: p.unitEnergy })}`
               : ""}
             {p.xp ? ` · ${p.xp} XP` : ""}
           </small>

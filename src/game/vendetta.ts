@@ -1,3 +1,5 @@
+import { disempower } from "./board-rules";
+import { takeTrashAt } from "./trash";
 import { cards, getCard } from "../data/cards";
 import type {
   CardScript,
@@ -610,7 +612,7 @@ export const vendettaModule: ExpansionModule = {
         break;
       case "lacerate":
         if (u) {
-          u.empowered = false;
+          disempower(u);
           if (ctx.getMight(s, u) <= 3) ctx.killUnits(s, [u.id]);
         }
         break;
@@ -844,7 +846,7 @@ export const vendettaModule: ExpansionModule = {
         const owner = e.who === "opponent" ? ((1 - p) as PlayerId) : p,
           index = e.amount ?? -1;
         if (s.players[owner].discard[index] !== e.cardName) break;
-        const id = s.players[owner].discard.splice(index, 1)[0];
+        const id = takeTrashAt(s, owner, index)!;
         s.players[owner].banished.push(id);
         if (owner === p) ctx.cardEvent(s, "banish", p, id);
         break;

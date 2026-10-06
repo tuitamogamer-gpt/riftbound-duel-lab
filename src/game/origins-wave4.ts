@@ -1,3 +1,4 @@
+import { readyForbidden } from "./board-rules";
 import { getCard } from "../data/cards";
 import { getKeywords } from "./engine";
 import { getScript } from "./scripts";
@@ -322,7 +323,11 @@ export const originsWave4Module: ExpansionModule = {
         );
         if (u) {
           spend(s, p, u, ctx);
-          if (!u.ready && !getKeywords(s, u).includes("Cannot ready")) {
+          if (
+            !u.ready &&
+            !readyForbidden(s, u.owner) &&
+            !getKeywords(s, u).includes("Cannot ready")
+          ) {
             u.ready = true;
             ctx.cardEvent(s, "ready", p, u.cardId, u.id, u.location);
           }

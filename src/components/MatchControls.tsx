@@ -79,6 +79,8 @@ export function MatchControls({
     game.phase === "move" && game.pendingMove?.player === 0
       ? game.pendingMove
       : null;
+  const trashSelection =
+    game.pendingChoice?.kind === "trashTargets" ? game.pendingChoice : null;
   const destination = movement?.to.startsWith("field:")
     ? findCard(game.fields.find((field) => field.id === movement.to)?.cardId)
         ?.name
@@ -220,7 +222,12 @@ export function MatchControls({
                       : "Click units to change the group, then confirm.",
                 ),
               })
-            : t(hint)}
+            : trashSelection && !review && !paused && !busy
+              ? t(
+                  "{count} selected · Choose cards from the trash, then confirm.",
+                  { count: trashSelection.trashSelection!.selected.length },
+                )
+              : t(hint)}
         </p>
       </div>
       {selected && !busy && !review && !opening && (

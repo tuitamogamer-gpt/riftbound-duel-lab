@@ -117,6 +117,15 @@ export function getBotAction(
     const selected = s.units.find((u) => u.id === a.targetId);
     if (s.phase === "choice") {
       const choice = s.pendingChoice!;
+      if (choice.kind === "trashTargets") {
+        if (a.id === "choose-trash:done") return 0;
+        if ((a.amount ?? 0) < 0) return -100;
+        const ownTrash = a.targetId?.startsWith(`trash:${player}:`);
+        const returning = choice.effect?.custom === "wave7:return-trash";
+        if (choice.effect?.upTo && (returning ? !ownTrash : ownTrash))
+          return -10;
+        return 40 + (a.cardId ? (returning ? 1 : -1) * cardValue(a.cardId) : 0);
+      }
       if (a.id.endsWith(":skip") || a.id === "choose-optional:no") return 0;
       if (a.id.startsWith("choose-rune:"))
         return s.players[player].runes.find((rune) => rune.id === a.sourceId)

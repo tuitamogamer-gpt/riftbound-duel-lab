@@ -1,3 +1,4 @@
+import { addToTrash } from "./trash";
 import { cards, getCard } from "../data/cards";
 import type {
   CardScript,
@@ -633,7 +634,7 @@ export const vendettaExtraModule: ExpansionModule = {
       case "relic": {
         const id = s.players[p].deck.shift();
         if (id) {
-          s.players[p].discard.push(id);
+          addToTrash(s, p, id);
           ctx.log?.(s, `Forgotten Relic burns ${getCard(id).name}.`, "info", p);
           if (getCard(id).type === "Unit")
             ctx.trigger(
@@ -684,7 +685,7 @@ export const vendettaExtraModule: ExpansionModule = {
           index = e.amount ?? -1;
         if (index >= 0 && top[index])
           s.players[p].hand.push(top.splice(index, 1)[0]);
-        s.players[p].discard.push(...top);
+        addToTrash(s, p, ...top);
         break;
       }
       case "sands":

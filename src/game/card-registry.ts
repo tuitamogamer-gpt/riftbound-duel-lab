@@ -24,6 +24,7 @@ export function buildCardRegistry(
   catalog: Card[],
   explicit: Record<string, CardScript>,
   compile: (card: Card) => CardScript | undefined,
+  reviewedAliases: Record<string, string> = {},
 ): Record<string, CardRegistration> {
   const groups = new Map<string, Card[]>();
   const compiled = new Map<string, CardScript>();
@@ -73,6 +74,23 @@ export function buildCardRegistry(
             }),
       };
     }
+  }
+  for (const [cardId, rulesCardId] of Object.entries(reviewedAliases)) {
+    const source = registry[rulesCardId];
+    const entry = registry[cardId];
+    const card = catalog.find((card) => card.id === cardId);
+    if (
+      !entry?.script &&
+      source?.script &&
+      card &&
+      !unsupportedRulesReason(card)
+    )
+      registry[cardId] = {
+        cardId,
+        rulesCardId: source.rulesCardId,
+        status: "alias",
+        script: source.script,
+      };
   }
   return registry;
 }

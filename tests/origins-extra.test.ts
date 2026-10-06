@@ -385,9 +385,12 @@ describe("additional Origins rules through the engine", () => {
     expect(token.temporary).toBe(true);
     expect(getMight(end, token)).toBe(3);
   });
-  it("does not advertise Dr. Mundo before trash targets can be finalized", () => {
+  it("delegates Dr. Mundo to the public-trash implementation", () => {
     expect(originsExtraScripts[id(109)]).toBeUndefined();
-    expect(getScript(id(109))?.implemented ?? false).toBe(false);
+    expect(getScript(id(109))?.onBegin?.[0]).toMatchObject({
+      target: "trashCards",
+      targetCount: 3,
+    });
   });
   it("Thousand-Tailed Watcher and Ahri reductions respect the minimum Might", () => {
     const s = fixture(),
@@ -832,10 +835,7 @@ describe("additional Origins rules through the engine", () => {
     )!;
     end = applyAction(end, reaction);
     expect(end.players[0].cardsPlayedThisTurn).toBe(3);
-    expect(end.stack.map((i) => i.cardId)).toEqual([
-      "sfd-087-221",
-      id(144),
-    ]);
+    expect(end.stack.map((i) => i.cardId)).toEqual(["sfd-087-221", id(144)]);
     expect(end.players[0].hand).toHaveLength(0);
     end = settle(end);
     expect(end.units[0].ready).toBe(true);

@@ -11,6 +11,7 @@ export interface Rune {
   ready: boolean;
 }
 export interface Unit {
+  empowerCount?: number;
   id: string;
   cardId: string;
   owner: PlayerId;
@@ -54,6 +55,10 @@ export interface Gear {
   usedAbilities?: string[];
 }
 export interface PlayerState {
+  powerSpentThisTurn?: number;
+  freeHideTurn?: number;
+  firstGearPlayedTurn?: number;
+  grantedFlow?: { trashId: string; turn: number }[];
   id: PlayerId;
   name: string;
   deckId: string;
@@ -63,11 +68,14 @@ export interface PlayerState {
   deck: string[];
   hand: string[];
   discard: string[];
+  trashCards?: { id: string; cardId: string }[];
   banished: string[];
   runes: Rune[];
   runeDeck: Domain[];
   energy: number;
   spellEnergy?: number;
+  spellPower?: number;
+  unitEnergy?: number;
   showdownEnergy?: number;
   typedPower?: Record<string, number>;
   canLookAtEnemyHiddenTurn?: number;
@@ -110,6 +118,8 @@ export interface PendingMove {
   unitIds: string[];
 }
 export interface StackItem {
+  abilityEnergyCost?: number;
+  playSource?: "hand" | "champion" | "hidden" | "trash" | "effect";
   playOrdinal?: number;
   energySpent?: number;
   id: string;
@@ -121,6 +131,7 @@ export interface StackItem {
   effects: Effect[];
   kind: "spell" | "ability" | "trigger";
   flowed?: boolean;
+  grantedFlow?: boolean;
   fromHidden?: boolean;
   additionalCostPaid?: boolean;
   sourceSnapshot?: Unit;
@@ -164,6 +175,7 @@ export interface GameState {
   }[];
   stack: StackItem[];
   resolving?: StackItem[];
+  resolvingAbilities?: StackItem[];
   consecutivePasses: number;
   focusPlayer: PlayerId;
   chainStarter: PlayerId | null;
@@ -183,6 +195,7 @@ export interface GameState {
       | "spendBuff"
       | "optional"
       | "move"
+      | "trashTargets"
       | "custom";
     remaining: number;
     sourceId?: string;
@@ -197,9 +210,17 @@ export interface GameState {
     options?: GameAction[];
     sourceSnapshot?: Unit;
     lastDiscardEnergy?: number;
+    lastDiscardType?: string;
+    discardBatchCount?: number;
+    discardBatchCardId?: string;
     finalizingTrigger?: boolean;
     chosenRuneIds?: string[];
     cardIndices?: number[];
+    trashSelection?: {
+      selected: string[];
+      action: GameAction;
+      trigger?: Omit<StackItem, "id" | "kind">;
+    };
     returnPriority: PlayerId;
   } | null;
   pendingTurnStart?: PlayerId;
@@ -244,11 +265,18 @@ export interface GameAction {
   effects?: Effect[];
   abilityKey?: string;
   additionalCostPaid?: boolean;
+  targetsFinalized?: boolean;
   repeated?: boolean;
   repeatedTargetId?: string;
   repeatedEffects?: Effect[];
 }
 export type TargetFilter =
+  | "enemyChainItemChoosingFriendly"
+  | "friendlyUnitAndEnemyChainItem"
+  | "unitAndEquipment"
+  | "ownTeemo"
+  | "exhaustedOther"
+  | "trashCards"
   | "upToThreeUnitsSameLocation"
   | "upToFourFriendlyUnits"
   | "friendlyAndWeakerEnemy"
@@ -345,6 +373,10 @@ export type Effect = {
     | "special";
   amount?: number;
   target?: TargetFilter;
+  cardTypes?: string[];
+  cardTags?: string[];
+  targetCount?: number;
+  upTo?: boolean;
   targetDomain?: string;
   targetLocations?: LocationId[];
   targetEmpowered?: boolean;
@@ -386,6 +418,8 @@ export type Effect = {
   modes?: { label: string; effects: Effect[] }[];
 };
 export interface ActivatedAbility {
+  sacrificeSelf?: boolean;
+  disempowerSelf?: boolean;
   label: string;
   effects: Effect[];
   energy?: number;

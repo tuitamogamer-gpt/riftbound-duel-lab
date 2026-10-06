@@ -1,3 +1,4 @@
+import { reviewedPrintingAliases } from "../src/game/printing-aliases";
 import { describe, expect, it } from "vitest";
 import { cards, getCard } from "../src/data/cards";
 import {
@@ -53,6 +54,7 @@ describe("complete printing registry", () => {
     expect(Object.keys(cardRegistry).sort()).toEqual(
       cards.map((c) => c.id).sort(),
     );
+    const reviewed = reviewedPrintingAliases(cards);
     for (const card of cards) {
       const record = cardRegistry[card.id];
       expect(record.cardId).toBe(card.id);
@@ -60,9 +62,15 @@ describe("complete printing registry", () => {
       expect(getScript(card.id)).toEqual(record.script);
       if (record.status === "unsupported") expect(record.reason).toBeTruthy();
       if (record.status === "alias") {
-        expect(gameplayFingerprint(card)).toBe(
-          gameplayFingerprint(getCard(record.rulesCardId)),
-        );
+        if (reviewed[card.id]) {
+          expect(record.rulesCardId).toBe(getRulesCardId(reviewed[card.id]));
+          expect(gameplayFingerprint({ ...card, text: "" })).toBe(
+            gameplayFingerprint({ ...getCard(record.rulesCardId), text: "" }),
+          );
+        } else
+          expect(gameplayFingerprint(card)).toBe(
+            gameplayFingerprint(getCard(record.rulesCardId)),
+          );
         expect(record.script).toBe(getScript(record.rulesCardId));
       }
     }

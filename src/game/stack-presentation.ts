@@ -27,6 +27,7 @@ export function pendingChoiceCardId(game: GameState) {
     (choice.sourceId === "legend"
       ? game.players[choice.actor ?? choice.player].legendId
       : undefined) ??
+    game.resolvingAbilities?.at(-1)?.cardId ??
     game.resolving?.at(-1)?.cardId
   );
 }
@@ -79,8 +80,10 @@ export function getActionStackView(game: GameState, review: Review | null) {
   // useful snapshot after it is popped from the chain in a resolution frame.
   for (const item of [...(visible.resolving ?? [])].reverse())
     add(item, "resolving");
+  for (const item of [...(visible.resolvingAbilities ?? [])].reverse())
+    add(item, "resolving");
 
-  // Abilities do not enter game.resolving. Find a just-popped source only in
+  // Triggered abilities do not enter game.resolving. Find a just-popped source only in
   // already displayed frames, so its card stays on the table while it resolves.
   if (effectSource && publicEffect && publicEffect.stage !== "announced") {
     const pastStates = review

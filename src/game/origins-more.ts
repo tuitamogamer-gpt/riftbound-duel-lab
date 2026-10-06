@@ -1,3 +1,4 @@
+import { takeTrashAt } from "./trash";
 import { getCard } from "../data/cards";
 import { getMight } from "./engine";
 import { getScript } from "./scripts";
@@ -555,7 +556,7 @@ export const originsMoreModule: ExpansionModule = {
         const x = s.players[p],
           i = x.discard.indexOf(x.championId);
         if (!x.championAvailable && i >= 0) {
-          x.discard.splice(i, 1);
+          takeTrashAt(s, p, i);
           x.championAvailable = true;
         }
         break;

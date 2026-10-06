@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "catalogFetchedAt": "2026-10-04T11:25:25.600Z",
+  "catalogFetchedAt": "2026-10-06T12:48:20.286Z",
   "provider": "Riftcodex",
   "providerPrintings": 1451,
   "registered": 1456,
-  "playable": 1102,
+  "playable": 1186,
   "statuses": {
-    "scripted": 837,
+    "scripted": 875,
     "compiled": 37,
-    "alias": 228,
-    "unsupported": 354
+    "alias": 274,
+    "unsupported": 270
   },
   "sets": {
     "JDG": {
@@ -19,8 +19,8 @@
     },
     "OGN": {
       "total": 352,
-      "playable": 282,
-      "unsupported": 70
+      "playable": 294,
+      "unsupported": 58
     },
     "OGS": {
       "total": 24,
@@ -29,28 +29,28 @@
     },
     "OPP": {
       "total": 133,
-      "playable": 109,
-      "unsupported": 24
+      "playable": 115,
+      "unsupported": 18
     },
     "PR": {
       "total": 13,
-      "playable": 11,
-      "unsupported": 2
+      "playable": 13,
+      "unsupported": 0
     },
     "SFD": {
       "total": 288,
-      "playable": 186,
-      "unsupported": 102
+      "playable": 197,
+      "unsupported": 91
     },
     "UNL": {
       "total": 280,
-      "playable": 201,
-      "unsupported": 79
+      "playable": 228,
+      "unsupported": 52
     },
     "VEN": {
       "total": 358,
-      "playable": 283,
-      "unsupported": 75
+      "playable": 309,
+      "unsupported": 49
     },
     "TOKEN": {
       "total": 5,
@@ -1350,8 +1350,10 @@
       "type": "Unit",
       "cardId": "ogn-070-298",
       "rulesCardId": "ogn-070-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Party Favors",
@@ -2087,8 +2089,18 @@
       "type": "Unit",
       "cardId": "ogn-109-298",
       "rulesCardId": "ogn-109-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onBegin": [
+          {
+            "type": "special",
+            "custom": "wave7:recycle-trash",
+            "target": "trashCards",
+            "targetCount": 3
+          }
+        ]
+      }
     },
     {
       "name": "Ekko - Recurrent",
@@ -3042,8 +3054,14 @@
       "type": "Unit",
       "cardId": "ogn-162-298",
       "rulesCardId": "ogn-162-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "keywords": [
+          "Ganking"
+        ]
+      }
     },
     {
       "name": "Miss Fortune - Captain (Alternate Art)",
@@ -3051,8 +3069,14 @@
       "type": "Unit",
       "cardId": "ogn-162a-298",
       "rulesCardId": "ogn-162-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "keywords": [
+          "Ganking"
+        ]
+      }
     },
     {
       "name": "Seal of Strength",
@@ -3812,8 +3836,10 @@
       "type": "Unit",
       "cardId": "ogn-202-298",
       "rulesCardId": "ogn-202-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Jinx - Rebel (Alternate Art)",
@@ -3821,8 +3847,10 @@
       "type": "Unit",
       "cardId": "ogn-202a-298",
       "rulesCardId": "ogn-202-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Possession",
@@ -3982,8 +4010,32 @@
       "type": "Gear",
       "cardId": "ogn-212-298",
       "rulesCardId": "ogn-212-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "token",
+            "amount": 1
+          }
+        ],
+        "abilities": [
+          {
+            "label": "Recycle up to four cards",
+            "sacrificeSelf": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:recycle-trash",
+                "target": "trashCards",
+                "who": "all",
+                "targetCount": 4,
+                "upTo": true
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Hidden Blade",
@@ -4575,8 +4627,24 @@
       "type": "Legend",
       "cardId": "ogn-247-298",
       "rulesCardId": "ogn-247-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Power for spells",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "condition": "spellsOnly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Icathian Rain",
@@ -4786,8 +4854,24 @@
       "type": "Legend",
       "cardId": "ogn-263-298",
       "rulesCardId": "ogn-263-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Return a Teemo to hand",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:teemo",
+                "target": "ownTeemo"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Guerilla Warfare",
@@ -4795,8 +4879,24 @@
       "type": "Spell",
       "cardId": "ogn-264-298",
       "rulesCardId": "ogn-264-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave7:return-trash",
+            "target": "trashCards",
+            "targetCount": 2,
+            "upTo": true,
+            "condition": "hidden"
+          },
+          {
+            "type": "special",
+            "custom": "wave7:free-hide"
+          }
+        ]
+      }
     },
     {
       "name": "Viktor - Herald of the Arcane",
@@ -5492,8 +5592,24 @@
       "type": "Legend",
       "cardId": "ogn-307-298",
       "rulesCardId": "ogn-263-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Return a Teemo to hand",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:teemo",
+                "target": "ownTeemo"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Teemo - Swift Scout (Signature)",
@@ -5501,8 +5617,24 @@
       "type": "Legend",
       "cardId": "ogn-307*-298",
       "rulesCardId": "ogn-263-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Return a Teemo to hand",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:teemo",
+                "target": "ownTeemo"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Viktor - Herald of the Arcane (Overnumbered)",
@@ -7488,8 +7620,37 @@
       "type": "Legend",
       "cardId": "opp-193-221",
       "rulesCardId": "sfd-193-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Attach detached Equipment",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:attach",
+                "target": "unitAndEquipment",
+                "condition": "detachedFriendly"
+              }
+            ]
+          },
+          {
+            "label": "Reattach Equipment",
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:attach",
+                "target": "unitAndEquipment",
+                "condition": "attachedFriendly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Miss Fortune - Buccaneer",
@@ -7570,8 +7731,10 @@
       "type": "Unit",
       "cardId": "opp-202-298",
       "rulesCardId": "ogn-202-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Sivir - Battle Mistress (Metal)",
@@ -7670,8 +7833,24 @@
       "type": "Legend",
       "cardId": "opp-247-298--69bc5bf0d308c64675ca89d4",
       "rulesCardId": "ogn-247-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Power for spells",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "condition": "spellsOnly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Kai'Sa - Daughter of the Void (Metal)",
@@ -7679,8 +7858,24 @@
       "type": "Legend",
       "cardId": "opp-247-298--69bc5bf1d308c64675ca89f1",
       "rulesCardId": "ogn-247-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Power for spells",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "condition": "spellsOnly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Volibear - Relentless Storm",
@@ -7910,8 +8105,24 @@
       "type": "Legend",
       "cardId": "opp-263-298--69bc5befd308c64675ca89cb",
       "rulesCardId": "ogn-263-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Return a Teemo to hand",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:teemo",
+                "target": "ownTeemo"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Teemo - Swift Scout (Metal)",
@@ -7919,8 +8130,24 @@
       "type": "Legend",
       "cardId": "opp-263-298--69bc5bf2d308c64675ca89f9",
       "rulesCardId": "ogn-263-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Return a Teemo to hand",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:teemo",
+                "target": "ownTeemo"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Viktor - Herald of the Arcane",
@@ -8162,8 +8389,10 @@
       "type": "Unit",
       "cardId": "pr-202-298",
       "rulesCardId": "ogn-202-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Viktor - Leader",
@@ -8193,8 +8422,24 @@
       "type": "Legend",
       "cardId": "pr-263a-298",
       "rulesCardId": "ogn-263-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Return a Teemo to hand",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:teemo",
+                "target": "ownTeemo"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Aspirant's Climb",
@@ -8416,8 +8661,40 @@
       "type": "Spell",
       "cardId": "sfd-011-221",
       "rulesCardId": "sfd-011-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "reaction": true,
+        "spellModes": [
+          {
+            "label": "Attach",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:attach",
+                "target": "unitAndEquipment"
+              },
+              {
+                "type": "draw"
+              }
+            ]
+          },
+          {
+            "label": "Detach",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:detach",
+                "target": "unitAndEquipment",
+                "condition": "attachedToChosen"
+              },
+              {
+                "type": "draw"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Battering Ram",
@@ -8886,8 +9163,22 @@
       "type": "Unit",
       "cardId": "sfd-035-221",
       "rulesCardId": "sfd-035-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onHold": [
+          {
+            "type": "special",
+            "custom": "wave7:return-trash",
+            "target": "trashCards",
+            "cardTypes": [
+              "Unit",
+              "Gear"
+            ],
+            "optional": true
+          }
+        ]
+      }
     },
     {
       "name": "Lonely Poro",
@@ -9051,8 +9342,17 @@
       "type": "Spell",
       "cardId": "sfd-045-221",
       "rulesCardId": "sfd-045-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "reaction": true,
+        "spell": [
+          {
+            "type": "counter",
+            "target": "enemyChainItemChoosingFriendly"
+          }
+        ]
+      }
     },
     {
       "name": "Poro Snax",
@@ -9184,8 +9484,11 @@
       "type": "Unit",
       "cardId": "sfd-054-221",
       "rulesCardId": "sfd-054-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "deflect": 1
+      }
     },
     {
       "name": "Jax - Unmatched (Alternate Art)",
@@ -9193,8 +9496,11 @@
       "type": "Unit",
       "cardId": "sfd-054a-221",
       "rulesCardId": "sfd-054-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "deflect": 1
+      }
     },
     {
       "name": "Needlessly Large Yordle",
@@ -9327,8 +9633,20 @@
       "type": "Unit",
       "cardId": "sfd-061-221",
       "rulesCardId": "sfd-061-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "wave7:return-trash",
+            "target": "trashCards",
+            "cardTypes": [
+              "Gear"
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Bubble Bot",
@@ -9539,8 +9857,10 @@
       "type": "Unit",
       "cardId": "sfd-075-221",
       "rulesCardId": "sfd-075-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Production Surge",
@@ -10827,8 +11147,11 @@
       "type": "Unit",
       "cardId": "sfd-143-221",
       "rulesCardId": "sfd-143-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true
+      }
     },
     {
       "name": "Sivir - Mercenary (Alternate Art)",
@@ -10836,8 +11159,11 @@
       "type": "Unit",
       "cardId": "sfd-143a-221",
       "rulesCardId": "sfd-143-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "accelerating": true
+      }
     },
     {
       "name": "Spirit Wheel",
@@ -11558,8 +11884,37 @@
       "type": "Legend",
       "cardId": "sfd-193-221",
       "rulesCardId": "sfd-193-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Attach detached Equipment",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:attach",
+                "target": "unitAndEquipment",
+                "condition": "detachedFriendly"
+              }
+            ]
+          },
+          {
+            "label": "Reattach Equipment",
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:attach",
+                "target": "unitAndEquipment",
+                "condition": "attachedFriendly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Counter Strike",
@@ -12415,8 +12770,37 @@
       "type": "Legend",
       "cardId": "sfd-245-221",
       "rulesCardId": "sfd-193-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Attach detached Equipment",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:attach",
+                "target": "unitAndEquipment",
+                "condition": "detachedFriendly"
+              }
+            ]
+          },
+          {
+            "label": "Reattach Equipment",
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:attach",
+                "target": "unitAndEquipment",
+                "condition": "attachedFriendly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Irelia - Blade Dancer (Overnumbered)",
@@ -12927,9 +13311,16 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-022a-219",
-      "rulesCardId": "unl-022a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-022-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "deflect": 1,
+        "keywords": [
+          "Deflect",
+          "Ganking"
+        ]
+      }
     },
     {
       "name": "Katarina - Reckless",
@@ -13057,9 +13448,25 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-028a-219",
-      "rulesCardId": "unl-028a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-028-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "hidden": true,
+        "keywords": [
+          "Ganking"
+        ],
+        "additionalCost": {
+          "power": 1,
+          "domain": "Fury"
+        },
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "unl-extra:pyke-ready"
+          }
+        ]
+      }
     },
     {
       "name": "Red Brambleback",
@@ -13113,9 +13520,29 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-030a-219",
-      "rulesCardId": "unl-030a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-030-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "deflect": 1,
+        "keywords": [
+          "Deflect"
+        ],
+        "abilities": [
+          {
+            "label": "Double my Might this turn",
+            "energy": 2,
+            "power": 1,
+            "domain": "Fury",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "unl:double"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Combat Experience",
@@ -13549,9 +13976,27 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-051a-219",
-      "rulesCardId": "unl-051a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-051-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "unl-extra:select-top",
+            "amount": 3,
+            "condition": "tribalUnit"
+          }
+        ],
+        "onHold": [
+          {
+            "type": "special",
+            "custom": "unl-extra:select-top",
+            "amount": 3,
+            "condition": "tribalUnit"
+          }
+        ]
+      }
     },
     {
       "name": "Nami - Headstrong",
@@ -13627,9 +14072,16 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-055a-219",
-      "rulesCardId": "unl-055a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-055-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "shield": 1,
+        "keywords": [
+          "Tank"
+        ],
+        "notes": "When stunning enemy unit at battlefield, may move here."
+      }
     },
     {
       "name": "Yuumi - Magical Cat",
@@ -13688,9 +14140,11 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-058a-219",
-      "rulesCardId": "unl-058a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-058-219",
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Master Yi - Unstoppable",
@@ -13708,9 +14162,11 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-059a-219",
-      "rulesCardId": "unl-059a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-059-219",
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Vilemaw",
@@ -13735,9 +14191,18 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-060a-219",
-      "rulesCardId": "unl-060a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-060-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "ambush": true,
+        "onHold": [
+          {
+            "type": "draw",
+            "amount": 1
+          }
+        ]
+      }
     },
     {
       "name": "Downstage Dramatics",
@@ -14092,9 +14557,11 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-079a-219",
-      "rulesCardId": "unl-079a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-079-219",
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Hwei - Brooding Painter",
@@ -14102,8 +14569,23 @@
       "type": "Unit",
       "cardId": "unl-080-219",
       "rulesCardId": "unl-080-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onMove": [
+          {
+            "type": "draw"
+          },
+          {
+            "type": "discard"
+          },
+          {
+            "type": "special",
+            "custom": "wave7:hwei",
+            "condition": "discardType"
+          }
+        ]
+      }
     },
     {
       "name": "Keeper of Masks",
@@ -14131,9 +14613,12 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-082a-219",
-      "rulesCardId": "unl-082a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-082-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "accelerating": true
+      }
     },
     {
       "name": "Smoke and Mirrors",
@@ -14262,9 +14747,19 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-089a-219",
-      "rulesCardId": "unl-089a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-089-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Vision"
+        ],
+        "onPlay": [
+          {
+            "type": "predict"
+          }
+        ]
+      }
     },
     {
       "name": "LeBlanc - Everywhere At Once",
@@ -14532,8 +15027,34 @@
       "type": "Spell",
       "cardId": "unl-103-219",
       "rulesCardId": "unl-103-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "reaction": true,
+        "spellModes": [
+          {
+            "label": "Recycle up to three opposing cards",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:recycle-trash",
+                "target": "trashCards",
+                "who": "opponent",
+                "targetCount": 3,
+                "upTo": true
+              }
+            ]
+          },
+          {
+            "label": "Draw one",
+            "effects": [
+              {
+                "type": "draw"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Gentle Gemdragon",
@@ -14571,8 +15092,17 @@
       "type": "Spell",
       "cardId": "unl-106-219",
       "rulesCardId": "unl-106-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "reaction": true,
+        "spell": [
+          {
+            "type": "counter",
+            "target": "friendlyUnitAndEnemyChainItem"
+          }
+        ]
+      }
     },
     {
       "name": "Stare Down",
@@ -14702,9 +15232,28 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-113a-219",
-      "rulesCardId": "unl-113a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-113-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Hunt 2"
+        ],
+        "onConquer": [
+          {
+            "type": "special",
+            "custom": "unl-extra:xp",
+            "amount": 2
+          }
+        ],
+        "onHold": [
+          {
+            "type": "special",
+            "custom": "unl-extra:xp",
+            "amount": 2
+          }
+        ]
+      }
     },
     {
       "name": "Nidalee - Cat Form",
@@ -14760,9 +15309,15 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-116a-219",
-      "rulesCardId": "unl-116a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-116-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "deflect": 1,
+        "keywords": [
+          "Deflect"
+        ]
+      }
     },
     {
       "name": "Arachnoid Horror",
@@ -15332,9 +15887,26 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-143a-219",
-      "rulesCardId": "unl-143a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-143-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "ambush": true,
+        "onAttack": [
+          {
+            "type": "special",
+            "custom": "unl-extra:mutating",
+            "condition": "enemyAloneHere"
+          }
+        ],
+        "onDefend": [
+          {
+            "type": "special",
+            "custom": "unl-extra:mutating",
+            "condition": "enemyAloneHere"
+          }
+        ]
+      }
     },
     {
       "name": "Maduli the Gatekeeper",
@@ -15370,9 +15942,15 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-145a-219",
-      "rulesCardId": "unl-145a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-145-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "hidden": true,
+        "keywords": [
+          "Backline"
+        ]
+      }
     },
     {
       "name": "Syndra - Transcendent",
@@ -15455,9 +16033,16 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-150a-219",
-      "rulesCardId": "unl-150a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-150-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "deflect": 1,
+        "keywords": [
+          "Deflect"
+        ],
+        "notes": "At a battlefield, stuns units opponents play and prevents their movement for this turn."
+      }
     },
     {
       "name": "Bandle Soldier",
@@ -15725,8 +16310,23 @@
       "type": "Unit",
       "cardId": "unl-167-219",
       "rulesCardId": "unl-167-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "wave7:return-trash",
+            "target": "trashCards",
+            "cardTags": [
+              "Bird",
+              "Cat",
+              "Dog",
+              "Poro"
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Undying Loyalty",
@@ -15798,9 +16398,21 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-172a-219",
-      "rulesCardId": "unl-172a-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-172-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "assault": 1,
+        "keywords": [
+          "Assault"
+        ],
+        "onDeath": [
+          {
+            "type": "special",
+            "custom": "unl-extra:fragmented"
+          }
+        ]
+      }
     },
     {
       "name": "Sacrifice",
@@ -16478,9 +17090,17 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-221-219",
-      "rulesCardId": "unl-221-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "sfd-036-221",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "onDeath": [
+          {
+            "type": "special",
+            "custom": "sfd-extra:lonely"
+          }
+        ]
+      }
     },
     {
       "name": "Plundering Poro (Overnumbered)",
@@ -16504,9 +17124,22 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-223-219",
-      "rulesCardId": "unl-223-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "sfd-099-221",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
+          }
+        ],
+        "keywords": [
+          "Weaponmaster"
+        ]
+      }
     },
     {
       "name": "Mystic Poro (Overnumbered)",
@@ -16587,18 +17220,56 @@
       "set": "UNL",
       "type": "Legend",
       "cardId": "unl-228-219",
-      "rulesCardId": "unl-228-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-185-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Return a friendly unit and play Gold",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "bounce",
+                "target": "friendlyUnitAtBattlefield"
+              },
+              {
+                "type": "special",
+                "custom": "unl-extra:gold"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Pyke - Bloodharbor Ripper (Signature)",
       "set": "UNL",
       "type": "Legend",
       "cardId": "unl-228*-219",
-      "rulesCardId": "unl-228-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-185-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Return a friendly unit and play Gold",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "bounce",
+                "target": "friendlyUnitAtBattlefield"
+              },
+              {
+                "type": "special",
+                "custom": "unl-extra:gold"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Vi - Piltover Enforcer (Overnumbered)",
@@ -16651,18 +17322,22 @@
       "set": "UNL",
       "type": "Legend",
       "cardId": "unl-231-219",
-      "rulesCardId": "unl-231-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-191-219",
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Master Yi - Wuju Master (Signature)",
       "set": "UNL",
       "type": "Legend",
       "cardId": "unl-231*-219",
-      "rulesCardId": "unl-231-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-191-219",
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Vex - Gloomist (Overnumbered)",
@@ -17499,17 +18174,21 @@
       "type": "Unit",
       "cardId": "ven-025-166--6a517604ad64d2d80a4f0389",
       "rulesCardId": "ven-025-166--6a517604ad64d2d80a4f0389",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Esteemed Hierophant",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-025-166--6a56ab95ff602fd324f47613",
-      "rulesCardId": "ven-025-166--6a517604ad64d2d80a4f0389",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-025-166--6a56ab95ff602fd324f47613",
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Field Musicians",
@@ -18693,17 +19372,39 @@
       "type": "Unit",
       "cardId": "ven-068-166--6a517605ad64d2d80a4f0399",
       "rulesCardId": "ven-068-166--6a517605ad64d2d80a4f0399",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "wave7:ready-other",
+            "target": "exhaustedOther",
+            "excludeSource": true,
+            "optional": true
+          }
+        ]
+      }
     },
     {
       "name": "Jayce, Brilliant Inventor",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-068-166--6a56ab96ff602fd324f47626",
-      "rulesCardId": "ven-068-166--6a517605ad64d2d80a4f0399",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-068-166--6a56ab96ff602fd324f47626",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "wave7:ready-other",
+            "target": "exhaustedOther",
+            "excludeSource": true,
+            "optional": true
+          }
+        ]
+      }
     },
     {
       "name": "Jayce, Brilliant Inventor",
@@ -18711,17 +19412,39 @@
       "type": "Unit",
       "cardId": "ven-068a-166--6a517605ad64d2d80a4f0398",
       "rulesCardId": "ven-068a-166--6a517605ad64d2d80a4f0398",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "wave7:ready-other",
+            "target": "exhaustedOther",
+            "excludeSource": true,
+            "optional": true
+          }
+        ]
+      }
     },
     {
       "name": "Jayce, Brilliant Inventor (Alternate Art)",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-068a-166--6a56ab97ff602fd324f47627",
-      "rulesCardId": "ven-068a-166--6a517605ad64d2d80a4f0398",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-068a-166--6a56ab97ff602fd324f47627",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "wave7:ready-other",
+            "target": "exhaustedOther",
+            "excludeSource": true,
+            "optional": true
+          }
+        ]
+      }
     },
     {
       "name": "Mel, Newly Awakened",
@@ -19514,17 +20237,47 @@
       "type": "Spell",
       "cardId": "ven-103-166--6a517608ad64d2d80a4f03c6",
       "rulesCardId": "ven-103-166--6a517608ad64d2d80a4f03c6",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave7:return-trash",
+            "target": "trashCards",
+            "who": "all",
+            "targetCount": 2,
+            "upTo": true,
+            "cardTypes": [
+              "Unit"
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Shadows of the Past",
       "set": "VEN",
       "type": "Spell",
       "cardId": "ven-103-166--6a56ab9aff602fd324f47661",
-      "rulesCardId": "ven-103-166--6a517608ad64d2d80a4f03c6",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-103-166--6a56ab9aff602fd324f47661",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave7:return-trash",
+            "target": "trashCards",
+            "who": "all",
+            "targetCount": 2,
+            "upTo": true,
+            "cardTypes": [
+              "Unit"
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Tail-Cloaked Matriarch",
@@ -19869,17 +20622,53 @@
       "type": "Unit",
       "cardId": "ven-113-166--6a517606ad64d2d80a4f03a0",
       "rulesCardId": "ven-113-166--6a517606ad64d2d80a4f03a0",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "mill",
+            "amount": 2
+          }
+        ],
+        "onConquer": [
+          {
+            "type": "special",
+            "custom": "wave7:grant-flow",
+            "target": "trashCards",
+            "cardTypes": [
+              "Spell"
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Kennen, Storm of Shuriken",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-113-166--6a56ab97ff602fd324f4762f",
-      "rulesCardId": "ven-113-166--6a517606ad64d2d80a4f03a0",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-113-166--6a56ab97ff602fd324f4762f",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "mill",
+            "amount": 2
+          }
+        ],
+        "onConquer": [
+          {
+            "type": "special",
+            "custom": "wave7:grant-flow",
+            "target": "trashCards",
+            "cardTypes": [
+              "Spell"
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Kennen, Storm of Shuriken",
@@ -19887,8 +20676,26 @@
       "type": "Unit",
       "cardId": "ven-113a-166",
       "rulesCardId": "ven-113a-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "mill",
+            "amount": 2
+          }
+        ],
+        "onConquer": [
+          {
+            "type": "special",
+            "custom": "wave7:grant-flow",
+            "target": "trashCards",
+            "cardTypes": [
+              "Spell"
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Kharox",
@@ -20308,8 +21115,22 @@
       "type": "Unit",
       "cardId": "ven-134-166",
       "rulesCardId": "ven-134-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Empower",
+            "energy": 3,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave7:kayle"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Kennen, Keeper of Balance",
@@ -20631,8 +21452,25 @@
       "type": "Legend",
       "cardId": "ven-141-166--6a517604ad64d2d80a4f037c",
       "rulesCardId": "ven-141-166--6a517604ad64d2d80a4f037c",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add two Energy for units",
+            "power": 2,
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "energy",
+                "amount": 2,
+                "condition": "unitsOnly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Renekton - Butcher of the Sands",
@@ -20640,8 +21478,25 @@
       "type": "Legend",
       "cardId": "ven-141-166--6a56ab95ff602fd324f47604",
       "rulesCardId": "ven-141-166--6a56ab95ff602fd324f47604",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add two Energy for units",
+            "power": 2,
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "energy",
+                "amount": 2,
+                "condition": "unitsOnly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Dominus",
@@ -20763,8 +21618,10 @@
       "type": "Legend",
       "cardId": "ven-145-166--6a517604ad64d2d80a4f0383",
       "rulesCardId": "ven-145-166--6a517604ad64d2d80a4f0383",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Nasus - Curator of the Sands",
@@ -20772,8 +21629,10 @@
       "type": "Legend",
       "cardId": "ven-145-166--6a56ab95ff602fd324f4760b",
       "rulesCardId": "ven-145-166--6a56ab95ff602fd324f4760b",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Siphoning Strike",
@@ -21059,8 +21918,25 @@
       "type": "Legend",
       "cardId": "ven-155-166--6a517605ad64d2d80a4f0392",
       "rulesCardId": "ven-155-166--6a517605ad64d2d80a4f0392",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Give Assault 2",
+            "exhaust": true,
+            "disempowerSelf": true,
+            "timing": "action",
+            "effects": [
+              {
+                "type": "assault",
+                "amount": 2,
+                "target": "anyUnit"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Yordle, Kennen - Heart of the Tempest",
@@ -21068,8 +21944,25 @@
       "type": "Legend",
       "cardId": "ven-155-166--6a56ab96ff602fd324f4761e",
       "rulesCardId": "ven-155-166--6a56ab96ff602fd324f4761e",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Give Assault 2",
+            "exhaust": true,
+            "disempowerSelf": true,
+            "timing": "action",
+            "effects": [
+              {
+                "type": "assault",
+                "amount": 2,
+                "target": "anyUnit"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Lightning Rush",
@@ -21859,8 +22752,25 @@
       "type": "Legend",
       "cardId": "ven-190-166--6a517604ad64d2d80a4f037d",
       "rulesCardId": "ven-141-166--6a517604ad64d2d80a4f037c",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add two Energy for units",
+            "power": 2,
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "energy",
+                "amount": 2,
+                "condition": "unitsOnly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Renekton - Butcher of the Sands (Overnumbered)",
@@ -21868,26 +22778,49 @@
       "type": "Legend",
       "cardId": "ven-190-166--6a56ab95ff602fd324f47605",
       "rulesCardId": "ven-141-166--6a56ab95ff602fd324f47604",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add two Energy for units",
+            "power": 2,
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "energy",
+                "amount": 2,
+                "condition": "unitsOnly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Master of Shadows",
       "set": "VEN",
       "type": "Legend",
       "cardId": "ven-191-166--6a517606ad64d2d80a4f03a6",
-      "rulesCardId": "ven-191-166--6a517606ad64d2d80a4f03a6",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-143-166--6a517606ad64d2d80a4f03a5",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "notes": "Own banishes empower legend; exhaust and disempower for Action discard then draw."
+      }
     },
     {
       "name": "Zed - Master of Shadows (Overnumbered)",
       "set": "VEN",
       "type": "Legend",
       "cardId": "ven-191-166--6a56ab97ff602fd324f47637",
-      "rulesCardId": "ven-191-166--6a56ab97ff602fd324f47637",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-143-166--6a56ab97ff602fd324f47636",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "notes": "Own banishes empower legend; exhaust and disempower for Action discard then draw."
+      }
     },
     {
       "name": "Curator of the Sands",
@@ -21895,8 +22828,10 @@
       "type": "Legend",
       "cardId": "ven-192-166--6a517604ad64d2d80a4f0382",
       "rulesCardId": "ven-145-166--6a517604ad64d2d80a4f0383",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Nasus - Curator of the Sands (Overnumbered)",
@@ -21904,8 +22839,10 @@
       "type": "Legend",
       "cardId": "ven-192-166--6a56ab95ff602fd324f4760a",
       "rulesCardId": "ven-145-166--6a56ab95ff602fd324f4760b",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Eye of Twilight",
@@ -22044,18 +22981,52 @@
       "set": "VEN",
       "type": "Legend",
       "cardId": "ven-197-166--6a517605ad64d2d80a4f0391",
-      "rulesCardId": "ven-197-166--6a517605ad64d2d80a4f0391",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-155-166--6a517605ad64d2d80a4f0392",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Give Assault 2",
+            "exhaust": true,
+            "disempowerSelf": true,
+            "timing": "action",
+            "effects": [
+              {
+                "type": "assault",
+                "amount": 2,
+                "target": "anyUnit"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Yordle, Kennen - Heart of the Tempest (Overnumbered)",
       "set": "VEN",
       "type": "Legend",
       "cardId": "ven-197-166--6a56ab96ff602fd324f4761d",
-      "rulesCardId": "ven-197-166--6a56ab96ff602fd324f4761d",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-155-166--6a56ab96ff602fd324f4761e",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Give Assault 2",
+            "exhaust": true,
+            "disempowerSelf": true,
+            "timing": "action",
+            "effects": [
+              {
+                "type": "assault",
+                "amount": 2,
+                "target": "anyUnit"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Fury Rune",

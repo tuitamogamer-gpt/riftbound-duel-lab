@@ -19,9 +19,15 @@ export function decisionActions(game: GameState, actions: GameAction[]) {
     options:
       game.phase === "move"
         ? []
-        : actions.filter((action) => action.id !== "damage-done"),
+        : actions.filter(
+            (action) =>
+              action.id !== "damage-done" && action.id !== "choose-trash:done",
+          ),
     confirm: actions.find(
-      (action) => action.id === "move-confirm" || action.id === "damage-done",
+      (action) =>
+        action.id === "move-confirm" ||
+        action.id === "damage-done" ||
+        action.id === "choose-trash:done",
     ),
     cancel: actions.find((action) => action.id === "move-cancel"),
   };

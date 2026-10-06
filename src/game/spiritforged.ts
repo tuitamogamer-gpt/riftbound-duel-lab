@@ -1,3 +1,5 @@
+import { readyForbidden } from "./board-rules";
+import { addToTrash, takeTrashAt } from "./trash";
 import { canPlayCard } from "./board-rules";
 import { cards, getCard, type Card } from "../data/cards";
 import type {
@@ -453,7 +455,7 @@ export const spiritforgedModule: ExpansionModule = {
       }
       case "lucian-ready":
         if (source && !source.usedAbilities?.includes(`lucian:${s.turn}`)) {
-          source.ready = true;
+          if (!readyForbidden(s, source.owner)) source.ready = true;
           (source.usedAbilities ??= []).push(`lucian:${s.turn}`);
         }
         break;
@@ -523,7 +525,7 @@ export const spiritforgedModule: ExpansionModule = {
           if (item.flowed) {
             s.players[item.player].banished.push(item.cardId);
             ctx.cardEvent(s, "banish", item.player, item.cardId);
-          } else s.players[item.player].discard.push(item.cardId);
+          } else addToTrash(s, item.player, item.cardId);
         }
         break;
       }
@@ -570,7 +572,7 @@ export const spiritforgedModule: ExpansionModule = {
       case "veiled-ready": {
         const g = s.gears.find((g) => g.id === arg[0]);
         if (g) {
-          g.ready = true;
+          if (!readyForbidden(s, g.owner)) g.ready = true;
           if (hasEquip(getCard(g.cardId)) && g.attachedTo)
             choose(s, p, ctx, [
               option(p, "veiled-detach", "Detach the Equipment", [
@@ -631,7 +633,7 @@ export const spiritforgedModule: ExpansionModule = {
         for (const gid of [...u.gear]) detach(s, gid);
         s.units = s.units.filter((x) => x.id !== uid);
         if (!u.token) s.players[p].deck.push(u.cardId);
-        s.players[p].discard.splice(index, 1);
+        takeTrashAt(s, p, index);
         ctx.playUnit(s, p, id, loc as LocationId, false);
         ctx.log?.(
           s,
@@ -841,9 +843,7 @@ export const spiritforgedModule: ExpansionModule = {
       return true;
     ctx.pay(s, a.player, 1, 1, ["Fury"]);
     g.ready = false;
-    s.players[a.player].deck.push(
-      s.players[a.player].discard.splice(index, 1)[0],
-    );
+    s.players[a.player].deck.push(takeTrashAt(s, a.player, index)!);
     ctx.pushStack(s, {
       player: a.player,
       cardId: g.cardId,

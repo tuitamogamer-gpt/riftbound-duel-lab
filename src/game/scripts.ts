@@ -1,4 +1,5 @@
 import { cardWave6Scripts } from "./card-wave6";
+import { cardWave7Scripts } from "./card-wave7";
 import { originsWave4Scripts } from "./origins-wave4";
 import { cardWave5Scripts } from "./card-wave5";
 import { vendettaWave4Scripts } from "./vendetta-wave4";
@@ -17,6 +18,7 @@ import { vendettaExtraScripts } from "./vendetta-extra";
 import { unleashedExtraScripts } from "./unleashed-extra";
 import { cards } from "../data/cards";
 import { buildCardRegistry } from "./card-registry";
+import { reviewedPrintingAliases } from "./printing-aliases";
 import { compileCardScript } from "./card-script-compiler";
 import type { CardScript } from "./types";
 const plain: CardScript = { implemented: true };
@@ -209,12 +211,18 @@ Object.assign(
   unleashedExtraScripts,
   cardWave5Scripts,
   cardWave6Scripts,
+  cardWave7Scripts,
 );
 map["token-tentacle"] = plain;
 map["token-mech"] = plain;
 map["token-sand-soldier"] = plain;
 map["token-bird"] = { ...plain, deflect: 1, keywords: ["Deflect"] };
-export const cardRegistry = buildCardRegistry(cards, map, compileCardScript);
+export const cardRegistry = buildCardRegistry(
+  cards,
+  map,
+  compileCardScript,
+  reviewedPrintingAliases(cards),
+);
 Object.assign(
   map,
   Object.fromEntries(

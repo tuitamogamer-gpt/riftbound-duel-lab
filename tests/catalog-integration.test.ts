@@ -20,10 +20,12 @@ import { vendettaWave3Scripts } from "../src/game/vendetta-wave3";
 import { originsWave4Scripts } from "../src/game/origins-wave4";
 import { vendettaWave4Scripts } from "../src/game/vendetta-wave4";
 import { unleashedWave4Scripts } from "../src/game/unleashed-wave4";
+import { cardWave7Scripts } from "../src/game/card-wave7";
 import { parseSession } from "../src/persistence";
 import type { GameState } from "../src/game/types";
 
 const added = {
+  ...cardWave7Scripts,
   ...originsExtraScripts,
   ...spiritforgedExtraScripts,
   ...originsMoreScripts,

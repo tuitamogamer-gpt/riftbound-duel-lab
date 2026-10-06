@@ -1,4 +1,9 @@
 export const flowMessages: Record<string, [string, string, string]> = {
+  "{count} selected · Choose cards from the trash, then confirm.": [
+    "{count} selected · Choose cards from the trash, then confirm.",
+    "{count} odabrano · Odaberi karte iz trasha, zatim potvrdi.",
+    "{count} selezionate · Scegli le carte dagli scarti, poi conferma.",
+  ],
   "Reveal now": ["Reveal now", "Otkrij sada", "Rivela ora"],
   "Next turn": ["Next turn", "Od sljedećeg poteza", "Dal prossimo turno"],
   Blocked: ["Blocked", "Blokirano", "Bloccata"],
