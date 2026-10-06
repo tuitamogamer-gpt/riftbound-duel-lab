@@ -4,23 +4,23 @@
   "provider": "Riftcodex",
   "providerPrintings": 1451,
   "registered": 1456,
-  "playable": 1186,
+  "playable": 1219,
   "statuses": {
-    "scripted": 875,
+    "scripted": 902,
     "compiled": 37,
-    "alias": 274,
-    "unsupported": 270
+    "alias": 280,
+    "unsupported": 237
   },
   "sets": {
     "JDG": {
       "total": 3,
-      "playable": 1,
-      "unsupported": 2
+      "playable": 2,
+      "unsupported": 1
     },
     "OGN": {
       "total": 352,
-      "playable": 294,
-      "unsupported": 58
+      "playable": 301,
+      "unsupported": 51
     },
     "OGS": {
       "total": 24,
@@ -29,8 +29,8 @@
     },
     "OPP": {
       "total": 133,
-      "playable": 115,
-      "unsupported": 18
+      "playable": 117,
+      "unsupported": 16
     },
     "PR": {
       "total": 13,
@@ -39,18 +39,18 @@
     },
     "SFD": {
       "total": 288,
-      "playable": 197,
-      "unsupported": 91
+      "playable": 206,
+      "unsupported": 82
     },
     "UNL": {
       "total": 280,
-      "playable": 228,
-      "unsupported": 52
+      "playable": 231,
+      "unsupported": 49
     },
     "VEN": {
       "total": 358,
-      "playable": 309,
-      "unsupported": 49
+      "playable": 320,
+      "unsupported": 38
     },
     "TOKEN": {
       "total": 5,
@@ -73,9 +73,18 @@
       "set": "JDG",
       "type": "Unit",
       "cardId": "jdg-087-219",
-      "rulesCardId": "jdg-087-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-087-219",
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "shield": 2,
+        "onHold": [
+          {
+            "type": "special",
+            "custom": "wave9:main-power"
+          }
+        ]
+      }
     },
     {
       "name": "Heimerdinger - Inventor",
@@ -633,8 +642,22 @@
       "type": "Gear",
       "cardId": "ogn-032-298",
       "rulesCardId": "ogn-032-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Give the next spell 1 Bonus Damage",
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave9:spell-bonus"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Shakedown",
@@ -2108,8 +2131,20 @@
       "type": "Unit",
       "cardId": "ogn-110-298",
       "rulesCardId": "ogn-110-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "onDeath": [
+          {
+            "type": "readyRunes",
+            "amount": 1000,
+            "triggerCost": {
+              "recycleSelf": true
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Heimerdinger - Inventor",
@@ -2311,8 +2346,18 @@
       "type": "Unit",
       "cardId": "ogn-121-298",
       "rulesCardId": "ogn-121-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "hidden": true,
+        "onDefend": [
+          {
+            "type": "special",
+            "custom": "wave8:teemo",
+            "target": "enemyUnitHere"
+          }
+        ]
+      }
     },
     {
       "name": "Teemo - Strategist (Alternate Art)",
@@ -2320,8 +2365,18 @@
       "type": "Unit",
       "cardId": "ogn-121a-298",
       "rulesCardId": "ogn-121-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "hidden": true,
+        "onDefend": [
+          {
+            "type": "special",
+            "custom": "wave8:teemo",
+            "target": "enemyUnitHere"
+          }
+        ]
+      }
     },
     {
       "name": "Time Warp",
@@ -4182,8 +4237,17 @@
       "type": "Spell",
       "cardId": "ogn-221-298",
       "rulesCardId": "ogn-221-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "action": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave9:imperial-decree"
+          }
+        ]
+      }
     },
     {
       "name": "Noxian Drummer",
@@ -4728,8 +4792,18 @@
       "type": "Spell",
       "cardId": "ogn-254-298",
       "rulesCardId": "ogn-254-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "action": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "wave9:guillotine",
+            "target": "anyUnit"
+          }
+        ]
+      }
     },
     {
       "name": "Ahri - Nine-Tailed Fox",
@@ -4748,8 +4822,28 @@
       "type": "Spell",
       "cardId": "ogn-256-298",
       "rulesCardId": "ogn-256-298",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "action": true,
+        "hidden": true,
+        "spell": [
+          {
+            "type": "kill",
+            "target": "boardCards",
+            "cardTypes": [
+              "Unit"
+            ],
+            "upTo": true,
+            "who": "all",
+            "group": {
+              "sameLocation": true,
+              "atBattlefield": true,
+              "totalMight": 4
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Lee Sin - Blind Monk",
@@ -7611,8 +7705,24 @@
       "type": "Legend",
       "cardId": "opp-189-221",
       "rulesCardId": "sfd-189-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Power for gear",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "condition": "gearOnly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Jax - Grandmaster At Arms (Metal)",
@@ -7683,8 +7793,26 @@
       "type": "Legend",
       "cardId": "opp-197-221",
       "rulesCardId": "sfd-197-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Play a Sand Soldier",
+            "energy": 1,
+            "exhaust": true,
+            "condition": "playedEquipment",
+            "effects": [
+              {
+                "type": "token",
+                "cardName": "Sand Soldier",
+                "location": "base",
+                "amount": 1
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Teemo - Scout (GG EZ)",
@@ -8652,8 +8780,10 @@
       "type": "Unit",
       "cardId": "sfd-010-221",
       "rulesCardId": "sfd-010-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Angle Shot",
@@ -9324,8 +9454,28 @@
       "type": "Spell",
       "cardId": "sfd-043-221",
       "rulesCardId": "sfd-043-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "action": true,
+        "hidden": true,
+        "spell": [
+          {
+            "type": "moveTarget",
+            "target": "boardCards",
+            "cardTypes": [
+              "Unit"
+            ],
+            "upTo": true,
+            "who": "self",
+            "group": {
+              "sameLocation": true,
+              "atBattlefield": true,
+              "destination": "base"
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Legion Quartermaster",
@@ -10931,8 +11081,20 @@
       "type": "Unit",
       "cardId": "sfd-128-221",
       "rulesCardId": "sfd-128-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onDefend": [
+          {
+            "type": "moveTarget",
+            "target": "enemyAttackingUnit",
+            "optional": true,
+            "triggerCost": {
+              "sacrificeSelf": true
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Temptation",
@@ -11500,8 +11662,17 @@
       "type": "Spell",
       "cardId": "sfd-164-221",
       "rulesCardId": "sfd-164-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "action": true,
+        "spell": [
+          {
+            "type": "kill",
+            "target": "unitAtBattlefield"
+          }
+        ]
+      }
     },
     {
       "name": "Glasc Mixologist",
@@ -11688,8 +11859,27 @@
       "type": "Unit",
       "cardId": "sfd-177-221",
       "rulesCardId": "sfd-177-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "onAttack": [
+          {
+            "type": "moveTarget",
+            "target": "boardCards",
+            "cardTypes": [
+              "Unit"
+            ],
+            "upTo": true,
+            "who": "self",
+            "optional": true,
+            "group": {
+              "tokensOnly": true,
+              "destination": "here"
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Azir - Sovereign (Alternate Art)",
@@ -11697,8 +11887,27 @@
       "type": "Unit",
       "cardId": "sfd-177a-221",
       "rulesCardId": "sfd-177-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "onAttack": [
+          {
+            "type": "moveTarget",
+            "target": "boardCards",
+            "cardTypes": [
+              "Unit"
+            ],
+            "upTo": true,
+            "who": "self",
+            "optional": true,
+            "group": {
+              "tokensOnly": true,
+              "destination": "here"
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Blade of the Ruined King",
@@ -11848,8 +12057,24 @@
       "type": "Legend",
       "cardId": "sfd-189-221",
       "rulesCardId": "sfd-189-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Power for gear",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "condition": "gearOnly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Forgefire Cape",
@@ -11974,8 +12199,26 @@
       "type": "Legend",
       "cardId": "sfd-197-221",
       "rulesCardId": "sfd-197-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Play a Sand Soldier",
+            "energy": 1,
+            "exhaust": true,
+            "condition": "playedEquipment",
+            "effects": [
+              {
+                "type": "token",
+                "cardName": "Sand Soldier",
+                "location": "base",
+                "amount": 1
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Arise!",
@@ -12761,8 +13004,24 @@
       "type": "Legend",
       "cardId": "sfd-244-221",
       "rulesCardId": "sfd-189-221",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "alias",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Add one Power for gear",
+            "exhaust": true,
+            "timing": "reaction",
+            "effects": [
+              {
+                "type": "power",
+                "amount": 1,
+                "condition": "gearOnly"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Jax - Grandmaster At Arms (Overnumbered)",
@@ -13474,8 +13733,17 @@
       "type": "Unit",
       "cardId": "unl-029-219",
       "rulesCardId": "unl-029-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "onConquer": [
+          {
+            "type": "buff",
+            "target": "friendlyUnit"
+          }
+        ]
+      }
     },
     {
       "name": "Red Brambleback (Alternate Art)",
@@ -14048,8 +14316,25 @@
       "type": "Spell",
       "cardId": "unl-054-219",
       "rulesCardId": "unl-054-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "moveTarget",
+            "target": "boardCards",
+            "cardTypes": [
+              "Unit"
+            ],
+            "upTo": true,
+            "who": "opponent",
+            "group": {
+              "totalMight": 8,
+              "destination": "any"
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Vex - Mocking",
@@ -14699,9 +14984,18 @@
       "set": "UNL",
       "type": "Unit",
       "cardId": "unl-087-219",
-      "rulesCardId": "jdg-087-219",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "unl-087-219",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "shield": 2,
+        "onHold": [
+          {
+            "type": "special",
+            "custom": "wave9:main-power"
+          }
+        ]
+      }
     },
     {
       "name": "Blue Sentinel (Alternate Art)",
@@ -18165,8 +18459,10 @@
       "type": "Unit",
       "cardId": "ven-024-166",
       "rulesCardId": "ven-024-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Esteemed Hierophant",
@@ -18716,8 +19012,10 @@
       "type": "Unit",
       "cardId": "ven-044-166",
       "rulesCardId": "ven-044-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Helm of Suppression",
@@ -19010,8 +19308,10 @@
       "type": "Unit",
       "cardId": "ven-053-166",
       "rulesCardId": "ven-053-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Questionable Tome",
@@ -19964,17 +20264,55 @@
       "type": "Unit",
       "cardId": "ven-091-166--6a517604ad64d2d80a4f0381",
       "rulesCardId": "ven-091-166--6a517604ad64d2d80a4f0381",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onAttack": [
+          {
+            "type": "moveTarget",
+            "target": "boardCards",
+            "cardTypes": [
+              "Unit"
+            ],
+            "upTo": true,
+            "who": "opponent",
+            "maxMight": 5,
+            "optional": true,
+            "group": {
+              "here": true,
+              "destination": "base"
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Corrupted Dragon",
       "set": "VEN",
       "type": "Unit",
       "cardId": "ven-091-166--6a56ab95ff602fd324f47609",
-      "rulesCardId": "ven-091-166--6a517604ad64d2d80a4f0381",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-091-166--6a56ab95ff602fd324f47609",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onAttack": [
+          {
+            "type": "moveTarget",
+            "target": "boardCards",
+            "cardTypes": [
+              "Unit"
+            ],
+            "upTo": true,
+            "who": "opponent",
+            "maxMight": 5,
+            "optional": true,
+            "group": {
+              "here": true,
+              "destination": "base"
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Renekton, Brute",
@@ -20356,17 +20694,51 @@
       "type": "Spell",
       "cardId": "ven-107-166--6a518b2537f518eaadf8bafe",
       "rulesCardId": "ven-107-166--6a518b2537f518eaadf8bafe",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "bounce",
+            "target": "boardCards",
+            "cardTypes": [
+              "Unit"
+            ],
+            "upTo": true,
+            "who": "opponent",
+            "targetDomain": "Order",
+            "group": {
+              "totalMight": 5
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Decree of Discord",
       "set": "VEN",
       "type": "Spell",
       "cardId": "ven-107-166--6a56ab95ff602fd324f4760e",
-      "rulesCardId": "ven-107-166--6a518b2537f518eaadf8bafe",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-107-166--6a56ab95ff602fd324f4760e",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "bounce",
+            "target": "boardCards",
+            "cardTypes": [
+              "Unit"
+            ],
+            "upTo": true,
+            "who": "opponent",
+            "targetDomain": "Order",
+            "group": {
+              "totalMight": 5
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Forgotten Relic",
@@ -21088,8 +21460,16 @@
       "type": "Unit",
       "cardId": "ven-132-166",
       "rulesCardId": "ven-132-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "wave9:name-spell"
+          }
+        ]
+      }
     },
     {
       "name": "Glowstone",
@@ -21824,8 +22204,24 @@
       "type": "Spell",
       "cardId": "ven-150-166",
       "rulesCardId": "ven-150-166",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "ready",
+            "target": "boardCards",
+            "cardTypes": [
+              "Unit",
+              "Gear",
+              "Rune"
+            ],
+            "upTo": true,
+            "who": "all",
+            "targetCount": 4
+          }
+        ]
+      }
     },
     {
       "name": "Soul's Reflection",
@@ -22068,17 +22464,21 @@
       "type": "Battlefield",
       "cardId": "ven-161-166--6a517607ad64d2d80a4f03b7",
       "rulesCardId": "ven-161-166--6a517607ad64d2d80a4f03b7",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Piltovan Forge",
       "set": "VEN",
       "type": "Battlefield",
       "cardId": "ven-161-166--6a56ab99ff602fd324f4764d",
-      "rulesCardId": "ven-161-166--6a517607ad64d2d80a4f03b7",
-      "status": "unsupported",
-      "reason": "Rules text requires an explicit effect implementation and behavior tests."
+      "rulesCardId": "ven-161-166--6a56ab99ff602fd324f4764d",
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Protective Sands",

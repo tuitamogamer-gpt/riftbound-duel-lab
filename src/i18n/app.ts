@@ -438,6 +438,11 @@ export const appMessages: Record<string, [string, string, string]> = {
     "{count} moći za čarolije",
     "{count} potere per magie",
   ],
+  "{count} Power for gear": [
+    "{count} Power for gear",
+    "{count} moći za opremu",
+    "{count} potere per l'equipaggiamento",
+  ],
   "{count} Energy for units": [
     "{count} Energy for units",
     "{count} energije za jedinice",

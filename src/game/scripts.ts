@@ -1,5 +1,7 @@
 import { cardWave6Scripts } from "./card-wave6";
 import { cardWave7Scripts } from "./card-wave7";
+import { cardWave8Scripts } from "./card-wave8";
+import { cardWave9Scripts } from "./card-wave9";
 import { originsWave4Scripts } from "./origins-wave4";
 import { cardWave5Scripts } from "./card-wave5";
 import { vendettaWave4Scripts } from "./vendetta-wave4";
@@ -212,6 +214,8 @@ Object.assign(
   cardWave5Scripts,
   cardWave6Scripts,
   cardWave7Scripts,
+  cardWave8Scripts,
+  cardWave9Scripts,
 );
 map["token-tentacle"] = plain;
 map["token-mech"] = plain;

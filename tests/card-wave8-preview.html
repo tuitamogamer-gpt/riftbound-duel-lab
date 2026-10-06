@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eighth card wave QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      import { cards } from "/src/data/cards.ts";
+      // A synthetic match on an isolated origin; reload retains the selection.
+      if (!sessionStorage.getItem("wave8-v2-seeded")) {
+        const match = createCombatFixture();
+        match.turn = 7;
+        match.phase = "main";
+        match.combat = null;
+        match.currentPlayer = match.priorityPlayer = match.focusPlayer = 0;
+        match.fields.forEach((f) => {
+          f.cardId = "ogn-279-298";
+          f.controller = null;
+        });
+        match.fields[0].controller = 1;
+        match.players[0].legendId = "ogn-259-298";
+        match.players[0].hand = [
+          "ogn-256-298",
+          "unl-054-219",
+          cards.find(
+            (c) => c.set === "VEN" && c.collectorNumber === 150 && !c.variant,
+          ).id,
+        ];
+        match.players[1].hand = [];
+        for (const p of match.players) {
+          p.energy = 20;
+          p.power = 10;
+          p.championAvailable = false;
+          p.discard = [];
+        }
+        match.units = [
+          { ...combatUnit("ally", 0, 3, "ogn-052-298"), location: "base:0" },
+          {
+            ...combatUnit("target-a", 1, 2, "ogn-052-298"),
+            location: "field:0",
+          },
+          {
+            ...combatUnit("target-b", 1, 2, "ogn-049-298"),
+            location: "field:0",
+          },
+          { ...combatUnit("other", 1, 4, "ogn-175-298"), location: "base:1" },
+        ];
+        match.stack = [];
+        match.pendingChoice = null;
+        match.pendingTriggers = [];
+        localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review: null }));
+        sessionStorage.setItem("wave8-v2-seeded", "1");
+      }
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

@@ -1,6 +1,18 @@
 /** Engine strings remain canonical and language independent. Templates are matched
  * at the presentation boundary; placeholders contain card names or nested labels. */
 const englishMessages: [string, string, string][] = [
+  ["Name {card}", "Imenuj {card}", "Nomina {card}"],
+  [
+    "Add one Power for gear",
+    "Dodaj jednu moć za opremu",
+    "Aggiungi un Potere per gli oggetti",
+  ],
+  ["Play a Sand Soldier", "Odigraj Sand Soldiera", "Gioca un Sand Soldier"],
+  [
+    "Give the next spell 1 Bonus Damage",
+    "Daj sljedećoj čaroliji 1 dodatnu štetu",
+    "La prossima magia infligge 1 danno bonus",
+  ],
   [
     "Channel 1 rune exhausted",
     "Kanalizuj 1 iscrpljenu runu",

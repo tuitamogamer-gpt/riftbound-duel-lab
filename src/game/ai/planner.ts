@@ -422,8 +422,17 @@ export function chooseDecision(
               )
                 continue;
               const nextCandidates = candidates(parent.state, p, budget, 30);
+              // A sampled future draw cannot supply a known follow-up from
+              // hand. Public board routes and abilities can still be explored.
+              const sampledDraw =
+                parent.state.players[p].deck.length <
+                initial.players[p].deck.length;
+              const followups = nextCandidates.actions.filter(
+                (action) =>
+                  !sampledDraw || !action.sourceId?.startsWith("hand:"),
+              );
               const ordered = diverse(
-                rankCandidates(parent.state, nextCandidates.actions, profile),
+                rankCandidates(parent.state, followups, profile),
                 Math.max(3, Math.floor(settings.width / 2)),
               );
               for (const action of ordered) {

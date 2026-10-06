@@ -118,6 +118,26 @@ export function getReferenceAction(
     const selected = s.units.find((u) => u.id === a.targetId);
     if (s.phase === "choice") {
       const choice = s.pendingChoice!;
+      if (choice.kind === "boardTargets") {
+        if (a.id === "choose-board:done") return 0;
+        if (a.id.startsWith("choose-board:destination:"))
+          return choice.boardSelection?.destination ? -100 : 5;
+        if ((a.amount ?? 0) < 0) return -100;
+        const object = selected ?? s.gears.find((g) => g.id === a.targetId);
+        const runeOwner = s.players.find((p) =>
+          p.runes.some((r) => r.id === a.targetId),
+        );
+        const owner = object?.owner ?? runeOwner?.id;
+        if (choice.effect?.type === "ready") {
+          const ready =
+            object?.ready ??
+            runeOwner?.runes.find((r) => r.id === a.targetId)?.ready;
+          return owner === player && !ready ? 30 : -10;
+        }
+        return owner !== player || choice.effect?.type === "moveTarget"
+          ? 20
+          : -10;
+      }
       if (choice.kind === "trashTargets") {
         if (a.id === "choose-trash:done") return 0;
         if ((a.amount ?? 0) < 0) return -100;

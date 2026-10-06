@@ -46,6 +46,28 @@ export const componentMessages: Record<string, [string, string, string]> = {
     "Za Tideturnerovu zamjenu moraš izabrati jedinicu pod svojom kontrolom na drugoj lokaciji.",
     "Lo scambio di Tideturner deve scegliere un'unità che controlli in un'altra posizione.",
   ],
+  "Teemo triggers when he defends. Playing him from Hidden does not create a second trigger.":
+    [
+      "Teemo triggers when he defends. Playing him from Hidden does not create a second trigger.",
+      "Teemov efekat se aktivira kada brani. Igranje iz Hiddena ne pokreće dodatno okidanje.",
+      "Teemo si attiva quando difende. Giocarlo da Hidden non crea una seconda attivazione.",
+    ],
+  "The discount applies to the next card played after Astral Heron's triggered ability resolves, during the same turn.":
+    [
+      "The discount applies to the next card played after Astral Heron's triggered ability resolves, during the same turn.",
+      "Popust važi za sljedeću kartu odigranu nakon razrješenja Astral Heronovog efekta, tokom istog poteza.",
+      "Lo sconto si applica alla prossima carta giocata dopo la risoluzione dell'abilità di Astral Heron, nello stesso turno.",
+    ],
+  "Search spell names": [
+    "Search spell names",
+    "Pretraži nazive čarolija",
+    "Cerca nomi di incantesimi",
+  ],
+  "No matching spells": [
+    "No matching spells",
+    "Nema odgovarajućih čarolija",
+    "Nessun incantesimo corrispondente",
+  ],
   "Updated rules": ["Updated rules", "Ažurirana pravila", "Regole aggiornate"],
   "Official errata": [
     "Official errata",

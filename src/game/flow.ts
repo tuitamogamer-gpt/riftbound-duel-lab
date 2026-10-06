@@ -21,13 +21,16 @@ export function decisionActions(game: GameState, actions: GameAction[]) {
         ? []
         : actions.filter(
             (action) =>
-              action.id !== "damage-done" && action.id !== "choose-trash:done",
+              action.id !== "damage-done" &&
+              action.id !== "choose-trash:done" &&
+              action.id !== "choose-board:done",
           ),
     confirm: actions.find(
       (action) =>
         action.id === "move-confirm" ||
         action.id === "damage-done" ||
-        action.id === "choose-trash:done",
+        action.id === "choose-trash:done" ||
+        action.id === "choose-board:done",
     ),
     cancel: actions.find((action) => action.id === "move-cancel"),
   };

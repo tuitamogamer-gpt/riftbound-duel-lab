@@ -310,7 +310,8 @@ export default function App() {
         setGame(result.state);
         setReview(
           isMovementSelection(action) ||
-            result.state.pendingChoice?.kind === "trashTargets"
+            result.state.pendingChoice?.kind === "trashTargets" ||
+            result.state.pendingChoice?.kind === "boardTargets"
             ? null
             : {
                 before: match,
@@ -1475,6 +1476,9 @@ function RuneZone({
               : ""}
             {p.spellPower
               ? ` · ${t("{count} Power for spells", { count: p.spellPower })}`
+              : ""}
+            {p.gearPower
+              ? ` · ${t("{count} Power for gear", { count: p.gearPower })}`
               : ""}
             {p.unitEnergy
               ? ` · ${t("{count} Energy for units", { count: p.unitEnergy })}`

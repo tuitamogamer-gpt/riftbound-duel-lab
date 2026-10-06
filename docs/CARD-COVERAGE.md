@@ -2,7 +2,27 @@
 
 The catalog was fetched again on 6 October 2026. It contains every printing returned by the paginated Riftcodex API: 1,451 printings in eight sets, plus five local rules tokens. Provider completeness is checked against both pagination totals and each set's card count. It is not independent evidence that Riftcodex has every Riot publication or preview; its latest reported record update was 21 July 2026. No Radiance set is returned in this snapshot.
 
-Current checked snapshot: **1,186 executable entries and 270 unsupported entries**, including the five local rules tokens. These counts refer to printings, not unique gameplay cards. The [validation log](VALIDATION.md) records the current full-suite acceptance, including 169 precon pairings and 16 mixed-expansion integration games.
+Current checked snapshot: **1,219 executable entries and 237 unsupported entries**, including the five local rules tokens. These counts refer to printings, not unique gameplay cards. The [validation log](VALIDATION.md) records the current checks.
+
+## Ninth implementation wave — 6 October 2026
+
+This continuation implements **12 card faces / 17 previously unsupported printings**: Ravenborn Tome, Imperial Decree, Noxian Guillotine, Ornn (Fire Below the Mountain), Azir (Emperor of the Sands), Red Brambleback, Blue Sentinel, Affectionate Poro, Astral Heron, Otterpus, Fallen Feline and Piltovan Forge. Their scripts are in `card-wave9.ts`; equivalent printings still require the registry's full gameplay fingerprint.
+
+The engine now keeps next-spell damage bonuses, delayed damage-triggered kills, gear-only Power, first-gear-ability discounts, equipment-play permission, delayed Main-phase Power and the next-card discount. Extra conquer/hold triggers are additive and pay their own costs, while the ordinary point happens once. Poro remembers actual damage even after healing. Fallen Feline names a spell through a searchable, resumable choice; card inspection shows the public name and the restriction applies only while Feline is at a battlefield. Pending effects and resource pools survive save/load.
+
+The wave also corrects Teemo, Strategist from wave eight: the official erratum makes his ability trigger on defending only. Entering from Hidden does not add another trigger. Both Teemo's correction and Astral Heron's discount timing appear beside the preserved provider text in card inspection.
+
+**237 printings remain unsupported.** Effect-directed card plays, ownership changes, copy effects, extra turns, incomplete Equipment panels and multiple Repeat instances remain separate work. Provider data and original printed text are unchanged.
+
+## Eighth implementation wave — 6 October 2026
+
+This continuation implements **12 card faces / 16 previously unsupported printings**: Ekko, Recurrent; Teemo, Strategist; Fox-Fire; Void Drone; Emperor's Divide; Overzealous Fan; Drag Under; Azir, Sovereign; Tricksy Tentacles; Corrupted Dragon; Decree of Discord; and Acceleration Gate. Their scripts are in `card-wave8.ts`; equivalent printings retain the registry's full gameplay-fingerprint checks.
+
+Board target groups now use a staged selection with a persistent confirmation control. All targets, shared destinations and Deflect costs are finalized before payment and responses. The options grow with the number of objects, without generating every possible subset. A reaction that invalidates the group's total Might or shared location opens a saved, resumable subset choice restricted to the original targets. Hidden choices remain local. Acceleration Gate can include units, gear and runes belonging to either player. Selection clicks update immediately.
+
+Ekko recycles the exact physical trash visit as a trigger cost, before responses; a different copy cannot substitute for it. Overzealous Fan likewise pays its self-sacrifice before its effect enters the chain. Teemo reveals and recycles the top five cards and deals unit-sourced damage for the Hidden cards. Azir uses his live battlefield on resolution. Corrupted Dragon checks the current victory threshold. Void Drone and Drag Under apply their discount to plays from outside hand, including granted Flow where applicable.
+
+The provider catalog and original printed text are unchanged. **254 printings remain unsupported**; effect-directed card plays, ownership changes, copy effects, missing Equipment panels and multiple Repeat instances are still separate work. The new unrestricted group selection covers the listed faces, not every independent multi-target effect.
 
 ## Seventh implementation wave — 6 October 2026
 

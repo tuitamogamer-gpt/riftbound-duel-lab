@@ -11,6 +11,9 @@ export interface Rune {
   ready: boolean;
 }
 export interface Unit {
+  namedSpell?: string;
+  damageTakenTurn?: number;
+  deathTrashId?: string;
   empowerCount?: number;
   id: string;
   cardId: string;
@@ -55,6 +58,13 @@ export interface Gear {
   usedAbilities?: string[];
 }
 export interface PlayerState {
+  gearPower?: number;
+  firstGearAbilityTurn?: number;
+  equipmentPlayedTurn?: number;
+  nextSpellBonus?: number;
+  nextMainPower?: number;
+  nextCardEnergyDiscount?: number;
+  nextCardPowerDiscount?: number;
   powerSpentThisTurn?: number;
   freeHideTurn?: number;
   firstGearPlayedTurn?: number;
@@ -121,6 +131,7 @@ export interface PendingMove {
   unitIds: string[];
 }
 export interface StackItem {
+  spellBonusDamage?: number;
   abilityEnergyCost?: number;
   playSource?: "hand" | "champion" | "hidden" | "trash" | "effect";
   playOrdinal?: number;
@@ -152,6 +163,12 @@ export interface Combat {
   assigningPlayer: PlayerId;
 }
 export interface GameState {
+  damageTriggers?: {
+    player: PlayerId;
+    cardId: string;
+    turn: number;
+    targetId?: string;
+  }[];
   revision?: number;
   matchConfig?: {
     formatId: string;
@@ -211,6 +228,7 @@ export interface GameState {
       | "optional"
       | "move"
       | "trashTargets"
+      | "boardTargets"
       | "custom";
     remaining: number;
     sourceId?: string;
@@ -235,6 +253,14 @@ export interface GameState {
       selected: string[];
       action: GameAction;
       trigger?: Omit<StackItem, "id" | "kind">;
+    };
+    boardSelection?: {
+      selected: string[];
+      action?: GameAction;
+      trigger?: Omit<StackItem, "id" | "kind">;
+      /** Resolution may only retain the originally declared objects. */
+      allowedIds?: string[];
+      destination?: LocationId;
     };
     returnPriority: PlayerId;
   } | null;
@@ -288,6 +314,7 @@ export interface GameAction {
   repeatedEffects?: Effect[];
 }
 export type TargetFilter =
+  | "boardCards"
   | "enemyChainItemChoosingFriendly"
   | "friendlyUnitAndEnemyChainItem"
   | "unitAndEquipment"
@@ -394,6 +421,14 @@ export type Effect = {
   cardTags?: string[];
   targetCount?: number;
   upTo?: boolean;
+  group?: {
+    sameLocation?: boolean;
+    totalMight?: number;
+    tokensOnly?: boolean;
+    atBattlefield?: boolean;
+    here?: boolean;
+    destination?: "any" | "here" | "base";
+  };
   targetDomain?: string;
   targetLocations?: LocationId[];
   targetEmpowered?: boolean;
@@ -430,6 +465,9 @@ export type Effect = {
     exhaust?: boolean;
     xp?: number;
     recycleCost?: number;
+    recycleSelf?: boolean;
+    sacrificeSelf?: boolean;
+    trashId?: string;
   };
   /** Bulleted modes are chosen before the triggered ability enters the chain. */
   modes?: { label: string; effects: Effect[] }[];

@@ -7,6 +7,14 @@ const spiritforged =
 const unleashed =
   "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-errata-updates/";
 const updates: Record<string, { text: string; url: string }> = {
+  "teemo strategist": {
+    text: "Teemo triggers when he defends. Playing him from Hidden does not create a second trigger.",
+    url: "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata/",
+  },
+  "astral heron": {
+    text: "The discount applies to the next card played after Astral Heron's triggered ability resolves, during the same turn.",
+    url: "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications/",
+  },
   "janna savior": {
     text: "Janna heals friendly units here even without an enemy. Moving up to one enemy unit is optional.",
     url: spiritforged,

@@ -13,6 +13,8 @@ describe("current rules beside preserved provider text", () => {
     "Tianna Crownguard",
     "Guards!",
     "Rengar, Trophy Hunter",
+    "Teemo, Strategist",
+    "Astral Heron",
   ])("shows an official correction for %s and equivalent printings", (name) => {
     const html = render(name);
     expect(html).toContain("Updated rules");

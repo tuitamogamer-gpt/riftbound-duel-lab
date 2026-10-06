@@ -74,16 +74,35 @@ export function MatchControls({
       (!action.targetId && action.locationId === target),
   );
   const {
-    options: actions,
+    options: allActions,
     confirm,
     cancel,
   } = decisionActions(game, available);
+  const namingSpell =
+    game.pendingChoice?.kind === "custom" &&
+    allActions.some((action) =>
+      action.id.startsWith("choose-custom:wave9-name:"),
+    );
+  const searchKey = `${game.turn}:${game.pendingChoice?.sourceId}`;
+  const [searchState, setSearch] = useState({ key: "", value: "" });
+  const search = searchState.key === searchKey ? searchState.value : "";
+  const actions = namingSpell
+    ? allActions.filter((action) =>
+        findCard(action.cardId)
+          ?.name.toLowerCase()
+          .includes(search.trim().toLowerCase()),
+      )
+    : allActions;
   const movement =
     game.phase === "move" && game.pendingMove?.player === 0
       ? game.pendingMove
       : null;
   const trashSelection =
     game.pendingChoice?.kind === "trashTargets" ? game.pendingChoice : null;
+  const boardSelection =
+    game.pendingChoice?.kind === "boardTargets"
+      ? game.pendingChoice.boardSelection
+      : null;
   const destination = movement?.to.startsWith("field:")
     ? findCard(game.fields.find((field) => field.id === movement.to)?.cardId)
         ?.name
@@ -227,13 +246,30 @@ export function MatchControls({
                       : "Click units to change the group, then confirm.",
                 ),
               })
-            : trashSelection && !review && !paused && !busy
+            : boardSelection && !review && !paused && !busy
               ? t(
-                  "{count} selected · Choose cards from the trash, then confirm.",
-                  { count: trashSelection.trashSelection!.selected.length },
+                  "{count} selected · Choose cards on the board, then confirm.",
+                  { count: boardSelection.selected.length },
                 )
-              : t(hint)}
+              : trashSelection && !review && !paused && !busy
+                ? t(
+                    "{count} selected · Choose cards from the trash, then confirm.",
+                    { count: trashSelection.trashSelection!.selected.length },
+                  )
+                : t(hint)}
         </p>
+        {namingSpell && !review && !paused && !busy && (
+          <input
+            className="spell-name-search"
+            type="search"
+            aria-label={t("Search spell names")}
+            placeholder={t("Search spell names")}
+            value={search}
+            onChange={(event) =>
+              setSearch({ key: searchKey, value: event.target.value })
+            }
+          />
+        )}
       </div>
       {selected && !paused && !busy && !review && !opening && (
         <button
@@ -298,6 +334,9 @@ export function MatchControls({
         ) : (
           <>
             <div className="context-actions">
+              {namingSpell && !actions.length && (
+                <span>{t("No matching spells")}</span>
+              )}
               {actions.slice(page * 3, page * 3 + 3).map((action) => {
                 const optionCard = findCard(
                   game.units.find((unit) => unit.id === action.targetId)

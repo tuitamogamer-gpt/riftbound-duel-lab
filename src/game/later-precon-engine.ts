@@ -1,5 +1,7 @@
 import { cardWave6Module } from "./card-wave6";
 import { cardWave7Module } from "./card-wave7";
+import { cardWave8Module } from "./card-wave8";
+import { cardWave9Module } from "./card-wave9";
 import { originsWave4Module } from "./origins-wave4";
 import { cardWave5Module } from "./card-wave5";
 import { vendettaWave4Module } from "./vendetta-wave4";
@@ -218,6 +220,8 @@ function modules(): ExpansionModule[] {
     cardWave5Module,
     cardWave6Module,
     cardWave7Module,
+    cardWave8Module,
+    cardWave9Module,
   ];
 }
 export function laterMight(s: GameState, u: Unit, value: number) {

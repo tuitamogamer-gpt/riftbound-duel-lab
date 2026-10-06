@@ -79,6 +79,7 @@ const effectTypes = new Set([
   "special",
 ]);
 const targetFilters = new Set([
+  "boardCards",
   "enemyChainItemChoosingFriendly",
   "friendlyUnitAndEnemyChainItem",
   "trashCards",
@@ -154,10 +155,18 @@ const effects = (x: unknown, depth = 0): boolean =>
       ) &&
       optionalCount(e.targetCount) &&
       optionalBoolean(e.upTo) &&
+      (e.group === undefined ||
+        (isObject(e.group) &&
+          ["sameLocation", "tokensOnly", "atBattlefield", "here"].every((key) =>
+            optionalBoolean(e.group[key]),
+          ) &&
+          optionalCount(e.group.totalMight) &&
+          (e.group.destination === undefined ||
+            ["any", "here", "base"].includes(e.group.destination)))) &&
       (e.cardTypes === undefined ||
         (stringArray(e.cardTypes) &&
           e.cardTypes.every((type) =>
-            ["Unit", "Spell", "Gear"].includes(type),
+            ["Unit", "Spell", "Gear", "Rune"].includes(type),
           ))) &&
       (e.cardTags === undefined || stringArray(e.cardTags)) &&
       [
@@ -199,7 +208,10 @@ const effects = (x: unknown, depth = 0): boolean =>
             optionalCount(e.triggerCost[key]),
           ) &&
           optionalString(e.triggerCost.domain) &&
-          optionalBoolean(e.triggerCost.exhaust))) &&
+          optionalBoolean(e.triggerCost.exhaust) &&
+          optionalBoolean(e.triggerCost.recycleSelf) &&
+          optionalBoolean(e.triggerCost.sacrificeSelf) &&
+          optionalString(e.triggerCost.trashId))) &&
       (e.modes === undefined ||
         (Array.isArray(e.modes) &&
           e.modes.length > 0 &&
@@ -216,6 +228,8 @@ const validUnit = (u: unknown): boolean =>
   cardId(u.cardId) &&
   cardsById[u.cardId].type === "Unit" &&
   typeof u.id === "string" &&
+  optionalString(u.deathTrashId) &&
+  optionalString(u.namedSpell) &&
   playerId(u.owner) &&
   location(u.location) &&
   typeof u.ready === "boolean" &&
@@ -236,6 +250,7 @@ const validUnit = (u: unknown): boolean =>
     "deathReplacementTurn",
     "combatShield",
     "empowerCount",
+    "damageTakenTurn",
   ].every((k) => optionalCount(u[k])) &&
   [
     "empowered",
@@ -258,7 +273,7 @@ const validStackItem = (s: unknown): boolean =>
   effects(s.effects) &&
   optionalString(s.sourceId) &&
   optionalString(s.targetId) &&
-  ["playOrdinal", "energySpent", "abilityEnergyCost"].every(
+  ["playOrdinal", "energySpent", "abilityEnergyCost", "spellBonusDamage"].every(
     (k) => s[k] === undefined || nonnegative(s[k]),
   ) &&
   (s.playSource === undefined ||
@@ -368,6 +383,7 @@ const choice = (x: unknown): boolean =>
     "move",
     "custom",
     "trashTargets",
+    "boardTargets",
   ].includes(x.kind) &&
   count(x.remaining) &&
   phase(x.returnPhase) &&
@@ -376,6 +392,30 @@ const choice = (x: unknown): boolean =>
   optionalString(x.targetId) &&
   optionalCount(x.lastDiscardEnergy) &&
   optionalString(x.lastDiscardType) &&
+  (x.boardSelection === undefined ||
+    (isObject(x.boardSelection) &&
+      stringArray(x.boardSelection.selected) &&
+      new Set(x.boardSelection.selected).size ===
+        x.boardSelection.selected.length &&
+      (x.boardSelection.action === undefined ||
+        validAction(x.boardSelection.action)) &&
+      (x.boardSelection.allowedIds === undefined ||
+        (stringArray(x.boardSelection.allowedIds) &&
+          x.boardSelection.selected.every((id: string) =>
+            x.boardSelection.allowedIds.includes(id),
+          ))) &&
+      (x.boardSelection.destination === undefined ||
+        location(x.boardSelection.destination)) &&
+      (x.boardSelection.trigger === undefined ||
+        validStackItem({
+          ...x.boardSelection.trigger,
+          id: "draft",
+          kind: "trigger",
+        })) &&
+      (x.boardSelection.action !== undefined ||
+        x.boardSelection.allowedIds !== undefined))) &&
+  (x.kind !== "boardTargets" ||
+    (isObject(x.boardSelection) && x.effect?.target === "boardCards")) &&
   optionalCount(x.discardBatchCount) &&
   (x.discardBatchCardId === undefined || cardId(x.discardBatchCardId)) &&
   (x.trashSelection === undefined ||
@@ -524,6 +564,13 @@ export function validState(x: unknown, actionable = true): x is GameState {
           "power",
           "spellEnergy",
           "spellPower",
+          "gearPower",
+          "firstGearAbilityTurn",
+          "equipmentPlayedTurn",
+          "nextSpellBonus",
+          "nextMainPower",
+          "nextCardEnergyDiscount",
+          "nextCardPowerDiscount",
           "unitEnergy",
           "showdownEnergy",
           "spellsPlayedThisTurn",
@@ -605,6 +652,16 @@ export function validState(x: unknown, actionable = true): x is GameState {
     return false;
 
   if (
+    (x.damageTriggers !== undefined &&
+      (!Array.isArray(x.damageTriggers) ||
+        !x.damageTriggers.every(
+          (w: unknown) =>
+            isObject(w) &&
+            playerId(w.player) &&
+            cardId(w.cardId) &&
+            count(w.turn) &&
+            optionalString(w.targetId),
+        ))) ||
     (x.hidden !== undefined &&
       (!Array.isArray(x.hidden) ||
         !x.hidden.every(

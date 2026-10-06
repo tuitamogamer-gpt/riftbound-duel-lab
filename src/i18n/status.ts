@@ -1,5 +1,15 @@
 /** Status labels and rules explanations; printed keyword names stay in English. */
 export const statusMessages: Record<string, [string, string, string]> = {
+  "Named spell: {card}": [
+    "Named spell: {card}",
+    "Imenovana čarolija: {card}",
+    "Incantesimo nominato: {card}",
+  ],
+  "Opponents cannot play this spell while this unit is at a battlefield.": [
+    "Opponents cannot play this spell while this unit is at a battlefield.",
+    "Protivnici ne mogu igrati ovu čaroliju dok je ova jedinica na bojištu.",
+    "Gli avversari non possono giocare questo incantesimo mentre l'unità è su un campo.",
+  ],
   "Active effects": ["Active effects", "Aktivni efekti", "Effetti attivi"],
   "{count} more active effects": [
     "{count} more active effects",

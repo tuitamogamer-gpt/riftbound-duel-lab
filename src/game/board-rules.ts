@@ -1,4 +1,5 @@
 import { getCard, type Card } from "../data/cards";
+import { canonicalCardName } from "../data/card-identity";
 import type { CardScript, GameState, LocationId, PlayerId } from "./types";
 
 export const isFace = (id: string, set: string, number: number) => {
@@ -33,6 +34,17 @@ export function canPlayCard(
   )
     return false;
   if (card.type === "Spell" && s.players[p].cannotPlaySpellsTurn === s.turn)
+    return false;
+  if (
+    card.type === "Spell" &&
+    s.units.some(
+      (u) =>
+        u.owner !== p &&
+        isFace(u.cardId, "VEN", 132) &&
+        u.location.startsWith("field:") &&
+        u.namedSpell === canonicalCardName(card.name),
+    )
+  )
     return false;
   if (isFace(card.id, "VEN", 29) && playerTurnNumber(s, p) <= 3) return false;
   if (

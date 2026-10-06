@@ -49,6 +49,21 @@
   margin: 4px 0 0;
   font-size: 10px;
 }
+.spell-name-search {
+  width: 100%;
+  max-width: 300px;
+  margin-top: 5px;
+  padding: 5px 8px;
+  border: 1px solid #648f8e;
+  border-radius: 5px;
+  background: #102832;
+  color: #e0eee9;
+  font: inherit;
+  font-size: 12px;
+}
+.spell-name-search:focus-visible {
+  outline: 2px solid #b7ebd3;
+}
 .app.is-game .visual-controls .cancel-selection {
   position: absolute;
   right: 160px;

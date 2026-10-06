@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ninth card wave QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      import { cards } from "/src/data/cards.ts";
+      // Synthetic QA on a separate origin; a reload preserves real UI choices.
+      const naming =
+        new URLSearchParams(location.search).get("scenario") === "names";
+      const seedKey = naming ? "wave9-names-seeded" : "wave9-seeded";
+      if (!sessionStorage.getItem(seedKey)) {
+        const match = createCombatFixture();
+        match.turn = 7;
+        match.phase = "main";
+        match.combat = null;
+        match.currentPlayer = match.priorityPlayer = match.focusPlayer = 0;
+        match.fields.forEach((f) => {
+          f.cardId = "ogn-279-298";
+          f.controller = null;
+        });
+        match.fields[0].cardId = cards.find(
+          (c) => c.set === "VEN" && c.collectorNumber === 161 && !c.variant,
+        ).id;
+        match.fields[0].controller = 0;
+        match.players[0].legendId = "sfd-189-221";
+        match.players[0].hand = ["ven-132-166", "ogn-005-298"];
+        match.players[1].hand = [];
+        for (const p of match.players) {
+          p.energy = 20;
+          p.power = naming ? 5 : 0;
+          p.runes = [];
+          p.legendUsedTurn = -1;
+          p.cardsPlayedThisTurn = 0;
+          p.championAvailable = false;
+          p.discard = [];
+        }
+        match.units = [
+          { ...combatUnit("ally", 0, 3, "ogn-052-298"), location: "field:0" },
+          { ...combatUnit("enemy", 1, 10, "ogn-049-298"), location: "field:1" },
+        ];
+        match.gears = [
+          { id: "tome", cardId: "ogn-032-298", owner: 0, ready: true },
+          { id: "snax", cardId: "sfd-046-221", owner: 0, ready: true },
+        ];
+        match.stack = [];
+        match.pendingChoice = null;
+        match.pendingTriggers = [];
+        localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review: null }));
+        sessionStorage.setItem(seedKey, "1");
+      }
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

@@ -48,10 +48,19 @@ export function decisionFor(
 }
 export function fallbackAction(s: GameState, p: PlayerId): GameAction | null {
   if (s.priorityPlayer !== p || s.winner !== null) return null;
-  if (s.pendingChoice?.kind === "trashTargets") {
+  if (
+    s.pendingChoice?.kind === "trashTargets" ||
+    s.pendingChoice?.kind === "boardTargets"
+  ) {
     let nextSelection: GameAction | null = null;
     for (const action of iterateLegalActions(s, p)) {
-      if (action.id === "choose-trash:done") return action;
+      if (
+        action.id === "choose-trash:done" ||
+        action.id === "choose-board:done"
+      )
+        return action;
+      if (action.id.startsWith("choose-board:destination:") && !nextSelection)
+        nextSelection = action;
       if (action.amount === 1 && !nextSelection) nextSelection = action;
     }
     return nextSelection;

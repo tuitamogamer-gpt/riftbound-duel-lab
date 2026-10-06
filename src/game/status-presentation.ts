@@ -1,5 +1,7 @@
 import { getKeywords } from "./engine";
 import { getScript } from "./scripts";
+import { cards } from "../data/cards";
+import { canonicalCardName } from "../data/card-identity";
 import type { GameState, Gear, Unit } from "./types";
 
 export interface CardStatus {
@@ -39,6 +41,20 @@ export function unitStatuses(game: GameState, unit: Unit): CardStatus[] {
   // Catalog keywords also include text behind Empowered/Level conditions. Only
   // the script's unconditional keywords are inherent for this comparison.
   const printed = new Set(getScript(unit.cardId)?.keywords ?? []);
+
+  if (unit.namedSpell) {
+    const name =
+      cards.find((card) => canonicalCardName(card.name) === unit.namedSpell)
+        ?.name ?? unit.namedSpell;
+    add(
+      "named-spell",
+      "Named spell: {card}",
+      "NAME",
+      "neutral",
+      "Opponents cannot play this spell while this unit is at a battlefield.",
+      { card: name },
+    );
+  }
 
   if (unit.stunned)
     add(

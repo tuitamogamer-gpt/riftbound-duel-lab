@@ -32,6 +32,11 @@ export const flowMessages: Record<string, [string, string, string]> = {
     "{count} odabrano · Odaberi karte iz trasha, zatim potvrdi.",
     "{count} selezionate · Scegli le carte dagli scarti, poi conferma.",
   ],
+  "{count} selected · Choose cards on the board, then confirm.": [
+    "{count} selected · Choose cards on the board, then confirm.",
+    "{count} odabrano · Odaberi karte na stolu, zatim potvrdi.",
+    "{count} selezionate · Scegli le carte sul tavolo, poi conferma.",
+  ],
   "Reveal now": ["Reveal now", "Otkrij sada", "Rivela ora"],
   "Next turn": ["Next turn", "Od sljedećeg poteza", "Dal prossimo turno"],
   Blocked: ["Blocked", "Blokirano", "Bloccata"],
