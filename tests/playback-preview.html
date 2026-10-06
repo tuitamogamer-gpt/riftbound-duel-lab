@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Playback and reaction QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Synthetic QA on an isolated loopback port; never use a real saved duel.
+      import {
+        createGame,
+        applyAction,
+        applyActionStepped,
+        getLegalActions,
+      } from "/src/game/engine.ts";
+      import { publicDecisionPresentation } from "/src/game/ai/presentation.ts";
+      import { createCombatFixture } from "./fixtures/combat.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      const mode = new URLSearchParams(location.search).get("mode") || "review";
+      let match,
+        review = null;
+      if (mode === "reaction") {
+        match = createCombatFixture();
+        match.currentPlayer = 1;
+        match.priorityPlayer = 0;
+        match.phase = "showdown";
+        match.combat.stage = "priority";
+        match.players[0].hand = ["ogn-046-298"];
+        match.players[0].energy = 20;
+        match.players[0].runes = Array.from({ length: 5 }, (_, i) => ({
+          id: `r${i}`,
+          domain: "Calm",
+          ready: true,
+        }));
+        match.stack = [
+          {
+            id: "spell",
+            cardId: "ogn-004-298",
+            player: 1,
+            targetId: match.units[0].id,
+            effects: [{ type: "damage", amount: 3 }],
+            kind: "spell",
+          },
+        ];
+      } else {
+        const before = applyAction(
+          createGame({ seed: 44, firstPlayer: 0 }),
+          "mulligan:",
+        );
+        const action = getLegalActions(before, 1).find(
+          (a) => a.id === "mulligan:",
+        );
+        const result = applyActionStepped(before, action);
+        const presented = publicDecisionPresentation(
+          before,
+          action,
+          result.frames,
+        );
+        match = result.state;
+        review = {
+          before,
+          final: match,
+          frames: presented.frames,
+          action: presented.action,
+          index: 0,
+        };
+      }
+      localStorage.setItem(
+        SAVE_KEY,
+        JSON.stringify({ match, review, paused: mode === "review" }),
+      );
+      localStorage.setItem("riftbound-duel-language", "en");
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

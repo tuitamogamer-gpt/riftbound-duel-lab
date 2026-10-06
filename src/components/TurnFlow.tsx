@@ -78,9 +78,11 @@ export function TurnFlow({
                 ? steps[current][3]
                 : review
                   ? "Resolving effects"
-                  : game.priorityPlayer === 0
-                    ? "You have priority"
-                    : "AI has priority",
+                  : game.winner !== null
+                    ? "Match complete"
+                    : game.priorityPlayer === 0
+                      ? "You have priority"
+                      : "AI has priority",
             )}
           </small>
         </div>

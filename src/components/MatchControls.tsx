@@ -9,7 +9,11 @@ import { decisionActions, selectedCardId, sourceActions } from "../game/flow";
 import type { GameAction, GameState } from "../game/types";
 import { useI18n } from "../i18n";
 import type { Review } from "./StepFlow";
-import { priorityWindow, visibleTurnStep } from "../game/presentation";
+import {
+  matchStatus,
+  priorityWindow,
+  visibleTurnStep,
+} from "../game/presentation";
 import { hiddenCardStatus } from "../game/hidden-presentation";
 import {
   getActionStackView,
@@ -27,6 +31,7 @@ export function MatchControls({
   busy,
   paused,
   resume,
+  step,
   mulligan,
   inspect,
   openPile,
@@ -41,6 +46,7 @@ export function MatchControls({
   busy: boolean;
   paused: boolean;
   resume: () => void;
+  step?: (direction: -1 | 1) => void;
   mulligan: number[];
   inspect: (card: CatalogCard) => void;
   openPile: (view: PileView) => void;
@@ -118,24 +124,13 @@ export function MatchControls({
           ? "Choose your opening hand"
           : game.winner !== null
             ? "Match complete"
-            : (card?.name ??
-              (game.phase === "damage"
-                ? "Choose a damage target"
-                : game.phase === "move"
-                  ? "Move your units"
-                  : game.phase === "choice"
-                    ? "Choose an effect"
-                    : ending?.category === "pass"
-                      ? window === "reaction"
-                        ? "Your reaction"
-                        : "Action window"
-                      : "Your turn"));
+            : (card?.name ?? matchStatus(game).label);
   const hint = paused
-    ? "Resume when you are ready."
+    ? (review?.frames[review.index]?.label ?? "Resume when you are ready.")
     : review
       ? (review.frames[review.index]?.label ?? "Resolving effects")
       : busy
-        ? "Watch the highlighted cards. Your turn follows automatically."
+        ? "The opponent is choosing a move. Play continues automatically."
         : opening
           ? "Click up to two cards in your hand to replace them, or keep your hand."
           : card
@@ -176,13 +171,26 @@ export function MatchControls({
       <div className="decision-copy" role="status" aria-live="polite">
         <span className="decision-kicker">
           {t(
-            opening
-              ? "Opening hand"
-              : game.pendingChoice
-                ? "Choose an effect"
-                : busy || review
-                  ? "Resolving effects"
-                  : "Your next move",
+            paused
+              ? "Game paused"
+              : busy || review
+                ? "Resolving effects"
+                : opening
+                  ? "Opening hand"
+                  : game.pendingChoice
+                    ? "Choose an effect"
+                    : window === "reaction"
+                      ? "Your reaction"
+                      : "Your next move",
+          )}
+          {review && (
+            <span className="review-progress">
+              {" · "}
+              {t("Effect {count} of {total}", {
+                count: review.index + 1,
+                total: review.frames.length,
+              })}
+            </span>
           )}
         </span>
         <strong>
@@ -230,7 +238,7 @@ export function MatchControls({
               : t(hint)}
         </p>
       </div>
-      {selected && !busy && !review && !opening && (
+      {selected && !paused && !busy && !review && !opening && (
         <button
           className="cancel-selection"
           onClick={clear}
@@ -241,9 +249,36 @@ export function MatchControls({
       )}
       <div className="decision-actions">
         {paused ? (
-          <button className="gold-button" onClick={resume}>
-            {t("Resume game")} <ArrowRight size={17} />
-          </button>
+          <>
+            {review && step && (
+              <div
+                className="review-navigation"
+                role="group"
+                aria-label={t("Review effects")}
+              >
+                <button
+                  className="secondary-decision review-previous"
+                  disabled={review.index === 0}
+                  aria-label={t("Previous effect")}
+                  title={t("Previous effect")}
+                  onClick={() => step(-1)}
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button className="secondary-decision" onClick={() => step(1)}>
+                  {t(
+                    review.index + 1 === review.frames.length
+                      ? "Finish review"
+                      : "Next effect",
+                  )}
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            )}
+            <button className="gold-button" onClick={resume}>
+              {t("Resume game")} <ArrowRight size={17} />
+            </button>
+          </>
         ) : review || busy ? (
           <span className="playing-indicator">
             <i />

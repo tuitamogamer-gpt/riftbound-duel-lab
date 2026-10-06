@@ -10,6 +10,7 @@ import {
   scoreMoment,
 } from "../game/table-presentation";
 import { reviewDelay } from "../game/presentation";
+import type { PlaybackSpeed } from "../game/playback";
 import type { GameState } from "../game/types";
 import { useI18n } from "../i18n";
 import { CardSleeve } from "./CardSleeve";
@@ -42,10 +43,12 @@ export function TableMoment({
   game,
   review,
   inspect,
+  playbackSpeed = 1,
 }: {
   game: GameState;
   review: Review | null;
   inspect: (card: CatalogCard) => void;
+  playbackSpeed?: PlaybackSpeed;
 }) {
   const { t } = useI18n();
   const frame = review?.frames[review.index];
@@ -80,7 +83,9 @@ export function TableMoment({
       className={`table-moment moment-${score ? "score" : draw ? "draw" : "phase"} moment-player-${player}`}
       key={momentKey(review)}
       style={
-        { "--moment-duration": `${reviewDelay(review)}ms` } as CSSProperties
+        {
+          "--moment-duration": `${reviewDelay(review, playbackSpeed)}ms`,
+        } as CSSProperties
       }
       role="status"
       aria-live="polite"

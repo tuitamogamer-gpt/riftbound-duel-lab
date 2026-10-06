@@ -1,4 +1,32 @@
 export const flowMessages: Record<string, [string, string, string]> = {
+  "Opponent completes a private choice": [
+    "Opponent completes a private choice",
+    "Protivnik završava skriveni izbor",
+    "L'avversario completa una scelta privata",
+  ],
+  "Playback speed": [
+    "Playback speed",
+    "Brzina prikaza",
+    "Velocità di riproduzione",
+  ],
+  "Review effects": ["Review effects", "Pregled efekata", "Rivedi gli effetti"],
+  "Previous effect": [
+    "Previous effect",
+    "Prethodni efekat",
+    "Effetto precedente",
+  ],
+  "Next effect": ["Next effect", "Sljedeći efekat", "Effetto successivo"],
+  "Finish review": ["Finish review", "Završi pregled", "Termina revisione"],
+  "Effect {count} of {total}": [
+    "Effect {count} of {total}",
+    "Efekat {count} od {total}",
+    "Effetto {count} di {total}",
+  ],
+  "The opponent is choosing a move. Play continues automatically.": [
+    "The opponent is choosing a move. Play continues automatically.",
+    "Protivnik bira potez. Igra se nastavlja automatski.",
+    "L'avversario sta scegliendo una mossa. La partita prosegue automaticamente.",
+  ],
   "{count} selected · Choose cards from the trash, then confirm.": [
     "{count} selected · Choose cards from the trash, then confirm.",
     "{count} odabrano · Odaberi karte iz trasha, zatim potvrdi.",

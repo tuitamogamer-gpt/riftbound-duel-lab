@@ -7,6 +7,7 @@ export const SAVE_KEY = "riftbound-duel-save-v1";
 export interface SavedSession {
   match: GameState | null;
   review: Review | null;
+  paused?: boolean;
 }
 const isObject = (x: unknown): x is Record<string, any> =>
   Boolean(x && typeof x === "object" && !Array.isArray(x));
@@ -797,6 +798,7 @@ export function parseSession(raw: string | null): SavedSession {
     return {
       match: value.match,
       review: validReview ? (r as unknown as Review) : null,
+      ...(value.paused === true ? { paused: true } : {}),
     };
   } catch {
     return empty;

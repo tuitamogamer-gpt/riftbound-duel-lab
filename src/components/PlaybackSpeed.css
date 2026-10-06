@@ -1,0 +1,146 @@
+.app.is-game .playback-speed {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 3px;
+  color: var(--text-2);
+}
+.app.is-game .playback-speed select {
+  min-width: 54px;
+  min-height: 28px;
+  padding: 3px 4px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--ink-2);
+  color: var(--text);
+  font: 600 11px var(--body);
+  cursor: pointer;
+}
+.app.is-game .turn-indicator[data-state="paused"]:before {
+  background: var(--text-3);
+  box-shadow: none;
+  animation: none;
+}
+.app.is-game .turn-indicator[data-state="reaction"] {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+}
+.app.is-game .turn-indicator[data-state="reaction"]:before {
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+}
+.review-progress {
+  letter-spacing: 0.2px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.review-navigation {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.app.is-game .review-navigation button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 7px 9px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.app.is-game .review-navigation button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.app.is-game .review-navigation .review-previous {
+  padding: 7px;
+}
+/* A frame entered while paused must be readable, not frozen at opacity zero. */
+[data-review-paused="true"] .table-moment *,
+[data-review-paused="true"] .victory-token.token-scoring,
+[data-review-paused="true"] .victory-gain,
+[data-review-paused="true"] .field-scoring,
+[data-review-paused="true"] .hand-draw-arrival {
+  animation: none !important;
+}
+[data-review-paused="true"] .moment-timer {
+  visibility: hidden;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .game-layout .victory-token.token-scoring {
+    animation-duration: calc(1900ms / var(--playback-speed, 1));
+  }
+  .game-layout .victory-gain,
+  .game-layout .field-scoring {
+    animation-duration: calc(3400ms / var(--playback-speed, 1));
+  }
+  .game-layout .moment-title {
+    animation-duration: calc(650ms / var(--playback-speed, 1));
+  }
+  .game-layout .moment-point {
+    animation-duration: calc(1000ms / var(--playback-speed, 1));
+  }
+  .game-layout .moment-drawn-card {
+    animation-duration:
+      calc(800ms / var(--playback-speed, 1)),
+      calc(600ms / var(--playback-speed, 1));
+    animation-delay:
+      calc(var(--draw-index, 0) * 150ms / var(--playback-speed, 1)),
+      calc(var(--moment-duration) - 650ms / var(--playback-speed, 1));
+  }
+  .game-layout .field-effect-wave {
+    animation-duration: calc(1100ms / var(--playback-speed, 1));
+  }
+}
+@media (max-width: 750px) {
+  .app.is-game .playback-speed > svg {
+    display: none;
+  }
+  .app.is-game .playback-speed select {
+    min-width: 47px;
+    font-size: 10px;
+  }
+  .app.is-game .match-toolbar {
+    gap: 3px;
+  }
+  .app.is-game .match-toolbar .language-selector select {
+    min-width: 66px;
+    width: 66px;
+  }
+  .app.is-game .match-toolbar > span {
+    padding: 0 3px;
+  }
+  .app.is-game .review-navigation button {
+    font-size: 10px;
+    padding: 6px;
+  }
+}
+@media (max-width: 450px) {
+  .bot-difficulty-label {
+    display: none;
+  }
+  .app.is-game .match-toolbar .text-button {
+    padding-inline: 4px;
+  }
+}
+@media (max-width: 360px) {
+  .app.is-game .match-toolbar > span {
+    display: none;
+  }
+  .app.is-game .review-navigation button,
+  .app.is-game .review-navigation .review-previous {
+    font-size: 9px;
+    padding: 5px;
+  }
+  .app.is-game .review-navigation svg {
+    width: 14px;
+  }
+  .app.is-game .decision-actions > .gold-button {
+    font-size: 9px;
+    padding-inline: 7px;
+    gap: 4px;
+  }
+}

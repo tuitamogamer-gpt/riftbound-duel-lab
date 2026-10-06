@@ -2,6 +2,7 @@ import type { Review } from "../components/StepFlow";
 import type { GameState, TurnStep } from "./types";
 import { getRuneChanges } from "./rune-presentation";
 import { scoreMoment, phaseMoment } from "./table-presentation";
+import type { PlaybackSpeed } from "./playback";
 
 export function visibleTurnStep(game: GameState): TurnStep {
   if (game.pendingAwaken !== undefined) return "awaken";
@@ -24,8 +25,38 @@ export function priorityWindow(game: GameState) {
   return "action";
 }
 
+/** Turn ownership and the player being asked to decide are separate. */
+export function matchStatus(
+  game: GameState,
+  { paused = false, reviewing = false } = {},
+) {
+  if (paused) return { state: "paused", label: "Game paused" };
+  if (reviewing) return { state: "resolving", label: "Resolving effects" };
+  if (game.winner !== null) return { state: "ended", label: "Match complete" };
+  if (game.priorityPlayer === 1)
+    return { state: "opponent", label: "Opponent is playing" };
+  if (game.phase === "mulligan")
+    return { state: "you", label: "Choose your opening hand" };
+  if (game.phase === "choice")
+    return { state: "you", label: "Choose an effect" };
+  if (game.phase === "damage")
+    return { state: "you", label: "Choose a damage target" };
+  if (game.phase === "move") return { state: "you", label: "Move your units" };
+  if (game.stack.length) return { state: "reaction", label: "Your reaction" };
+  if (game.phase === "showdown")
+    return { state: "you", label: "Action window" };
+  return {
+    state: "you",
+    label: game.currentPlayer === 0 ? "Your turn" : "You have priority",
+  };
+}
+
 /** Pace follows the displayed turn, including a bot pass that begins YOUR turn. */
-export function reviewDelay(review: Review): number {
+export function reviewDelay(review: Review, speed: PlaybackSpeed = 1): number {
+  return Math.round(baseReviewDelay(review) / speed);
+}
+
+function baseReviewDelay(review: Review): number {
   const frame = review.frames[review.index];
   if (!frame) return 500;
   const humanTurn = frame.state.currentPlayer === 0;
@@ -51,7 +82,13 @@ export function reviewDelay(review: Review): number {
   return humanTurn ? 1000 : 850;
 }
 
-export function automaticDelay(game: GameState, player: 0 | 1) {
+export function automaticDelay(
+  game: GameState,
+  player: 0 | 1,
+  speed: PlaybackSpeed = 1,
+) {
   // Even a forced human pass leaves time to read the window before it closes.
-  return player === 0 ? 1700 : game.phase === "move" ? 500 : 1050;
+  return player === 0
+    ? 1700
+    : Math.round((game.phase === "move" ? 500 : 1050) / speed);
 }

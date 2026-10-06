@@ -59,7 +59,13 @@ import { isMovementSelection, sourceActions } from "./game/flow";
 import { MatchControls } from "./components/MatchControls";
 import { PileDialog, type PileView } from "./components/CardPiles";
 import { TurnFlow, ShowdownCue, CombatReadout } from "./components/TurnFlow";
-import { reviewDelay, automaticDelay } from "./game/presentation";
+import { reviewDelay, automaticDelay, matchStatus } from "./game/presentation";
+import {
+  PLAYBACK_SPEED_KEY,
+  readPlaybackSpeed,
+  stepReview,
+} from "./game/playback";
+import { PlaybackSpeed } from "./components/PlaybackSpeed";
 import { EffectTrails, FieldEffect } from "./components/EffectFeedback";
 import { ActionStack } from "./components/ActionStack";
 import {
@@ -159,7 +165,15 @@ export default function App() {
       /* Old or incomplete telemetry does not affect the game. */
     }
   }, [saved]);
-  const [paused, setPaused] = useState(false);
+  const [paused, setPaused] = useState(saved.paused ?? false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(() => readPlaybackSpeed());
+  useEffect(() => {
+    try {
+      localStorage.setItem(PLAYBACK_SPEED_KEY, String(playbackSpeed));
+    } catch {
+      // Playback remains usable when browser storage is unavailable.
+    }
+  }, [playbackSpeed]);
   const [visible, setVisible] = useState(true);
   const [mulligan, setMulligan] = useState<number[]>([]);
   const [target, setTarget] = useState<string | null>(null);
@@ -170,6 +184,9 @@ export default function App() {
     return () => document.removeEventListener("visibilitychange", update);
   }, []);
   const game = review?.frames[review.index]?.state || match;
+  const status = game
+    ? matchStatus(game, { paused, reviewing: !!review })
+    : null;
   const drawEvent = review?.frames[review.index]?.draw;
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -240,11 +257,14 @@ export default function App() {
   useEffect(() => {
     if (match)
       try {
-        localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review }));
+        localStorage.setItem(
+          SAVE_KEY,
+          JSON.stringify({ match, review, paused }),
+        );
         if (audit.current)
           localStorage.setItem(BOT_AUDIT_KEY, JSON.stringify(audit.current));
       } catch {}
-  }, [match, review]);
+  }, [match, review, paused]);
   const doAction = useCallback(
     (action: GameAction) => {
       if (!match || review) return;
@@ -326,14 +346,9 @@ export default function App() {
     )
       return;
     if (review) {
-      const delay = reviewDelay(review);
+      const delay = reviewDelay(review, playbackSpeed);
       const timer = window.setTimeout(
-        () =>
-          setReview((current) =>
-            current && current.index + 1 < current.frames.length
-              ? { ...current, index: current.index + 1 }
-              : null,
-          ),
+        () => setReview((current) => stepReview(current)),
         delay,
       );
       return () => window.clearTimeout(timer);
@@ -354,7 +369,7 @@ export default function App() {
         }
         doAction(next);
       },
-      automaticDelay(match, next.player),
+      automaticDelay(match, next.player, playbackSpeed),
     );
     return () => window.clearTimeout(timer);
   }, [
@@ -370,6 +385,7 @@ export default function App() {
     confirmNew,
     logOpen,
     difficulty,
+    playbackSpeed,
     bot.result,
     doAction,
   ]);
@@ -628,6 +644,8 @@ export default function App() {
           <main
             className="game-layout"
             id="main-content"
+            style={{ "--playback-speed": playbackSpeed } as React.CSSProperties}
+            data-review-paused={paused}
             data-playback-paused={
               paused ||
               previewActive ||
@@ -652,32 +670,22 @@ export default function App() {
               </strong>
               <div
                 className="turn-indicator"
-                data-state={
-                  game.winner !== null
-                    ? "ended"
-                    : review
-                      ? "resolving"
-                      : thinking
-                        ? "opponent"
-                        : "you"
-                }
+                data-state={status?.state}
+                role="status"
+                aria-live="polite"
               >
-                {t(
-                  game.winner !== null
-                    ? "Meč završen"
-                    : review
-                      ? "Resolving effects"
-                      : thinking
-                        ? "Opponent is playing"
-                        : "Your turn",
-                )}
+                {t(status?.label)}
               </div>
               <details className="bot-explanation">
-                <summary>
-                  {t(
-                    DIFFICULTIES[game.botSettings?.difficulty ?? "normal"]
-                      .label,
-                  )}{" "}
+                <summary
+                  aria-label={`${t(DIFFICULTIES[game.botSettings?.difficulty ?? "normal"].label)} AI`}
+                >
+                  <span className="bot-difficulty-label">
+                    {t(
+                      DIFFICULTIES[game.botSettings?.difficulty ?? "normal"]
+                        .label,
+                    )}{" "}
+                  </span>
                   AI
                 </summary>
                 <p role="status">
@@ -711,6 +719,10 @@ export default function App() {
                 {t("POTEZ")} {game.turn}
               </span>
               <LanguageSelector />
+              <PlaybackSpeed
+                speed={playbackSpeed}
+                onChange={setPlaybackSpeed}
+              />
               <button
                 className="icon-button"
                 onClick={() => setPaused((value) => !value)}
@@ -934,7 +946,7 @@ export default function App() {
                               style={
                                 review
                                   ? ({
-                                      "--draw-duration": `${reviewDelay(review)}ms`,
+                                      "--draw-duration": `${reviewDelay(review, playbackSpeed)}ms`,
                                     } as React.CSSProperties)
                                   : undefined
                               }
@@ -989,6 +1001,7 @@ export default function App() {
                   game={game}
                   review={review}
                   inspect={setInspected}
+                  playbackSpeed={playbackSpeed}
                 />
               </div>
               <MatchControls
@@ -1005,6 +1018,10 @@ export default function App() {
                 busy={thinking}
                 paused={paused}
                 resume={() => setPaused(false)}
+                step={(direction) => {
+                  if (paused)
+                    setReview((current) => stepReview(current, direction));
+                }}
                 mulligan={mulligan}
                 inspect={setInspected}
                 openPile={setPileView}
