@@ -16,7 +16,6 @@ import {
   CircleHelp,
   Pause,
   Play,
-  Flag,
   History,
   Layers3,
   RotateCcw,
@@ -69,6 +68,7 @@ import {
 import { PlaybackSpeed } from "./components/PlaybackSpeed";
 import { EffectTrails, FieldEffect } from "./components/EffectFeedback";
 import { ActionStack } from "./components/ActionStack";
+import { BattlefieldMight } from "./components/BattlefieldMight";
 import {
   TableMoment,
   ScoreTrack,
@@ -898,13 +898,10 @@ export default function App() {
                             </div>
                           )}
                           <div className="field-divider">
-                            <span />
-                            {game.combat?.fieldId === field.id ? (
+                            <BattlefieldMight game={game} fieldId={field.id} />
+                            {game.combat?.fieldId === field.id && (
                               <CombatReadout game={game} />
-                            ) : (
-                              <Flag size={16} />
                             )}
-                            <span />
                           </div>
                           <div className="field-half">
                             <UnitRow
@@ -927,6 +924,27 @@ export default function App() {
                       );
                     })}
                   </div>
+                  <MatchControls
+                    game={game}
+                    legal={legal}
+                    selected={selected}
+                    target={target}
+                    clear={() => {
+                      setSelected(null);
+                      setTarget(null);
+                    }}
+                    act={doAction}
+                    review={review}
+                    busy={thinking}
+                    paused={paused}
+                    resume={() => setPaused(false)}
+                    step={(direction) => {
+                      if (paused)
+                        setReview((current) => stepReview(current, direction));
+                    }}
+                    mulligan={mulligan}
+                    inspect={setInspected}
+                  />
                   <BoardZone
                     game={game}
                     location="base:0"
@@ -942,7 +960,9 @@ export default function App() {
                         <span>
                           {t("TVOJA RUKA")} <b>{game.players[0].hand.length}</b>
                         </span>
-                        <span>{t("Click a card · choose a move below")} </span>
+                        <span>
+                          {t("Click a card · choose a move in the center")}{" "}
+                        </span>
                       </div>
                       <div
                         className="hand"
@@ -1013,36 +1033,15 @@ export default function App() {
                       inspect={setInspected}
                     />
                   </div>
+                  <TableMoment
+                    game={game}
+                    review={review}
+                    inspect={setInspected}
+                    playbackSpeed={playbackSpeed}
+                  />
                 </div>
                 <EffectTrails review={review} />
-                <TableMoment
-                  game={game}
-                  review={review}
-                  inspect={setInspected}
-                  playbackSpeed={playbackSpeed}
-                />
               </div>
-              <MatchControls
-                game={game}
-                legal={legal}
-                selected={selected}
-                target={target}
-                clear={() => {
-                  setSelected(null);
-                  setTarget(null);
-                }}
-                act={doAction}
-                review={review}
-                busy={thinking}
-                paused={paused}
-                resume={() => setPaused(false)}
-                step={(direction) => {
-                  if (paused)
-                    setReview((current) => stepReview(current, direction));
-                }}
-                mulligan={mulligan}
-                inspect={setInspected}
-              />
             </BoardInteraction.Provider>
             {pileView && (
               <PileDialog
@@ -1798,7 +1797,7 @@ function Help({ close }: { close: () => void }) {
             [
               "03",
               "Pošalji jedinice",
-              "Select a ready unit, then a highlighted battlefield. Add other units if you want, then confirm the move below.",
+              "Select a ready unit, then a highlighted battlefield. Add other units if you want, then confirm the move in the center.",
             ],
             [
               "04",

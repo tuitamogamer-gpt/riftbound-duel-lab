@@ -1,4 +1,19 @@
 export const tableMessages: Record<string, [string, string, string]> = {
+  "Battlefield Might": [
+    "Battlefield Might",
+    "Might na bojištu",
+    "Might sul campo",
+  ],
+  "{player}: {total} total Might": [
+    "{player}: {total} total Might",
+    "{player}: {total} ukupno Might-a",
+    "{player}: {total} Might totale",
+  ],
+  "Total current Might of this side’s units, including bonuses.": [
+    "Total current Might of this side’s units, including bonuses.",
+    "Ukupan trenutni Might jedinica ove strane na bojištu, uključujući bonuse.",
+    "Might attuale totale delle unità di questo lato, inclusi i bonus.",
+  ],
   Hold: ["Hold", "Hold · Zadržavanje", "Hold · Controllo"],
   Conquer: ["Conquer", "Conquer · Osvajanje", "Conquer · Conquista"],
   point: ["point", "bod", "punto"],

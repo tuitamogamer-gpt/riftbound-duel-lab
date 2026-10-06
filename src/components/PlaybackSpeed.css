@@ -117,6 +117,18 @@
     font-size: 10px;
     padding: 6px;
   }
+  .app.is-game .visual-controls .decision-actions:has(.review-navigation) {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  }
+  .app.is-game .review-navigation button:last-child {
+    flex: 1;
+    min-width: 0;
+    white-space: normal;
+  }
+  .app.is-game .review-navigation svg {
+    flex-shrink: 0;
+  }
 }
 @media (max-width: 450px) {
   .bot-difficulty-label {

@@ -1,7 +1,7 @@
 /* One shared table: opponent above, player below, battlefields across the centre.
    Geometry lives here, after the surface skin. Both players use identical zones. */
 .app.is-game .game-layout {
-  grid-template-rows: 32px 38px minmax(0, 1fr) 88px;
+  grid-template-rows: 32px 38px minmax(0, 1fr);
   gap: 7px;
   padding: 0 10px 8px;
 }
@@ -17,12 +17,13 @@
     minmax(150px, 0.85fr) minmax(0, 2.5fr) minmax(150px, 0.85fr)
     70px;
   grid-template-rows:
-    26px minmax(0, 1.3fr) minmax(0, 2.5fr) minmax(0, 1.3fr)
+    26px minmax(0, 1.3fr) minmax(0, 2.5fr) 88px minmax(0, 1.3fr)
     24px minmax(0, 1.65fr);
   grid-template-areas:
     "opponent opponent enemy-hand score"
     "opponent-setup enemy-base enemy-runes score"
     "fields fields fields score"
+    "decisions decisions decisions score"
     "player-setup own-base runes score"
     "player player player score"
     "hand hand hand score";
@@ -435,7 +436,13 @@
   outline-offset: 4px;
   border-radius: 4px;
 }
-/* The decision dock can now devote its full width to the current move. */
+/* Decisions stay directly below the battlefields and their central stack. */
+.app.is-game .playmat > .match-controls {
+  grid-area: decisions;
+  z-index: 70;
+  min-height: 0;
+  height: 100%;
+}
 .app.is-game .visual-controls {
   grid-template-columns: 0 minmax(150px, 1fr) minmax(0, 1.65fr);
 }
@@ -480,7 +487,7 @@
 
 @media (min-height: 900px) and (min-width: 900px) {
   .app.is-game .game-layout {
-    grid-template-rows: 38px 44px minmax(0, 1fr) 96px;
+    grid-template-rows: 38px 44px minmax(0, 1fr);
     gap: 10px;
   }
   .app.is-game .playmat {
@@ -513,14 +520,14 @@
 }
 @media (max-width: 800px) {
   .app.is-game .game-layout {
-    grid-template-rows: 30px 54px minmax(0, 1fr) 156px;
+    grid-template-rows: 30px 54px minmax(0, 1fr);
     padding: 0 4px 5px;
     gap: 4px;
   }
   .app.is-game .playmat {
     grid-template-columns: 90px minmax(0, 1fr) 80px 38px;
     grid-template-rows:
-      24px minmax(0, 1.25fr) minmax(0, 1.8fr) minmax(0, 1.25fr)
+      24px minmax(0, 1.25fr) minmax(0, 1.8fr) 140px minmax(0, 1.25fr)
       20px minmax(0, 1.4fr);
     padding: 5px;
     gap: 5px 4px;
@@ -617,6 +624,9 @@
     --chain-lane: 0px;
     gap: 0 3px;
   }
+  .app.is-game .battlefields:has(> .action-stack) {
+    --chain-lane: 84px;
+  }
   .app.is-game .battlefields > .battlefield,
   .app.is-game .battlefields:has(> .action-stack) > .battlefield {
     /* Narrow screens preserve usable card targets; desktop keeps true 16:9. */
@@ -644,12 +654,14 @@
     font-size: 7px;
   }
   .app.is-game .action-stack {
-    position: absolute;
-    width: 84px;
-    left: 50%;
-    transform: translateX(-50%);
-    grid-column: auto;
-    --stack-card-width: 54px;
+    position: relative;
+    width: 100%;
+    left: auto;
+    transform: none;
+    grid-column: 2;
+    overflow-y: auto;
+    clip-path: inset(0);
+    --stack-card-width: min(54px, max(24px, calc((100cqh - 88px) * 0.716)));
   }
   .app.is-game .action-stack-heading {
     font-size: 7px;
@@ -658,6 +670,9 @@
     font-size: 7px;
   }
   .app.is-game .action-stack-status {
+    display: none;
+  }
+  .app.is-game .action-stack-priority {
     display: none;
   }
   .app.is-game .player-cards .hand-title span:last-child {
@@ -694,12 +709,12 @@
 }
 @media (max-height: 600px) and (min-width: 801px) {
   .app.is-game .game-layout {
-    grid-template-rows: 28px 30px minmax(0, 1fr) 70px;
+    grid-template-rows: 28px 30px minmax(0, 1fr);
     gap: 4px;
   }
   .app.is-game .playmat {
     grid-template-rows:
-      20px minmax(0, 1.25fr) minmax(0, 2fr) minmax(0, 1.25fr)
+      20px minmax(0, 1.25fr) minmax(0, 2fr) 76px minmax(0, 1.25fr)
       20px minmax(0, 1.4fr);
   }
 }
@@ -708,11 +723,11 @@
     overflow-y: auto;
   }
   .app.is-game .playmat {
-    height: 480px;
-    min-height: 480px;
+    height: 580px;
+    min-height: 580px;
   }
 }
-/* Keep the selected source card within the shorter decision dock. */
+/* Keep the selected source card within the central decision strip. */
 .app.is-game .visual-controls .decision-source {
   height: 100%;
   min-height: 0;
@@ -753,4 +768,140 @@
 
 .app.is-game .player-cards .hand {
   --hand-card-height: inherit;
+}
+
+/* Both sides keep a live Might total, even outside a showdown or on an empty field. */
+.app.is-game
+  :is(.battlefields, .battlefields:has(> .action-stack))
+  > .battlefield {
+  grid-template-rows: 27px minmax(0, 1fr) 30px minmax(0, 1fr);
+}
+.app.is-game
+  :is(.battlefields, .battlefields:has(> .action-stack))
+  > .battlefield.in-combat {
+  grid-template-rows: 27px minmax(0, 1fr) 44px minmax(0, 1fr);
+}
+.app.is-game .battlefield > .field-divider {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  height: 100%;
+  padding: 0 6px;
+}
+.battlefield-might {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  width: min(100%, 240px);
+  min-width: 0;
+}
+.field-might-side {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  grid-row: 1;
+  padding: 2px 9px;
+  border: 1px solid #f29a9a80;
+  border-radius: 5px;
+  background: #301d28f2;
+  color: #ffd1d1;
+  line-height: 20px;
+}
+.field-might-side.player-0 {
+  grid-column: 3;
+  border-color: #5ad8c680;
+  background: #0d302ef2;
+  color: #b5ffeb;
+}
+.field-might-side small {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.field-might-side b {
+  font:
+    800 19px/20px "Exo 2",
+    sans-serif;
+  font-variant-numeric: tabular-nums;
+  animation: might-total-update 350ms ease-out;
+}
+.field-might-label {
+  grid-area: 1 / 2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #e9c97b;
+}
+.field-might-label small {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.app.is-game .battlefield > .field-divider > .combat-readout {
+  flex: none;
+  width: auto;
+  height: auto;
+  margin: 0;
+  background: transparent;
+  line-height: 10px;
+}
+.app.is-game .battlefield > .field-divider > .combat-readout svg {
+  width: 10px;
+  height: 10px;
+}
+@keyframes might-total-update {
+  from {
+    color: #fff;
+    text-shadow: 0 0 12px currentColor;
+    transform: scale(1.15);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@media (max-width: 800px) {
+  .app.is-game
+    :is(.battlefields, .battlefields:has(> .action-stack))
+    > .battlefield {
+    grid-template-rows: 28px minmax(0, 1fr) 26px minmax(0, 1fr);
+  }
+  .app.is-game
+    :is(.battlefields, .battlefields:has(> .action-stack))
+    > .battlefield.in-combat {
+    grid-template-rows: 28px minmax(0, 1fr) 40px minmax(0, 1fr);
+  }
+  .app.is-game .battlefield > .field-divider {
+    padding: 0 3px;
+  }
+  .battlefield-might {
+    gap: 3px;
+  }
+  .field-might-side {
+    gap: 3px;
+    padding: 1px 4px;
+    line-height: 18px;
+  }
+  .field-might-side b {
+    font-size: 15px;
+    line-height: 18px;
+  }
+  .field-might-side small,
+  .field-might-label small {
+    font-size: 7px;
+    letter-spacing: 0;
+  }
+  .field-might-label > svg {
+    display: none;
+  }
+  .app.is-game .field-divider .combat-readout small {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .field-might-side b {
+    animation: none;
+  }
 }

@@ -135,8 +135,8 @@ export function MatchControls({
               ? hiddenStatus.hint
               : actions.length
                 ? actions.some((action) => action.targetId)
-                  ? "Choose a highlighted target or a move below."
-                  : readableText(card.text) || "Choose a move below."
+                  ? "Choose a highlighted target or an available move."
+                  : readableText(card.text) || "Choose a move."
                 : ownUnit && !ownUnit.ready
                   ? "This unit is exhausted. It readies at the start of your turn."
                   : "No legal play now. Check the cost, timing and available targets."
@@ -145,11 +145,11 @@ export function MatchControls({
               : game.phase === "move"
                 ? "Click your units to add or remove them, then confirm the move."
                 : game.phase === "choice"
-                  ? "Choose one of the available effects below."
+                  ? "Choose one of the available effects."
                   : forcedPass
                     ? "No available response. Passing priority shortly."
                     : hiddenAvailable
-                      ? "A Hidden card is ready. Reveal it below or select it on the battlefield."
+                      ? "A Hidden card is ready. Reveal it here or select it on the battlefield."
                       : ending?.category === "pass"
                         ? window === "reaction"
                           ? "Play a highlighted card to respond, or let the effect resolve."

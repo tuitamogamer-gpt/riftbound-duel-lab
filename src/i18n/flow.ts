@@ -69,10 +69,10 @@ export const flowMessages: Record<string, [string, string, string]> = {
       "Hidden karta se trenutno ne može odigrati. Provjeri mete na ovom bojištu, dodatne troškove i ograničenja.",
       "Nessuna giocata Hidden valida. Controlla i bersagli in questo campo, i costi aggiuntivi e le restrizioni.",
     ],
-  "A Hidden card is ready. Reveal it below or select it on the battlefield.": [
-    "A Hidden card is ready. Reveal it below or select it on the battlefield.",
-    "Hidden karta je spremna. Otkrij je ispod ili je odaberi na bojištu.",
-    "Una carta Hidden è pronta. Rivelala qui sotto o selezionala sul campo.",
+  "A Hidden card is ready. Reveal it here or select it on the battlefield.": [
+    "A Hidden card is ready. Reveal it here or select it on the battlefield.",
+    "Hidden karta je spremna. Otkrij je ovdje ili je odaberi na bojištu.",
+    "Una carta Hidden è pronta. Rivelala qui o selezionala sul campo.",
   ],
   "Ability choice": ["Ability choice", "Izbor sposobnosti", "Scelta abilità"],
   "Waiting for a choice": [
@@ -507,16 +507,12 @@ export const flowMessages: Record<string, [string, string, string]> = {
     "Scegli un effetto",
   ],
   "Your reaction": ["Your reaction", "Tvoja reakcija", "La tua reazione"],
-  "Choose a highlighted target or a move below.": [
-    "Choose a highlighted target or a move below.",
-    "Izaberi označenu metu ili potez ispod.",
-    "Scegli un bersaglio evidenziato o una mossa qui sotto.",
+  "Choose a highlighted target or an available move.": [
+    "Choose a highlighted target or an available move.",
+    "Izaberi označenu metu ili dostupan potez.",
+    "Scegli un bersaglio evidenziato o una mossa disponibile.",
   ],
-  "Choose a move below.": [
-    "Choose a move below.",
-    "Izaberi potez ispod.",
-    "Scegli una mossa qui sotto.",
-  ],
+  "Choose a move.": ["Choose a move.", "Izaberi potez.", "Scegli una mossa."],
   "This unit is exhausted. It readies at the start of your turn.": [
     "This unit is exhausted. It readies at the start of your turn.",
     "Ova jedinica je iscrpljena. Biće spremna na početku tvog poteza.",
@@ -537,10 +533,10 @@ export const flowMessages: Record<string, [string, string, string]> = {
     "Klikni svoje jedinice da ih dodaš ili ukloniš, pa potvrdi kretanje.",
     "Clicca le tue unità per aggiungerle o rimuoverle, poi conferma il movimento.",
   ],
-  "Choose one of the available effects below.": [
-    "Choose one of the available effects below.",
-    "Izaberi jedan od dostupnih efekata ispod.",
-    "Scegli uno degli effetti disponibili qui sotto.",
+  "Choose one of the available effects.": [
+    "Choose one of the available effects.",
+    "Izaberi jedan od dostupnih efekata.",
+    "Scegli uno degli effetti disponibili.",
   ],
   "Play a highlighted card to respond, or let the effect resolve.": [
     "Play a highlighted card to respond, or let the effect resolve.",
@@ -566,16 +562,16 @@ export const flowMessages: Record<string, [string, string, string]> = {
   "More options": ["More options", "Još opcija", "Altre opzioni"],
   "Move here": ["Move here", "Pomjeri ovdje", "Muovi qui"],
   "Play here": ["Play here", "Odigraj ovdje", "Gioca qui"],
-  "Click a card · choose a move below": [
-    "Click a card · choose a move below",
-    "Klikni kartu · izaberi potez ispod",
-    "Clicca una carta · scegli una mossa sotto",
+  "Click a card · choose a move in the center": [
+    "Click a card · choose a move in the center",
+    "Klikni kartu · izaberi potez u sredini",
+    "Clicca una carta · scegli una mossa al centro",
   ],
-  "Select a ready unit, then a highlighted battlefield. Add other units if you want, then confirm the move below.":
+  "Select a ready unit, then a highlighted battlefield. Add other units if you want, then confirm the move in the center.":
     [
-      "Select a ready unit, then a highlighted battlefield. Add other units if you want, then confirm the move below.",
-      "Izaberi spremnu jedinicu, pa označeno bojište. Dodaj druge jedinice ako želiš, pa potvrdi kretanje ispod.",
-      "Seleziona un’unità pronta, poi un campo evidenziato. Aggiungi altre unità se vuoi, poi conferma il movimento sotto.",
+      "Select a ready unit, then a highlighted battlefield. Add other units if you want, then confirm the move in the center.",
+      "Izaberi spremnu jedinicu, pa označeno bojište. Dodaj druge jedinice ako želiš, pa potvrdi kretanje u sredini.",
+      "Seleziona un’unità pronta, poi un campo evidenziato. Aggiungi altre unità se vuoi, poi conferma il movimento al centro.",
     ],
   "Click highlighted enemies to assign combat damage. Both sides deal damage simultaneously. Open the match log for combat details.":
     [
