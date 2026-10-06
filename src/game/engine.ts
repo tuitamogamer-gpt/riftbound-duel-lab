@@ -43,6 +43,14 @@ export interface StepFrame {
   label: string;
   combat?: CombatStep;
   effect?: StepEffect;
+  draw?: { player: PlayerId; count: number; cardIds?: string[] };
+  score?: {
+    player: PlayerId;
+    from: number;
+    to: number;
+    kind: "hold" | "conquer" | "effect";
+    fieldId?: LocationId;
+  };
 }
 export interface StepEffect {
   cardId?: string;
@@ -52,6 +60,7 @@ export interface StepEffect {
   locationId?: LocationId;
   type?: string;
   stage?: "announced" | "resolving" | "applied";
+  scoring?: "hold" | "conquer";
 }
 export interface CombatUnitPreview {
   unit: Unit;
@@ -114,18 +123,25 @@ function log(
   kind: GameState["log"][number]["kind"] = "info",
   player?: PlayerId,
   combat?: CombatStep,
+  presentation?: Pick<StepFrame, "draw" | "score">,
 ) {
   s.log.push({ id: s.nextId++, turn: s.turn, text, kind, player });
   if (s.log.length > 250) s.log.shift();
-  recordStep(s, text, combat);
+  recordStep(s, text, combat, presentation);
 }
-function recordStep(s: GameState, label: string, combat?: CombatStep) {
+function recordStep(
+  s: GameState,
+  label: string,
+  combat?: CombatStep,
+  presentation?: Pick<StepFrame, "draw" | "score">,
+) {
   if (stepFrames)
     stepFrames.push({
       state: structuredClone(s),
       label,
       ...(combat ? { combat: structuredClone(combat) } : {}),
       ...(stepEffects.has(s) ? { effect: { ...stepEffects.get(s)! } } : {}),
+      ...presentation,
     });
 }
 function random(s: GameState) {
@@ -601,7 +617,12 @@ function channel(s: GameState, p: PlayerId, n: number, ready = true) {
       p,
     );
 }
-function point(s: GameState, p: PlayerId, reason: string) {
+function point(
+  s: GameState,
+  p: PlayerId,
+  reason: string,
+  scoring?: "hold" | "conquer",
+) {
   if (
     s.units.some(
       (u) =>
@@ -617,6 +638,16 @@ function point(s: GameState, p: PlayerId, reason: string) {
     `${s.players[p].name}: ${s.players[p].points} / ${getVictoryScore(s)} — ${reason}`,
     "score",
     p,
+    undefined,
+    {
+      score: {
+        player: p,
+        from: s.players[p].points - 1,
+        to: s.players[p].points,
+        kind: scoring ?? "effect",
+        fieldId: scoring ? stepEffects.get(s)?.locationId : undefined,
+      },
+    },
   );
   if (s.players[p].points >= getVictoryScore(s)) {
     s.winner = p;
@@ -643,7 +674,21 @@ function draw(s: GameState, p: PlayerId, n: number) {
     if (x.deck.length) x.hand.push(x.deck.shift()!);
   }
   if (x.hand.length > before) {
-    log(s, `${x.name} draws ${x.hand.length - before} card(s).`, "info", p);
+    log(
+      s,
+      `${x.name} draws ${x.hand.length - before} card(s).`,
+      "info",
+      p,
+      undefined,
+      {
+        draw: {
+          player: p,
+          count: x.hand.length - before,
+          // Opponent card identities never enter presentation metadata.
+          ...(p === 0 ? { cardIds: x.hand.slice(before) } : {}),
+        },
+      },
+    );
     if (s.phase !== "mulligan")
       event(s, "draw", p, x.legendId, "legend", undefined, {
         amount: x.hand.length - before,
@@ -738,9 +783,16 @@ export function createGame(options: GameOptions = {}): GameState {
     const candidates = d.battlefieldIds?.length
       ? d.battlefieldIds
       : [d.battlefieldId];
-    s.fields[i].cardId = getRulesCardId(
-      candidates[Math.floor(random(s) * candidates.length)],
-    );
+    const selected =
+      i === 0 ? options.playerBattlefieldId : options.botBattlefieldId;
+    if (
+      selected &&
+      (getCard(selected).type !== "Battlefield" || !isImplemented(selected))
+    )
+      throw new Error("Choose a supported battlefield.");
+    // Preserve the shuffle sequence when a field is explicitly chosen.
+    const fallback = candidates[Math.floor(random(s) * candidates.length)];
+    s.fields[i].cardId = getRulesCardId(selected ?? fallback);
   }
   for (const p of s.players) {
     p.deck = shuffle(s, p.deck);
@@ -772,6 +824,7 @@ function scoreField(
       player: p,
       type: "score",
       stage: "applied",
+      scoring: hold ? "hold" : "conquer",
     },
     () => {
       if (cannotScore) return;
@@ -792,6 +845,7 @@ function scoreField(
           s,
           p,
           hold ? "holding a battlefield" : "conquering a battlefield",
+          hold ? "hold" : "conquer",
         );
     },
   );

@@ -1,0 +1,109 @@
+.battlefield-picker {
+  padding: 18px;
+  margin: 18px 0;
+  border: 1px solid #c9aa683d;
+  border-radius: 8px;
+  background: #101c23;
+  color: #dbe4e8;
+}
+.battlefield-picker-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #e8cc8c;
+  margin-bottom: 12px;
+  font:
+    600 13px "DM Sans",
+    sans-serif;
+}
+.battlefield-picker label {
+  display: grid;
+  gap: 7px;
+}
+.battlefield-picker label > span {
+  font-size: 11px;
+  color: #91a8b5;
+}
+.battlefield-picker select {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #55707d;
+  border-radius: 5px;
+  background: #152833;
+  color: #e7eef0;
+  font-size: 13px;
+}
+.battlefield-choice-preview {
+  margin-top: 12px;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  border: 1px solid #c9aa6860;
+  border-radius: 6px;
+  overflow: hidden;
+  display: block;
+  text-align: left;
+  background: #08111a;
+}
+.battlefield-choice-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  transition: transform 0.35s;
+}
+.battlefield-choice-preview > span {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent 22%, #08111ae0 85%);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 4px;
+}
+.battlefield-choice-preview small {
+  color: #7ee2c9;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font:
+    600 9px "DM Sans",
+    sans-serif;
+}
+.picker-opponent .battlefield-choice-preview small {
+  color: #efacaa;
+}
+.battlefield-choice-preview strong {
+  color: #fff2d0;
+  font:
+    italic 800 clamp(16px, 2vw, 25px) "Exo 2",
+    sans-serif;
+}
+.battlefield-choice-preview i {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font:
+    400 10px "DM Sans",
+    sans-serif;
+  color: #acbdc7;
+}
+.battlefield-choice-preview:hover img {
+  transform: scale(1.025);
+}
+.battlefield-choice-preview:focus-visible {
+  outline: 2px solid #ffe1a2;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .battlefield-choice-preview img {
+    transition: none;
+  }
+}
+/* The extra setup card makes this panel taller than a laptop viewport. */
+.rift-opponent:has(.battlefield-picker) {
+  position: static;
+}

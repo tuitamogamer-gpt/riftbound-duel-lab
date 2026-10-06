@@ -9,7 +9,7 @@ import { decisionActions, selectedCardId, sourceActions } from "../game/flow";
 import type { GameAction, GameState } from "../game/types";
 import { useI18n } from "../i18n";
 import type { Review } from "./StepFlow";
-import { priorityWindow } from "../game/presentation";
+import { priorityWindow, visibleTurnStep } from "../game/presentation";
 import { hiddenCardStatus } from "../game/hidden-presentation";
 import {
   getActionStackView,
@@ -103,9 +103,13 @@ export function MatchControls({
   const title = paused
     ? "Game paused"
     : review
-      ? review.action.player === 0
-        ? "Your play"
-        : "Opponent's play"
+      ? visibleTurnStep(game) !== "main"
+        ? game.currentPlayer === 0
+          ? "Your turn"
+          : "Opponent turn"
+        : review.action.player === 0
+          ? "Your play"
+          : "Opponent's play"
       : busy
         ? "Opponent is playing"
         : opening

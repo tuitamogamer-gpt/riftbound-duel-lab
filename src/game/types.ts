@@ -460,6 +460,8 @@ export interface GameOptions {
   playerDeck?: StarterDeck;
   botDeck?: StarterDeck;
   botDeckId?: string;
+  playerBattlefieldId?: string;
+  botBattlefieldId?: string;
   seed?: number;
   firstPlayer?: PlayerId;
 }

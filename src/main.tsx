@@ -21,10 +21,10 @@ import "./game-theme.css";
 import "./i18n/language.css";
 import "./match-layout.css";
 import "./battlefield-layout.css";
-import "./desktop-table.css";
 import "./components/MatchControls.css";
 import "./equipment-sleeves.css";
 import "./match-skin.css";
+import "./desktop-table.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <LanguageProvider>

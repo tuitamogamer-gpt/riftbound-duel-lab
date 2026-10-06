@@ -3,6 +3,7 @@ import { appMessages } from "./app";
 import { lobbyMessages } from "./lobby";
 import { componentMessages } from "./components";
 import { gameMessages } from "./game";
+import { tableMessages } from "./table";
 
 export const locales = ["en", "sr", "it"] as const;
 export type Locale = (typeof locales)[number];
@@ -14,6 +15,7 @@ export const messages: Record<string, [string, string, string]> = {
   ...lobbyMessages,
   ...appMessages,
   ...flowMessages,
+  ...tableMessages,
 };
 const localeIndex = { en: 0, sr: 1, it: 2 } as const;
 export const isLocale = (value: unknown): value is Locale =>

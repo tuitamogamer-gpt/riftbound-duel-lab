@@ -20,6 +20,9 @@ import { championArt } from "../data/champion-art";
 import { decks, type StarterDeck } from "../data/decks";
 import { getDeckScriptCoverage } from "../game/deck-import";
 import "./LobbyStartingPair.css";
+import { BattlefieldPicker } from "./BattlefieldPicker";
+import { defaultBattlefield } from "../game/battlefield-selection";
+import type { CatalogCard } from "../catalog";
 
 type Props = {
   allDecks: StarterDeck[];
@@ -43,6 +46,11 @@ type Props = {
   onExport: (deck: StarterDeck) => void;
   onHelp: () => void;
   onLibrary: () => void;
+  playerBattlefield?: string;
+  botBattlefield?: string;
+  onPlayerBattlefield?: (id: string) => void;
+  onBotBattlefield?: (id: string) => void;
+  onInspect?: (card: CatalogCard) => void;
 };
 
 function deckArt(deck?: StarterDeck) {
@@ -369,6 +377,11 @@ export function Lobby(p: Props) {
             {p.playerDeck && (
               <StartingCardPair deck={p.playerDeck} onDetails={p.onDetails} />
             )}
+            <BattlefieldPicker
+              value={p.playerBattlefield ?? defaultBattlefield(p.playerDeck)}
+              onChange={p.onPlayerBattlefield ?? (() => {})}
+              inspect={p.onInspect ?? (() => {})}
+            />
             <div className="rift-step-heading rift-deck-heading">
               <span>02</span>
               <h3>{t("TVOJ ŠPIL. TVOJ STIL.")}</h3>
@@ -468,6 +481,12 @@ export function Lobby(p: Props) {
             {p.botDeck && (
               <StartingCardPair deck={p.botDeck} onDetails={p.onDetails} />
             )}
+            <BattlefieldPicker
+              opponent
+              value={p.botBattlefield ?? defaultBattlefield(p.botDeck)}
+              onChange={p.onBotBattlefield ?? (() => {})}
+              inspect={p.onInspect ?? (() => {})}
+            />
             <fieldset className="rift-difficulty">
               <legend>{t("TEMPO TVOG IZAZOVA")}</legend>
               <div>
@@ -510,7 +529,15 @@ export function Lobby(p: Props) {
               </div>
               <p>
                 <Flag size={13} /> {t("2 bojišta")}
-                <span /> <Trophy size={13} /> {t("Prvi do 8 bodova")}
+                <span /> <Trophy size={13} />{" "}
+                {t("First to {count} points", {
+                  count:
+                    8 +
+                    [
+                      p.playerBattlefield ?? defaultBattlefield(p.playerDeck),
+                      p.botBattlefield ?? defaultBattlefield(p.botDeck),
+                    ].filter((id) => id === "ogn-276-298").length,
+                })}
               </p>
             </div>
             <button

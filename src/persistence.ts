@@ -659,6 +659,24 @@ export function parseSession(raw: string | null): SavedSession {
           isObject(f) &&
           typeof f.label === "string" &&
           (f.combat === undefined || combatStep(f.combat)) &&
+          (f.draw === undefined ||
+            (isObject(f.draw) &&
+              playerId(f.draw.player) &&
+              count(f.draw.count) &&
+              f.draw.count > 0 &&
+              (f.draw.cardIds === undefined ||
+                (f.draw.player === 0 &&
+                  Array.isArray(f.draw.cardIds) &&
+                  f.draw.cardIds.length === f.draw.count &&
+                  f.draw.cardIds.every(cardId))))) &&
+          (f.score === undefined ||
+            (isObject(f.score) &&
+              playerId(f.score.player) &&
+              count(f.score.from) &&
+              count(f.score.to) &&
+              f.score.to > f.score.from &&
+              ["hold", "conquer", "effect"].includes(f.score.kind) &&
+              (f.score.fieldId === undefined || field(f.score.fieldId)))) &&
           (f.effect === undefined ||
             (isObject(f.effect) &&
               playerId(f.effect.player) &&
@@ -666,6 +684,8 @@ export function parseSession(raw: string | null): SavedSession {
               optionalString(f.effect.sourceId) &&
               optionalString(f.effect.targetId) &&
               optionalString(f.effect.type) &&
+              (f.effect.scoring === undefined ||
+                ["hold", "conquer"].includes(f.effect.scoring)) &&
               (f.effect.locationId === undefined ||
                 location(f.effect.locationId)) &&
               (f.effect.stage === undefined ||

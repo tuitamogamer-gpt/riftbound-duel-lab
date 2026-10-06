@@ -1,6 +1,7 @@
 import type { Review } from "../components/StepFlow";
 import type { GameState, TurnStep } from "./types";
 import { getRuneChanges } from "./rune-presentation";
+import { scoreMoment, phaseMoment } from "./table-presentation";
 
 export function visibleTurnStep(game: GameState): TurnStep {
   if (game.pendingAwaken !== undefined) return "awaken";
@@ -28,24 +29,29 @@ export function reviewDelay(review: Review): number {
   const frame = review.frames[review.index];
   if (!frame) return 500;
   const humanTurn = frame.state.currentPlayer === 0;
+  if (scoreMoment(review)) return 3400;
+  if (frame.draw)
+    return frame.draw.player === 0
+      ? 4400 + Math.min(2, frame.draw.count - 1) * 500
+      : 2800;
+  if (phaseMoment(review)) return 2600;
   if (frame.combat?.stage === "start" || frame.combat?.stage === "impact")
-    return humanTurn ? 1900 : 1200;
-  if (frame.combat) return humanTurn ? 1350 : 750;
-  if (frame.effect) return humanTurn ? 1800 : 1400;
+    return 2200;
+  if (frame.combat) return 1700;
+  if (frame.effect) return 1900;
   // Public cards cross the table before settling; leave enough time to read them.
   if (
     review.action.category === "play" &&
     !review.action.id.startsWith("hide:")
   )
-    return humanTurn ? 1650 : 1400;
-  if (getRuneChanges(review).length) return humanTurn ? 1700 : 700;
-  if (visibleTurnStep(frame.state) !== "main") return humanTurn ? 1500 : 450;
-  if (frame.state.stack.length || frame.state.phase === "showdown")
-    return humanTurn ? 1150 : 650;
-  return humanTurn ? 950 : 400;
+    return 1900;
+  if (getRuneChanges(review).length) return 1800;
+  if (visibleTurnStep(frame.state) !== "main") return 1500;
+  if (frame.state.stack.length || frame.state.phase === "showdown") return 1200;
+  return humanTurn ? 1000 : 850;
 }
 
 export function automaticDelay(game: GameState, player: 0 | 1) {
   // Even a forced human pass leaves time to read the window before it closes.
-  return player === 0 ? 1700 : game.phase === "move" ? 240 : 450;
+  return player === 0 ? 1700 : game.phase === "move" ? 500 : 1050;
 }

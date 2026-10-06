@@ -61,13 +61,14 @@ describe("readable turn presentation", () => {
         ?.frames[review.index].state.turnStep,
     ).toBe("channel");
   });
-  it("paces the human opening slower even when the preceding action belongs to AI", () => {
+  it("gives both players readable opening phases regardless of the preceding action owner", () => {
     const human = opening(0),
       bot = opening(1);
     human.index = human.frames.findIndex((f) => f.state.turnStep === "channel");
     bot.index = bot.frames.findIndex((f) => f.state.turnStep === "channel");
     expect(human.action.player).toBe(1);
-    expect(reviewDelay(human)).toBeGreaterThan(reviewDelay(bot) * 2);
+    expect(reviewDelay(human)).toBeGreaterThanOrEqual(2400);
+    expect(reviewDelay(bot)).toBe(reviewDelay(human));
     expect(automaticDelay(human.final, 0)).toBeGreaterThan(
       automaticDelay(bot.final, 1),
     );

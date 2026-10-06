@@ -1,0 +1,597 @@
+.table-moment {
+  position: fixed;
+  inset: 0;
+  z-index: 65;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  color: #f8e6b7;
+  --moment-accent: #7de4cd;
+  text-align: center;
+  isolation: isolate;
+}
+.moment-player-1 {
+  --moment-accent: #f1a6a6;
+}
+.moment-halo {
+  position: absolute;
+  width: min(800px, 100vw);
+  height: min(680px, 86dvh);
+  z-index: -1;
+  background: radial-gradient(
+    ellipse,
+    #08131bf5 10%,
+    #08131be8 36%,
+    #08131b60 60%,
+    transparent 74%
+  );
+  animation: moment-bloom 650ms ease-out both;
+}
+.moment-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 94vw;
+}
+.moment-owner {
+  color: var(--moment-accent);
+  font:
+    600 10px "DM Sans",
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+.moment-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  animation: moment-arrive 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.moment-title strong {
+  font:
+    italic 800 clamp(32px, 5vw, 66px)/1.05 "Exo 2",
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 3px 24px #e9c97b30;
+}
+.moment-letter {
+  width: 48px;
+  height: 48px;
+  border: 1px solid #e9c97b80;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #e9c97b;
+  font:
+    600 25px "Cinzel",
+    serif;
+  box-shadow: 0 0 30px #e9c97b18;
+}
+.moment-hint {
+  margin: 0;
+  font:
+    400 12px/1.5 "DM Sans",
+    sans-serif;
+  color: #c2d2da;
+}
+.moment-source {
+  color: #f4e2b9;
+  font:
+    600 13px "DM Sans",
+    sans-serif;
+}
+.moment-timer {
+  width: 120px;
+  height: 2px;
+  margin-top: 9px;
+  background: #e9c97b25;
+  overflow: hidden;
+}
+.moment-timer i {
+  display: block;
+  height: 100%;
+  background: #e9c97b;
+  transform-origin: left;
+  animation: moment-time var(--moment-duration) linear both;
+}
+.moment-point {
+  font:
+    italic 800 clamp(70px, 9vw, 120px)/1 "Exo 2",
+    sans-serif;
+  color: #ffdf91;
+  text-shadow: 0 0 40px #e7b34b60;
+  animation: point-arrive 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.moment-point small {
+  display: block;
+  font:
+    600 10px "DM Sans",
+    sans-serif;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+}
+.moment-score-path {
+  display: flex;
+  gap: 13px;
+  align-items: center;
+  color: var(--moment-accent);
+  font:
+    600 11px "DM Sans",
+    sans-serif;
+}
+.moment-score-path b {
+  font:
+    800 26px "Exo 2",
+    sans-serif;
+}
+.moment-score-path small {
+  color: #a3b5c0;
+}
+.moment-draw .moment-content {
+  gap: 8px;
+}
+.moment-draw .moment-title strong {
+  font-size: clamp(25px, 3.5vw, 44px);
+}
+.moment-draw .moment-letter {
+  width: 35px;
+  height: 35px;
+  font-size: 20px;
+}
+.moment-draw-replacement {
+  font-size: 11px;
+  color: #efc888;
+}
+.moment-cards {
+  display: flex;
+  gap: 14px;
+  padding: 10px 0 5px;
+  justify-content: center;
+  max-width: 92vw;
+}
+.moment-drawn-card {
+  display: block;
+  position: relative;
+  width: clamp(110px, 17vw, 188px);
+  flex: 0 1 188px;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  pointer-events: auto;
+  animation: card-discovered 800ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--draw-index, 0) * 150ms);
+  filter: drop-shadow(0 12px 24px #0009);
+  color: #fff3d2;
+}
+.moment-drawn-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 744 / 1039;
+  border-radius: 9px;
+  border: 1px solid #efd398b0;
+  box-shadow: 0 0 25px #e9c97b20;
+}
+.moment-drawn-card > span:not(.card-sleeve) {
+  display: block;
+  margin-top: 6px;
+  font:
+    600 11px/1.3 "DM Sans",
+    sans-serif;
+}
+.moment-card-back {
+  width: 150px;
+  flex: none;
+  aspect-ratio: 744 / 1039;
+  overflow: hidden;
+  border-radius: 9px;
+  border: 1px solid #f1a6a699;
+  pointer-events: none;
+}
+.victory-track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  border-left: 1px solid #e9c97b30;
+  padding: 10px 0 4px;
+  color: #d2bc83;
+}
+.victory-heading {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+.victory-heading strong {
+  font:
+    800 25px "Exo 2",
+    sans-serif;
+}
+.victory-heading > span {
+  font:
+    600 7px "DM Sans",
+    sans-serif;
+  letter-spacing: 1.5px;
+}
+.victory-rail {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  margin: 21px 0 20px;
+  min-height: 0;
+}
+.victory-rail:before,
+.victory-rail:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(#f4d68b99, #d6b67640);
+}
+.victory-rail:before {
+  left: 22%;
+}
+.victory-rail:after {
+  left: 78%;
+}
+.victory-spaces {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: space-between;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.victory-spaces li {
+  position: relative;
+  height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.victory-spaces li:before {
+  content: "";
+  position: absolute;
+  left: 16%;
+  right: 16%;
+  top: 0;
+  height: 1px;
+  background: #e9c97b20;
+}
+.victory-spaces li > span {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  border: 1px solid #d4b96e45;
+  background: #101d28;
+  border-radius: 50%;
+  font:
+    600 10px "DM Sans",
+    sans-serif;
+}
+.victory-spaces .victory-finish > span {
+  color: #ffe6a5;
+  border-color: #f0cf78;
+  box-shadow: 0 0 15px #d4b96e33;
+}
+.victory-token {
+  position: absolute;
+  left: 22%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  width: 17px;
+  height: 17px;
+  --token-color: #6df0d1;
+}
+.victory-token.token-player-1 {
+  left: 78%;
+  --token-color: #ff9d9d;
+}
+.victory-token-gem {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 2px solid var(--token-color);
+  border-radius: 5px;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, var(--token-color), #122331 90%);
+  box-shadow:
+    0 0 9px #0008,
+    0 0 9px var(--token-color);
+}
+.victory-token.token-scoring {
+  animation: token-travel 1900ms cubic-bezier(0.33, 1, 0.38, 1) both;
+}
+.victory-gain {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffdf91;
+  font:
+    800 19px "Exo 2",
+    sans-serif;
+  text-shadow: 0 0 15px #fcd465;
+  animation: score-gain 3.4s both;
+}
+.victory-legend {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 5px;
+  font:
+    600 8px "DM Sans",
+    sans-serif;
+}
+.victory-legend span:first-child {
+  color: #6df0d1;
+}
+.victory-legend span:last-child {
+  color: #ff9d9d;
+}
+.field-scoring {
+  position: absolute;
+  inset: 0;
+  z-index: 18;
+  border: 2px solid #6df0d1;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 50px #6df0d133,
+    0 0 25px #6df0d155;
+  animation: field-score 3.4s both;
+}
+.field-scoring.scoring-player-1 {
+  border-color: #ff9d9d;
+  box-shadow:
+    inset 0 0 50px #ff9d9d33,
+    0 0 25px #ff9d9d55;
+}
+.field-scoring > span {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 1px solid #e9c97b;
+  border-radius: 4px;
+  background: #15232af5;
+  padding: 4px 12px;
+  color: #ffe6a5;
+  font:
+    800 13px "Exo 2",
+    sans-serif;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+[data-playback-paused="true"]
+  :is(.table-moment, .victory-track, .field-scoring)
+  *,
+[data-playback-paused="true"] .field-scoring {
+  animation-play-state: paused !important;
+}
+@keyframes moment-bloom {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes moment-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes point-arrive {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes moment-time {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+@keyframes card-discovered {
+  from {
+    opacity: 0;
+    transform: translateY(100px) scale(0.65) rotateY(45deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes token-travel {
+  0%,
+  32% {
+    top: var(--token-from);
+  }
+  100% {
+    top: var(--token-to);
+  }
+}
+@keyframes score-gain {
+  0%,
+  20% {
+    opacity: 0;
+  }
+  40%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes field-score {
+  0% {
+    opacity: 0;
+  }
+  18%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.15;
+  }
+}
+@media (max-width: 800px) {
+  .victory-track {
+    padding-top: 4px;
+  }
+  .victory-heading > svg {
+    width: 15px;
+    height: 15px;
+  }
+  .victory-heading strong {
+    font-size: 20px;
+  }
+  .victory-heading > span {
+    font-size: 5px;
+    letter-spacing: 0.5px;
+  }
+  .victory-spaces li > span {
+    width: 16px;
+    height: 16px;
+    font-size: 8px;
+  }
+  .victory-token {
+    width: 10px;
+    height: 10px;
+    left: 13%;
+  }
+  .victory-token.token-player-1 {
+    left: 87%;
+  }
+  .victory-rail:before {
+    left: 13%;
+  }
+  .victory-rail:after {
+    left: 87%;
+  }
+  .victory-token-gem {
+    border-width: 1px;
+    border-radius: 2px;
+  }
+  .victory-legend {
+    padding: 0;
+    font-size: 6px;
+  }
+  .moment-owner {
+    font-size: 8px;
+    letter-spacing: 2px;
+  }
+  .moment-letter {
+    width: 34px;
+    height: 34px;
+    font-size: 19px;
+  }
+  .moment-title {
+    gap: 8px;
+  }
+  .moment-hint {
+    font-size: 10px;
+  }
+  .moment-source {
+    font-size: 11px;
+  }
+  .moment-cards {
+    gap: 6px;
+  }
+  .moment-drawn-card {
+    width: 130px;
+    flex-basis: 130px;
+  }
+  .moment-drawn-card > span:not(.card-sleeve) {
+    font-size: 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .table-moment *,
+  .victory-track *,
+  .field-scoring {
+    animation: none !important;
+  }
+  .moment-timer {
+    display: none;
+  }
+}
+/* A moment owns the table's focus; the chain stays in its reserved lane. */
+.game-layout:has(.table-moment) .action-stack {
+  opacity: 0.12;
+  pointer-events: none;
+}
+.game-layout:has(.table-moment) .action-stack * {
+  pointer-events: none;
+}
+.game-layout:has(.moment-score) .field-effect,
+.game-layout:has(.moment-score) .effect-trails,
+.game-layout:has(.moment-draw) .effect-trails {
+  visibility: hidden;
+}
+.moment-halo {
+  animation: none;
+}
+.moment-drawn-card {
+  animation:
+    card-discovered 800ms cubic-bezier(0.16, 1, 0.3, 1) both,
+    card-settles 600ms ease-in forwards;
+  animation-delay:
+    calc(var(--draw-index, 0) * 150ms), calc(var(--moment-duration) - 650ms);
+}
+.hand-draw-arrival {
+  animation: hand-receives var(--draw-duration) ease-out both;
+}
+[data-playback-paused="true"] .hand-draw-arrival {
+  animation-play-state: paused;
+}
+@keyframes card-settles {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(130px) scale(0.55);
+  }
+}
+@keyframes hand-receives {
+  0%,
+  83% {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .moment-drawn-card,
+  .hand-draw-arrival {
+    animation: none;
+  }
+}

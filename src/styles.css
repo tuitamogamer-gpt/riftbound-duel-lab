@@ -2789,8 +2789,8 @@ select {
 }
 .is-game .field-art {
   opacity: 0.68 !important;
-  background-size: cover !important;
-  background-position: center !important;
+  background-size: cover;
+  background-position: center;
   filter: none;
 }
 .is-game .battlefield:after {

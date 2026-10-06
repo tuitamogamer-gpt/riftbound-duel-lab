@@ -1,447 +1,666 @@
-/* Desktop table: public setup at left, bases beside the battlefields, hand below.
-   Keep the compact layout below this breakpoint. Card sizes follow the available
-   table space instead of the fixed thumbnail caps in the compact stylesheet. */
-@media (min-width: 1100px) and (min-height: 650px) {
-  .app.is-game {
-    --table-gap: clamp(8px, 0.65vw, 18px);
-    --table-type: clamp(11px, 0.75vw, 17px);
-    --hand-height: clamp(170px, 25dvh, 500px);
-  }
+/* One shared table: opponent above, player below, battlefields across the centre.
+   Geometry lives here, after the surface skin. Both players use identical zones. */
+.app.is-game .game-layout {
+  grid-template-rows: 32px 38px minmax(0, 1fr) 88px;
+  gap: 7px;
+  padding: 0 10px 8px;
+}
+.app.is-game .match-toolbar {
+  height: 32px;
+}
+.app.is-game .match-content {
+  position: relative;
+  min-width: 0;
+}
+.app.is-game .playmat {
+  grid-template-columns:
+    minmax(150px, 0.85fr) minmax(0, 2.5fr) minmax(150px, 0.85fr)
+    70px;
+  grid-template-rows:
+    26px minmax(0, 1fr) minmax(0, 2.5fr) minmax(0, 1fr)
+    24px minmax(0, 1.65fr);
+  grid-template-areas:
+    "opponent opponent enemy-hand score"
+    "opponent-setup enemy-base enemy-runes score"
+    "fields fields fields score"
+    "player-setup own-base runes score"
+    "player player player score"
+    "hand hand hand score";
+  gap: 6px 10px;
+  padding: 9px;
+  min-height: 0;
+  height: 100%;
+}
+.app.is-game .player-cards,
+.app.is-game .opponent-hand-section {
+  display: contents;
+  container-type: normal;
+}
+.app.is-game .player-bar.player-1 {
+  grid-area: opponent;
+}
+.app.is-game .player-bar.player-0 {
+  grid-area: player;
+}
+.app.is-game .base-zone[data-location="base:1"] {
+  grid-area: enemy-base;
+}
+.app.is-game .base-zone[data-location="base:0"] {
+  grid-area: own-base;
+}
+.app.is-game .player-zone-1 {
+  grid-area: opponent-setup;
+}
+.app.is-game .player-zone-0 {
+  grid-area: player-setup;
+}
+.app.is-game .opponent-hand-section > .rune-zone {
+  grid-area: enemy-runes;
+}
+.app.is-game .player-cards > .rune-zone {
+  grid-area: runes;
+}
+.app.is-game .player-cards > .hand-section {
+  grid-area: hand;
+}
+.app.is-game .opponent-hand-section > .enemy-hand {
+  grid-area: enemy-hand;
+}
+.app.is-game .victory-track {
+  grid-area: score;
+}
+.app.is-game .player-bar {
+  height: 100%;
+  min-width: 0;
+  padding: 2px 8px;
+  border: 0;
+  background: transparent;
+}
+.app.is-game .legend-portrait {
+  height: 22px;
+  width: 22px;
+}
+.app.is-game .player-name {
+  display: flex;
+  gap: 9px;
+}
+.app.is-game .player-name strong {
+  font-size: 11px;
+}
+.app.is-game .player-name small {
+  font-size: 9px;
+}
+.app.is-game .score > span {
+  font-size: 19px;
+}
+.app.is-game .score-pips {
+  display: none;
+}
+.app.is-game .player-cards .enemy-hand {
+  height: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  gap: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+.app.is-game .card-back {
+  width: 14px;
+  height: 20px;
+  flex: 0 1 14px;
+}
+.app.is-game .enemy-hand .card-back:nth-child(n + 5) {
+  display: none;
+}
+.app.is-game .player-cards .enemy-hand > span {
+  font-size: 8px;
+  flex: none;
+  white-space: nowrap;
+}
+.app.is-game .player-cards > .champion-zone {
+  container-type: size;
+  min-height: 0;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.app.is-game .player-cards .setup-card {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 4px;
+  gap: 5px;
+  min-width: 0;
+}
+.app.is-game .player-cards .champion-zone .game-card.small,
+.app.is-game .player-cards .setup-empty-art {
+  height: min(calc(100cqh - 10px), 112px);
+  width: auto;
+  max-width: 52%;
+  flex: none;
+}
+.app.is-game .setup-card-copy {
+  min-width: 0;
+}
+.app.is-game .setup-card-heading {
+  font-size: 7px;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+}
+.app.is-game .setup-status {
+  font-size: 7px;
+}
+.app.is-game .setup-card-name {
+  font-size: 8px;
+  line-height: 1.25;
+  margin-top: 4px;
+}
+.app.is-game .setup-card-hint {
+  display: none;
+}
+.app.is-game .base-zone {
+  padding: 20px 9px 6px;
+  min-width: 0;
+  min-height: 0;
+  background: linear-gradient(180deg, #14273599, #0b182270);
+}
+.app.is-game .base-zone[data-location="base:1"] {
+  border-color: #f29a9a28;
+}
+.app.is-game .base-zone[data-location="base:0"] {
+  border-color: #5ad8c638;
+}
+.app.is-game .zone-label {
+  top: 4px;
+  left: 10px;
+  font-size: 8px;
+  line-height: 12px;
+  padding: 0;
+  background: transparent;
+}
+.app.is-game .base-units {
+  --unit-card-height: min(calc(100cqh - 7px), 112px);
+  container-type: size;
+  justify-content: center;
+  gap: 7px;
+}
+.app.is-game .empty-base,
+.app.is-game .empty-field {
+  font-size: 9px;
+  text-align: center;
+  line-height: 1.4;
+  margin: auto;
+  max-width: 38ch;
+}
+.app.is-game .empty-base:before,
+.app.is-game .empty-field:before {
+  display: none;
+}
+.app.is-game .player-cards > .rune-zone,
+.app.is-game .opponent-hand-section > .rune-zone {
+  container-type: size;
+  min-height: 0;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: 25px minmax(0, 1fr);
+  gap: 3px;
+  padding: 5px 7px;
+  border: 1px solid #ffffff15;
+  border-radius: 6px;
+  background: #101f29b0;
+}
+.app.is-game .rune-zone .rune-zone-heading,
+.app.is-game .player-cards > .rune-zone .rune-zone-heading {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 5px;
+  justify-content: space-between;
+}
+.app.is-game .rune-zone-heading > span {
+  font-size: 8px;
+}
+.app.is-game .rune-zone-heading small,
+.app.is-game .player-cards > .rune-zone .rune-zone-heading small {
+  font-size: 8px;
+  line-height: 1.3;
+  white-space: normal;
+}
+.app.is-game .rune-orbs {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  gap: 3px;
+  min-height: 0;
+}
+.app.is-game .rune-card {
+  height: min(calc(100cqh - 36px), 56px);
+  width: auto;
+  aspect-ratio: 744 / 1039;
+  flex: 0 1 calc(min(calc(100cqh - 36px), 56px) * 0.716);
+  min-width: 0;
+}
+.app.is-game .rune-card-art {
+  width: calc(min(calc(100cqh - 36px), 56px) * 0.716);
+}
+.app.is-game .rune-card:last-child {
+  flex-shrink: 0;
+}
+.app.is-game .battlefields,
+.app.is-game .battlefields:has(> .action-stack) {
+  --chain-lane: clamp(96px, 11vw, 190px);
+  grid-area: fields;
+  container-type: size;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) var(--chain-lane) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0 10px;
+}
+.app.is-game .battlefields > .battlefield,
+.app.is-game .battlefields:has(> .action-stack) > .battlefield {
+  height: min(100cqh, calc((100cqw - var(--chain-lane) - 20px) * 9 / 32));
+  width: auto;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+  grid-template-rows: 27px minmax(0, 1fr) 12px minmax(0, 1fr);
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: end;
+}
+.app.is-game .battlefields > .battlefield:last-child {
+  grid-column: 3;
+  justify-self: start;
+}
+.app.is-game .battlefield > .field-half {
+  --unit-card-height: min(calc(100cqh - 6px), 132px);
+  padding: 4px 8px 7px;
+  gap: 7px;
+}
+.app.is-game .battlefield .field-art {
+  background-size: 210% auto;
+  background-position: center 36%;
+  /* Only the illustration is used as the play surface; rules stay in the preview. */
+  filter: saturate(0.8) brightness(0.55);
+  opacity: 0.9 !important;
+}
+.app.is-game .field-heading {
+  padding: 3px 8px;
+  gap: 5px;
+}
+.app.is-game .field-heading > div {
+  min-width: 0;
+}
+.app.is-game .field-heading .eyebrow {
+  display: none;
+}
+.app.is-game .field-heading button {
+  font-size: clamp(10px, 1vw, 17px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.app.is-game .control-badge {
+  padding: 3px 5px;
+  font-size: 6px;
+}
+.app.is-game .field-divider,
+.app.is-game .in-combat .field-divider {
+  height: 12px;
+  min-height: 0;
+}
+.app.is-game .field-divider > svg {
+  width: 12px;
+  height: 12px;
+}
+.app.is-game .combat-readout {
+  gap: 5px;
+}
+.app.is-game .combat-readout b {
+  font-size: 9px;
+}
+.app.is-game .combat-readout small {
+  font-size: 7px;
+}
+.app.is-game .hidden-zone {
+  top: 30px;
+}
+.app.is-game .action-stack {
+  --stack-card-width: min(90px, calc((100cqh - 70px) * 0.716));
+  grid-column: 2;
+  max-height: 100%;
+}
+.app.is-game .action-stack-heading {
+  padding: 3px 5px;
+  margin-bottom: 4px;
+  font-size: 8px;
+}
+.app.is-game .action-stack-heading > span {
+  display: none;
+}
+.app.is-game .action-stack-name {
+  font-size: 9px;
+}
+.app.is-game .action-stack-owner,
+.app.is-game .action-stack-status {
+  font-size: 8px;
+}
+.app.is-game .player-cards > .hand-section {
+  container-type: size;
+  grid-template-rows: 15px minmax(0, 1fr);
+  gap: 3px;
+  padding: 4px 10px 6px;
+  min-height: 0;
+  min-width: 0;
+}
+.app.is-game .hand-title {
+  font-size: 9px;
+  line-height: 15px;
+}
+.app.is-game .player-cards .hand-title span:last-child {
+  display: block;
+  font-size: 8px;
+}
+.app.is-game .player-cards .hand {
+  --hand-card-height: calc(100cqh - 25px);
+  align-items: center;
+  padding: 0 3px;
+}
+.app.is-game .hand .game-card {
+  height: var(--hand-card-height);
+  width: calc(var(--hand-card-height) * 0.716);
+  max-width: none;
+}
+.app.is-game .player-cards .hand-card-wrap {
+  max-width: calc(var(--hand-card-height) * 0.716 + 14px);
+}
+.app.is-game .unit-power {
+  font-size: 10px;
+  line-height: 14px;
+  padding: 1px 5px;
+}
+.app.is-game .unit-info {
+  font-size: 13px;
+}
+.app.is-game .unit-wrap .exhausted-token {
+  width: 20px;
+  height: 20px;
+  bottom: 12px;
+}
+.app.is-game .destination-button {
+  padding: 4px 8px;
+  font-size: 9px;
+  bottom: 4px;
+}
+.app.is-game .decision-copy strong {
+  font-size: 17px;
+}
+.app.is-game .decision-copy p {
+  font-size: 10px;
+}
+.app.is-game .match-controls .gold-button {
+  font-size: 12px;
+  min-height: 38px;
+}
 
+@media (min-height: 900px) and (min-width: 900px) {
   .app.is-game .game-layout {
-    padding: 0 var(--table-gap) var(--table-gap);
-    grid-template-rows: 40px 44px minmax(0, 1fr) clamp(80px, 8.5dvh, 120px);
-    gap: var(--table-gap);
+    grid-template-rows: 38px 44px minmax(0, 1fr) 96px;
+    gap: 10px;
   }
-
-  .app.is-game .match-toolbar {
-    height: 40px;
-    font-size: var(--table-type);
-  }
-
   .app.is-game .playmat {
-    padding: var(--table-gap);
-    gap: var(--table-gap);
-    grid-template-columns: clamp(224px, 18vw, 580px) minmax(0, 0.85fr) minmax(
-        0,
-        2fr
-      );
-    grid-template-rows: 36px minmax(0, 1fr) 36px minmax(0, 1fr) var(
-        --hand-height
-      );
-    grid-template-areas:
-      "opponent enemy-base fields"
-      "opponent-setup enemy-base fields"
-      "player own-base fields"
-      "player-setup own-base fields"
-      "runes hand hand";
+    gap: 10px 14px;
+    padding: 14px;
   }
-
-  .app.is-game .player-bar.player-1 {
-    grid-area: opponent;
-  }
-  .app.is-game .player-bar.player-0 {
-    grid-area: player;
-  }
-  .app.is-game .base-zone[data-location="base:1"] {
-    grid-area: enemy-base;
-  }
-  .app.is-game .base-zone[data-location="base:0"] {
-    grid-area: own-base;
-  }
-  .app.is-game .battlefields {
-    grid-area: fields;
-  }
-
-  .app.is-game .player-cards:not(.opponent-cards) {
-    display: contents;
-    container-type: normal;
-  }
-
-  .app.is-game .player-cards > .hand-section {
-    grid-area: hand;
-  }
-  .app.is-game .player-cards > .rune-zone {
-    grid-area: runes;
-  }
-  .app.is-game .player-cards > .player-zone-0 {
-    grid-area: player-setup;
-  }
-
-  .app.is-game .player-bar {
-    height: 36px;
-    padding: 4px 8px;
-  }
-
-  .app.is-game .legend-portrait {
-    width: 26px;
-    height: 26px;
-  }
-  .app.is-game .player-name {
-    display: block;
-  }
-  .app.is-game .player-name strong {
-    font-size: var(--table-type);
-  }
-  .app.is-game .player-name small {
-    display: block;
-    font-size: 10px;
-    line-height: 12px;
-  }
-  .app.is-game .player-name strong {
-    line-height: 14px;
-  }
-  .app.is-game .score > span {
-    font-size: 25px;
-  }
-  .app.is-game .score {
-    padding-left: 7px;
-    margin-left: 0;
-  }
-  .app.is-game .score-pips {
-    display: none;
-  }
-
-  .app.is-game .opponent-cards {
-    display: contents;
-    container-type: normal;
-  }
-
-  .app.is-game .opponent-cards > .champion-zone {
-    grid-area: opponent-setup;
-  }
-  .app.is-game .opponent-cards > .opponent-hand-section {
-    grid-area: enemy-base;
-    align-self: start;
-    height: 48px;
-    margin: 28px 12px 0;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    z-index: 1;
-  }
-
-  .app.is-game .player-cards .enemy-hand {
-    flex: 0 1 90px;
-    height: auto;
-    padding: 0;
-    gap: 3px;
-    flex-wrap: wrap;
-  }
-
-  .app.is-game .card-back {
-    width: 14px;
-    height: 20px;
-  }
-  .app.is-game .player-cards .enemy-hand > span {
-    font-size: 10px;
-    white-space: normal;
-    flex-basis: 100%;
-  }
-  .app.is-game .enemy-hand .card-back:nth-child(n + 4) {
-    display: none;
-  }
-
-  .app.is-game .player-cards > .champion-zone {
-    container-type: size;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .app.is-game .player-cards .setup-card {
-    flex-direction: column;
-    justify-content: center;
-    padding: 5px;
-    gap: 6px;
-    overflow: hidden;
-  }
-
-  .app.is-game .player-cards .champion-zone .game-card.small,
-  .app.is-game .player-cards .setup-empty-art {
-    height: min(100cqh - 56px, (100cqw - 38px) / 2 / 0.716);
-    width: auto;
-    max-width: none;
-    flex: none;
-  }
-
-  .app.is-game .setup-card-copy {
-    flex: 0 0 auto;
-    width: 100%;
-  }
-  .app.is-game .setup-card-heading {
-    font-size: 9px;
-    flex-direction: row;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 2px 5px;
-    margin-bottom: 3px;
-  }
-  .app.is-game .setup-card-name {
-    font-size: 11px;
-    line-height: 1.25;
-  }
+  .app.is-game .setup-card-heading,
   .app.is-game .setup-status {
     font-size: 9px;
   }
-
-  .app.is-game .player-cards > .hand-section {
-    container-type: size;
-    min-width: 0;
-    grid-template-rows: 20px minmax(0, 1fr);
-    padding: 8px 14px 10px;
-    gap: 6px;
-    background: linear-gradient(135deg, #17353e, #0d202d);
-    border-color: #719e9760;
-  }
-
-  .app.is-game .hand-title {
-    font-size: var(--table-type);
-    line-height: 20px;
-  }
-  .app.is-game .player-cards .hand-title span:last-child {
-    display: block;
+  .app.is-game .setup-card-name {
     font-size: 11px;
   }
-  .app.is-game .player-cards .hand {
-    --hand-card-height: calc(100cqh - 34px);
-    padding: 0 4px 6px;
-    align-items: flex-end;
-  }
-  .app.is-game .hand .game-card {
-    width: calc(var(--hand-card-height) * 0.716);
-    height: var(--hand-card-height);
-    max-width: none;
-  }
-  .app.is-game .player-cards .hand-card-wrap {
-    max-width: calc(var(--hand-card-height) * 0.716 + 14px);
-  }
-  .app.is-game .hand-card-wrap .card-info-button {
-    left: 4px;
-    bottom: 4px;
-    font-size: 17px;
-    line-height: 20px;
-  }
-
-  .app.is-game .player-cards > .rune-zone {
-    min-width: 0;
-    grid-template-rows: auto minmax(0, 1fr);
-    align-items: stretch;
-    padding: 12px;
-    gap: 10px;
-    background: #102733;
-  }
-  .app.is-game .player-cards > .rune-zone .rune-zone-heading {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-  .app.is-game .rune-zone-heading > span {
-    font-size: 11px;
-  }
+  .app.is-game .rune-zone-heading > span,
+  .app.is-game .rune-zone-heading small,
   .app.is-game .player-cards > .rune-zone .rune-zone-heading small {
-    font-size: var(--table-type);
-    line-height: 1.5;
+    font-size: 10px;
   }
-  .app.is-game .player-cards > .rune-zone .rune-orbs {
-    align-content: center;
-    flex-wrap: wrap;
-    gap: 7px;
-  }
-  .app.is-game .player-cards > .rune-zone .rune-card {
-    flex: 0 0 calc((100% - 35px) / 6);
-    width: calc((100% - 35px) / 6);
-    height: auto;
-    aspect-ratio: 744 / 1039;
-  }
-  .app.is-game .player-cards > .rune-zone .rune-card-art {
-    width: 100%;
-  }
-  .app.is-game .opponent-hand-section .rune-zone {
-    gap: 5px;
-    padding: 0 3px;
-  }
-  .app.is-game .opponent-hand-section .rune-zone-heading {
-    flex: 0 1 90px;
-  }
-  .app.is-game .opponent-hand-section .rune-zone-heading small {
-    font-size: 9px;
-  }
-  .app.is-game .opponent-hand-section .rune-card {
-    height: 34px;
-    width: 24px;
-    flex-basis: 24px;
-  }
-  .app.is-game .opponent-hand-section .rune-card-art {
-    width: 24px;
-  }
-
-  .app.is-game .base-zone {
-    padding: 25px 12px 16px;
-    min-width: 0;
-    background: linear-gradient(160deg, #25434d99, #0c202c);
-  }
-  .app.is-game .base-zone[data-location="base:1"] {
-    padding-top: 84px;
-  }
-  .app.is-game .zone-label {
-    top: 6px;
-    left: 9px;
-    font-size: var(--table-type);
-    letter-spacing: 1px;
-    background: transparent;
-  }
-  .app.is-game .base-units {
-    --unit-card-height: min(
-      calc(100cqh - 10px),
-      calc((100cqw - 4px) * 1039 / 744)
-    );
-    container-type: size;
-    justify-content: center;
-    gap: 6px;
-  }
-  .app.is-game .empty-base,
-  .app.is-game .empty-field {
-    font-size: var(--table-type);
-    line-height: 1.5;
-    text-align: center;
-    margin: auto;
-    max-width: 28ch;
-    color: #adc0ca;
-  }
-  .app.is-game .battlefields {
-    gap: var(--table-gap);
-  }
-  .app.is-game .battlefield,
-  .app.is-game .battlefield.in-combat {
-    grid-template-rows: 50px minmax(0, 1fr) 28px minmax(0, 1fr);
-  }
-  .app.is-game .field-heading {
-    padding: 7px 12px;
-    gap: 8px;
-  }
-  .app.is-game .field-heading > div {
-    display: grid;
-    gap: 2px;
-    justify-items: start;
-  }
-  .app.is-game .field-heading .eyebrow {
-    font-size: 9px;
-  }
-  .app.is-game .field-heading button {
-    font-size: clamp(14px, 1vw, 24px);
-    max-width: 100%;
+  .app.is-game .battlefields > .battlefield,
+  .app.is-game .battlefields:has(> .action-stack) > .battlefield {
+    grid-template-rows: 34px minmax(0, 1fr) 18px minmax(0, 1fr);
   }
   .app.is-game .control-badge {
-    font-size: 9px;
-    padding: 4px 6px;
-  }
-  .app.is-game .battlefield > .field-half {
-    --unit-card-height: min(
-      calc(100cqh - 12px),
-      calc((100cqw - 4px) * 1039 / 744)
-    );
-    padding: 8px 12px 14px;
-    gap: 6px;
+    font-size: 8px;
   }
   .app.is-game .field-divider,
   .app.is-game .in-combat .field-divider {
-    height: 28px;
+    height: 18px;
   }
-  .app.is-game .unit-power {
-    font-size: 13px;
-    line-height: 20px;
-    padding: 1px 7px;
+}
+@media (max-width: 800px) {
+  .app.is-game .game-layout {
+    grid-template-rows: 30px 54px minmax(0, 1fr) 156px;
+    padding: 0 4px 5px;
+    gap: 4px;
   }
-  .app.is-game .unit-wrap .exhausted-token {
-    width: 28px;
-    height: 28px;
-    bottom: 17px;
+  .app.is-game .playmat {
+    grid-template-columns: 90px minmax(0, 1fr) 80px 38px;
+    grid-template-rows:
+      24px minmax(0, 1fr) minmax(0, 1.8fr) minmax(0, 1fr)
+      20px minmax(0, 1.05fr);
+    padding: 5px;
+    gap: 5px 4px;
   }
-  .app.is-game .unit-info {
-    font-size: 17px;
+  .app.is-game .match-toolbar {
+    height: 30px;
   }
-  .app.is-game .hidden-zone {
-    top: 53px;
+  .app.is-game .turn-flow {
+    gap: 2px 5px;
+    padding: 3px 6px;
   }
-  .app.is-game .destination-button {
-    font-size: 13px;
-    padding: 9px 12px;
+  .app.is-game .turn-owner {
+    font-size: 9px;
   }
-  .app.is-game .base-zone .destination-button {
-    bottom: 8px;
-    transform: none;
+  .app.is-game .turn-steps li {
+    padding: 2px;
+    gap: 3px;
+    font-size: 8px;
   }
-  .app.is-game .decision-copy strong {
-    font-size: clamp(18px, 1.2vw, 27px);
+  .app.is-game .priority-window strong {
+    font-size: 9px;
   }
-  .app.is-game .decision-copy p,
-  .app.is-game .context-action strong {
-    font-size: var(--table-type);
+  .app.is-game .player-name small {
+    display: none;
   }
-  .app.is-game .context-action small {
-    font-size: 11px;
+  .app.is-game .player-name strong {
+    font-size: 8px;
   }
-  .app.is-game .match-controls .gold-button {
-    font-size: 14px;
-    min-height: 46px;
+  .app.is-game .legend-portrait {
+    width: 17px;
+    height: 17px;
   }
-
-  .app.is-game .battlefields:has(> .action-stack) {
-    grid-template-columns: minmax(0, 1fr) clamp(150px, 14vw, 360px) minmax(
-        0,
-        1fr
-      );
+  .app.is-game .score > span {
+    font-size: 16px;
   }
-  .app.is-game .battlefields:has(> .action-stack) .field-heading {
-    flex-wrap: wrap;
-    align-content: center;
+  .app.is-game .score > small {
+    font-size: 8px;
+  }
+  .app.is-game .player-cards .setup-card {
+    flex-direction: column;
+    padding: 2px;
     gap: 2px;
   }
+  .app.is-game .player-cards .champion-zone .game-card.small,
+  .app.is-game .player-cards .setup-empty-art {
+    height: min(calc(100cqh - 26px), 74px);
+    max-width: 100%;
+  }
+  .app.is-game .setup-card-name {
+    display: none;
+  }
+  .app.is-game .setup-card-heading,
+  .app.is-game .setup-status {
+    font-size: 6px;
+  }
+  .app.is-game .player-cards > .champion-zone {
+    gap: 3px;
+  }
+  .app.is-game .player-cards > .rune-zone,
+  .app.is-game .opponent-hand-section > .rune-zone {
+    padding: 3px;
+    grid-template-rows: 29px minmax(0, 1fr);
+  }
+  .app.is-game .rune-zone-heading > span {
+    display: none;
+  }
+  .app.is-game .rune-zone-heading small,
+  .app.is-game .player-cards > .rune-zone .rune-zone-heading small {
+    font-size: 7px;
+  }
+  .app.is-game .rune-orbs {
+    gap: 1px;
+  }
+  .app.is-game .rune-card {
+    height: 30px;
+    width: 21px;
+    flex-basis: 21px;
+  }
+  .app.is-game .rune-card-art {
+    width: 21px;
+  }
+  .app.is-game .base-zone {
+    padding: 17px 4px 3px;
+  }
+  .app.is-game .zone-label {
+    font-size: 6px;
+    left: 4px;
+  }
+  .app.is-game .empty-base {
+    font-size: 7px;
+  }
+  .app.is-game .battlefields,
+  .app.is-game .battlefields:has(> .action-stack) {
+    --chain-lane: 0px;
+    gap: 0 3px;
+  }
+  .app.is-game .battlefields > .battlefield,
   .app.is-game .battlefields:has(> .action-stack) > .battlefield {
-    grid-template-rows: 64px minmax(0, 1fr) 28px minmax(0, 1fr);
+    /* Narrow screens preserve usable card targets; desktop keeps true 16:9. */
+    height: 100%;
+    width: 100%;
+    aspect-ratio: auto;
+    grid-template-rows: 28px minmax(0, 1fr) 12px minmax(0, 1fr);
+  }
+  .app.is-game .field-heading {
+    padding: 2px 4px;
+  }
+  .app.is-game .field-heading button {
+    font-size: 8px;
+    white-space: normal;
+    line-height: 1.1;
+  }
+  .app.is-game .control-badge {
+    display: none;
+  }
+  .app.is-game .battlefield > .field-half {
+    padding: 4px 5px 6px;
+    gap: 4px;
+  }
+  .app.is-game .empty-field {
+    font-size: 7px;
   }
   .app.is-game .action-stack {
-    --stack-card-width: clamp(82px, 8vw, 220px);
+    position: absolute;
+    width: 84px;
+    left: 50%;
+    transform: translateX(-50%);
+    grid-column: auto;
+    --stack-card-width: 54px;
   }
-  .app.is-game .action-stack-heading,
+  .app.is-game .action-stack-heading {
+    font-size: 7px;
+  }
   .app.is-game .action-stack-name {
-    font-size: var(--table-type);
+    font-size: 7px;
   }
-  .app.is-game .action-stack-owner,
   .app.is-game .action-stack-status {
+    display: none;
+  }
+  .app.is-game .player-cards .hand-title span:last-child {
+    display: none;
+  }
+  .app.is-game .player-cards > .hand-section {
+    padding: 3px 5px;
+  }
+  .app.is-game .player-cards .hand {
+    --hand-card-height: min(calc(100cqh - 24px), 86px);
+  }
+  .app.is-game .destination-button {
+    padding: 3px;
+    font-size: 7px;
+  }
+  .app.is-game .decision-copy strong {
+    font-size: 14px;
+  }
+  .app.is-game .decision-copy p {
+    font-size: 9px;
+  }
+  .app.is-game .match-controls .gold-button {
     font-size: 10px;
   }
 }
-
-@media (min-width: 1100px) and (min-height: 650px) and (max-height: 850px) {
-  .app.is-game {
-    --table-gap: 7px;
-    --hand-height: 23dvh;
-  }
+@media (max-height: 600px) and (min-width: 801px) {
   .app.is-game .game-layout {
-    grid-template-rows: 32px 36px minmax(0, 1fr) 76px;
+    grid-template-rows: 28px 30px minmax(0, 1fr) 70px;
+    gap: 4px;
   }
-  .app.is-game .match-toolbar {
-    height: 32px;
+  .app.is-game .playmat {
+    grid-template-rows:
+      20px minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr)
+      20px minmax(0, 1.2fr);
   }
-  .app.is-game .setup-card-name {
-    font-size: 10px;
-    max-height: 25px;
-    overflow: hidden;
+}
+@media (max-height: 500px) {
+  .app.is-game .match-content {
+    overflow-y: auto;
   }
-  .app.is-game .setup-card-heading {
-    font-size: 8px;
+  .app.is-game .playmat {
+    height: 480px;
+    min-height: 480px;
   }
-  .app.is-game .player-cards > .rune-zone {
-    padding: 8px;
-    gap: 5px;
+}
+/* Keep source cards and piles within the shorter decision dock. */
+.app.is-game .visual-controls .decision-source {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+}
+.app.is-game .visual-controls .decision-source .game-card {
+  max-height: 66px;
+  width: auto;
+  max-width: 100%;
+}
+.app.is-game .visual-controls .pile-art {
+  height: 44px;
+  width: 32px;
+}
+@media (max-width: 800px) {
+  .app.is-game .battlefield .field-art {
+    background-size: auto 340%;
+    background-position: center 36%;
   }
-  .app.is-game .player-cards > .rune-zone .rune-orbs {
-    gap: 5px;
-  }
-  .app.is-game .player-cards > .rune-zone .rune-card {
-    flex-basis: calc((100% - 25px) / 6);
-    width: calc((100% - 25px) / 6);
+}
+@media (max-width: 750px) {
+  .app.is-game .visual-controls,
+  .app.is-game .visual-controls.has-source {
+    grid-template-rows: minmax(0, 1fr) 52px;
   }
 }

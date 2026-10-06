@@ -65,6 +65,12 @@ import { TurnFlow, ShowdownCue, CombatReadout } from "./components/TurnFlow";
 import { reviewDelay, automaticDelay } from "./game/presentation";
 import { EffectTrails, FieldEffect } from "./components/EffectFeedback";
 import { ActionStack } from "./components/ActionStack";
+import {
+  TableMoment,
+  ScoreTrack,
+  FieldScoring,
+} from "./components/TableMoments";
+import { defaultBattlefield } from "./game/battlefield-selection";
 import { useCardPreviewActive } from "./components/CardPreview";
 import { runeOutcomeLabels, type RuneEvent } from "./game/rune-presentation";
 import { decks } from "./data/decks";
@@ -143,6 +149,7 @@ export default function App() {
     return () => document.removeEventListener("visibilitychange", update);
   }, []);
   const game = review?.frames[review.index]?.state || match;
+  const drawEvent = review?.frames[review.index]?.draw;
   useEffect(() => {
     if (!import.meta.env.DEV) return;
     Object.assign(window, {
@@ -189,6 +196,7 @@ export default function App() {
   const [deckDetails, setDeckDetails] = useState<StarterDeck | null>(null);
   const [playerDeck, setPlayerDeck] = useState(decks[0]?.id || "");
   const [botDeck, setBotDeck] = useState(decks[1]?.id || decks[0]?.id || "");
+  const [fieldChoices, setFieldChoices] = useState<Record<string, string>>({});
   const [inspected, setInspected] = useState<CatalogCard | null>(null);
   const [pileView, setPileView] = useState<PileView | null>(null);
   const [help, setHelp] = useState(false);
@@ -355,6 +363,11 @@ export default function App() {
   }, []);
   const selectedPlayerDeck = allDecks.find((d) => d.id === playerDeck);
   const selectedBotDeck = allDecks.find((d) => d.id === botDeck);
+  const playerBattlefield =
+    fieldChoices[`player:${playerDeck}`] ??
+    defaultBattlefield(selectedPlayerDeck);
+  const botBattlefield =
+    fieldChoices[`bot:${botDeck}`] ?? defaultBattlefield(selectedBotDeck);
   const matchReady = Boolean(
     selectedPlayerDeck &&
     selectedBotDeck &&
@@ -406,6 +419,8 @@ export default function App() {
           playerDeck: selectedPlayerDeck,
           botDeck: selectedBotDeck,
           botDeckId: botDeck,
+          playerBattlefieldId: playerBattlefield,
+          botBattlefieldId: botBattlefield,
           seed: Math.floor(Math.random() * 2147483646) + 1,
         }),
       );
@@ -520,11 +535,39 @@ export default function App() {
             onExport={exportDeck}
             onHelp={() => setHelp(true)}
             onLibrary={() => setScreen("library")}
+            playerBattlefield={playerBattlefield}
+            botBattlefield={botBattlefield}
+            onPlayerBattlefield={(id) =>
+              setFieldChoices((current) => ({
+                ...current,
+                [`player:${playerDeck}`]: id,
+              }))
+            }
+            onBotBattlefield={(id) =>
+              setFieldChoices((current) => ({
+                ...current,
+                [`bot:${botDeck}`]: id,
+              }))
+            }
+            onInspect={setInspected}
           />
         )}
         {screen === "library" && <Library inspect={setInspected} />}
         {screen === "game" && game && (
-          <main className="game-layout" id="main-content">
+          <main
+            className="game-layout"
+            id="main-content"
+            data-playback-paused={
+              paused ||
+              previewActive ||
+              !visible ||
+              !!inspected ||
+              !!pileView ||
+              help ||
+              logOpen ||
+              confirmNew
+            }
+          >
             <div className="match-toolbar">
               <button
                 className="text-button"
@@ -597,6 +640,7 @@ export default function App() {
             >
               <div className="match-content">
                 <div className="playmat">
+                  <ScoreTrack game={game} review={review} />
                   <PlayerBar game={game} player={1} inspect={setInspected} />
                   <div className="player-cards opponent-cards">
                     <div className="opponent-hand-section">
@@ -653,7 +697,9 @@ export default function App() {
                           <div
                             className="field-art"
                             style={{
-                              backgroundImage: `url(/art/${i === 0 ? "ancient-altar" : "moonlit-willow"}.webp)`,
+                              backgroundImage: c
+                                ? `url(${cardArtUrl(c)})`
+                                : undefined,
                             }}
                           />
                           <div className="field-heading">
@@ -682,6 +728,7 @@ export default function App() {
                           </div>
                           <Destination location={field.id} />
                           <FieldEffect review={review} fieldId={field.id} />
+                          <FieldScoring review={review} fieldId={field.id} />
                           <ShowdownCue
                             game={game}
                             review={review}
@@ -777,7 +824,17 @@ export default function App() {
                         {game.players[0].hand.map((id, i) => {
                           const c = findCard(id);
                           return c ? (
-                            <div className="hand-card-wrap" key={`${id}-${i}`}>
+                            <div
+                              className={`hand-card-wrap ${drawEvent?.player === 0 && i >= game.players[0].hand.length - drawEvent.count ? "hand-draw-arrival" : ""}`}
+                              style={
+                                review
+                                  ? ({
+                                      "--draw-duration": `${reviewDelay(review)}ms`,
+                                    } as React.CSSProperties)
+                                  : undefined
+                              }
+                              key={`${id}-${i}`}
+                            >
                               <Card
                                 card={c}
                                 selected={
@@ -823,6 +880,11 @@ export default function App() {
                   </div>
                 </div>
                 <EffectTrails review={review} />
+                <TableMoment
+                  game={game}
+                  review={review}
+                  inspect={setInspected}
+                />
               </div>
               <MatchControls
                 game={game}
