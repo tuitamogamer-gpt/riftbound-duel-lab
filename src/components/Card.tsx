@@ -5,6 +5,8 @@ import { cardArtUrl } from "../data/art";
 import { readableText } from "../data/cards";
 import { domainColors } from "../catalog";
 import { useI18n } from "../i18n";
+import type { CardStatus } from "../game/status-presentation";
+import { CardStatusTokens } from "./CardStatusTokens";
 import { ExhaustedToken } from "./ExhaustedToken";
 import { RulesErrata } from "./RulesErrata";
 export function Card({
@@ -19,6 +21,7 @@ export function Card({
   might,
   preview = true,
   playable = false,
+  statuses,
 }: {
   card: CatalogCard;
   onClick?: () => void;
@@ -31,6 +34,7 @@ export function Card({
   might?: number;
   preview?: boolean;
   playable?: boolean;
+  statuses?: CardStatus[];
 }) {
   const { t } = useI18n();
   const [failed, setFailed] = useState(false);
@@ -43,13 +47,19 @@ export function Card({
       aria-label={
         card.name +
         (footer ? `: ${t(footer)}` : "") +
-        (ready === false ? ` · ${t("Exhausted")}` : "")
+        (ready === false ? ` · ${t("Exhausted")}` : "") +
+        (statuses?.length
+          ? ` · ${statuses.map((status) => t(status.label, status.values)).join(" · ")}`
+          : "")
       }
       data-card-preview={preview ? card.id : undefined}
       data-card-ready={ready}
       data-card-damage={damage}
       data-card-might={might}
       data-card-footer={footer}
+      data-card-statuses={
+        statuses?.length ? JSON.stringify(statuses) : undefined
+      }
       style={
         {
           "--card-accent": domainColors[card.domains[0]] || "#bd9b64",
@@ -75,7 +85,10 @@ export function Card({
       )}
       <span className="card-shine" />
       <ExhaustedToken ready={ready} />
-      {damage ? <span className="damage-badge">−{damage}</span> : null}
+      {statuses && <CardStatusTokens statuses={statuses} />}
+      {damage && !statuses?.some((status) => status.id === "damage") ? (
+        <span className="damage-badge">−{damage}</span>
+      ) : null}
       {footer && <span className="card-footer">{t(footer)}</span>}
       <span className="card-zoom">
         <Search size={13} />
@@ -87,10 +100,18 @@ export function CardDetail({
   card,
   scripted,
   onClose,
+  ready,
+  damage,
+  might,
+  statuses,
 }: {
   card: CatalogCard;
   scripted: boolean;
   onClose: () => void;
+  ready?: boolean;
+  damage?: number;
+  might?: number;
+  statuses?: CardStatus[];
 }) {
   const { t } = useI18n();
   return (
@@ -109,7 +130,14 @@ export function CardDetail({
         >
           ×
         </button>
-        <Card card={card} preview={false} />
+        <Card
+          card={card}
+          preview={false}
+          ready={ready}
+          damage={damage}
+          might={might}
+          statuses={statuses}
+        />
         <div>
           <div className="eyebrow">
             {card.setName} / {card.id}
@@ -130,6 +158,11 @@ export function CardDetail({
               t("Ova karta nema dodatni tekst efekta.")}
           </p>
           <RulesErrata name={card.name} />
+          {statuses && statuses.length > 0 && (
+            <section aria-label={t("Active effects")}>
+              <CardStatusTokens statuses={statuses} expanded />
+            </section>
+          )}
           <div className="stat-row">
             {card.energy !== null && (
               <span>
@@ -142,10 +175,10 @@ export function CardDetail({
                 ◈ {card.power} {t("power")}
               </span>
             )}
-            {card.might !== null && (
+            {(might !== undefined || card.might !== null) && (
               <span>
                 <Shield size={16} />
-                {card.might} {t("might")}
+                {might ?? card.might} {t("might")}
               </span>
             )}
           </div>

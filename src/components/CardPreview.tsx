@@ -16,6 +16,7 @@ import { cardArtUrl } from "../data/art";
 import { readableText } from "../data/cards";
 import "./CardPreview.css";
 import { useI18n } from "../i18n";
+import { CardStatusTokens, readCardStatuses } from "./CardStatusTokens";
 import { ExhaustedToken } from "./ExhaustedToken";
 import { RulesErrata } from "./RulesErrata";
 
@@ -158,6 +159,7 @@ export function CardPreviewProvider({ children }: { children: ReactNode }) {
         "data-card-damage",
         "data-card-might",
         "data-card-footer",
+        "data-card-statuses",
       ],
     });
     document.addEventListener("pointerover", onPointerOver);
@@ -290,6 +292,7 @@ export function PreviewPanel({
   const damage = Number(anchor.dataset.cardDamage || 0);
   const might = anchor.dataset.cardMight;
   const footer = anchor.dataset.cardFooter;
+  const statuses = readCardStatuses(anchor.dataset.cardStatuses);
   return (
     <aside
       id={id}
@@ -316,6 +319,7 @@ export function PreviewPanel({
           </div>
         )}
         <ExhaustedToken ready={previewReady} />
+        <CardStatusTokens statuses={statuses} />
         <span className="card-preview-set">
           {card.set} · {card.collectorNumber}
         </span>
@@ -356,6 +360,14 @@ export function PreviewPanel({
           {readableText(card.text) || t("Ova karta nema dodatni tekst efekta.")}
         </p>
         <RulesErrata name={card.name} />
+        {statuses.length > 0 && (
+          <section
+            className="card-preview-effects"
+            aria-label={t("Active effects")}
+          >
+            <CardStatusTokens statuses={statuses} expanded />
+          </section>
+        )}
         {(ready || damage > 0 || footer) && (
           <div className="card-preview-state">
             {ready && (

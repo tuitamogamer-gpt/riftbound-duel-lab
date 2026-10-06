@@ -489,7 +489,7 @@
   line-height: 1;
 }
 .app.is-game .gear-zone {
-  border-top: 1px solid var(--gold-line);
+  border-left-color: var(--gold-line);
 }
 .app.is-game .gear-zone-heading {
   color: var(--gold);

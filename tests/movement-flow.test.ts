@@ -85,7 +85,6 @@ describe("board-first movement selection", () => {
         null,
         createElement(MatchControls, {
           inspect: () => {},
-          openPile: () => {},
           game,
           legal,
           selected: null,
@@ -128,7 +127,6 @@ describe("board-first movement selection", () => {
         null,
         createElement(MatchControls, {
           inspect: () => {},
-          openPile: () => {},
           game,
           legal,
           selected: null,

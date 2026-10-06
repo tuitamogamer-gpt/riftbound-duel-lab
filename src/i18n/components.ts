@@ -10,6 +10,12 @@ export const componentMessages: Record<string, [string, string, string]> = {
     "Protivnički gear i equipment",
     "Oggetti ed equipaggiamenti avversari",
   ],
+  "Previous gear": [
+    "Previous gear",
+    "Prethodna oprema",
+    "Equipaggiamento precedente",
+  ],
+  "More gear": ["More gear", "Još opreme", "Altro equipaggiamento"],
   "Gear & equipment": [
     "Gear & equipment",
     "Gear i equipment",

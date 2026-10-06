@@ -1,18 +1,11 @@
-/* Public gear is a separate row of real card faces. Row overflow stays local. */
+/* Units and gear share the full base height, separated by a vertical divider.
+   Adding equipment must never change the table tracks or shrink unit cards. */
 .app.is-game .base-zone.has-gear {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   justify-content: stretch;
-  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 5px;
-}
-.app.is-game .has-gear .base-units {
-  container-type: size;
-  height: 100%;
-  --unit-card-height: min(
-    calc(100cqh - 8px),
-    calc((100cqw - 4px) * 1039 / 744)
-  );
+  gap: 10px;
 }
 .gear-zone {
   display: grid;
@@ -20,13 +13,13 @@
   grid-template-rows: minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
-  border-top: 1px solid #b89d6255;
-  padding-top: 14px;
+  border-left: 1px solid #b89d6255;
+  padding-left: 10px;
 }
 .gear-zone-heading {
   position: absolute;
-  top: 1px;
-  left: 0;
+  top: -17px;
+  left: 10px;
   right: 0;
   display: flex;
   align-items: center;
@@ -37,34 +30,52 @@
   letter-spacing: 1px;
   text-transform: uppercase;
 }
+.gear-zone-heading > span {
+  min-width: 0;
+}
 .gear-zone-heading b {
   margin-left: auto;
 }
+.gear-navigation {
+  display: flex;
+  flex: none;
+  gap: 2px;
+}
+.gear-navigation button {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid #b89d6255;
+  border-radius: 3px;
+  color: #ffe2a8;
+  background: #132830;
+}
+.gear-navigation button:disabled {
+  opacity: 0.35;
+}
+.gear-navigation button:focus-visible {
+  outline: 2px solid #ffe2a8;
+  outline-offset: 1px;
+}
 .gear-slots {
   container-type: size;
-  --gear-height: min(
-    100cqh,
-    140px,
-    max(
-      54px,
-      calc(
-        (100cqw - (var(--gear-count) - 1) * 7px) / var(--gear-count) * 1039 /
-          744
-      )
-    )
-  );
+  --gear-height: min(100cqh, 112px, calc(100cqw * 1039 / 744));
   --gear-width: calc(var(--gear-height) * 744 / 1039);
   display: flex;
-  align-items: start;
+  align-items: center;
   gap: 7px;
   min-width: 0;
   min-height: 0;
   overflow-x: auto;
   overflow-y: hidden;
   padding: 2px 3px 4px;
-  scrollbar-width: thin;
-  scrollbar-color: #a28d63 #132830;
+  scrollbar-width: none;
   overscroll-behavior-x: contain;
+}
+.gear-slots::-webkit-scrollbar {
+  display: none;
 }
 .gear-slot {
   position: relative;
@@ -200,61 +211,36 @@ img.signature-sleeve {
   max-width: 34ch;
 }
 
-@media (min-width: 1100px) and (min-height: 650px) {
+@media (max-width: 800px) {
   .app.is-game .base-zone.has-gear {
-    padding-bottom: 7px;
-    grid-template-rows: minmax(0, 0.8fr) minmax(0, 1.3fr);
-  }
-  .app.is-game .base-zone.has-gear[data-location="base:1"] {
-    padding-top: 70px;
-  }
-  .app.is-game .opponent-cards > .opponent-hand-section {
-    height: 36px;
-  }
-  .app.is-game .card-back {
-    width: 22px;
-    height: 31px;
-  }
-  .app.is-game .player-cards .enemy-hand {
-    flex-wrap: nowrap;
-    flex-basis: 120px;
-  }
-  .app.is-game .player-cards .enemy-hand > span {
-    flex: 1;
-    font-size: 9px;
-    margin: 0;
-  }
-  .app.is-game .base-zone.has-gear:has(.base-units > .empty-base) {
-    grid-template-rows: 18px minmax(0, 1fr);
-  }
-  .app.is-game .has-gear .empty-base {
-    font-size: 9px;
-    line-height: 1;
-    max-width: none;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-@media (max-width: 1099px), (max-height: 649px) {
-  .app.is-game .playmat:has(.has-gear) {
-    grid-template-rows:
-      23px minmax(44px, 0.95fr) minmax(112px, 1.65fr) minmax(150px, 3fr)
-      minmax(112px, 1.65fr) 23px minmax(64px, 1.35fr);
-  }
-  .app.is-game .base-zone.has-gear {
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-    grid-template-rows: minmax(0, 1fr);
-    padding-top: 8px;
-    gap: 8px;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 5px;
   }
   .gear-zone {
-    padding-top: 11px;
+    padding-left: 5px;
   }
   .gear-zone-heading {
-    font-size: 7px;
-    line-height: 9px;
-    letter-spacing: 0.5px;
+    top: -14px;
+    left: 5px;
+    font-size: 6px;
+    line-height: 10px;
+    letter-spacing: 0;
+    gap: 2px;
+  }
+  .gear-zone-heading span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .gear-zone-heading > svg {
+    display: none;
+  }
+  .gear-navigation {
+    gap: 1px;
+  }
+  .gear-navigation button {
+    width: 13px;
+    height: 13px;
   }
   .gear-slots {
     gap: 6px;
@@ -266,26 +252,6 @@ img.signature-sleeve {
   .gear-slot .exhausted-token {
     width: 20px;
     height: 20px;
-  }
-}
-/* Shorter desktop tables retain full card faces by placing the two lanes beside
-   one another. Tall screens keep equipment directly below the unit row. */
-@media (min-width: 1100px) and (min-height: 650px) and (max-height: 940px) {
-  .app.is-game .base-zone.has-gear,
-  .app.is-game .base-zone.has-gear:has(.base-units > .empty-base) {
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-    grid-template-rows: minmax(0, 1fr);
-    gap: 10px;
-  }
-  .app.is-game .base-zone.has-gear[data-location="base:1"] {
-    padding-top: 63px;
-  }
-  .app.is-game .opponent-cards > .opponent-hand-section {
-    margin-top: 23px;
-  }
-  .gear-zone-heading {
-    font-size: 8px;
-    letter-spacing: 0.3px;
   }
 }
 @media (max-width: 650px) {
@@ -307,13 +273,5 @@ img.signature-sleeve {
   }
   .app.is-game .player-cards .enemy-hand > span {
     font-size: 6px;
-  }
-}
-@media (max-height: 740px) and (max-width: 1099px), (max-height: 600px) {
-  .app.is-game .match-content:has(.has-gear) {
-    overflow-y: auto;
-  }
-  .app.is-game .playmat:has(.has-gear) {
-    min-height: 555px;
   }
 }

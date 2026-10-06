@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Active card status tokens QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Synthetic fixture on a separate local origin; never the user's live save.
+      import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      const match = createCombatFixture();
+      match.phase = "main";
+      match.turnStep = "main";
+      match.combat = null;
+      match.units = [
+        {
+          ...combatUnit("ready-stunned", 0, 3, "ogn-010-298"),
+          location: "base:0",
+          ready: true,
+          stunned: true,
+        },
+        {
+          ...combatUnit("exhausted-stunned", 1, 4, "ogn-088-298"),
+          location: "field:0",
+          ready: false,
+          stunned: true,
+        },
+        {
+          ...combatUnit("stacked-statuses", 0, 5, "ogn-049-298"),
+          location: "field:1",
+          ready: true,
+          buff: 1,
+          temporaryMight: 2,
+          preventDamage: 3,
+          moveLockedTurn: match.turn,
+        },
+      ];
+      match.gears = [
+        {
+          id: "temporary-empowered-gear",
+          owner: 0,
+          cardId: "ogn-017-298",
+          ready: true,
+          temporary: true,
+          empowered: true,
+        },
+      ];
+      if (new URLSearchParams(location.search).has("plain")) {
+        for (const unit of match.units) {
+          unit.ready = true;
+          unit.stunned = false;
+          unit.buff = 0;
+          unit.temporaryMight = 0;
+          unit.preventDamage = 0;
+          delete unit.moveLockedTurn;
+          delete unit.baseMightOverride;
+        }
+        for (const gear of match.gears) {
+          gear.temporary = false;
+          gear.empowered = false;
+        }
+      }
+      match.players[0].hand = ["ogn-098-298", "ogn-017-298", "ogn-083-298"];
+      match.players[1].hand = ["ogn-219-298", "ogn-088-298", "ogn-090-298"];
+      for (const player of match.players) {
+        player.championAvailable = true;
+        player.energy = 8;
+        player.power = 4;
+        player.runes = [
+          { id: `rune-${player.id}`, domain: "Fury", ready: true },
+        ];
+      }
+      match.fields[0].controller = 1;
+      match.fields[1].controller = 0;
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review: null }));
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

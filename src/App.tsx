@@ -56,8 +56,9 @@ import {
   getMight,
 } from "./game/engine";
 import { isMovementSelection, sourceActions } from "./game/flow";
+import { gearStatuses, unitStatuses } from "./game/status-presentation";
 import { MatchControls } from "./components/MatchControls";
-import { PileDialog, type PileView } from "./components/CardPiles";
+import { CardPiles, PileDialog, type PileView } from "./components/CardPiles";
 import { TurnFlow, ShowdownCue, CombatReadout } from "./components/TurnFlow";
 import { reviewDelay, automaticDelay, matchStatus } from "./game/presentation";
 import {
@@ -235,7 +236,23 @@ export default function App() {
   const [playerDeck, setPlayerDeck] = useState(decks[0]?.id || "");
   const [botDeck, setBotDeck] = useState(decks[1]?.id || decks[0]?.id || "");
   const [fieldChoices, setFieldChoices] = useState<Record<string, string>>({});
-  const [inspected, setInspected] = useState<CatalogCard | null>(null);
+  const [inspection, setInspection] = useState<{
+    card: CatalogCard;
+    sourceId?: string;
+  } | null>(null);
+  const inspected = inspection?.card ?? null;
+  const setInspected = useCallback(
+    (card: CatalogCard | null, sourceId?: string) => {
+      setInspection(card ? { card, sourceId } : null);
+    },
+    [],
+  );
+  const inspectedUnit = game?.units.find(
+    (unit) => unit.id === inspection?.sourceId,
+  );
+  const inspectedGear = game?.gears.find(
+    (gear) => gear.id === inspection?.sourceId,
+  );
   const [pileView, setPileView] = useState<PileView | null>(null);
   const [help, setHelp] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
@@ -984,6 +1001,7 @@ export default function App() {
                           ) : null;
                         })}
                       </div>
+                      <CardPiles game={game} open={setPileView} />
                     </section>
                     <RuneZone game={game} player={0} inspect={setInspected} />
                     <ChampionZone
@@ -1024,7 +1042,6 @@ export default function App() {
                 }}
                 mulligan={mulligan}
                 inspect={setInspected}
-                openPile={setPileView}
               />
             </BoardInteraction.Provider>
             {pileView && (
@@ -1258,6 +1275,18 @@ export default function App() {
           <CardDetail
             card={inspected}
             scripted={supported(inspected)}
+            ready={inspectedUnit?.ready ?? inspectedGear?.ready}
+            damage={inspectedUnit?.damage}
+            might={
+              game && inspectedUnit ? getMight(game, inspectedUnit) : undefined
+            }
+            statuses={
+              game && inspectedUnit
+                ? unitStatuses(game, inspectedUnit)
+                : game && inspectedGear
+                  ? gearStatuses(game, inspectedGear)
+                  : undefined
+            }
             onClose={() => setInspected(null)}
           />
         )}
@@ -1439,7 +1468,7 @@ function UnitRow({
   units: Unit[];
   select: (id: string) => void;
   selected: string | null;
-  inspect: (c: CatalogCard) => void;
+  inspect: (c: CatalogCard, sourceId?: string) => void;
 }) {
   const { t } = useI18n();
   const h = useHighlights();
@@ -1465,6 +1494,9 @@ function UnitRow({
               small
               ready={u.ready}
               damage={u.damage}
+              statuses={
+                interaction.game ? unitStatuses(interaction.game, u) : undefined
+              }
               might={
                 interaction.game
                   ? getMight(interaction.game, u)
@@ -1501,7 +1533,7 @@ function UnitRow({
             </div>
             <button
               className="unit-info"
-              onClick={() => inspect(c)}
+              onClick={() => inspect(c, u.id)}
               aria-label={t("Detalji {card}", { card: c.name })}
             >
               ⓘ
@@ -1560,7 +1592,7 @@ function BoardZone({
   title: string;
   select: (id: string) => void;
   selected: string | null;
-  inspect: (c: CatalogCard) => void;
+  inspect: (c: CatalogCard, sourceId?: string) => void;
 }) {
   const { t } = useI18n();
   const units = game.units.filter((u) => u.location === location);
@@ -1574,7 +1606,10 @@ function BoardZone({
     >
       <span className="zone-label">{t(title)}</span>
       <Destination location={location} />
-      <div className="base-units">
+      <div
+        className="base-units"
+        style={{ "--unit-count": units.length } as React.CSSProperties}
+      >
         <UnitRow
           units={units}
           select={select}

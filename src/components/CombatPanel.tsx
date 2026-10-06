@@ -15,6 +15,7 @@ import {
   type CombatStep,
 } from "../game/engine";
 import type { GameAction, GameState, PlayerId, Unit } from "../game/types";
+import { unitStatuses } from "../game/status-presentation";
 import { Card } from "./Card";
 import type { Review } from "./StepFlow";
 import "./CombatPanel.css";
@@ -132,7 +133,7 @@ export function CombatPanel({
   review: Review | null;
   legal: GameAction[];
   onAction: (action: GameAction) => void;
-  inspect: (card: CatalogCard) => void;
+  inspect: (card: CatalogCard, sourceId?: string) => void;
 }) {
   const { t } = useI18n();
   const view = getCombatView(game, review);
@@ -354,11 +355,15 @@ export function CombatPanel({
                           card={card}
                           small
                           onClick={() =>
-                            action ? onAction(action) : inspect(card)
+                            action ? onAction(action) : inspect(card, unit.id)
                           }
                           selected={!!action}
                           might={hit?.might ?? might}
                           damage={damage}
+                          statuses={unitStatuses(game, {
+                            ...(entry.current ?? unit),
+                            damage,
+                          })}
                           ready={entry.current?.ready ?? unit.ready}
                         />
                         {stage === "impact" &&

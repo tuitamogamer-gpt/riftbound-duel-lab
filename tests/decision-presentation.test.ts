@@ -47,7 +47,6 @@ describe("visible decision cards and piles", () => {
         resume: vi.fn(),
         mulligan: [],
         inspect: vi.fn(),
-        openPile: vi.fn(),
       }),
     );
     expect(html).toContain(`data-decision-card="${game.units[0].cardId}"`);

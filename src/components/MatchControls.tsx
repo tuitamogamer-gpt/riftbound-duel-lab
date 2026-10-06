@@ -3,7 +3,6 @@ import { ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { findCard, type CatalogCard } from "../catalog";
 import { cardArtUrl } from "../data/art";
 import { Card } from "./Card";
-import { CardPiles, type PileView } from "./CardPiles";
 import { readableText } from "../data/cards";
 import { decisionActions, selectedCardId, sourceActions } from "../game/flow";
 import type { GameAction, GameState } from "../game/types";
@@ -34,7 +33,6 @@ export function MatchControls({
   step,
   mulligan,
   inspect,
-  openPile,
 }: {
   game: GameState;
   legal: GameAction[];
@@ -49,7 +47,6 @@ export function MatchControls({
   step?: (direction: -1 | 1) => void;
   mulligan: number[];
   inspect: (card: CatalogCard) => void;
-  openPile: (view: PileView) => void;
 }) {
   const { t } = useI18n();
   const window = priorityWindow(game);
@@ -401,7 +398,6 @@ export function MatchControls({
           </>
         )}
       </div>
-      <CardPiles game={game} open={openPile} />
     </section>
   );
 }

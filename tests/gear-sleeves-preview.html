@@ -11,6 +11,9 @@
       // Synthetic fixture on a separate local origin; never the user's live save.
       import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
       import { SAVE_KEY } from "/src/persistence.ts";
+      const params = new URLSearchParams(location.search);
+      const fixtureCount = (name, fallback = 0) =>
+        Math.max(0, Math.min(30, Number(params.get(name) || fallback) || 0));
       const match = createCombatFixture();
       match.phase = "main";
       match.turnStep = "main";
@@ -41,9 +44,7 @@
         { id: "enemy-gear", owner: 1, cardId: "ogn-090-298", ready: true },
         { id: "enemy-gear-2", owner: 1, cardId: "ogn-120-298", ready: false },
       ];
-      const count = Number(
-        new URLSearchParams(location.search).get("crowded") || 0,
-      );
+      const count = fixtureCount("crowded");
       for (let i = 0; i < count; i++)
         match.gears.push({
           id: `extra-${i}`,
@@ -51,7 +52,24 @@
           cardId: "ogn-017-298",
           ready: true,
         });
+      if (params.has("no-gear")) {
+        match.gears = [];
+        for (const unit of match.units) unit.gear = [];
+      }
+      for (const owner of [0, 1]) {
+        for (let i = 1; i < fixtureCount("units", 1); i++)
+          match.units.push({
+            ...combatUnit(`base-${owner}-${i}`, owner, 3, "ogn-010-298"),
+            location: `base:${owner}`,
+            ready: true,
+          });
+      }
       match.players[0].hand = ["ogn-098-298", "ogn-017-298", "ogn-083-298"];
+      if (params.has("hand"))
+        match.players[0].hand = Array.from(
+          { length: fixtureCount("hand") },
+          (_, i) => ["ogn-098-298", "ogn-017-298", "ogn-083-298"][i % 3],
+        );
       match.players[1].hand = ["ogn-219-298", "ogn-088-298", "ogn-090-298"];
       for (const player of match.players) {
         player.championAvailable = true;
