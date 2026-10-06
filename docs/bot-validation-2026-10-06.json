@@ -1,0 +1,135 @@
+{
+  "date": "2026-10-06",
+  "configVersion": "battlefield-planner-1",
+  "sourceHashes": {
+    "scripts/bot-benchmark.ts": "0fec55bb96a4d87bc6a0809057736888febf4912eaa11d4d0aa580d200bc9353",
+    "src/App.tsx": "d9b45239d988d9ff7d650ab8335d940583302730eae2344211b1e580f160b657",
+    "src/game/ai/candidates.ts": "41ceb457df813eb321668733f0dd3fb2c101fd713dfa0f40b784afb7cda46e1e",
+    "src/game/ai/config.ts": "6e1a2a1a0a7032e4e4f9eab67382ada217a56b7c99c11032fafedb8723d90ea8",
+    "src/game/ai/decisions.ts": "a25146a3e9aebb5a6c50a9156c016d8d32a2ff2c46bc569ba3415ea187beb0e5",
+    "src/game/ai/evaluate.ts": "9e87bf28456c5c3972479e316ec9950f847f38ce446f86e7506dfeb8f78fb243",
+    "src/game/ai/observation.ts": "c1b4bbf2b04b173ebb0cffc99a298c4c8310538f1c9d548d7a1ba63658a6a301",
+    "src/game/ai/planner.ts": "5145c7f86ad8f3d3972aae018919b7b8706e145ce788ad5422a12a4a743956db",
+    "src/game/ai/presentation.ts": "bdca95f640b7a582e3af91e4246fb2c79359415419ffac3b98e54be792cf51d2",
+    "src/game/ai/replay.ts": "7fd2233196ee7405dc620051dd452bcf2d790d35fbdf79c6defcb4555350264a",
+    "src/game/ai/worker.ts": "35a7f95f462d25a5e645f95574bffdf4f98a52cddff6c2c85ff5fc120063b79e",
+    "src/game/bot-reference.ts": "239dd88297b2e3e8299220b1145df75a9aba61387a2c797c2fa9669fb017d87f",
+    "src/game/bot.ts": "dfff967aede99906073b7fc43ed0394c9e02a09af6b0b03c08c7768442618bb1",
+    "src/game/engine.ts": "f4d05233facaea9b51eb9a6a6e8e2dfde11675538c13fcd6ceccbf1c1e608e39",
+    "src/game/types.ts": "300dc6d867433084b2d9f2888ae7b27a75c9175ae5c52b721f25f60239417f4d",
+    "src/hooks/useBotDecision.ts": "77f89eb3f8148245a27cd59d3f0d3f71d2c9f3e0cbb108f89d85378b4672e608",
+    "tests/ai-acceptance.test.ts": "0cdda1ce12196d68b6bd4b69d33e01cf00aed1c8e2700f000cc6e89a6a85d200"
+  },
+  "formatId": "duel-lab-supported-1v1",
+  "rulesVersion": "core-2026-07-16+vendetta-faq-2026-08-14",
+  "cardDataVersion": "0861c196b3100198a9fffa7b9465afc76a2e4b07db84e63e8efa6145fea25f6c",
+  "checks": {
+    "fullSuite": {
+      "command": "npm test",
+      "passed": true,
+      "files": 55,
+      "tests": 1593,
+      "seconds": 930.58,
+      "scope": "Full engine, UI helpers, 169 ordered precon pairings, 48 practice games and mixed-expansion coverage; run before the final Expert-only risk-aggregation correction."
+    },
+    "finalBotSuite": {
+      "command": "npm run test:bots",
+      "passed": true,
+      "files": 3,
+      "tests": 51,
+      "seconds": 1.16,
+      "scope": "Final code, including two additional regressions added after the full run: contextual Power payment and duplicate hidden-response risk invariance."
+    },
+    "build": {
+      "command": "npm run build",
+      "passed": true,
+      "notes": [
+        "TypeScript and Vite production bundle pass.",
+        "Main and worker bundle sizes still trigger the existing >500 kB chunk warning."
+      ]
+    },
+    "catalog": {
+      "command": "npm run cards:check",
+      "passed": true,
+      "registered": 1456,
+      "executable": 1102,
+      "unsupported": 354
+    },
+    "diffWhitespace": {
+      "command": "git diff --check",
+      "passed": true
+    }
+  },
+  "pairedGames": {
+    "report": "bot-benchmark-2026-10-06.json",
+    "finalComparisons": 96,
+    "recordedWithCalibration": 120,
+    "illegal": 0,
+    "blocked": 0,
+    "decisions": 11434,
+    "fallbacks": 23,
+    "outcomes": [
+      {
+        "strong": "beginner",
+        "weak": "reference",
+        "wins": {
+          "strong": 14,
+          "weak": 10
+        }
+      },
+      {
+        "strong": "normal",
+        "weak": "beginner",
+        "wins": {
+          "strong": 16,
+          "weak": 8
+        }
+      },
+      {
+        "strong": "hard",
+        "weak": "normal",
+        "wins": {
+          "strong": 13,
+          "weak": 11
+        }
+      },
+      {
+        "strong": "expert",
+        "weak": "hard",
+        "wins": {
+          "strong": 13,
+          "weak": 11
+        }
+      }
+    ],
+    "limitation": "All four stronger policies won more games in this pilot; margins of 13 to 11 do not establish reliable superiority."
+  },
+  "browser": {
+    "build": "Production Vite bundle on 127.0.0.1:5182",
+    "worker": true,
+    "consoleErrors": 0,
+    "winningFixture": {
+      "difficulty": "expert",
+      "winner": 1,
+      "score": [0, 8],
+      "decisions": 3,
+      "revision": 3
+    },
+    "downloadedReplayReexecuted": true,
+    "privatePredictNameVisible": false,
+    "viewports": [
+      {
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "width": 390,
+        "height": 844
+      }
+    ],
+    "screenshots": [
+      "screenshots/bot-expert-ended.png",
+      "screenshots/bot-mobile-explanation.png"
+    ]
+  }
+}

@@ -9,6 +9,8 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:bots": "vitest run tests/ai-acceptance.test.ts tests/new-bot.test.ts tests/bot-tactics.test.ts",
+    "bot:benchmark": "vite-node scripts/bot-benchmark.ts",
     "sync:cards": "node scripts/sync-cards.mjs && npm run cards:report",
     "cache:art": "node scripts/cache-playable-art.mjs",
     "format": "prettier --write src tests docs *.json *.ts *.md",

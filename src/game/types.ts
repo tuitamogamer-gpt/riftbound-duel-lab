@@ -59,6 +59,9 @@ export interface PlayerState {
   freeHideTurn?: number;
   firstGearPlayedTurn?: number;
   grantedFlow?: { trashId: string; turn: number }[];
+  /** Unordered registered lists, never the remaining deck order. */
+  deckList?: string[];
+  runeList?: Domain[];
   id: PlayerId;
   name: string;
   deckId: string;
@@ -149,6 +152,18 @@ export interface Combat {
   assigningPlayer: PlayerId;
 }
 export interface GameState {
+  revision?: number;
+  matchConfig?: {
+    formatId: string;
+    rulesVersion: string;
+    cardDataVersion: string;
+    supportedCardIds: string[];
+    openDecklists: boolean;
+  };
+  botSettings?: {
+    difficulty: "beginner" | "normal" | "hard" | "expert";
+    seed: number;
+  };
   /** Presentation of the turn opening; priority and legality still use phase. */
   turnStep?: TurnStep;
   stagedFields?: LocationId[];
@@ -250,6 +265,8 @@ export type ActionCategory =
   | "end"
   | "resource";
 export interface GameAction {
+  /** A permutation of existing runes, consumed by the shared payment resolver. */
+  paymentRuneOrder?: string[];
   id: string;
   label: string;
   category: ActionCategory;
@@ -490,6 +507,9 @@ export interface CardScript {
   notes?: string;
 }
 export interface GameOptions {
+  botDifficulty?: "beginner" | "normal" | "hard" | "expert";
+  botSeed?: number;
+  openDecklists?: boolean;
   playerDeckId?: string;
   playerDeck?: StarterDeck;
   botDeck?: StarterDeck;

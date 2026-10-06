@@ -426,6 +426,21 @@ export function validState(x: unknown, actionable = true): x is GameState {
   if (
     !isObject(x) ||
     x.version !== 1 ||
+    !optionalCount(x.revision) ||
+    (x.botSettings !== undefined &&
+      (!isObject(x.botSettings) ||
+        !["beginner", "normal", "hard", "expert"].includes(
+          x.botSettings.difficulty,
+        ) ||
+        !count(x.botSettings.seed))) ||
+    (x.matchConfig !== undefined &&
+      (!isObject(x.matchConfig) ||
+        !["formatId", "rulesVersion", "cardDataVersion"].every(
+          (k) => typeof x.matchConfig[k] === "string",
+        ) ||
+        typeof x.matchConfig.openDecklists !== "boolean" ||
+        !Array.isArray(x.matchConfig.supportedCardIds) ||
+        !x.matchConfig.supportedCardIds.every(cardId))) ||
     !Array.isArray(x.players) ||
     x.players.length !== 2 ||
     !Array.isArray(x.fields) ||
@@ -457,6 +472,10 @@ export function validState(x: unknown, actionable = true): x is GameState {
         p.id === i &&
         typeof p.name === "string" &&
         typeof p.deckId === "string" &&
+        (p.deckList === undefined ||
+          (Array.isArray(p.deckList) && p.deckList.every(cardId))) &&
+        (p.runeList === undefined ||
+          (Array.isArray(p.runeList) && p.runeList.every(domain))) &&
         cardId(p.legendId) &&
         cardId(p.championId) &&
         ["championAvailable", "hasBegun", "mulliganDone"].every(

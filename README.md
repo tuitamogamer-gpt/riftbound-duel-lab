@@ -1,6 +1,6 @@
 # Riftbound Duel Lab
 
-A local-first, unofficial Riftbound 1v1 practice simulator with a deterministic rules engine, a heuristic opponent, and a full-viewport table, one decision bar, and automatic opponent/effect playback. English is the default interface language. Choose **ENG · English**, **SRB · Srpski** (Latin script), or **ITA · Italiano** in the header. The app remembers your choice locally, including after reload. Switching languages preserves the current match and review step. Card names, artwork and official rules text retain their original English.
+A local-first, unofficial Riftbound 1v1 practice simulator with a deterministic rules engine, four bot difficulty settings, and a full-viewport table, one decision bar, and automatic opponent/effect playback. English is the default interface language. Choose **ENG · English**, **SRB · Srpski** (Latin script), or **ITA · Italiano** in the header. The app remembers your choice locally, including after reload. Switching languages preserves the current match and review step. Card names, artwork and official rules text retain their original English.
 
 **Play:** [riftbound-duel-lab.vercel.app](https://riftbound-duel-lab.vercel.app/). Published on 2 October 2026; see [deployment details and verification](docs/DEPLOYMENT.md).
 
@@ -19,7 +19,11 @@ npm run build    # TypeScript + production build
 npm run preview  # serve the production build on loopback
 npm run sync:cards # refresh all provider cards and rebuild the script inventory
 npm run cards:check # verify the saved inventory matches engine support
+npm run test:bots # tactical, fairness, fallback and replay scenarios
+npm run bot:benchmark -- 12 # paired bot games and measured decision times
 ```
+
+Choose **Beginner**, **Normal**, **Hard**, or **Expert** in the lobby. The bot plans from its permitted observation in a Web Worker, responds during either player's turn, and uses the same legal actions, resource payment and combat resolver as the human. Open the **AI** control in the match toolbar for its public reason; a diagnostic replay becomes downloadable after the game ends. See [bot implementation, measured results and limits](docs/AI-BOTS.md).
 
 ## Starter precons and local deck import
 
@@ -74,7 +78,8 @@ Precon effects extend this with explicit discard, recycle, retrieval and Vision 
 - `src/game/deck-import.ts`: text import/export, validation, coverage reports, and local imported-deck storage.
 - `src/game/deck-sources.ts`: bounded local Piltover deck-code decoding and chosen-champion resolution.
 - `src/data/precon-lists.json`: sourced retail deck contents; `src/components/DeckImport.tsx`: the local import dialog.
-- `src/game/bot.ts`: public-information tactical bot.
+- `src/game/bot.ts`, `src/game/ai/`: observation/decision adapters, shared-engine beam planning, difficulty/profile configuration, diagnostics and replay.
+- `src/hooks/useBotDecision.ts`: worker scheduling, stale-response validation and legal watchdog fallback.
 - `src/data/`: normalized card catalog, provider provenance, bans, token metadata, and validated retail and practice decks.
 - `src/components/StepFlow.tsx`: manual review and event highlights.
 - `src/components/CardPreview.tsx`: shared viewport-aware hover/focus inspection.

@@ -14,7 +14,7 @@ import {
 } from "../src/game/engine";
 import { getCard } from "../src/data/cards";
 import { officialPreconDecks } from "../src/data/decks";
-import { getBotAction } from "../src/game/bot";
+import { decideBot } from "../src/game/bot";
 const ogn = (n: number) => `ogn-${String(n).padStart(3, "0")}-298`;
 const ogs = (n: number) => `ogs-${String(n).padStart(3, "0")}-024`;
 function position(): GameState {
@@ -691,50 +691,73 @@ describe("Precon timing and public rules edge cases", () => {
 });
 
 describe("all published starter precon matchups", () => {
-  it("completes all 169 ordered deck pairings with no illegal actions or stuck choices", () => {
-    const failures: string[] = [];
-    for (const [i, a] of officialPreconDecks.entries())
-      for (const [j, b] of officialPreconDecks.entries()) {
-        let s = createGame({
-          playerDeck: a,
-          botDeck: b,
-          seed: 7200 + i * 31 + j,
-        });
-        let steps = 0;
-        try {
-          for (; s.winner === null && steps < 3000; steps++) {
-            const action = getBotAction(s);
-            if (!action) throw new Error(`no legal action ${s.phase}`);
-            s = applyAction(s, action);
-            for (const p of s.players) {
-              const count =
-                p.hand.length +
-                p.deck.length +
-                p.discard.length +
-                p.banished.length +
-                Number(p.championAvailable) +
-                s.units.filter((u) => u.owner === p.id && !u.token).length +
-                s.gears.filter((g) => g.owner === p.id && !g.token).length +
-                s.stack.filter((x) => x.player === p.id && x.kind === "spell")
-                  .length +
-                (s.resolving ?? []).filter((x) => x.player === p.id).length +
-                (s.hidden ?? []).filter((h) => h.owner === p.id).length;
-              if (count !== 40)
-                throw new Error(
-                  `${p.deckId} conservation ${count} after ${action.id}; resolving=${(s.resolving ?? []).map((x) => x.cardId)} gears=${s.gears.map((g) => g.cardId + ":" + g.token)}`,
-                );
-              if (p.energy < 0 || p.runes.length + p.runeDeck.length !== 12)
-                throw new Error("resource invariant");
-            }
+  // Separate cases preserve every ordered pairing and allow the runner to report progress.
+  const pairs = officialPreconDecks.flatMap((a, i) =>
+    officialPreconDecks.map((b, j) => ({
+      a,
+      b,
+      i,
+      j,
+      name: `${a.id} vs ${b.id}`,
+    })),
+  );
+  it.each(pairs)(
+    "completes $name with card/rune conservation and no stuck decisions",
+    async ({ a, b, i, j }) => {
+      let s = createGame({
+        playerDeck: a,
+        botDeck: b,
+        seed: 7200 + i * 31 + j,
+      });
+      let steps = 0;
+      const seen = new Set<string>();
+      try {
+        for (; s.winner === null && steps < 3000; steps++) {
+          if (steps % 25 === 0)
+            await new Promise<void>((resolve) => setTimeout(resolve, 0));
+          const key = JSON.stringify({
+            ...s,
+            log: [],
+            nextId: 0,
+            revision: 0,
+          });
+          if (seen.has(key))
+            throw new Error(`Repeated rules state in ${s.phase}`);
+          seen.add(key);
+          const action = decideBot(s, s.priorityPlayer, {
+            deterministic: true,
+          })?.action;
+          if (!action) throw new Error(`no legal action ${s.phase}`);
+          s = applyAction(s, action);
+          for (const p of s.players) {
+            const count =
+              p.hand.length +
+              p.deck.length +
+              p.discard.length +
+              p.banished.length +
+              Number(p.championAvailable) +
+              s.units.filter((u) => u.owner === p.id && !u.token).length +
+              s.gears.filter((g) => g.owner === p.id && !g.token).length +
+              s.stack.filter((x) => x.player === p.id && x.kind === "spell")
+                .length +
+              (s.resolving ?? []).filter((x) => x.player === p.id).length +
+              (s.hidden ?? []).filter((h) => h.owner === p.id).length;
+            if (count !== 40)
+              throw new Error(
+                `${p.deckId} conservation ${count} after ${action.id}; resolving=${(s.resolving ?? []).map((x) => x.cardId)} gears=${s.gears.map((g) => g.cardId + ":" + g.token)}`,
+              );
+            if (p.energy < 0 || p.runes.length + p.runeDeck.length !== 12)
+              throw new Error("resource invariant");
           }
-          if (s.winner === null)
-            throw new Error(`no winner after ${steps} actions (${s.phase})`);
-        } catch (error) {
-          failures.push(`${a.id} vs ${b.id} turn${s.turn}: ${String(error)}`);
         }
+        if (s.winner === null)
+          throw new Error(`no winner after ${steps} actions (${s.phase})`);
+      } catch (error) {
+        throw new Error(`${a.id} vs ${b.id} turn${s.turn}: ${String(error)}`);
       }
-    expect(failures).toEqual([]);
-  }, 120000);
+    },
+    60000,
+  );
 });
 
 describe("resources and effect limits across phase boundaries", () => {

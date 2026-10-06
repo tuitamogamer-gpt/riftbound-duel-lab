@@ -99,6 +99,7 @@ describe("public-board tactical decisions", () => {
   });
   it("keeps a holding unit when a base unit can capture the other field", () => {
     const s = main();
+    s.players[0].scoredFieldsThisTurn = [1];
     s.fields[0].controller = null;
     s.units = [
       {

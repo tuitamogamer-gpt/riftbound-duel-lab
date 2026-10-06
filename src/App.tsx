@@ -6,6 +6,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -54,11 +55,7 @@ import {
   applyActionStepped,
   getMight,
 } from "./game/engine";
-import {
-  getAutomaticAction,
-  isMovementSelection,
-  sourceActions,
-} from "./game/flow";
+import { isMovementSelection, sourceActions } from "./game/flow";
 import { MatchControls } from "./components/MatchControls";
 import { PileDialog, type PileView } from "./components/CardPiles";
 import { TurnFlow, ShowdownCue, CombatReadout } from "./components/TurnFlow";
@@ -83,6 +80,12 @@ import type { Review } from "./components/StepFlow";
 import { scripts } from "./game/scripts";
 import type { GameAction, GameState, LocationId, Unit } from "./game/types";
 import "./interaction.css";
+import { BOT_AUDIT_KEY, createReplay, type BotReplay } from "./game/ai/replay";
+import type { BotTrace } from "./game/ai/planner";
+import { useBotDecision } from "./hooks/useBotDecision";
+import { publicExplanation } from "./game/ai/planner";
+import { DIFFICULTIES, type Difficulty } from "./game/ai/config";
+import { publicDecisionPresentation } from "./game/ai/presentation";
 
 const BoardInteraction = createContext<{
   game: GameState | null;
@@ -138,6 +141,24 @@ export default function App() {
   const [saved] = useState(freshRead);
   const [match, setGame] = useState<GameState | null>(saved.match);
   const [review, setReview] = useState<Review | null>(saved.review);
+  const audit = useRef<BotReplay | null>(null);
+  const pendingBotTrace = useRef<BotTrace | undefined>(undefined);
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(
+        localStorage.getItem(BOT_AUDIT_KEY) ?? "null",
+      ) as BotReplay | null;
+      if (
+        stored &&
+        saved.match &&
+        stored.initial.seed === saved.match.seed &&
+        stored.finalRevision === saved.match.revision
+      )
+        audit.current = stored;
+    } catch {
+      /* Old or incomplete telemetry does not affect the game. */
+    }
+  }, [saved]);
   const [paused, setPaused] = useState(false);
   const [visible, setVisible] = useState(true);
   const [mulligan, setMulligan] = useState<number[]>([]);
@@ -203,16 +224,14 @@ export default function App() {
   const [selected, setSelected] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [muted, setMuted] = useState(true);
-  const botActions = useMemo(
-    () =>
-      match && !review && match.winner === null
-        ? getLegalActions(match, 1)
-        : [],
-    [match, review],
+  const thinking = Boolean(
+    match && !review && match.winner === null && match.priorityPlayer === 1,
   );
-  const thinking = botActions.length > 0;
   const [logOpen, setLogOpen] = useState(false);
-  const [difficulty, setDifficulty] = useState("Taktički");
+  const [difficulty, setDifficulty] = useState<Difficulty>(
+    saved.match?.botSettings?.difficulty ?? "normal",
+  );
+  const [botReason, setBotReason] = useState("");
   const [confirmNew, setConfirmNew] = useState(false);
   const legal = useMemo(
     () => (match && !review && !paused ? getLegalActions(match, 0) : []),
@@ -222,18 +241,30 @@ export default function App() {
     if (match)
       try {
         localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review }));
+        if (audit.current)
+          localStorage.setItem(BOT_AUDIT_KEY, JSON.stringify(audit.current));
       } catch {}
   }, [match, review]);
   const doAction = useCallback(
     (action: GameAction) => {
       if (!match || review) return;
       try {
-        const result = applyActionStepped(match, action.id);
+        const result = applyActionStepped(match, action);
+        audit.current ??= createReplay(match);
+        audit.current.decisions.push({
+          action: structuredClone(action),
+          ...(pendingBotTrace.current
+            ? { trace: pendingBotTrace.current }
+            : {}),
+        });
+        audit.current.finalRevision = result.state.revision ?? 0;
+        pendingBotTrace.current = undefined;
         setTarget(null);
         setMulligan([]);
         const frames = result.frames.length
           ? result.frames
           : [{ state: result.state, label: action.label }];
+        const presented = publicDecisionPresentation(match, action, frames);
         setGame(result.state);
         setReview(
           isMovementSelection(action) ||
@@ -242,9 +273,9 @@ export default function App() {
             : {
                 before: match,
                 final: result.state,
-                frames,
+                frames: presented.frames,
                 index: 0,
-                action,
+                action: presented.action,
               },
         );
         setError("");
@@ -257,6 +288,26 @@ export default function App() {
     },
     [match, review, muted],
   );
+
+  const botEnabled =
+    !!match &&
+    screen === "game" &&
+    !review &&
+    !paused &&
+    !previewActive &&
+    visible &&
+    !help &&
+    !inspected &&
+    !pileView &&
+    !confirmNew &&
+    !logOpen;
+  const bot = useBotDecision(match, botEnabled);
+  useEffect(() => {
+    if (bot.error) {
+      setError(bot.error);
+      setPaused(true);
+    }
+  }, [bot.error]);
 
   // Animate recorded effects, then hand control back only for a real decision.
   // Human mulligans, reactions, optional effects and end-turn are never chosen here.
@@ -287,10 +338,22 @@ export default function App() {
       );
       return () => window.clearTimeout(timer);
     }
-    const next = getAutomaticAction(match, difficulty === "Trening");
+    const own = match.priorityPlayer === 0 ? getLegalActions(match, 0) : [];
+    const next =
+      match.priorityPlayer === 1
+        ? bot.result?.action
+        : own.length === 1 && own[0].category === "pass"
+          ? own[0]
+          : undefined;
     if (!next) return;
     const timer = window.setTimeout(
-      () => doAction(next),
+      () => {
+        if (bot.result && next.player === 1) {
+          setBotReason(publicExplanation(bot.result).reason);
+          pendingBotTrace.current = bot.result.trace;
+        }
+        doAction(next);
+      },
       automaticDelay(match, next.player),
     );
     return () => window.clearTimeout(timer);
@@ -307,6 +370,7 @@ export default function App() {
     confirmNew,
     logOpen,
     difficulty,
+    bot.result,
     doAction,
   ]);
 
@@ -423,9 +487,15 @@ export default function App() {
           playerBattlefieldId: playerBattlefield,
           botBattlefieldId: botBattlefield,
           seed: Math.floor(Math.random() * 2147483646) + 1,
+          botDifficulty: difficulty,
+          botSeed: Math.floor(Math.random() * 2147483646) + 1,
         }),
       );
+      audit.current = null;
+      pendingBotTrace.current = undefined;
+      localStorage.removeItem(BOT_AUDIT_KEY);
       setReview(null);
+      setBotReason("");
       setPaused(false);
       setMulligan([]);
       setTarget(null);
@@ -524,7 +594,7 @@ export default function App() {
             onGroup={setDeckGroup}
             onPlayer={chooseDeck}
             onBot={setBotDeck}
-            onDifficulty={setDifficulty}
+            onDifficulty={(value) => setDifficulty(value as Difficulty)}
             onStart={() =>
               match && (review || match.winner === null)
                 ? setConfirmNew(true)
@@ -602,6 +672,40 @@ export default function App() {
                         : "Your turn",
                 )}
               </div>
+              <details className="bot-explanation">
+                <summary>
+                  {t(
+                    DIFFICULTIES[game.botSettings?.difficulty ?? "normal"]
+                      .label,
+                  )}{" "}
+                  AI
+                </summary>
+                <p role="status">
+                  {thinking && !review
+                    ? t("Bot is thinking…")
+                    : t(
+                        botReason || "The bot explains its last decision here.",
+                      )}
+                  {game.winner !== null && audit.current && (
+                    <button
+                      onClick={() => {
+                        const url = URL.createObjectURL(
+                          new Blob([JSON.stringify(audit.current, null, 2)], {
+                            type: "application/json",
+                          }),
+                        );
+                        const anchor = document.createElement("a");
+                        anchor.href = url;
+                        anchor.download = `riftbound-replay-${game.seed}.json`;
+                        anchor.click();
+                        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+                      }}
+                    >
+                      {t("Download bot replay")}
+                    </button>
+                  )}
+                </p>
+              </details>
               <span>
                 {" "}
                 {t("POTEZ")} {game.turn}

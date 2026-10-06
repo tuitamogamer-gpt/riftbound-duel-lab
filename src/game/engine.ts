@@ -17,6 +17,7 @@ import {
   disempower,
 } from "./board-rules";
 import { cards, getCard, type Card } from "../data/cards";
+import catalogMeta from "../data/catalog-meta.json";
 import { decks, type StarterDeck } from "../data/decks";
 import { getScript, getRulesCardId, isImplemented } from "./scripts";
 import {
@@ -713,15 +714,32 @@ function point(
       },
     },
   );
-  if (s.players[p].points >= getVictoryScore(s)) {
-    s.winner = p;
-    s.phase = "ended";
-    log(s, `${s.players[p].name} wins the match.`, "score", p);
-  }
+  checkVictory(s);
   if (s.winner === null)
     event(s, "score", p, s.players[p].legendId, "legend", undefined, {
       amount: 1,
     });
+}
+/** Core 321/323/472: a resolving chain item completes before victory cleanup. */
+function checkVictory(s: GameState) {
+  if (
+    s.winner !== null ||
+    executingEffects.has(s) ||
+    s.pendingChoice ||
+    s.resolving?.length ||
+    s.resolvingAbilities?.length
+  )
+    return;
+  const winner = s.players.find(
+    (p) =>
+      p.points >= getVictoryScore(s) &&
+      p.points > s.players[otherPlayer(p.id)].points,
+  );
+  if (winner) {
+    s.winner = winner.id;
+    s.phase = "ended";
+    log(s, `${winner.name} wins the match.`, "score", winner.id);
+  }
 }
 function draw(s: GameState, p: PlayerId, n: number) {
   const x = s.players[p];
@@ -788,6 +806,12 @@ function createPlayer(
     championId: getRulesCardId(d.championId),
     championAvailable: true,
     deck: main,
+    deckList: [...main].sort(),
+    runeList: d.runes
+      .flatMap(
+        (e) => Array(e.count).fill(getCard(e.cardId).domains[0]) as string[],
+      )
+      .sort(),
     hand: [],
     discard: [],
     banished: [],
@@ -810,6 +834,21 @@ export function createGame(options: GameOptions = {}): GameState {
   const seed = (options.seed ?? Date.now()) >>> 0 || 1;
   const s: GameState = {
     version: 1,
+    revision: 0,
+    botSettings: {
+      difficulty: options.botDifficulty ?? "normal",
+      seed: options.botSeed ?? 20261006,
+    },
+    matchConfig: {
+      formatId: "duel-lab-supported-1v1",
+      rulesVersion: "core-2026-07-16+vendetta-faq-2026-08-14",
+      cardDataVersion: catalogMeta.cardDataSha256,
+      supportedCardIds: cards
+        .filter((c) => isImplemented(c.id))
+        .map((c) => c.id)
+        .sort(),
+      openDecklists: options.openDecklists ?? false,
+    },
     seed,
     rng: seed,
     turn: 0,
@@ -893,8 +932,8 @@ function scoreField(
       if (cannotScore) return;
       if (
         !hold &&
-        x.points === getVictoryScore(s) - 1 &&
-        x.scoredFieldsThisTurn.length < 2
+        x.points >= getVictoryScore(s) - 1 &&
+        x.scoredFieldsThisTurn.length < s.fields.length
       ) {
         draw(s, p, 1);
         log(
@@ -1243,20 +1282,23 @@ function effectTargetMatches(
         getMight(s, object) < getMight(s, source)))
   );
 }
-function targets(
+function* iterateTargets(
   s: GameState,
   p: PlayerId,
   effects: Effect[],
   location?: LocationId,
   sourceId?: string,
-): Array<string | undefined> {
+): Generator<string | undefined> {
   const e = effects.find((e) => e.target);
-  if (!e) return [undefined];
+  if (!e) {
+    yield undefined;
+    return;
+  }
   if (
     e.target === "enemyChainItemChoosingFriendly" ||
     e.target === "friendlyUnitAndEnemyChainItem"
   ) {
-    return s.stack
+    yield* s.stack
       .filter((item) => item.player !== p)
       .flatMap((item) => {
         const chosen = item.effects.flatMap((effect) =>
@@ -1276,18 +1318,23 @@ function targets(
           ? [`${units[0].id}~${item.id}`]
           : [];
       });
+    return;
   }
   if (e.target === "trashCards") {
-    if ((e.targetCount ?? 1) > 1) return [undefined];
-    return [
+    if ((e.targetCount ?? 1) > 1) {
+      yield undefined;
+      return;
+    }
+    yield* [
       ...trashTargets(s, p, e).map((card) => card.id),
       ...(e.upTo ? [undefined] : []),
     ];
+    return;
   }
   const units = s.units.filter((u) => effectTargetMatches(s, u, e, sourceId));
   const gears = s.gears.filter((g) => effectTargetMatches(s, g, e, sourceId));
-  if (e.target === "ownTeemo")
-    return [
+  if (e.target === "ownTeemo") {
+    yield* [
       ...(s.players[p].championAvailable &&
       getCard(s.players[p].championId).tags.includes("Teemo")
         ? [`champion:${p}`]
@@ -1298,8 +1345,10 @@ function targets(
         )
         .map((u) => u.id),
     ];
-  if (e.target === "exhaustedOther")
-    return [
+    return;
+  }
+  if (e.target === "exhaustedOther") {
+    yield* [
       ...units
         .filter((u) => u.id !== sourceId && !u.ready && !protectedFrom(s, u, p))
         .map((u) => u.id),
@@ -1311,8 +1360,10 @@ function targets(
           : []),
       ]),
     ];
-  if (e.target === "unitAndEquipment")
-    return units
+    return;
+  }
+  if (e.target === "unitAndEquipment") {
+    yield* units
       .filter((u) => !protectedFrom(s, u, p))
       .flatMap((u) =>
         gears
@@ -1328,8 +1379,10 @@ function targets(
           )
           .map((g) => `${u.id}~${g.id}`),
       );
-  if (e.target === "spell")
-    return s.stack
+    return;
+  }
+  if (e.target === "spell") {
+    yield* s.stack
       .filter(
         (item) =>
           item.kind === "spell" &&
@@ -1339,7 +1392,12 @@ function targets(
             (getCard(item.cardId).power ?? 0) <= e.maxPower),
       )
       .map((item) => item.id);
-  if (e.target === "battlefield") return s.fields.map((f) => f.id);
+    return;
+  }
+  if (e.target === "battlefield") {
+    yield* s.fields.map((f) => f.id);
+    return;
+  }
   if (
     [
       "friendlyBaseAndBattlefield",
@@ -1347,21 +1405,25 @@ function targets(
       "friendlyUnitAndBaseMove",
     ].includes(e.target!)
   ) {
-    return units
-      .filter(
-        (u) =>
-          u.owner === p &&
-          (e.target !== "friendlyBaseAndBattlefield" || u.location === base(p)),
-      )
-      .flatMap((u) =>
-        (e.target === "friendlyUnitAndBaseMove" && u.location !== base(p)
-          ? [base(p)]
-          : s.fields.map((f) => f.id)
-        ).map((f) => `${u.id}~${f}`),
-      );
+    {
+      yield* units
+        .filter(
+          (u) =>
+            u.owner === p &&
+            (e.target !== "friendlyBaseAndBattlefield" ||
+              u.location === base(p)),
+        )
+        .flatMap((u) =>
+          (e.target === "friendlyUnitAndBaseMove" && u.location !== base(p)
+            ? [base(p)]
+            : s.fields.map((f) => f.id)
+          ).map((f) => `${u.id}~${f}`),
+        );
+      return;
+    }
   }
-  if (e.target === "enemyUnitAndOccupiedLocation")
-    return units
+  if (e.target === "enemyUnitAndOccupiedLocation") {
+    yield* units
       .filter((u) => u.owner !== p && !protectedFrom(s, u, p))
       .flatMap((u) =>
         [
@@ -1372,25 +1434,30 @@ function targets(
           .filter((f) => f !== u.location)
           .map((f) => `${u.id}~${f}`),
       );
+    return;
+  }
   if (e.target === "enemyHereAndDifferentBattlefield") {
     const source = s.units.find((u) => u.id === sourceId);
-    return units
-      .filter(
-        (u) =>
-          source &&
-          u.owner !== p &&
-          !protectedFrom(s, u, p) &&
-          u.location === source.location &&
-          getMight(s, u) < getMight(s, source),
-      )
-      .flatMap((u) =>
-        s.fields
-          .filter((f) => f.id !== u.location)
-          .map((f) => `${u.id}~${f.id}`),
-      );
+    {
+      yield* units
+        .filter(
+          (u) =>
+            source &&
+            u.owner !== p &&
+            !protectedFrom(s, u, p) &&
+            u.location === source.location &&
+            getMight(s, u) < getMight(s, source),
+        )
+        .flatMap((u) =>
+          s.fields
+            .filter((f) => f.id !== u.location)
+            .map((f) => `${u.id}~${f.id}`),
+        );
+      return;
+    }
   }
-  if (e.target === "friendlyBattlefieldAndOptionalEnemy")
-    return s.fields
+  if (e.target === "friendlyBattlefieldAndOptionalEnemy") {
+    yield* s.fields
       .filter((f) => s.units.some((u) => u.owner === p && u.location === f.id))
       .flatMap((f) => [
         f.id,
@@ -1401,8 +1468,10 @@ function targets(
           )
           .map((u) => `${f.id}~${u.id}`),
       ]);
-  if (e.target === "battlefieldUnitAndOptionalOther")
-    return units
+    return;
+  }
+  if (e.target === "battlefieldUnitAndOptionalOther") {
+    yield* units
       .filter((u) => u.location.startsWith("field:") && !protectedFrom(s, u, p))
       .flatMap((u) => [
         u.id,
@@ -1410,6 +1479,8 @@ function targets(
           .filter((v) => v.id !== u.id && !protectedFrom(s, v, p))
           .map((v) => `${u.id}~${v.id}`),
       ]);
+    return;
+  }
   if (
     e.target === "upToThreeUnitsSameLocation" ||
     e.target === "upToFourFriendlyUnits"
@@ -1419,24 +1490,24 @@ function targets(
         !protectedFrom(s, u, p) &&
         (e.target !== "upToFourFriendlyUnits" || u.owner === p),
     );
-    const results: (string | undefined)[] = [undefined];
-    const visit = (chosen: Unit[], start: number) => {
-      if (chosen.length) results.push(chosen.map((u) => u.id).join("~"));
-      if (chosen.length === (e.target === "upToFourFriendlyUnits" ? 4 : 3))
+    yield undefined;
+    function* visit(chosen: Unit[], start: number): Generator<string> {
+      if (chosen.length) yield chosen.map((u) => u.id).join("~");
+      if (chosen.length === (e!.target === "upToFourFriendlyUnits" ? 4 : 3))
         return;
       for (let i = start; i < eligible.length; i++)
         if (
           !chosen.length ||
-          e.target === "upToFourFriendlyUnits" ||
+          e!.target === "upToFourFriendlyUnits" ||
           eligible[i].location === chosen[0].location
         )
-          visit([...chosen, eligible[i]], i + 1);
-    };
-    visit([], 0);
-    return results;
+          yield* visit([...chosen, eligible[i]], i + 1);
+    }
+    yield* visit([], 0);
+    return;
   }
-  if (e.target === "friendlyAndWeakerEnemy")
-    return units
+  if (e.target === "friendlyAndWeakerEnemy") {
+    yield* units
       .filter((u) => u.owner === p)
       .flatMap((u) =>
         units
@@ -1448,8 +1519,10 @@ function targets(
           )
           .map((v) => `${u.id}~${v.id}`),
       );
-  if (e.target === "upToOneEnemyUnitHere")
-    return [
+    return;
+  }
+  if (e.target === "upToOneEnemyUnitHere") {
+    yield* [
       undefined,
       ...units
         .filter(
@@ -1458,9 +1531,14 @@ function targets(
         )
         .map((u) => u.id),
     ];
+    return;
+  }
   if (e.target === "twoUnitChoices") {
     const eligible = units.filter((u) => !protectedFrom(s, u, p));
-    return eligible.flatMap((a) => eligible.map((b) => `${a.id}~${b.id}`));
+    {
+      yield* eligible.flatMap((a) => eligible.map((b) => `${a.id}~${b.id}`));
+      return;
+    }
   }
   if (
     e.target === "twoUnitsSameBattlefield" ||
@@ -1473,23 +1551,28 @@ function targets(
           ? u.location.startsWith("field:")
           : u.owner === p),
     );
-    return eligible.flatMap((a, i) =>
-      (e.target === "twoFriendlyDifferentLocations"
-        ? eligible.filter((b) => b.id !== a.id)
-        : eligible.slice(i + 1)
-      )
-        .filter((b) =>
-          e.target === "twoUnitsSameBattlefield"
-            ? a.location === b.location
-            : a.location !== b.location,
+    {
+      yield* eligible.flatMap((a, i) =>
+        (e.target === "twoFriendlyDifferentLocations"
+          ? eligible.filter((b) => b.id !== a.id)
+          : eligible.slice(i + 1)
         )
-        .map((b) => `${a.id}~${b.id}`),
-    );
+          .filter((b) =>
+            e.target === "twoUnitsSameBattlefield"
+              ? a.location === b.location
+              : a.location !== b.location,
+          )
+          .map((b) => `${a.id}~${b.id}`),
+      );
+      return;
+    }
   }
-  if (e.target === "twoGear")
-    return gears.flatMap((a, index) =>
+  if (e.target === "twoGear") {
+    yield* gears.flatMap((a, index) =>
       gears.slice(index + 1).map((b) => `${a.id}~${b.id}`),
     );
+    return;
+  }
   if (
     ["anyTwoUnits", "orderedTwoUnits", "orderedTwoFriendlyUnits"].includes(
       e.target!,
@@ -1500,15 +1583,18 @@ function targets(
         !protectedFrom(s, u, p) &&
         (e.target !== "orderedTwoFriendlyUnits" || u.owner === p),
     );
-    return eligible.flatMap((a, i) =>
-      (e.target === "anyTwoUnits"
-        ? eligible.slice(i + 1)
-        : eligible.filter((b) => b.id !== a.id)
-      ).map((b) => `${a.id}~${b.id}`),
-    );
+    {
+      yield* eligible.flatMap((a, i) =>
+        (e.target === "anyTwoUnits"
+          ? eligible.slice(i + 1)
+          : eligible.filter((b) => b.id !== a.id)
+        ).map((b) => `${a.id}~${b.id}`),
+      );
+      return;
+    }
   }
-  if (e.target === "enemyUnitAndBattlefield")
-    return units
+  if (e.target === "enemyUnitAndBattlefield") {
+    yield* units
       .filter(
         (u) =>
           u.owner !== p &&
@@ -1516,41 +1602,53 @@ function targets(
           !protectedFrom(s, u, p),
       )
       .map((u) => `${u.location}~${u.id}`);
-  if (e.target === "enemyUnitOrGear")
-    return [
+    return;
+  }
+  if (e.target === "enemyUnitOrGear") {
+    yield* [
       ...units
         .filter((u) => u.owner !== p && !protectedFrom(s, u, p))
         .map((u) => u.id),
       ...gears.filter((g) => g.owner !== p).map((g) => g.id),
     ];
-  if (e.target === "unitAndSpell")
-    return units
+    return;
+  }
+  if (e.target === "unitAndSpell") {
+    yield* units
       .filter((u) => u.owner === p)
       .flatMap((u) =>
         s.stack.filter((i) => i.kind === "spell").map((i) => `${u.id}~${i.id}`),
       );
+    return;
+  }
   if (e.target === "upToTwoUnits" || e.target === "upToTwoFriendlyUnits") {
     const eligible = units.filter(
       (u) =>
         (e.target === "upToTwoUnits" || u.owner === p) &&
         !protectedFrom(s, u, p),
     );
-    return [
-      undefined,
-      ...eligible.map((u) => u.id),
-      ...eligible.flatMap((u, i) =>
-        eligible.slice(i + 1).map((v) => `${u.id}~${v.id}`),
-      ),
-    ];
+    {
+      yield* [
+        undefined,
+        ...eligible.map((u) => u.id),
+        ...eligible.flatMap((u, i) =>
+          eligible.slice(i + 1).map((v) => `${u.id}~${v.id}`),
+        ),
+      ];
+      return;
+    }
   }
   if (e.target === "twoFriendlyUnits") {
     const eligible = units.filter((u) => u.owner === p);
-    return eligible.flatMap((u, i) =>
-      eligible.slice(i + 1).map((v) => `${u.id}~${v.id}`),
-    );
+    {
+      yield* eligible.flatMap((u, i) =>
+        eligible.slice(i + 1).map((v) => `${u.id}~${v.id}`),
+      );
+      return;
+    }
   }
-  if (e.target === "unitOrGear")
-    return [
+  if (e.target === "unitOrGear") {
+    yield* [
       ...units
         .filter(
           (u) => u.location.startsWith("field:") && !protectedFrom(s, u, p),
@@ -1558,6 +1656,8 @@ function targets(
         .map((u) => u.id),
       ...gears.map((g) => g.id),
     ];
+    return;
+  }
   if (
     [
       "duel",
@@ -1565,8 +1665,8 @@ function targets(
       "duelEnemyAtBattlefield",
       "friendlyAndEnemyHere",
     ].includes(e.target!)
-  )
-    return units
+  ) {
+    yield* units
       .filter((u) => u.owner === p)
       .flatMap((a) =>
         units
@@ -1584,12 +1684,14 @@ function targets(
           )
           .map((b) => a.id + "~" + b.id),
       );
+    return;
+  }
   if (
     e.target === "enemyGear" ||
     e.target === "anyGear" ||
     e.target === "friendlyEquipment"
-  )
-    return [
+  ) {
+    yield* [
       ...gears
         .filter(
           (g) =>
@@ -1602,9 +1704,23 @@ function targets(
         .map((g) => g.id),
       ...(e.optional ? [undefined] : []),
     ];
-  return units
-    .filter((u) => matches(s, u, p, e.target!, location, e.maxMight))
-    .map((u) => u.id);
+    return;
+  }
+  {
+    yield* units
+      .filter((u) => matches(s, u, p, e.target!, location, e.maxMight))
+      .map((u) => u.id);
+    return;
+  }
+}
+function targets(
+  s: GameState,
+  p: PlayerId,
+  effects: Effect[],
+  location?: LocationId,
+  sourceId?: string,
+) {
+  return [...iterateTargets(s, p, effects, location, sourceId)];
 }
 function targetLabel(s: GameState, id?: string): string {
   if (!id) return "";
@@ -1834,41 +1950,52 @@ function annotateEffects(
 }
 
 /** Physical card selections for up-front costs; identical copies share a choice. */
-function recycleSelections(discard: string[], count: number): number[][] {
-  if (!count) return [[]];
-  const result: number[][] = [];
-  const visit = (start: number, selected: number[]) => {
+function* recycleSelections(
+  discard: string[],
+  count: number,
+): Generator<number[]> {
+  function* visit(start: number, selected: number[]): Generator<number[]> {
     if (selected.length === count) {
-      result.push(selected);
+      yield selected;
       return;
     }
     const seen = new Set<string>();
     for (let i = start; i <= discard.length - (count - selected.length); i++) {
       if (seen.has(discard[i])) continue;
       seen.add(discard[i]);
-      visit(i + 1, [...selected, i]);
+      yield* visit(i + 1, [...selected, i]);
     }
-  };
-  visit(0, []);
-  return result;
+  }
+  yield* visit(0, []);
 }
 
-export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
+/** Lazy engine decisions; consumers may stop without enumerating the remaining choices. */
+export function* iterateLegalActions(
+  s: GameState,
+  p: PlayerId,
+): Generator<GameAction> {
   const out: GameAction[] = [];
   const repeatCandidates: GameAction[] = [];
-  const add = (a: Omit<GameAction, "player">) => out.push({ ...a, player: p });
-  if (s.phase === "ended" || s.winner !== null) return out;
+  const add = (a: Omit<GameAction, "player">): GameAction => {
+    const action = { ...a, player: p };
+    out.push(action);
+    return action;
+  };
+  function* addMany(...actions: GameAction[]) {
+    for (const action of actions) yield add(action);
+  }
+  if (s.phase === "ended" || s.winner !== null) return;
   const x = s.players[p];
   if (s.phase === "mulligan") {
-    if (x.mulliganDone || s.priorityPlayer !== p) return out;
-    add({
+    if (x.mulliganDone || s.priorityPlayer !== p) return;
+    yield add({
       id: "mulligan:",
       label: "Keep all four cards",
       category: "mulligan",
       cardIndices: [],
     });
     for (let i = 0; i < x.hand.length; i++) {
-      add({
+      yield add({
         id: `mulligan:${i}`,
         label: p === 0 ? `Replace ${cardName(x.hand[i])}` : "Replace one card",
         category: "mulligan",
@@ -1876,7 +2003,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
         cardId: p === 0 ? x.hand[i] : undefined,
       });
       for (let j = i + 1; j < x.hand.length; j++)
-        add({
+        yield add({
           id: `mulligan:${i},${j}`,
           label:
             p === 0
@@ -1886,9 +2013,9 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
           cardIndices: [i, j],
         });
     }
-    return out;
+    return;
   }
-  if (s.priorityPlayer !== p) return out;
+  if (s.priorityPlayer !== p) return;
   if (s.phase === "choice") {
     const choice = s.pendingChoice!;
     if (choice.kind === "trashTargets") {
@@ -1900,7 +2027,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
       for (const card of candidates) {
         const chosen = selected.includes(card.id);
         if (!chosen && selected.length >= maximum) continue;
-        add({
+        yield add({
           id: `choose-trash:${card.id}`,
           label: `${chosen ? "Remove" : "Choose"} ${cardName(card.cardId)} · ${card.owner === p ? "your trash" : "opponent's trash"}`,
           cardId: card.cardId,
@@ -1910,12 +2037,12 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
         });
       }
       if (effect.upTo || selected.length === maximum)
-        add({
+        yield add({
           id: "choose-trash:done",
           label: `Confirm ${selected.length} card${selected.length === 1 ? "" : "s"}`,
           category: "ability",
         });
-      return out;
+      return;
     }
     if (choice.kind === "readyRunes") {
       for (const rune of x.runes.filter((r) =>
@@ -1923,19 +2050,19 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
           ? !choice.chosenRuneIds?.includes(r.id)
           : !r.ready,
       ))
-        add({
+        yield add({
           id: `choose-rune:${rune.id}`,
           label: `Ready ${rune.domain} rune`,
           category: "ability",
           sourceId: rune.id,
         });
       if (!out.length || choice.effect?.optional)
-        add({
+        yield add({
           id: "choose-rune:skip",
           label: "Finish readying runes",
           category: "ability",
         });
-      return out;
+      return;
     }
     if (choice.kind === "custom") {
       const options = (choice.options ?? []).filter((a) => {
@@ -1955,7 +2082,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
           targetTax(s, p, newTargets.map((u) => u.id).join("~")),
         );
       });
-      return (
+      yield* (
         options.length
           ? options
           : [
@@ -1968,6 +2095,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
               },
             ]
       ).map((a) => ({ ...a, player: p }));
+      return;
     }
     if (["discard", "recycle", "retrieve"].includes(choice.kind)) {
       const zone = choice.kind === "discard" ? x.hand : x.discard;
@@ -1980,7 +2108,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
               getCard(cardId).type !== "Spell"))
         )
           continue;
-        add({
+        yield add({
           id: `choose-card:${i}`,
           label: `${choice.kind}: ${cardName(cardId)}`,
           category: "ability",
@@ -1989,15 +2117,15 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
         });
       }
       if (!out.length || choice.effect?.optional)
-        add({
+        yield add({
           id: "choose-card:skip",
           label: "Continue without selecting a card",
           category: "ability",
         });
-      return out;
+      return;
     }
     if (choice.kind === "predict") {
-      add({
+      yield add({
         id: "choose-predict:keep",
         label: x.deck.length
           ? `Keep ${cardName(x.deck[0])} on top`
@@ -2005,43 +2133,43 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
         category: "ability",
       });
       if (x.deck.length)
-        add({
+        yield add({
           id: "choose-predict:recycle",
           label: `Recycle ${cardName(x.deck[0])}`,
           category: "ability",
         });
-      return out;
+      return;
     }
     if (choice.kind === "sacrifice" || choice.kind === "spendBuff") {
       for (const u of s.units.filter(
         (u) => u.owner === p && (choice.kind === "sacrifice" || u.buff > 0),
       ))
-        add({
+        yield add({
           id: `choose-unit:${u.id}`,
           label: `${choice.kind === "sacrifice" ? "Kill" : "Spend a buff from"} ${cardName(u.cardId)}`,
           category: "ability",
           targetId: u.id,
         });
       if (!out.length || choice.effect?.optional)
-        add({
+        yield add({
           id: "choose-unit:skip",
           label: "Decline optional effect",
           category: "ability",
         });
-      return out;
+      return;
     }
     if (choice.kind === "optional") {
-      add({
+      yield add({
         id: "choose-optional:yes",
         label: choice.effect?.cardName ?? "Use optional ability",
         category: "ability",
       });
-      add({
+      yield add({
         id: "choose-optional:no",
         label: "Decline optional ability",
         category: "ability",
       });
-      return out;
+      return;
     }
     if (choice.kind === "move") {
       const u = s.units.find((u) => u.id === choice.targetId);
@@ -2050,13 +2178,13 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
           base(u.owner),
           ...s.fields.map((f) => f.id),
         ].filter((id) => id !== u.location))
-          add({
+          yield add({
             id: `choose-destination:${locationId}`,
             label: `Move to ${locationName(locationId)}`,
             category: "ability",
             locationId,
           });
-      return out;
+      return;
     }
     if (choice.kind === "token") {
       for (const locationId of [
@@ -2073,42 +2201,41 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
             choice.effect?.condition !== "realCard",
           ),
       ))
-        add({
+        yield add({
           id: `choose-token:${locationId}`,
           label: `Place ${choice.effect?.cardName ?? "Recruit"} at ${locationName(locationId)} (${choice.remaining} remaining)`,
           category: "ability",
           locationId,
         });
       if (!out.length)
-        add({
+        yield add({
           id: "choose-token:skip",
           label: "No legal location: finish effect",
           category: "ability",
         });
     } else {
-      out.push(
-        ...triggerActions(
-          s,
-          p,
-          choice.effects ?? [],
-          choice.sourceId ?? "",
-          choice.cardId ?? "",
-          choice.locationId ??
-            s.units.find((u) => u.id === choice.sourceId)?.location ??
-            s.combat?.fieldId,
-        ),
-      );
+      for (const candidate of iterateTriggerActions(
+        s,
+        p,
+        choice.effects ?? [],
+        choice.sourceId ?? "",
+        choice.cardId ?? "",
+        choice.locationId ??
+          s.units.find((u) => u.id === choice.sourceId)?.location ??
+          s.combat?.fieldId,
+      ))
+        yield add(candidate);
       if (
         !out.length ||
         choice.effects?.some((e) => e.optional && !e.chooseRunes)
       )
-        add({
+        yield add({
           id: "choose-trigger:skip",
           label: "Decline optional trigger",
           category: "ability",
         });
     }
-    return out;
+    return;
   }
   if (s.phase === "move") {
     const move = s.pendingMove!;
@@ -2116,7 +2243,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
       (u) => u.owner === p && canMove(s, u, move.to),
     )) {
       const selected = move.unitIds.includes(u.id);
-      add({
+      yield add({
         id: `move-toggle:${u.id}`,
         label: `${selected ? "Remove" : "Add"} ${cardName(u.cardId)} (${getMight(s, u)} Might)`,
         category: "move",
@@ -2128,19 +2255,23 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
       move.unitIds.length &&
       canPay(s, p, 0, 0, [], groupMoveTax(s, p, move.to, move.unitIds.length))
     )
-      add({
+      yield add({
         id: "move-confirm",
         label: `Move ${move.unitIds.length} unit${move.unitIds.length === 1 ? "" : "s"} to ${locationName(move.to)}`,
         category: "move",
         locationId: move.to,
         unitIds: [...move.unitIds],
       });
-    add({ id: "move-cancel", label: "Cancel movement", category: "move" });
-    return out;
+    yield add({
+      id: "move-cancel",
+      label: "Cancel movement",
+      category: "move",
+    });
+    return;
   }
   if (s.phase === "damage") {
     const c = s.combat!;
-    if (c.assigningPlayer !== p) return out;
+    if (c.assigningPlayer !== p) return;
     let enemies = s.units.filter(
       (u) =>
         u.owner !== p &&
@@ -2167,7 +2298,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
               Math.max(1, damageToKill(s, u) - (c.assignments[p][u.id] ?? 0)),
             );
       if (amount > 0)
-        add({
+        yield add({
           id: `damage:${u.id}:${amount}`,
           label: `Assign ${amount} damage to ${cardName(u.cardId)}`,
           category: "combat",
@@ -2176,12 +2307,12 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
         });
     }
     if (!enemies.length || !c.remaining[p])
-      add({
+      yield add({
         id: "damage-done",
         label: "Confirm damage assignment",
         category: "combat",
       });
-    return out;
+    return;
   }
   const inChain = s.stack.length > 0;
   const inShowdown = s.phase === "showdown";
@@ -2207,7 +2338,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
               ? [{ energy: 1, power: 0 }]
               : []),
           ].filter((cost) => canPay(s, p, cost.energy, 0, [], cost.power)))
-            add({
+            yield add({
               id: `hide:${key}:${f.id}${cost.energy ? ":energy" : ""}`,
               label: `Hide ${cardName(id)} at ${locationName(f.id)}`,
               category: "ability",
@@ -2304,11 +2435,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
         : c.id === "ogn-208-298"
           ? [{ type: "sacrifice", target: "friendlyUnit" }]
           : [];
-    for (const targetId of targets(s, p, effects).length
-      ? targets(s, p, effects)
-      : c.type === "Unit"
-        ? [undefined]
-        : []) {
+    for (const targetId of iterateTargets(s, p, effects)) {
       if (
         c.id === "sfd-107-221" &&
         !s.units.find((u) => u.id === targetId?.split("~")[0])?.gear.length
@@ -2437,29 +2564,45 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
           continue;
         if (c.id === "ogn-208-298" && !s.units.some((u) => u.owner === p))
           continue;
-        const addPlay = payable
-          ? add
-          : (a: Omit<GameAction, "player">) => {
-              if (script.repeat) repeatCandidates.push({ ...a, player: p });
-            };
-        addPlay({
-          id: `play|${entry.source}|${locationId ?? ""}|${targetId ?? ""}${entry.mode ? `|mode:${entry.modeIndex}` : ""}${entry.paidAdditional ? "|additional" : ""}`,
-          label: `Play ${cardName(c.id)}${entry.mode ? ` · ${entry.mode.label}` : ""}${entry.paidAdditional ? (script.additionalCost?.xp ? ` · spend ${script.additionalCost.xp} XP` : " · pay additional cost") : ""}${locationId ? ` at ${locationName(locationId)}` : ""}${targetLabel(s, targetId)}`,
-          category: "play",
-          sourceId: entry.source,
-          cardId: c.id,
-          targetId,
-          locationId,
-          detail: `${cost.energy} energy · ${cost.power + cost.extraPower} power`,
-          ...(entry.paidAdditional ? { additionalCostPaid: true } : {}),
-          ...(entry.mode ? { effects: entry.mode.effects } : {}),
-          ...(c.id === "ogn-208-298"
-            ? { effects: [{ type: "sacrifice" }] }
-            : {}),
-        });
+
+        if (payable)
+          yield add({
+            id: `play|${entry.source}|${locationId ?? ""}|${targetId ?? ""}${entry.mode ? `|mode:${entry.modeIndex}` : ""}${entry.paidAdditional ? "|additional" : ""}`,
+            label: `Play ${cardName(c.id)}${entry.mode ? ` · ${entry.mode.label}` : ""}${entry.paidAdditional ? (script.additionalCost?.xp ? ` · spend ${script.additionalCost.xp} XP` : " · pay additional cost") : ""}${locationId ? ` at ${locationName(locationId)}` : ""}${targetLabel(s, targetId)}`,
+            category: "play",
+            sourceId: entry.source,
+            cardId: c.id,
+            targetId,
+            locationId,
+            detail: `${cost.energy} energy · ${cost.power + cost.extraPower} power`,
+            ...(entry.paidAdditional ? { additionalCostPaid: true } : {}),
+            ...(entry.mode ? { effects: entry.mode.effects } : {}),
+            ...(c.id === "ogn-208-298"
+              ? { effects: [{ type: "sacrifice" }] }
+              : {}),
+          });
+        else if (script.repeat)
+          repeatCandidates.push({
+            ...{
+              id: `play|${entry.source}|${locationId ?? ""}|${targetId ?? ""}${entry.mode ? `|mode:${entry.modeIndex}` : ""}${entry.paidAdditional ? "|additional" : ""}`,
+              label: `Play ${cardName(c.id)}${entry.mode ? ` · ${entry.mode.label}` : ""}${entry.paidAdditional ? (script.additionalCost?.xp ? ` · spend ${script.additionalCost.xp} XP` : " · pay additional cost") : ""}${locationId ? ` at ${locationName(locationId)}` : ""}${targetLabel(s, targetId)}`,
+              category: "play",
+              sourceId: entry.source,
+              cardId: c.id,
+              targetId,
+              locationId,
+              detail: `${cost.energy} energy · ${cost.power + cost.extraPower} power`,
+              ...(entry.paidAdditional ? { additionalCostPaid: true } : {}),
+              ...(entry.mode ? { effects: entry.mode.effects } : {}),
+              ...(c.id === "ogn-208-298"
+                ? { effects: [{ type: "sacrifice" }] }
+                : {}),
+            },
+            player: p,
+          });
         if (c.id === "ogn-048-298")
           for (const unit of s.units.filter((u) => u.owner === p && u.ready))
-            add({
+            yield add({
               id: `play|${entry.source}||${targetId ?? ""}|exhaust:${unit.id}`,
               label: `Meditation: exhaust ${cardName(unit.cardId)} to draw 2`,
               category: "play",
@@ -2481,7 +2624,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
               )
             )
               continue;
-            add({
+            yield add({
               id: `play|${entry.source}|${locationId ?? ""}|${targetId ?? ""}|discard:${i}`,
               label: `Play ${cardName(c.id)}: discard ${cardName(discardId)} for -2 energy`,
               category: "play",
@@ -2508,7 +2651,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
             acceleratedCost.additionalPower,
           )
         )
-          add({
+          yield add({
             id: `play|${entry.source}|${locationId ?? ""}|${targetId ?? ""}|accelerate`,
             label: `Accelerate ${cardName(c.id)}${locationId ? ` at ${locationName(locationId)}` : ""}${targetLabel(s, targetId)}`,
             category: "play",
@@ -2525,7 +2668,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
     for (const u of s.units.filter((u) => u.owner === p && u.ready))
       for (const to of [base(p), ...s.fields.map((f) => f.id)])
         if (canMove(s, u, to))
-          add({
+          yield add({
             id: `move-start:${u.id}:${to}`,
             label: `Move ${cardName(u.cardId)} → ${locationName(to)}`,
             category: "move",
@@ -2589,7 +2732,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
         !canPay(s, p, abilityEnergy, a.power ?? 0, a.domain ? [a.domain] : [])
       )
         continue;
-      for (const targetId of targets(
+      for (const targetId of iterateTargets(
         s,
         p,
         a.effects,
@@ -2614,7 +2757,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
           continue;
         const recycleOptions = recycleSelections(x.discard, a.recycleCost ?? 0);
         for (const recycleIndices of recycleOptions)
-          add({
+          yield add({
             id: `ability|${source.id}|${index}|${targetId ?? ""}|${recycleIndices.join(",")}`,
             label: `${cardName(source.cardId)}: ${a.label}${targetLabel(s, targetId)}${recycleIndices.length ? ` · recycle ${recycleIndices.map((i) => cardName(x.discard[i])).join(" + ")}` : ""}`,
             amount: recycleIndices[0],
@@ -2630,15 +2773,15 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
   for (const gear of s.gears.filter(
     (g) => g.owner === p && g.ready && g.cardId === "sfd-t03",
   ))
-    add({
+    yield add({
       id: `gold:${gear.id}`,
       label: "Spend Gold: add one universal power",
       category: "resource",
       sourceId: gear.id,
       cardId: gear.cardId,
     });
-  out.push(...addPlayVariants(s, p, [...out, ...repeatCandidates]));
-  out.push(
+  yield* addMany(...addPlayVariants(s, p, [...out, ...repeatCandidates]));
+  yield* addMany(
     ...getLaterActions(s, p, { ...context(), baseActions: out }).filter(
       (a) =>
         a.category !== "play" ||
@@ -2659,7 +2802,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
       ) as GameState["players"],
     };
     const known = new Set(out.map((action) => action.id));
-    out.push(
+    yield* addMany(
       ...getLaterActions(paymentView, p, {
         ...context(),
         baseActions: out,
@@ -2689,7 +2832,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
               g.cardId === "unl-188-219" ? [] : getCard(g.cardId).domains,
             )
           )
-            add({
+            yield add({
               id: `equip:${g.id}:${u.id}`,
               label: `Equip ${cardName(g.cardId)} to ${cardName(u.cardId)}`,
               category: "ability",
@@ -2699,7 +2842,7 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
             });
     }
   if (inChain || inShowdown)
-    add({
+    yield add({
       id: "pass",
       label: inChain
         ? "Pass priority"
@@ -2708,9 +2851,54 @@ export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
           : "Pass focus",
       category: "pass",
     });
-  else if (canMain) add({ id: "end-turn", label: "End turn", category: "end" });
-  return out;
+  else if (canMain)
+    yield add({ id: "end-turn", label: "End turn", category: "end" });
+  return;
 }
+export function getLegalActions(s: GameState, p: PlayerId): GameAction[] {
+  return [...iterateLegalActions(s, p)];
+}
+
+/** Equivalent to selecting a group and confirming in the human movement UI. */
+export function getGroupMoveAction(
+  s: GameState,
+  p: PlayerId,
+  ids: string[],
+  to: LocationId,
+): GameAction | null {
+  if (
+    s.priorityPlayer !== p ||
+    s.winner !== null ||
+    s.phase !== "main" ||
+    s.stack.length ||
+    s.currentPlayer !== p
+  )
+    return null;
+  if (
+    !ids.length ||
+    new Set(ids).size !== ids.length ||
+    ![base(p), ...s.fields.map((f) => f.id)].includes(to)
+  )
+    return null;
+  if (
+    !ids.every((id) =>
+      s.units.some((u) => u.id === id && u.owner === p && canMove(s, u, to)),
+    )
+  )
+    return null;
+  if (!canPay(s, p, 0, 0, [], groupMoveTax(s, p, to, ids.length))) return null;
+  const unitIds = [...ids].sort();
+  return {
+    id: `move-group:${to}:${unitIds.join(",")}`,
+    player: p,
+    category: "move",
+    sourceId: unitIds[0],
+    unitIds,
+    locationId: to,
+    label: `Move ${ids.length} unit(s) to ${locationName(to)}`,
+  };
+}
+
 function getAbilities(s: GameState, p: PlayerId, cardId: string) {
   const own = getScript(cardId)?.abilities ?? [];
   if (cardId !== "ogn-111-298") return own;
@@ -2969,35 +3157,18 @@ function targetTax(s: GameState, p: PlayerId, id?: string) {
     return n + (u && u.owner !== p ? deflect(s, u) : 0);
   }, 0);
 }
-function triggerTargets(
+function* iterateTriggerActions(
   s: GameState,
   p: PlayerId,
   effects: Effect[],
   sourceId: string,
   cardId: string,
   locationId?: LocationId,
-) {
-  return targets(s, p, effects, locationId, sourceId).filter(
-    (id) =>
-      (id !== sourceId || !["ogn-132-298", "ogn-136-298"].includes(cardId)) &&
-      (!(id ?? "").split("~").includes(sourceId) ||
-        !effects.some((effect) => effect.excludeSource)) &&
-      canPay(s, p, 0, 0, [], targetTax(s, p, id)),
-  );
-}
-/** Enumerate modes and public cost choices before a trigger enters the chain. */
-function triggerActions(
-  s: GameState,
-  p: PlayerId,
-  effects: Effect[],
-  sourceId: string,
-  cardId: string,
-  locationId?: LocationId,
-): GameAction[] {
+): Generator<GameAction> {
   const modalIndex = effects.findIndex((e) => e.modes?.length);
   if (modalIndex >= 0) {
     const wrapper = effects[modalIndex];
-    return wrapper.modes!.flatMap((mode, index) => {
+    for (const [index, mode] of wrapper.modes!.entries()) {
       const selected = mode.effects.map((e, i) => ({
         ...e,
         ...(i === 0 && wrapper.triggerCost
@@ -3005,7 +3176,7 @@ function triggerActions(
           : {}),
         ...(wrapper.optional ? { optional: true } : {}),
       }));
-      return triggerActions(
+      for (const action of iterateTriggerActions(
         s,
         p,
         [
@@ -3016,15 +3187,17 @@ function triggerActions(
         sourceId,
         cardId,
         locationId,
-      ).map((action) => ({
-        ...action,
-        id: `${action.id}:mode:${index}`,
-        label: `${mode.label}${targetLabel(s, action.targetId)}`,
-      }));
-    });
+      ))
+        yield {
+          ...action,
+          id: `${action.id}:mode:${index}`,
+          label: `${mode.label}${targetLabel(s, action.targetId)}`,
+        };
+    }
+    return;
   }
-  const cost = triggerPrice(effects);
-  const player = s.players[p];
+  const cost = triggerPrice(effects),
+    player = s.players[p];
   const source =
     s.units.find((u) => u.id === sourceId) ??
     s.gears.find((g) => g.id === sourceId);
@@ -3035,55 +3208,61 @@ function triggerActions(
         : source?.owner === p && source.ready)) ||
     (player.xp ?? 0) < cost.xp
   )
-    return [];
+    return;
   const runeEffect = effects.find((e) => e.chooseRunes);
   if (
     runeEffect &&
     !runeEffect.optional &&
     player.runes.length < (runeEffect.amount ?? 1)
   )
-    return [];
-  return triggerTargets(s, p, effects, sourceId, cardId, locationId).flatMap(
-    (targetId) => {
-      // A leading "may" declines the whole trigger; it is not a zero-target
-      // option for an instruction that still requires a chosen object.
-      if (
-        targetId === undefined &&
-        effects.some(
-          (e) =>
-            e.target &&
-            !e.target.startsWith("upTo") &&
-            !(
-              e.target === "trashCards" &&
-              ((e.targetCount ?? 1) > 1 || e.upTo)
-            ),
-        )
+    return;
+  for (const targetId of iterateTargets(s, p, effects, locationId, sourceId)) {
+    if (
+      targetId === sourceId &&
+      ["ogn-132-298", "ogn-136-298"].includes(cardId)
+    )
+      continue;
+    if (
+      (targetId ?? "").split("~").includes(sourceId) &&
+      effects.some((e) => e.excludeSource)
+    )
+      continue;
+    if (
+      targetId === undefined &&
+      effects.some(
+        (e) =>
+          e.target &&
+          !e.target.startsWith("upTo") &&
+          !(e.target === "trashCards" && ((e.targetCount ?? 1) > 1 || e.upTo)),
       )
-        return [];
-      if (
-        !canPay(
-          s,
-          p,
-          cost.energy,
-          cost.power,
-          cost.domains,
-          targetTax(s, p, targetId),
-        )
+    )
+      continue;
+    if (
+      !canPay(
+        s,
+        p,
+        cost.energy,
+        cost.power,
+        cost.domains,
+        targetTax(s, p, targetId),
       )
-        return [];
-      return recycleSelections(player.discard, cost.recycleCost).map(
-        (cardIndices) => ({
-          id: `choose-trigger:${targetId ?? ""}${cardIndices.length ? `:recycle:${cardIndices.join(",")}` : ""}`,
-          label: `${targetId ? "Choose target" : "Use triggered ability"}${targetLabel(s, targetId)}${cardIndices.length ? ` · recycle ${cardIndices.map((i) => cardName(player.discard[i])).join(" + ")}` : ""}`,
-          player: p,
-          category: "ability" as const,
-          targetId,
-          effects,
-          ...(cardIndices.length ? { cardIndices } : {}),
-        }),
-      );
-    },
-  );
+    )
+      continue;
+    for (const cardIndices of recycleSelections(
+      player.discard,
+      cost.recycleCost,
+    )) {
+      yield {
+        id: `choose-trigger:${targetId ?? ""}${cardIndices.length ? `:recycle:${cardIndices.join(",")}` : ""}`,
+        label: `${targetId ? "Choose target" : "Use triggered ability"}${targetLabel(s, targetId)}${cardIndices.length ? ` · recycle ${cardIndices.map((i) => cardName(player.discard[i])).join(" + ")}` : ""}`,
+        player: p,
+        category: "ability",
+        targetId,
+        effects,
+        ...(cardIndices.length ? { cardIndices } : {}),
+      };
+    }
+  }
 }
 function triggerPrice(effects: Effect[]) {
   const costs = effects.flatMap((e) => (e.triggerCost ? [e.triggerCost] : []));
@@ -3399,6 +3578,7 @@ function resumeChoice(s: GameState, selected = true) {
       choice.sourceSnapshot,
     );
   if (!s.pendingChoice) finishResolvedCards(s);
+  checkVictory(s);
   drainTriggers(s);
   continuePending(s);
 }
@@ -4521,7 +4701,18 @@ function trigger(
     });
     return;
   }
-  const options = triggerActions(s, p, effects, sourceId, cardId, locationId);
+  const options: GameAction[] = [];
+  for (const candidate of iterateTriggerActions(
+    s,
+    p,
+    effects,
+    sourceId,
+    cardId,
+    locationId,
+  )) {
+    options.push(candidate);
+    if (options.length === 2) break;
+  }
   if (!options.length) return;
   if (
     options.length === 1 &&
@@ -4894,6 +5085,7 @@ function passPriority(s: GameState) {
       },
     );
     if (!s.pendingChoice) finishResolvedCards(s);
+    checkVictory(s);
     drainTriggers(s);
     if (s.winner !== null) return;
     let nextPriority: PlayerId;
@@ -4968,13 +5160,49 @@ function applyActionInternal(
   declaredAction?: GameAction,
 ): GameState {
   const id = typeof action === "string" ? action : action.id;
-  const legal =
-    declaredAction ??
-    getLegalActions(state, state.priorityPlayer).find((a) => a.id === id);
+  let legal: GameAction | undefined = declaredAction;
+  if (!legal && id.startsWith("move-group:")) {
+    const [, kind, number, members] = id.split(":");
+    legal =
+      getGroupMoveAction(
+        state,
+        state.priorityPlayer,
+        (members ?? "").split(","),
+        `${kind}:${number}` as LocationId,
+      ) ?? undefined;
+    if (legal?.id !== id) legal = undefined;
+  }
+  if (!legal)
+    for (const candidate of iterateLegalActions(state, state.priorityPlayer)) {
+      if (candidate.id === id) {
+        legal = candidate;
+        break;
+      }
+    }
   if (!legal) throw new Error(`Illegal action: ${id}`);
   const s: GameState = structuredClone(state);
   const p = legal.player,
     x = s.players[p];
+  if (typeof action !== "string" && action.paymentRuneOrder) {
+    const ids = action.paymentRuneOrder;
+    if (
+      ids.length !== x.runes.length ||
+      new Set(ids).size !== ids.length ||
+      !ids.every((id) => x.runes.some((r) => r.id === id))
+    )
+      throw new Error("Invalid payment preference");
+    x.runes.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+  }
+  if (id.startsWith("move-group:")) {
+    s.pendingMove = {
+      player: p,
+      from: s.units.find((u) => u.id === legal!.unitIds![0])!.location,
+      to: legal.locationId!,
+      unitIds: legal.unitIds!,
+    };
+    s.phase = "move";
+    return applyActionInternal(s, "move-confirm");
+  }
   if (id.startsWith("choose-trash:")) {
     const choice = s.pendingChoice!;
     const draft = choice.trashSelection!;
@@ -5793,6 +6021,8 @@ export function applyAction(
   action: string | GameAction,
 ): GameState {
   const next = applyActionInternal(state, action);
+  next.revision = (state.revision ?? 0) + 1;
+  checkVictory(next);
   if (next.winner !== null) {
     next.phase = "ended";
     next.pendingChoice = null;
@@ -5854,6 +6084,8 @@ export function getGameView(s: GameState, viewer: PlayerId): PublicGameView {
   const clone = structuredClone(s);
   return {
     ...clone,
+    seed: 0,
+    rng: 0,
     hidden: clone.hidden?.map((h) =>
       h.owner === viewer ||
       s.players[viewer].canLookAtEnemyHiddenTurn === s.turn
@@ -5874,6 +6106,16 @@ export function getGameView(s: GameState, viewer: PlayerId): PublicGameView {
         : clone.pendingChoice,
     players: clone.players.map((p) => ({
       ...p,
+      deckList:
+        p.id === viewer || s.matchConfig?.openDecklists
+          ? p.deckList
+          : undefined,
+      runeList:
+        p.id === viewer || s.matchConfig?.openDecklists
+          ? p.runeList
+          : undefined,
+      deckId:
+        p.id === viewer || s.matchConfig?.openDecklists ? p.deckId : "private",
       hand: p.id === viewer ? p.hand : [],
       deck: [],
       runeDeck: [],
@@ -5901,9 +6143,14 @@ export function applyActionStepped(
   state: GameState,
   action: string | GameAction,
 ): { state: GameState; frames: StepFrame[] } {
-  const legal = getLegalActions(state, state.priorityPlayer).find(
-    (a) => a.id === (typeof action === "string" ? action : action.id),
-  );
+  let legal = typeof action === "string" ? undefined : action;
+  if (typeof action === "string")
+    for (const candidate of iterateLegalActions(state, state.priorityPlayer)) {
+      if (candidate.id === action) {
+        legal = candidate;
+        break;
+      }
+    }
   const collected: StepFrame[] = [];
   stepFrames = collected;
   try {

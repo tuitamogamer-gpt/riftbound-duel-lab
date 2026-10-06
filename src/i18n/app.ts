@@ -1,4 +1,79 @@
 export const appMessages: Record<string, [string, string, string]> = {
+  Beginner: ["Beginner", "Početnik", "Principiante"],
+  Normal: ["Normal", "Normalni", "Normale"],
+  Hard: ["Hard", "Teški", "Difficile"],
+  Expert: ["Expert", "Ekspert", "Esperto"],
+  "Bot is thinking…": [
+    "Bot is thinking…",
+    "Bot razmišlja…",
+    "Il bot sta pensando…",
+  ],
+  "The bot explains its last decision here.": [
+    "The bot explains its last decision here.",
+    "Ovdje bot objašnjava svoju posljednju odluku.",
+    "Qui il bot spiega la sua ultima decisione.",
+  ],
+  "Four difficulty levels. The same rules and hidden-information limits.": [
+    "Four difficulty levels. The same rules and hidden-information limits.",
+    "Četiri težine. Ista pravila i iste granice skrivenih informacija.",
+    "Quattro difficoltà. Stesse regole e limiti sulle informazioni nascoste.",
+  ],
+  "This decision reaches a winning result in the rules resolver.": [
+    "This decision reaches a winning result in the rules resolver.",
+    "Ova odluka donosi pobjedu prema obračunu pravila.",
+    "Questa decisione porta alla vittoria secondo il motore delle regole.",
+  ],
+  "I complete the required choice while preserving useful units and resources.":
+    [
+      "I complete the required choice while preserving useful units and resources.",
+      "Rješavam obavezni izbor i čuvam korisne jedinice i resurse.",
+      "Completo la scelta obbligatoria conservando unità e risorse utili.",
+    ],
+  "I keep an opening hand that supports early development and a follow-up.": [
+    "I keep an opening hand that supports early development and a follow-up.",
+    "Zadržavam početnu ruku za rani razvoj i koristan nastavak.",
+    "Tengo una mano iniziale che consente sviluppo e mosse successive.",
+  ],
+  "I disrupt a battlefield that threatens the next winning score.": [
+    "I disrupt a battlefield that threatens the next winning score.",
+    "Zaustavljam prijetnju pobjedničkog bodovanja na bojištu.",
+    "Interrompo una minaccia di punteggio vincente sul campo.",
+  ],
+  "I commit a group to improve the next battlefield scoring opportunity.": [
+    "I commit a group to improve the next battlefield scoring opportunity.",
+    "Pomjeram grupu radi naredne prilike za bodovanje.",
+    "Sposto un gruppo per migliorare la prossima opportunità di punteggio.",
+  ],
+  "I preserve resources after checking the outcome of passing this window.": [
+    "I preserve resources after checking the outcome of passing this window.",
+    "Čuvam resurse nakon provjere posljedica prolaska.",
+    "Conservo risorse dopo aver valutato il passaggio della priorità.",
+  ],
+  "I keep the current position and resources for the next scoring cycle.": [
+    "I keep the current position and resources for the next scoring cycle.",
+    "Čuvam poziciju i resurse za naredni ciklus bodovanja.",
+    "Conservo posizione e risorse per il prossimo ciclo di punteggio.",
+  ],
+  "I prepare a future response at a controlled battlefield.": [
+    "I prepare a future response at a controlled battlefield.",
+    "Pripremam budući odgovor na bojištu koje kontrolišem.",
+    "Preparo una risposta futura su un campo controllato.",
+  ],
+  "I improve my position while preserving useful follow-up options.": [
+    "I improve my position while preserving useful follow-up options.",
+    "Poboljšavam poziciju i čuvam korisne mogućnosti za nastavak.",
+    "Miglioro la posizione conservando opzioni utili per il seguito.",
+  ],
+  "The search limit was reached; I use the legal default for this decision.": [
+    "The search limit was reached; I use the legal default for this decision.",
+    "Pretraga je dosegla limit; koristim legalni rezervni izbor.",
+    "La ricerca ha raggiunto il limite; uso la scelta legale predefinita.",
+  ],
+  "Download bot replay": [
+    "Download bot replay",
+    "Preuzmi zapis odluka",
+    "Scarica il replay del bot",
+  ],
   "Your runes": ["Your runes", "Tvoje rune", "Le tue rune"],
   "Opponent runes": ["Opponent runes", "Protivničke rune", "Rune avversarie"],
   "Start with 4 cards and replace up to 2 once. Your Legend starts in its zone with its effects. Your chosen champion starts in a separate zone; pay its cost to play it.":

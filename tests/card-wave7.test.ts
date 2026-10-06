@@ -17,7 +17,8 @@ import {
   trashCards,
 } from "../src/game/trash";
 import { disempower } from "../src/game/board-rules";
-import { getBotAction } from "../src/game/bot";
+import { decideBot, getBotAction, getObservation } from "../src/game/bot";
+import { sampleState } from "../src/game/ai/observation";
 import { parseSession, validState } from "../src/persistence";
 import type {
   Effect,
@@ -305,6 +306,57 @@ describe("physical trash targets", () => {
     for (let i = 0; i < 4; i++) s = applyAction(s, getBotAction(s, 0)!);
     expect(s.pendingChoice).toBeNull();
     expect(s.stack.at(-1)?.targetId?.split("~")).toHaveLength(3);
+  });
+  it("a zero-budget bot completes a mandatory trash selection without toggling", () => {
+    let s = fixture();
+    addToTrash(s, 0, ogn(49), ogn(52), ogn(32));
+    s.phase = "choice";
+    s.currentPlayer = 1;
+    s.pendingChoice = {
+      player: 0,
+      kind: "trashTargets",
+      remaining: 1,
+      returnPhase: "main",
+      returnPriority: 0,
+      effect: { type: "special", target: "trashCards", targetCount: 2 },
+      trashSelection: {
+        selected: [],
+        action: {
+          id: "declared",
+          label: "Declared targets",
+          player: 0,
+          category: "ability",
+        },
+      },
+    };
+    for (let i = 0; i < 2; i++) {
+      const result = decideBot(s, 0, { deterministic: true, maxNodes: 0 })!;
+      expect(result.action.amount).toBe(1);
+      s = applyAction(s, result.action);
+      expect(s.pendingChoice!.trashSelection!.selected).toHaveLength(i + 1);
+    }
+    expect(
+      decideBot(s, 0, { deterministic: true, maxNodes: 0 })!.action.id,
+    ).toBe("choose-trash:done");
+  });
+  it("the simulation keeps public resolving abilities and restricted resources", () => {
+    const s = fixture();
+    s.resolvingAbilities = [
+      {
+        id: "ability-1",
+        cardId: ogn(212),
+        player: 0,
+        kind: "ability",
+        effects: [{ type: "draw", amount: 1 }],
+        abilityEnergyCost: 2,
+      },
+    ];
+    s.players[0].unitEnergy = 4;
+    s.players[0].spellPower = 2;
+    const simulated = sampleState(getObservation(s, 0), 123);
+    expect(simulated.resolvingAbilities).toEqual(s.resolvingAbilities);
+    expect(simulated.players[0].unitEnergy).toBe(4);
+    expect(simulated.players[0].spellPower).toBe(2);
   });
   it("Forge of the Future pays its sacrifice only after target declaration and still makes a Recruit on play", () => {
     let s = settle(play(fixture(), ogn(212)));

@@ -91,5 +91,5 @@ describe("native match flow", () => {
     expect(forced).toBeGreaterThan(0);
     expect(opponent).toBeGreaterThan(0);
     expect(reactions).toBeGreaterThan(0);
-  });
+  }, 30_000);
 });

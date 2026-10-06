@@ -1,3 +1,4 @@
+import { DIFFICULTIES, type Difficulty } from "../game/ai/config";
 import { useRef } from "react";
 import { useI18n } from "../i18n";
 import {
@@ -490,7 +491,7 @@ export function Lobby(p: Props) {
             <fieldset className="rift-difficulty">
               <legend>{t("TEMPO TVOG IZAZOVA")}</legend>
               <div>
-                {["Taktički", "Trening"].map((style) => (
+                {(Object.keys(DIFFICULTIES) as Difficulty[]).map((style) => (
                   <label key={style}>
                     <input
                       type="radio"
@@ -500,24 +501,20 @@ export function Lobby(p: Props) {
                       onChange={() => p.onDifficulty(style)}
                     />
                     <span>
-                      {style === "Taktički" ? (
+                      {style === "hard" || style === "expert" ? (
                         <Swords size={15} />
                       ) : (
                         <Shield size={15} />
                       )}
-                      {t(style)}
+                      {t(DIFFICULTIES[style].label)}
                     </span>
                   </label>
                 ))}
               </div>
               <p>
-                {p.difficulty === "Taktički"
-                  ? t(
-                      "Protivnik procjenjuje poteze i bori se za svako bojište.",
-                    )
-                  : t(
-                      "Jednostavniji prioriteti protivnika za upoznavanje karata.",
-                    )}
+                {t(
+                  "Four difficulty levels. The same rules and hidden-information limits.",
+                )}
               </p>
             </fieldset>
             <div className="rift-match-preview">

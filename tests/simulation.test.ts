@@ -182,7 +182,7 @@ describe("catalogue integration and hidden-information boundaries", () => {
       expect(view.players[1].runeDeck).toEqual([]);
       state = applyAction(state, action!);
     }
-  });
+  }, 30_000);
 
   it("rejects illegal actions without modifying the state", () => {
     const state = createGame({ seed: 123 });

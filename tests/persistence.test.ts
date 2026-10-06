@@ -62,6 +62,47 @@ describe("saved manual Proceed session", () => {
 });
 
 describe("saved state structural recovery", () => {
+  it("validates bot configuration and registered lists while accepting older saves", () => {
+    const current = createGame({
+      seed: 19,
+      botDifficulty: "expert",
+      botSeed: 321,
+    });
+    expect(
+      parseSession(JSON.stringify({ match: current, review: null })).match
+        ?.botSettings?.difficulty,
+    ).toBe("expert");
+    const legacy = structuredClone(current);
+    delete legacy.matchConfig;
+    delete legacy.botSettings;
+    delete legacy.revision;
+    legacy.players.forEach((p) => {
+      delete p.deckList;
+      delete p.runeList;
+    });
+    expect(validState(legacy)).toBe(true);
+    for (const mutate of [
+      (s: any) => {
+        s.botSettings.difficulty = "unknown";
+      },
+      (s: any) => {
+        s.botSettings.seed = -1;
+      },
+      (s: any) => {
+        s.revision = "stale";
+      },
+      (s: any) => {
+        s.players[0].deckList = ["not-a-card"];
+      },
+      (s: any) => {
+        s.matchConfig.openDecklists = "false";
+      },
+    ]) {
+      const broken = structuredClone(current);
+      mutate(broken);
+      expect(validState(broken)).toBe(false);
+    }
+  });
   it("rejects final decision phases with missing mandatory payloads", () => {
     for (const phase of ["move", "choice", "damage", "showdown"] as const) {
       const match = createGame({ seed: 7 });
