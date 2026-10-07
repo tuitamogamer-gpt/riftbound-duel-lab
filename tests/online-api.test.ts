@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { createDuelHandler } from "../api/duel";
+import { createDuelHandler } from "../src/server/duel-api";
 import { MemoryRoomStorage, MAX_ROOM_REQUEST_BYTES } from "../src/server/rooms";
 function response() {
   const result = {

@@ -13,7 +13,7 @@ export default defineConfig({
         let handler: Promise<any> | undefined;
         server.middlewares.use("/api/duel", async (req, res) => {
           handler ??= Promise.all([
-            server.ssrLoadModule("/api/duel.ts"),
+            server.ssrLoadModule("/src/server/duel-api.ts"),
             server.ssrLoadModule("/src/server/rooms.ts"),
           ]).then(([api, rooms]) =>
             api.createDuelHandler(new rooms.MemoryRoomStorage()),

@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { BlobRoomStorage } from "../src/server/blob-room-storage";
+import { BlobRoomStorage } from "./blob-room-storage";
 import {
   MAX_ROOM_REQUEST_BYTES,
   RoomError,
   RoomService,
   type RoomStorage,
-} from "../src/server/rooms";
+} from "./rooms";
 
 export function createDuelHandler(storage: RoomStorage) {
   const service = new RoomService(storage);

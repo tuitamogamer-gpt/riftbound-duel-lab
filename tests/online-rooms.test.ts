@@ -61,6 +61,80 @@ const act = (
   });
 
 describe("private authoritative rooms", () => {
+  it("names the guest's own base relative to its seat while preserving canonical action IDs", async () => {
+    const { storage, service, host, guest } = await opening("guest");
+    const state = storage.records.get(host.roomId)!.room.game!;
+    state.phase = "main";
+    state.turn = 5;
+    state.currentPlayer = state.priorityPlayer = state.focusPlayer = 1;
+    for (const player of state.players) {
+      player.hasBegun = true;
+      player.mulliganDone = true;
+      player.hand = [];
+      player.energy = player.power = 20;
+      player.runes = [];
+      player.championAvailable = false;
+    }
+    state.players[1].hand = ["ogn-175-298"];
+    state.units = [{ ...combatUnit("guest-retreat", 1, 3), ready: true }];
+    const canonical = getLegalActions(state, 1);
+    const canonicalPlay = canonical.find(
+      (action) => action.category === "play" && action.locationId === "base:1",
+    )!;
+    const canonicalMove = canonical.find(
+      (action) => action.id === "move-start:guest-retreat:base:1",
+    )!;
+    expect(canonicalPlay.label).toContain(" at enemy base");
+    expect(canonicalMove.label).toContain(" → enemy base");
+    const initial = await poll(service, guest);
+    expect(
+      initial.room.actions.find((action) => action.id === canonicalPlay.id)
+        ?.label,
+    ).toBe(canonicalPlay.label.replace(" at enemy base", " at your base"));
+    expect(
+      initial.room.actions.find((action) => action.id === canonicalMove.id)
+        ?.label,
+    ).toBe(canonicalMove.label.replace(" → enemy base", " → your base"));
+    const searched = await service.request({
+      op: "poll",
+      roomId: guest.roomId,
+      seatToken: guest.seatToken,
+      query: "your base",
+    });
+    expect(
+      searched.room.actions.some((action) => action.id === canonicalPlay.id),
+    ).toBe(true);
+    expect(
+      searched.room.actions.every((action) =>
+        action.label.includes("your base"),
+      ),
+    ).toBe(true);
+    expect((await poll(service, host)).room.actions).toEqual([]);
+    const choosing = await act(
+      service,
+      guest,
+      initial,
+      canonicalMove.id,
+      "guest-retreat-start",
+    );
+    const confirm = choosing.room.actions.find(
+      (action) => action.id === "move-confirm",
+    )!;
+    expect(confirm.label).toBe("Move 1 unit to your base");
+    expect(confirm.locationId).toBe("base:1");
+    const moved = await act(
+      service,
+      guest,
+      choosing,
+      confirm.id,
+      "guest-retreat-confirm",
+    );
+    expect(
+      moved.room.observation?.state.units.find(
+        (unit) => unit.id === "guest-retreat",
+      )?.location,
+    ).toBe("base:1");
+  });
   it("selects two ready units through live movement decisions and moves both only after group confirmation", async () => {
     const { storage, service, host, guest } = await opening();
     const state = storage.records.get(host.roomId)!.room.game!;

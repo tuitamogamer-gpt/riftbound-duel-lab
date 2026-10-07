@@ -20,6 +20,8 @@ Production uses **private Vercel Blob** for authoritative room state. There is n
 
 The SPA rewrite excludes `/api`, so `POST /api/duel` reaches the Vercel function. Every response is private and uncacheable; credentials remain in the POST body. Cross-origin browser requests are rejected.
 
+The production build bundles `src/server/duel-api.ts` and its rules/catalog into `.duel-server/handler.mjs`. The checked `api/duel.js` entry imports that explicit ESM filename; Vercel includes the generated file in its Node function. This avoids relying on Node to resolve the application's extensionless TypeScript imports. The generated backend is ignored by Git and rebuilt with each `npm run build`.
+
 `BlobRoomStorage` reads from origin with `useCache: false`. Existing room writes use the current ETag through `put(..., { ifMatch })`; a conflicting write returns a stale-position response instead of replacing another move. Room creation disables overwrite. Each stored room is limited to 2 MB and incoming requests to 120 KB. Polling reads the room every five seconds while visible and never writes heartbeats. Writes occur only for create, successful join, accepted move, and departure.
 
 ## Public and private information

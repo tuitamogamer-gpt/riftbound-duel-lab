@@ -18,6 +18,7 @@ import {
   createGame,
   getGroupMoveAction,
   iterateLegalActions,
+  locationName,
 } from "../game/engine";
 import { getObservation } from "../game/ai/observation";
 import { syncHybridObjects } from "../game/card-wave19";
@@ -202,7 +203,31 @@ function selectionSeat(selection: OnlineDeckSelection, hash: string): RoomSeat {
   return { tokenHash: hash, deck, battlefieldId };
 }
 
-function actionRow(action: GameAction, game: GameState): OnlineAction {
+function actionLabel(action: GameAction, seat: PlayerId) {
+  if (action.id.startsWith("choose-board:") && !action.locationId)
+    return seat === 0
+      ? action.label
+      : action.label.replace(/ · (your base|enemy base)$/, (_, name: string) =>
+          name === "your base" ? " · enemy base" : " · your base",
+        );
+  const location = action.locationId;
+  if (!location?.startsWith("base:")) return action.label;
+  const original = locationName(location);
+  const relative = location === `base:${seat}` ? "your base" : "enemy base";
+  if (original === relative) return action.label;
+  // Engine labels use seat 0's base names. Adapt their location annotations,
+  // preserving canonical actions and card/rule text for the other seat.
+  return action.label.replace(
+    /( at | to | → | · |^Destination: )(your base|enemy base)(?=$| [✓(]| · | → )/g,
+    (annotation, prefix: string, name: string) =>
+      name === original ? `${prefix}${relative}` : annotation,
+  );
+}
+function actionRow(
+  action: GameAction,
+  game: GameState,
+  seat: PlayerId,
+): OnlineAction {
   const replaced =
     action.category === "mulligan"
       ? (action.cardIndices ?? []).map(
@@ -211,7 +236,9 @@ function actionRow(action: GameAction, game: GameState): OnlineAction {
       : [];
   return {
     id: action.id,
-    label: replaced.length ? `Replace ${replaced.join(" + ")}` : action.label,
+    label: replaced.length
+      ? `Replace ${replaced.join(" + ")}`
+      : actionLabel(action, seat),
     player: action.player,
     category: action.category,
     ...(action.sourceId ? { sourceId: action.sourceId } : {}),
@@ -249,7 +276,7 @@ export function roomView(
         !action.sourceId?.startsWith(`${filter.sourceId}:`)
       )
         continue;
-      const row = actionRow(action, room.game);
+      const row = actionRow(action, room.game, seat);
       if (
         query &&
         !`${row.label} ${row.detail ?? ""}`.toLocaleLowerCase().includes(query)
