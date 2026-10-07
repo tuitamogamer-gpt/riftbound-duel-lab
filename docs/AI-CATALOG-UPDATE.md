@@ -36,6 +36,16 @@ The cohort has eight deck pairings per comparison: all 13 included official prec
 
 The report records exact lists and their cohort profiles, current catalog/rules metadata, configuration, game seeds, first players, outcomes, legal fallbacks, incomplete searches, illegal or blocked games, per-level timings, maximum completed depth, and counts of decisions using multiple samples. Cohort profiles describe the complete lists; runtime profile inference uses cards legitimately known during play. It saves completed-game progress before the whole run finishes. The fixed-node benchmark ignores interactive wall-time cutoffs. Timing includes observation, planning, and validation; concurrent regression workers can increase measured wall times.
 
+Interrupted runs can continue with the same arguments plus `--resume`. Checkpoints are replaced atomically and contain a SHA-256 fingerprint of the rules, planner, catalog, and cohort source files. Continuation rejects different source, configuration, lists, seeds, first players, seat-pair order, or inconsistent outcome/decision/timing totals before retaining a game. Six checkpoint tests cover valid continuation, corrupted or mismatched progress, and retaining a reported failed decision without erasing its failure.
+
+This pilot retained 14 completed games after the execution environment restarted. Its older checkpoint predates source fingerprints, so continuation explicitly verified all relevant source files against commit `8a1bfca67a2f153bf044ce3356cc49b50547d7a8` before skipping those games. The original generation time and all retained measurements are preserved; `resumptions` records the new start time, environment, and source commit. No old inspection-bug measurements enter this report. To reproduce that legacy continuation command:
+
+```sh
+npm run bot:benchmark -- 8 docs/bot-catalog-benchmark-2026-10-07.json hard,expert catalog --resume --resume-source=8a1bfca67a2f153bf044ce3356cc49b50547d7a8
+```
+
+New checkpoints require only `--resume`; `--check-resume` validates without executing another game.
+
 This is a small coverage pilot. It cannot establish statistical superiority or a general ordering of the difficulty settings. The dated [v1 measurements](AI-BOTS.md) remain historical checkpoints and should not be combined with this current-catalog sample.
 
 ## Remaining information limit

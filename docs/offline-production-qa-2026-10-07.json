@@ -1,0 +1,55 @@
+{
+  "checkedAt": "2026-10-07",
+  "sourceCommit": "8a1bfca67a2f153bf044ce3356cc49b50547d7a8",
+  "origin": "https://riftbound-duel-lab.vercel.app",
+  "passed": true,
+  "buildId": "f9bf35995522",
+  "cachedApplicationAssets": 77,
+  "missingAssets": [],
+  "apiCached": false,
+  "deckImages": {
+    "cached": 38,
+    "status": "38 deck images ready offline \u00b7 0 unavailable"
+  },
+  "errors": [],
+  "failedRequests": [],
+  "firstOfflineBotDecision": {
+    "configVersion": "battlefield-planner-2",
+    "difficulty": "beginner",
+    "nodes": 24,
+    "usedFallback": false,
+    "incomplete": false
+  },
+  "viewports": {
+    "offlineLobby": {
+      "width": 390,
+      "scrollWidth": 390,
+      "height": 844
+    },
+    "offlineBuilder": {
+      "width": 390,
+      "scrollWidth": 390,
+      "height": 844
+    },
+    "offlineTraining": {
+      "width": 390,
+      "scrollWidth": 390,
+      "height": 844
+    },
+    "offlineHistory": {
+      "width": 390,
+      "scrollWidth": 390,
+      "height": 844
+    },
+    "offlineMatch": {
+      "width": 390,
+      "scrollWidth": 390,
+      "height": 844
+    },
+    "offlineLandscape": {
+      "width": 844,
+      "scrollWidth": 844,
+      "height": 390
+    }
+  }
+}

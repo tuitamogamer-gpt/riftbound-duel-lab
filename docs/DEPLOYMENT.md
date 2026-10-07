@@ -1,5 +1,20 @@
 # Production deployment
 
+## Practice tools release — 7 October 2026
+
+Application tools were published in `8a1bfca67a2f153bf044ce3356cc49b50547d7a8`; the Node function packaging and guest-base labels were corrected in `bb08fe110334b0a5a3b931c8b72040a28865148d`. Both production builds for the latter commit reached **READY**, with their public aliases confirmed:
+
+- [riftbound-duel-lab.vercel.app](https://riftbound-duel-lab.vercel.app/) — `dpl_2nubG31wQ4wxyTC5C7gSM3S6h2GW`.
+- [riftbound-duel-lab-pgml.vercel.app](https://riftbound-duel-lab-pgml.vercel.app/) — `dpl_FkCYQN5dQfRzB159H2cBS1Jbckq4`.
+
+The required GitHub checks passed for both commits. Public Chromium checks verified the primary app's offline shell, lazy screens, first offline bot decision, saved-game reload and portrait/landscape layout. The [offline evidence](offline-production-qa-2026-10-07.json) records 77 cached application assets, 38 selected-deck images, no failed requests and an actual 24-node worker decision without fallback.
+
+Both deployed `/api/duel` functions reject GET with 405 and return the guarded `storage-unavailable` response with 503 when creating a room. Their responses use `private, no-store` and `no-referrer`. The primary app shows a friendly storage message and returns to the lobby at 390×844 and 1440×900. **Online room availability remains blocked by the private Blob store configuration:** the connected account rejected store creation with HTTP 403. See [ONLINE-DUELS.md](ONLINE-DUELS.md) for setup and local two-player validation.
+
+Complete-regression recovery and the fresh paired AI pilot are recorded in [VALIDATION.md](VALIDATION.md) and [AI-CATALOG-UPDATE.md](AI-CATALOG-UPDATE.md). These longer checks continue independently of the published implementation checkpoint.
+
+## Initial release — 2 October 2026
+
 Published on **2 October 2026**.
 
 - Public URL: https://riftbound-duel-lab.vercel.app/

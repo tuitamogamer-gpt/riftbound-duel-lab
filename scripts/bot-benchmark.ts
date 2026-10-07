@@ -1,7 +1,15 @@
-/** npx vite-node scripts/bot-benchmark.ts [pairs] [output.json] [levels] [catalog] */
-import { mkdirSync, writeFileSync } from "node:fs";
+/** npx vite-node scripts/bot-benchmark.ts [pairs] [output.json] [levels] [catalog] [--resume] */
+import {
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname } from "node:path";
 import { cpus } from "node:os";
+import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { applyAction, createGame } from "../src/game/engine";
 import { decideBot } from "../src/game/bot";
 import { getReferenceAction } from "../src/game/bot-reference";
@@ -17,9 +25,14 @@ import {
 } from "../src/game/ai/config";
 import type { GameState, PlayerId } from "../src/game/types";
 import { benchmarkDeckPairs, benchmarkList } from "./bot-benchmark-decks";
-const catalog = process.argv[5] === "catalog";
-const pairs = Math.max(1, Number(process.argv[2] ?? 6));
-const output = process.argv[3] ?? "test-results/bot-benchmark.json";
+import { validateBenchmarkResume } from "./bot-benchmark-report";
+const flags = process.argv.slice(2).filter((arg) => arg.startsWith("--"));
+const arguments_ = process.argv.slice(2).filter((arg) => !arg.startsWith("--"));
+const catalog = arguments_[3] === "catalog";
+const pairs = Math.max(1, Number(arguments_[0] ?? 6));
+const output = arguments_[1] ?? "test-results/bot-benchmark.json";
+if (!Number.isInteger(pairs))
+  throw new Error("Pair count must be a positive integer");
 mkdirSync(dirname(output), { recursive: true });
 const comparisons: [Difficulty, Difficulty | "reference"][] = [
   ["beginner", "reference"],
@@ -28,6 +41,36 @@ const comparisons: [Difficulty, Difficulty | "reference"][] = [
   ["expert", "hard"],
 ];
 const deckPairs = benchmarkDeckPairs(catalog);
+const selectedComparisons = comparisons.filter(
+  ([level]) => !arguments_[2] || arguments_[2].split(",").includes(level),
+);
+if (!selectedComparisons.length)
+  throw new Error("No benchmark comparisons selected");
+// Fingerprint the exact rules/planner/catalog inputs, including JSON data. A
+// checkpoint with different source is rejected even if its version is unchanged.
+const sourceFiles = [
+  ...["src/game", "src/data"].flatMap((directory) =>
+    readdirSync(directory, { recursive: true })
+      .map(String)
+      .filter((file) => /\.(ts|json)$/.test(file))
+      .map((file) => `${directory}/${file}`),
+  ),
+  "scripts/bot-benchmark-decks.ts",
+].sort();
+function sourceFingerprint(commit?: string) {
+  const hash = createHash("sha256");
+  for (const file of sourceFiles) {
+    const bytes = commit
+      ? execFileSync("git", ["show", `${commit}:${file}`], {
+          maxBuffer: 32 * 1024 * 1024,
+        })
+      : readFileSync(file);
+    hash.update(`${file}\0${bytes.length}\0`);
+    hash.update(bytes);
+  }
+  return hash.digest("hex");
+}
+const sourceSha256 = sourceFingerprint();
 const report: any = {
   configVersion: BOT_VERSION,
   configuration: DIFFICULTIES,
@@ -41,6 +84,8 @@ const report: any = {
   },
   pairsPerComparison: pairs,
   deterministicNodes: true,
+  selectedComparisons,
+  sourceSha256,
   scope: catalog
     ? "13 official precons and three legal modified/imported theme lists; equipment and tokens span expansions, XP remains within UNL"
     : "four curated practice decks",
@@ -61,13 +106,88 @@ const report: any = {
   })),
   comparisons: [],
 };
+let previousComparisons: any[] = [];
+if (flags.includes("--resume")) {
+  const previous = JSON.parse(readFileSync(output, "utf8"));
+  const sourceCommitArgument = flags.find((arg) =>
+    arg.startsWith("--resume-source="),
+  );
+  let legacySourceCommit: string | undefined;
+  if (!previous.sourceSha256) {
+    if (!sourceCommitArgument)
+      throw new Error(
+        "Legacy checkpoint requires --resume-source=<verified source commit>",
+      );
+    legacySourceCommit = execFileSync(
+      "git",
+      [
+        "rev-parse",
+        "--verify",
+        `${sourceCommitArgument.slice("--resume-source=".length)}^{commit}`,
+      ],
+      { encoding: "utf8" },
+    ).trim();
+    if (sourceFingerprint(legacySourceCommit) !== sourceSha256)
+      throw new Error(
+        "Legacy checkpoint source commit differs from the current planner/rules/catalog",
+      );
+  } else if (previous.sourceSha256 !== sourceSha256)
+    throw new Error("Checkpoint planner/rules/catalog source differs");
+  const identities = Array.from({ length: pairs }, (_, pair) => {
+    const [left, right] = deckPairs[pair % deckPairs.length];
+    return [0, 1].map((side) => ({
+      pair,
+      side,
+      decks: [left.id, right.id],
+      deckProfiles: [
+        inferProfile(benchmarkList(left)),
+        inferProfile(benchmarkList(right)),
+      ],
+      seed: 1201 + pair * 31,
+      firstPlayer: pair % 2,
+    }));
+  }).flat();
+  validateBenchmarkResume(previous, report, selectedComparisons, identities);
+  if (previous.status === "completed") {
+    console.log("Verified completed cohort: no games remain; report preserved");
+    process.exit(0);
+  }
+  previousComparisons = previous.comparisons;
+  report.generatedAt = previous.generatedAt;
+  report.environment = previous.environment;
+  report.resumptions = [
+    ...(previous.resumptions ?? []),
+    {
+      resumedAt: new Date().toISOString(),
+      completedGamesRetained: previousComparisons.reduce(
+        (sum, record) => sum + record.games.length,
+        0,
+      ),
+      environment: {
+        platform: process.platform,
+        arch: process.arch,
+        node: process.version,
+        cpu: cpus()[0]?.model,
+      },
+      ...(legacySourceCommit ? { legacySourceCommit } : {}),
+    },
+  ];
+  console.log(
+    `Verified checkpoint: retaining ${report.resumptions.at(-1).completedGamesRetained} completed games`,
+  );
+  if (flags.includes("--check-resume")) process.exit(0);
+} else if (flags.includes("--check-resume"))
+  throw new Error("--check-resume requires --resume");
+function checkpoint(value: any) {
+  const temporary = `${output}.tmp`;
+  writeFileSync(temporary, JSON.stringify(value, null, 2) + "\n");
+  renameSync(temporary, output);
+}
 function stateKey(s: GameState) {
   return JSON.stringify({ ...s, log: [], nextId: 0, revision: 0 });
 }
-for (const [strong, weak] of comparisons.filter(
-  ([level]) => !process.argv[4] || process.argv[4].split(",").includes(level),
-)) {
-  const record: any = {
+for (const [comparisonIndex, [strong, weak]] of selectedComparisons.entries()) {
+  const record: any = previousComparisons[comparisonIndex] ?? {
     strong,
     weak,
     wins: { strong: 0, weak: 0 },
@@ -82,6 +202,7 @@ for (const [strong, weak] of comparisons.filter(
   };
   for (let pair = 0; pair < pairs; pair++)
     for (let side = 0; side < 2; side++) {
+      if (pair * 2 + side < record.games.length) continue;
       const [left, right] = deckPairs[pair % deckPairs.length],
         seed = 1201 + pair * 31;
       const gameStarted = performance.now();
@@ -176,18 +297,11 @@ for (const [strong, weak] of comparisons.filter(
         `${strong}/${weak} pair ${pair + 1}/${pairs} side ${side}: ${s.winner === null ? error : labels[s.winner]} · ${steps} decisions`,
       );
       // Keep a resumable diagnostic report even if a later game is interrupted.
-      writeFileSync(
-        output,
-        JSON.stringify(
-          {
-            ...report,
-            comparisons: [...report.comparisons, record],
-            status: "running",
-          },
-          null,
-          2,
-        ) + "\n",
-      );
+      checkpoint({
+        ...report,
+        comparisons: [...report.comparisons, record],
+        status: "running",
+      });
     }
   function summarize(times: number[]) {
     const timings = times.sort((a, b) => a - b);
@@ -199,15 +313,17 @@ for (const [strong, weak] of comparisons.filter(
       max: timings.at(-1),
     };
   }
-  record.timingMs = summarize(record.timings);
-  for (const level of Object.values(record.levels) as any[]) {
-    level.timingMs = summarize(level.timings);
-    delete level.timings;
+  if (record.timings) {
+    record.timingMs = summarize(record.timings);
+    for (const level of Object.values(record.levels) as any[]) {
+      level.timingMs = summarize(level.timings);
+      delete level.timings;
+    }
+    delete record.timings;
   }
-  delete record.timings;
   report.comparisons.push(record);
-  writeFileSync(output, JSON.stringify(report, null, 2) + "\n");
+  checkpoint({ ...report, status: "running" });
 }
 report.status = "completed";
 report.completedAt = new Date().toISOString();
-writeFileSync(output, JSON.stringify(report, null, 2) + "\n");
+checkpoint(report);

@@ -25,6 +25,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run cards:check
+      - name: Regression report guards
+        run: node scripts/check-regression-reports.mjs
       - name: Core and imported-rule regressions
         run: >-
           npm test --
@@ -45,8 +47,11 @@ jobs:
           tests/ai-inspection-ownership.test.ts
           tests/public-hand-reveals.test.ts
           tests/online-rooms.test.ts
+          tests/online-client.test.ts
+          tests/online-api.test.ts
           tests/online-mulligan.test.ts
           tests/blob-room-storage.test.ts
+          tests/bot-benchmark-resume.test.ts
           tests/audit-storage.test.ts
           tests/match-series.test.ts
           tests/match-history.test.ts

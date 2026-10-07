@@ -19,19 +19,24 @@ const testName = (name) =>
   name
     .normalize("NFC")
     .replace(/\s+/g, " ")
+    // `vitest list` separates describe scopes with ` > `; JSON fullName uses spaces.
+    .replace(/ > /g, " ")
     .trim()
     .replace(
       /completes ['"]([^'"]+ vs [^'"]+)['"] with card\/rune/g,
       "completes $1 with card/rune",
     );
 const identity = (file, name) => `${fileName(file)}\n${testName(name)}`;
+const collected = JSON.parse(readFileSync(expectedPath, "utf8"));
 const expected = new Map(
-  JSON.parse(readFileSync(expectedPath, "utf8")).map((test) => [
+  collected.map((test) => [
     identity(test.file, test.name),
     { file: fileName(test.file), fullName: testName(test.name) },
   ]),
 );
 if (!expected.size) throw new Error("The collected test list is empty.");
+if (expected.size !== collected.length)
+  throw new Error("Collected test identities collide after normalization.");
 const reports = paths
   .map((path, index) => ({
     path,
@@ -40,7 +45,8 @@ const reports = paths
   }))
   .sort(
     (a, b) =>
-      (a.report.startTime ?? 0) - (b.report.startTime ?? 0) ||
+      (a.report.checkpointTime ?? a.report.startTime ?? 0) -
+        (b.report.checkpointTime ?? b.report.startTime ?? 0) ||
       a.index - b.index,
   );
 
@@ -52,10 +58,12 @@ for (const { path, report } of reports) {
   sourceReports.push({
     path,
     startTime: report.startTime ?? null,
+    ...(report.checkpointTime ? { checkpointTime: report.checkpointTime } : {}),
     success: report.success,
     passed: report.numPassedTests,
     failed: report.numFailedTests,
     pending: report.numPendingTests,
+    ...(report.recovery ? { recovery: report.recovery } : {}),
   });
   if (report.success !== true && report.numFailedTests === 0)
     unresolvedSourceErrors.push({
@@ -94,14 +102,18 @@ const summary = {
   baseHeadAtSummary: git(["rev-parse", "HEAD"]),
   workingTreeModifiedAtSummary: Boolean(git(["status", "--porcelain"])),
   sourceNote:
-    "Reports are working-tree checkpoints; failed initial reports remain recorded, with later executed cases replacing earlier results.",
+    "Reports are checkpoint evidence; recovered subsets identify their original logs and scope. Failed initial cases remain recorded, with later executed cases replacing earlier results. This is not a claim that an interrupted run completed.",
   expectedPath,
   expectedFiles: new Set([...expected.values()].map((test) => test.file)).size,
   expectedUniqueTests: expected.size,
   passedUniqueTests: passed.length,
   failedUniqueTests: failed.length,
   missingUniqueTests: missing.length,
-  success: !failed.length && !missing.length && !unresolvedSourceErrors.length,
+  success:
+    !failed.length &&
+    !missing.length &&
+    !unresolvedSourceErrors.length &&
+    unmatchedSourceAssertions === 0,
   sourceReports,
   unmatchedSourceAssertions,
   unresolvedSourceErrors,
@@ -120,6 +132,8 @@ console.log(
     passedUniqueTests: passed.length,
     failedUniqueTests: failed.length,
     missingUniqueTests: missing.length,
+    unmatchedSourceAssertions,
+    unresolvedSourceErrors: unresolvedSourceErrors.length,
     success: summary.success,
     ...(outputPath ? { output: outputPath } : {}),
   }),
