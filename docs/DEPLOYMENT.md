@@ -11,7 +11,9 @@ The required GitHub checks passed for both commits. Public Chromium checks verif
 
 Both deployed `/api/duel` functions reject GET with 405 and return the guarded `storage-unavailable` response with 503 when creating a room. Their responses use `private, no-store` and `no-referrer`. The primary app shows a friendly storage message and returns to the lobby at 390×844 and 1440×900. **Online room availability remains blocked by the private Blob store configuration:** the connected account rejected store creation with HTTP 403. See [ONLINE-DUELS.md](ONLINE-DUELS.md) for setup and local two-player validation.
 
-Complete-regression recovery and the fresh paired AI pilot are recorded in [VALIDATION.md](VALIDATION.md) and [AI-CATALOG-UPDATE.md](AI-CATALOG-UPDATE.md). These longer checks continue independently of the published implementation checkpoint.
+The fresh paired AI pilot completed all 32 games without illegal or blocked games; its outcomes and limits are recorded in [AI-CATALOG-UPDATE.md](AI-CATALOG-UPDATE.md). The consolidated regression inventory covers 2,568 unique passing cases and all 169 ordered precon pairs. It combines completed checkpoints, recovered executed assertions and exact reruns, while preserving original interrupted/failed process status. See [VALIDATION.md](VALIDATION.md) and the [coverage record](regression-validation-2026-10-07.json).
+
+The final follow-up corrects loading Pack of Wonders' legal Hidden board-card choices, adds positive and malformed-save regressions, and prevents long deterministic test loops from starving runner acknowledgements. Production compilation and the actual Node function-entry import pass with this save correction. These changes leave the paired AI pilot's engine, planner and catalog inputs intact.
 
 ## Initial release — 2 October 2026
 

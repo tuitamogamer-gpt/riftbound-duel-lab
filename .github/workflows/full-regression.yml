@@ -92,6 +92,13 @@ jobs:
         with:
           name: full-suite-report
           path: test-results
+      - name: Require successful worker processes as well as assertion reports
+        env:
+          FULL_SUITE_RESULT: ${{ needs.full-suite.result }}
+          PRECON_MATRIX_RESULT: ${{ needs.precon-matrix.result }}
+        run: |
+          test "$FULL_SUITE_RESULT" = success
+          test "$PRECON_MATRIX_RESULT" = success
       - name: Reject missing, duplicate, skipped or failed pairings
         run: >-
           node scripts/verify-precon-report.mjs

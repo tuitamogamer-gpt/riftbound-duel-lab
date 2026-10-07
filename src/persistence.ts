@@ -218,8 +218,10 @@ const effects = (x: unknown, depth = 0): boolean =>
             ["any", "here", "base", "open"].includes(e.group.destination)))) &&
       (e.cardTypes === undefined ||
         (stringArray(e.cardTypes) &&
-          e.cardTypes.every((type) =>
-            ["Unit", "Spell", "Gear", "Rune"].includes(type),
+          e.cardTypes.every(
+            (type) =>
+              ["Unit", "Spell", "Gear", "Rune"].includes(type) ||
+              (type === "Hidden" && e.target === "boardCards"),
           ))) &&
       (e.cardTags === undefined || stringArray(e.cardTags)) &&
       [

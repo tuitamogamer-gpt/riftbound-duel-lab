@@ -98,7 +98,7 @@ describe("additional catalog cards in mixed expansion games", () => {
       ["VEN", "OGN"],
       ["UNL", "SFD"],
     ]) {
-      it(`${a} versus ${b}, seed ${seed}: legal progress, read-only queries and resumable choices`, () => {
+      it(`${a} versus ${b}, seed ${seed}: legal progress, read-only queries and resumable choices`, async () => {
         let s = createGame({
           playerDeck: deck(a, seed),
           botDeck: deck(b, seed + 1),
@@ -128,6 +128,9 @@ describe("additional catalog cards in mixed expansion games", () => {
             expect(restored, `${a}/${b} save turn ${s.turn}`).toEqual(s);
             s = restored!;
           }
+          // Long deterministic games must also let the worker receive runner IPC.
+          if (step % 25 === 24)
+            await new Promise<void>((resolve) => setTimeout(resolve, 0));
         }
         expect(
           s.winner,

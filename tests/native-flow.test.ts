@@ -64,7 +64,7 @@ describe("native match flow", () => {
       ),
     ).toBe(false);
   });
-  it("automates only forced human passes and preserves every actual reaction through full games", () => {
+  it("automates only forced human passes and preserves every actual reaction through full games", async () => {
     let forced = 0,
       reactions = 0,
       opponent = 0;
@@ -86,6 +86,8 @@ describe("native match flow", () => {
         const decision = auto ?? getBotAction(game);
         expect(decision).toBeTruthy();
         game = applyAction(game, decision!);
+        if (step % 25 === 24)
+          await new Promise<void>((resolve) => setTimeout(resolve, 0));
       }
     }
     expect(forced).toBeGreaterThan(0);

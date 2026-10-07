@@ -76,42 +76,49 @@ function conservation(s: GameState) {
 describe("next 100 card effects in complete mixed-deck games", () => {
   for (const seed of [31, 71])
     for (const [a, b] of [["import-A", "import-B"]]) {
-      it(`${a} versus ${b}, seed ${seed}: legal progress, read-only queries and resumable choices`, () => {
-        let s = createGame({
-          playerDeck: deck(a, seed),
-          botDeck: deck(b, seed + 1),
-          seed,
-        });
-        for (let step = 0; step < 3000 && s.winner === null; step++) {
-          conservation(s);
-          const before = JSON.stringify(s);
-          const legal = getLegalActions(s, s.priorityPlayer);
-          for (const unit of s.units)
-            expect(Number.isFinite(getMight(s, unit))).toBe(true);
-          const action = getBotAction(s);
-          expect(
-            JSON.stringify(s),
-            "queries must not mutate saved match state",
-          ).toBe(before);
-          expect(
-            action,
-            `${a}/${b} turn ${s.turn} phase ${s.phase}`,
-          ).not.toBeNull();
-          expect(legal.some((a) => a.id === action!.id)).toBe(true);
-          s = applyAction(s, action!);
-          if (s.pendingChoice || step % 50 === 0) {
-            const restored = parseSession(
-              JSON.stringify({ match: s, review: null }),
-            ).match;
-            expect(restored, `${a}/${b} save turn ${s.turn}`).toEqual(s);
-            s = restored!;
+      it(
+        `${a} versus ${b}, seed ${seed}: legal progress, read-only queries and resumable choices`,
+        async () => {
+          let s = createGame({
+            playerDeck: deck(a, seed),
+            botDeck: deck(b, seed + 1),
+            seed,
+          });
+          for (let step = 0; step < 3000 && s.winner === null; step++) {
+            conservation(s);
+            const before = JSON.stringify(s);
+            const legal = getLegalActions(s, s.priorityPlayer);
+            for (const unit of s.units)
+              expect(Number.isFinite(getMight(s, unit))).toBe(true);
+            const action = getBotAction(s);
+            expect(
+              JSON.stringify(s),
+              "queries must not mutate saved match state",
+            ).toBe(before);
+            expect(
+              action,
+              `${a}/${b} turn ${s.turn} phase ${s.phase}`,
+            ).not.toBeNull();
+            expect(legal.some((a) => a.id === action!.id)).toBe(true);
+            s = applyAction(s, action!);
+            if (s.pendingChoice || step % 50 === 0) {
+              const restored = parseSession(
+                JSON.stringify({ match: s, review: null }),
+              ).match;
+              expect(restored, `${a}/${b} save turn ${s.turn}`).toEqual(s);
+              s = restored!;
+            }
+            if (step % 25 === 24)
+              await new Promise<void>((resolve) => setTimeout(resolve, 0));
           }
-        }
-        expect(
-          s.winner,
-          `${a}/${b} stopped at turn ${s.turn}/${s.phase}`,
-        ).not.toBeNull();
-        conservation(s);
-      }, 60_000);
+          expect(
+            s.winner,
+            `${a}/${b} stopped at turn ${s.turn}/${s.phase}`,
+          ).not.toBeNull();
+          conservation(s);
+          // Seed 31 took 87s with four shared workers; retain the complete game checks.
+        },
+        seed === 31 ? 120_000 : 60_000,
+      );
     }
 });

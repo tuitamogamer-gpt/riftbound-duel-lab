@@ -83,7 +83,7 @@ function assertState(state: GameState, context: string) {
   }
 }
 
-function simulate(playerDeckId: string, botDeckId: string, seed: number) {
+async function simulate(playerDeckId: string, botDeckId: string, seed: number) {
   let state = createGame({
     playerDeckId,
     botDeckId,
@@ -110,6 +110,9 @@ function simulate(playerDeckId: string, botDeckId: string, seed: number) {
     ).toBe(true);
     state = applyAction(state, action!);
     actions += 1;
+    // Process runner result/cancellation IPC without changing any game decisions.
+    if (actions % 25 === 0)
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
   }
   expect(
     state.winner,
@@ -126,8 +129,9 @@ describe("all supported deck matchups complete through legal bot actions", () =>
     for (const opponent of starterDecks) {
       it(
         `${player.name} vs ${opponent.name}: three seeded complete games`,
-        () => {
-          for (const seed of seeds) simulate(player.id, opponent.id, seed);
+        async () => {
+          for (const seed of seeds)
+            await simulate(player.id, opponent.id, seed);
           // Three complete deterministic games can exceed a minute when other
           // integration jobs share the runner. Preserve every seed and invariant.
         },
@@ -156,13 +160,14 @@ describe("catalogue integration and hidden-information boundaries", () => {
     }
   });
 
-  it("replays the same seed and decisions deterministically", () => {
-    const first = simulate("annie", "master-yi", 456);
-    const second = simulate("annie", "master-yi", 456);
+  it("replays the same seed and decisions deterministically", async () => {
+    const first = await simulate("annie", "master-yi", 456);
+    const second = await simulate("annie", "master-yi", 456);
     expect(first.actions).toBe(second.actions);
     expect(serializeGame(first.state)).toBe(serializeGame(second.state));
     expect(deserializeGame(serializeGame(first.state))).toEqual(first.state);
-  }, 30_000);
+    // The unchanged two-game replay measured 46.9s on the shared four-core runner.
+  }, 90_000);
 
   it("bot decisions do not change when hidden deck orders and the opposing hand change", () => {
     let state = createGame({

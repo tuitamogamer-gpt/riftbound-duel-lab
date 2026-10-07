@@ -77,43 +77,51 @@ describe("official preconstructed library", () => {
 });
 describe("complete precon games and saves", () => {
   for (const [index, deck] of officialPreconDecks.entries())
-    it(`${deck.name} plays a full legal game with preserved cards and resumable choices`, () => {
-      const other =
-        officialPreconDecks[(index + 1) % officialPreconDecks.length];
-      let s = createGame({
-        playerDeck: deck,
-        botDeck: other,
-        seed: 103 + index,
-      });
-      let count = 0;
-      const seen = new Set<string>();
-      while (s.winner === null && count < 3500) {
-        conserved(s);
-        const legal = getLegalActions(s, s.priorityPlayer);
-        const a = getBotAction(s);
-        expect(a, `${deck.id} ${s.turn} ${s.phase}`).not.toBeNull();
-        expect(legal.some((x) => x.id === a!.id)).toBe(true);
-        const signature = JSON.stringify({ ...s, log: [], nextId: 0 });
-        expect(seen.has(signature), `Stall ${deck.id} ${a!.id}`).toBe(false);
-        seen.add(signature);
-        const result = applyActionStepped(s, a!);
-        expect(result.state).toEqual(applyAction(s, a!));
-        s = result.state;
-        if (s.pendingChoice || count % 40 === 0) {
-          expect(
-            validState(s),
-            `${deck.id} saved ${s.phase} ${s.pendingChoice?.kind}`,
-          ).toBe(true);
-          expect(
-            parseSession(JSON.stringify({ match: s, review: null })).match,
-          ).toEqual(s);
+    it(
+      `${deck.name} plays a full legal game with preserved cards and resumable choices`,
+      async () => {
+        const other =
+          officialPreconDecks[(index + 1) % officialPreconDecks.length];
+        let s = createGame({
+          playerDeck: deck,
+          botDeck: other,
+          seed: 103 + index,
+        });
+        let count = 0;
+        const seen = new Set<string>();
+        while (s.winner === null && count < 3500) {
+          conserved(s);
+          const legal = getLegalActions(s, s.priorityPlayer);
+          const a = getBotAction(s);
+          expect(a, `${deck.id} ${s.turn} ${s.phase}`).not.toBeNull();
+          expect(legal.some((x) => x.id === a!.id)).toBe(true);
+          const signature = JSON.stringify({ ...s, log: [], nextId: 0 });
+          expect(seen.has(signature), `Stall ${deck.id} ${a!.id}`).toBe(false);
+          seen.add(signature);
+          const result = applyActionStepped(s, a!);
+          expect(result.state).toEqual(applyAction(s, a!));
+          s = result.state;
+          if (s.pendingChoice || count % 40 === 0) {
+            expect(
+              validState(s),
+              `${deck.id} saved ${s.phase} ${s.pendingChoice?.kind}`,
+            ).toBe(true);
+            expect(
+              parseSession(JSON.stringify({ match: s, review: null })).match,
+            ).toEqual(s);
+          }
+          count++;
+          // Keep Vitest's result IPC responsive during CPU-heavy deterministic games.
+          if (count % 25 === 0)
+            await new Promise<void>((resolve) => setTimeout(resolve, 0));
         }
-        count++;
-      }
-      expect(
-        s.winner,
-        `${deck.id} stopped at ${s.turn}/${s.phase} after ${count} actions`,
-      ).not.toBeNull();
-      conserved(s);
-    }, 60000);
+        expect(
+          s.winner,
+          `${deck.id} stopped at ${s.turn}/${s.phase} after ${count} actions`,
+        ).not.toBeNull();
+        conserved(s);
+        // This unchanged Viktor game measured 68.7s on the shared runner.
+      },
+      deck.id === "precon-viktor" ? 120_000 : 60_000,
+    );
 });

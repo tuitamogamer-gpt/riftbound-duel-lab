@@ -1,0 +1,1423 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-07T22:06:34.000815+00:00",
+  "coverageKind": "Complete unique-case coverage assembled from executed checkpoints",
+  "qualification": "This is mixed-checkpoint evidence, including earlier implementation snapshots and later targeted verification of changes. It does not claim that an interrupted, cancelled or failed whole-suite process completed successfully. Individual native passed results from RPC-affected processes were matched to their exact verbose completed cases; original process failures and runner errors remain recorded.",
+  "baseHeadAtCollection": "5550a10d91eaf631cceb3a2f99d81580fa2ee6fb",
+  "workingTreeModifiedAtCollection": true,
+  "coverage": {
+    "expectedFiles": 105,
+    "expectedUniqueTests": 2568,
+    "passedUniqueTests": 2568,
+    "failedUniqueTests": 0,
+    "missingUniqueTests": 0,
+    "unmatchedSourceAssertions": 0,
+    "unresolvedSourceErrors": [],
+    "success": true
+  },
+  "canonicalIdentityEncoding": "UTF-8 sorted normalized relative-file TAB normalized-full-name NEWLINE, with a final newline; describe separators and precon table quotes normalized as by summarize-regression-reports.mjs",
+  "expectedCanonicalIdentitySHA256": "575bbf1f2e3cd40e1c2a7b54935dbcb2e7b613bf1d32ad51a4edda4bf235218b",
+  "passedCanonicalIdentitySHA256": "575bbf1f2e3cd40e1c2a7b54935dbcb2e7b613bf1d32ad51a4edda4bf235218b",
+  "expectedManifest": {
+    "path": "test-results/expected-tests-final.json",
+    "sha256": "3d3f54464bf46ac4d4f5a2dc82ae0ab99a2156df127378e798edbc898cc81181"
+  },
+  "fullCaseLedger": {
+    "path": "test-results/regression-final.json",
+    "sha256": "a5419cb06cb382561963bd0d91c7a2f0173df78d9780f519125a87390160103e",
+    "note": "Local complete per-case source and duration ledger; this compact artifact records its identity digest, source provenance and file inventories."
+  },
+  "preconCoverage": {
+    "publishedPrecons": 13,
+    "passedUniqueOrderedPairs": 169,
+    "passedUniqueFocusedCases": 54,
+    "passedUniqueCases": 223,
+    "report": "test-results/precon-matrix-final.json",
+    "sha256": "83fe029b360d81c59bbd256e51bb624e83c5f3a14397a632428b2ce18b91b60d",
+    "strictVerification": "Passed scripts/verify-precon-report.mjs with actual exit 0",
+    "retainedOriginalPairCases": 107,
+    "freshContinuationPairCases": 62,
+    "freshFocusedCasesReplacingCancelledRun": 5,
+    "sourceNote": "Original 107 pairs predated the opposing top-card observation fix; none of the 13 precons contains Blind Fury or Void Hatchling, so those matchups do not visit that changed observation branch. The later 73 focused AI cases validate its ownership rules."
+  },
+  "historicalProcessStatuses": [
+    {
+      "report": "test-results/full-suite-recovered.json",
+      "originalStatus": "environment-interrupted",
+      "originalProcessExitCode": null,
+      "representedPassedCases": 1302,
+      "representedFailedCases": 1
+    },
+    {
+      "report": "test-results/simulation-progress-recovered.json",
+      "originalStatus": "environment-interrupted",
+      "originalProcessExitCode": null,
+      "representedPassedCases": 2,
+      "representedFailedCases": 1
+    },
+    {
+      "report": "test-results/precon-recovered.json",
+      "originalStatus": "environment-interrupted",
+      "originalProcessExitCode": null,
+      "representedPassedCases": 156,
+      "representedOrderedPairs": 107
+    },
+    {
+      "report": "test-results/github-required-recovered.json",
+      "originalStatus": "GitHub workflow succeeded",
+      "workflowRunId": 37684919489,
+      "workflowCommit": "8a1bfca67a2f153bf044ce3356cc49b50547d7a8",
+      "representedPassedCases": 547
+    },
+    {
+      "report": "test-results/full-resume.json",
+      "originalStatus": "deliberately cancelled after active games finished; actual exit 1",
+      "cancellationReceipt": "test-results/full-resume-cancellation.json",
+      "cancellationSHA256": "6a72c56bb63f9ba8592ba4d77f4da2c50f70ad86044e1a11289d1946bbd52dd1",
+      "knownRunnerRPCErrors": 2
+    }
+  ],
+  "qualifiedRunnerPassAudit": [
+    {
+      "report": "test-results/full-resume-checkpoint.json",
+      "actualOriginalProcessExitCode": 1,
+      "recordedRunnerRPCErrors": 2,
+      "nativePassedCases": 349,
+      "exactCompletedVerboseMatches": 349,
+      "missingVerboseMatches": 0
+    },
+    {
+      "report": "test-results/tail-0-checkpoint.json",
+      "actualOriginalProcessExitCode": 1,
+      "recordedRunnerRPCErrors": 2,
+      "nativePassedCases": 8,
+      "exactCompletedVerboseMatches": 8,
+      "missingVerboseMatches": 0
+    },
+    {
+      "report": "test-results/tail-2-checkpoint.json",
+      "actualOriginalProcessExitCode": 1,
+      "recordedRunnerRPCErrors": 1,
+      "nativePassedCases": 9,
+      "exactCompletedVerboseMatches": 9,
+      "missingVerboseMatches": 0
+    }
+  ],
+  "processReceipts": [
+    {
+      "report": "test-results/precon-resume-0.json",
+      "sha256": "9cb7dbc38e85280d9ad84b8bc57fccff69543f81f9e0cc4538f2ec0ccd1191ac",
+      "actualProcessExitCode": 0,
+      "passedExecutedCases": 31,
+      "failedExecutedCases": 0,
+      "knownRunnerRPCErrors": 0,
+      "log": "test-results/precon-resume-0.log",
+      "logSHA256": "abf427525eaa2855192ef54c8d725e43b1e1079ac3d9be6637031b2a84618a0e",
+      "unhandledErrorLogMatches": 0
+    },
+    {
+      "report": "test-results/precon-resume-1.json",
+      "sha256": "ec5e9a114df5c4c7e2cd61688b28a100b08ad127efc236ae3ee730a904894872",
+      "actualProcessExitCode": 0,
+      "passedExecutedCases": 31,
+      "failedExecutedCases": 0,
+      "knownRunnerRPCErrors": 0,
+      "log": "test-results/precon-resume-1.log",
+      "logSHA256": "7af4098652805aa66899b3c92ab42550f50a37366f418bb4032429f5806b7776",
+      "unhandledErrorLogMatches": 0
+    },
+    {
+      "report": "test-results/full-resume.json",
+      "sha256": "1867dcc790a171bbfcb2f02830430266eee2f84ca3c5fcbc83c31080ed22a1e9",
+      "actualProcessExitCode": 1,
+      "passedExecutedCases": 349,
+      "failedExecutedCases": 1,
+      "knownRunnerRPCErrors": 2,
+      "log": "test-results/full-resume.log",
+      "logSHA256": "9f93fab101ecc51d5f651bab1776a0cb83dad263706c40784d9ff739683cf7c0",
+      "unhandledErrorLogMatches": 2
+    },
+    {
+      "report": "test-results/tail-0.json",
+      "sha256": "2d136417eb112eebf64e26fabd7a6a3d2db7452ee71c5e1f72d6ca607b5480c8",
+      "actualProcessExitCode": 1,
+      "passedExecutedCases": 8,
+      "failedExecutedCases": 1,
+      "knownRunnerRPCErrors": 2,
+      "log": "test-results/tail-0.log",
+      "logSHA256": "50f1a207b0fe1283cb13158765c42d2861a0684a0f9d121bef6183a458b7bd68",
+      "unhandledErrorLogMatches": 2
+    },
+    {
+      "report": "test-results/tail-1.json",
+      "sha256": "4a5cd4fe42dbc150f6d8572875001e1a4a748ae2ab25dd11b12f7f2f796f9cca",
+      "actualProcessExitCode": 0,
+      "passedExecutedCases": 247,
+      "failedExecutedCases": 0,
+      "knownRunnerRPCErrors": 0,
+      "log": "test-results/tail-1.log",
+      "logSHA256": "13ee548e732c00c656b1a526ffdf28ae4cba17802b65b9bb8f09cac6cf7177f4",
+      "unhandledErrorLogMatches": 0
+    },
+    {
+      "report": "test-results/tail-2.json",
+      "sha256": "d6a1d5cadb8ccb286abcfe7c0bc8d693bac16bbc843f0fc63ca592476ccfe84b",
+      "actualProcessExitCode": 1,
+      "passedExecutedCases": 9,
+      "failedExecutedCases": 1,
+      "knownRunnerRPCErrors": 1,
+      "log": "test-results/tail-2.log",
+      "logSHA256": "fd8e3f435ef4058fe245d298cd315c1c82d7f668f46ce32d725fd0989fc2d7ac",
+      "unhandledErrorLogMatches": 1
+    },
+    {
+      "report": "test-results/save-validation-fix.json",
+      "sha256": "7a8a01b3f6f91a3d6a39334058a7904a28b9e23e7edeb34aeeeb1987ca0b5e7d",
+      "actualProcessExitCode": 1,
+      "passedExecutedCases": 57,
+      "failedExecutedCases": 1,
+      "knownRunnerRPCErrors": 0,
+      "log": "test-results/save-validation-fix.log",
+      "logSHA256": "55181d566d21236fbe4d13dcd01b83f033df0924293d494eeb4b8a10262c8e3c",
+      "unhandledErrorLogMatches": 0
+    },
+    {
+      "report": "test-results/save-selection-fix.json",
+      "sha256": "b19038bc4c0ea138c36d2f49db8bca2eb4f60184fa7fa1180b0571ce41aae345",
+      "actualProcessExitCode": 0,
+      "passedExecutedCases": 2,
+      "failedExecutedCases": 0,
+      "knownRunnerRPCErrors": 0,
+      "log": "test-results/save-selection-fix.log",
+      "logSHA256": "d9257178cb80350f62839db360b45e5327cfb4c13c601b0f90e21ce0514d799e",
+      "unhandledErrorLogMatches": 0
+    },
+    {
+      "report": "test-results/import-100-save-fix.json",
+      "sha256": "95c263799f7262964e973752cddc6616ad5a2dab240ff954a6f54768348a649a",
+      "actualProcessExitCode": 0,
+      "passedExecutedCases": 2,
+      "failedExecutedCases": 0,
+      "knownRunnerRPCErrors": 0,
+      "log": "test-results/import-100-save-fix.log",
+      "logSHA256": "0b1f3dc72713c171a4b55a340f9e356743434223e8f5ad1b59faf12a4c651931",
+      "unhandledErrorLogMatches": 0
+    },
+    {
+      "report": "test-results/precon-focused-final.json",
+      "sha256": "3db244974364913776939d1e669acc19dd7dd7a556106c21296e36e3da24a545",
+      "actualProcessExitCode": 0,
+      "passedExecutedCases": 5,
+      "failedExecutedCases": 0,
+      "knownRunnerRPCErrors": 0,
+      "log": "test-results/precon-focused-final.log",
+      "logSHA256": "02867506dca0ca23c3cbeb8046ee5c3d9705ede5a1c9446eaef303d1fbe70a3e",
+      "unhandledErrorLogMatches": 0
+    },
+    {
+      "report": "test-results/viktor-final.json",
+      "sha256": "ec58a83cb96a12e6cffa956f2a1ce416ad0ba43b537f33648d5d3e52d4e103b8",
+      "actualProcessExitCode": 0,
+      "passedExecutedCases": 1,
+      "failedExecutedCases": 0,
+      "knownRunnerRPCErrors": 0,
+      "log": "test-results/viktor-final.log",
+      "logSHA256": "c13bdf58e7f27af8c8771f6da8849944b3e4960796c342bc919d4fbc4bf588a1",
+      "unhandledErrorLogMatches": 0
+    },
+    {
+      "report": "test-results/simulation-ipc-final.json",
+      "sha256": "6223fd74657384cfe903c59617bd0a930202ea076f45e68277df86a6d4fa6753",
+      "actualProcessExitCode": 0,
+      "passedExecutedCases": 2,
+      "failedExecutedCases": 0,
+      "knownRunnerRPCErrors": 0,
+      "log": "test-results/simulation-ipc-final.log",
+      "logSHA256": "c36527c45190cf1d0a4e5717e5aa02ae83772b643005d59d1d25c509f838c2e6",
+      "unhandledErrorLogMatches": 0
+    },
+    {
+      "report": "test-results/catalog-ipc-final.json",
+      "sha256": "892d03d3ad57ecbfe8f392c92ebe7937c21f131f83f26f75c05b14388bc5f35f",
+      "actualProcessExitCode": 0,
+      "passedExecutedCases": 1,
+      "failedExecutedCases": 0,
+      "knownRunnerRPCErrors": 0,
+      "log": "test-results/catalog-ipc-final.log",
+      "logSHA256": "d34b05209d67604647c0b2b167c72837ac32a11755f16cace926f8212482b54f",
+      "unhandledErrorLogMatches": 0
+    },
+    {
+      "report": "test-results/long-loop-yield-checkpoint.json",
+      "sha256": "ba6293770925b70b585d965034d71a8a140af03b7c54d316891f2a97fcf7e463",
+      "actualProcessExitCode": 1,
+      "passedExecutedCases": 3,
+      "failedExecutedCases": 1,
+      "knownRunnerRPCErrors": 0,
+      "log": "test-results/long-loop-yield-checkpoint.log",
+      "logSHA256": "e1eaaa29534b078fb4c7ecc4a2c539ba1a898971356725af57688cdac5b00ac1",
+      "unhandledErrorLogMatches": 0
+    },
+    {
+      "report": "test-results/import-100-yield-isolated.json",
+      "sha256": "934dd1198112f0b1f14d909f04c4f0280b79c8b84b6e8026d3b0d1027a37d159",
+      "actualProcessExitCode": 0,
+      "passedExecutedCases": 1,
+      "failedExecutedCases": 0,
+      "knownRunnerRPCErrors": 0,
+      "log": "test-results/import-100-yield-isolated.log",
+      "logSHA256": "a99dd450dd78f2df76947b22bc09bd4235c09ec2e6f1e3a82beff1537bb38f8e",
+      "unhandledErrorLogMatches": 0
+    },
+    {
+      "report": "test-results/online-seat-label-checkpoint.json",
+      "sha256": "fef02cae15714d3bd315f6a1970bffa304f24dac74ac75f9cc9fbef7545f8b1f",
+      "actualProcessExitCode": 0,
+      "passedExecutedCases": 1,
+      "failedExecutedCases": 0,
+      "knownRunnerRPCErrors": 0,
+      "log": "test-results/online-seat-label-checkpoint.log",
+      "logSHA256": "a557f4a716b063ac378dc90baca4e872be6f2ca00f1d59ef2f7e0a87cb416197",
+      "unhandledErrorLogMatches": 0
+    }
+  ],
+  "correctedCases": [
+    {
+      "case": "saved state structural recovery restores every real event frame across all four decks without advancing it",
+      "originalDurationMs": 264693,
+      "previousBudgetMs": 240000,
+      "finalBudgetMs": 300000,
+      "latestPassingDurationMs": 125050,
+      "latestReport": "test-results/long-loop-yield-checkpoint.json"
+    },
+    {
+      "case": "all supported deck matchups complete through legal bot actions Annie vs Annie: three seeded complete games",
+      "originalDurationMs": 275111,
+      "previousBudgetMs": 240000,
+      "finalBudgetMs": 300000,
+      "latestPassingDurationMs": 144656,
+      "latestReport": "test-results/full-resume-checkpoint.json"
+    },
+    {
+      "case": "catalogue integration and hidden-information boundaries replays the same seed and decisions deterministically",
+      "originalDurationMs": 46873,
+      "previousBudgetMs": 30000,
+      "finalBudgetMs": 90000,
+      "latestPassingDurationMs": 44102,
+      "latestReport": "test-results/simulation-ipc-final.json"
+    },
+    {
+      "case": "complete precon games and saves Viktor \u00b7 Origins plays a full legal game with preserved cards and resumable choices",
+      "originalDurationMs": 68745,
+      "previousBudgetMs": 60000,
+      "finalBudgetMs": 120000,
+      "latestPassingDurationMs": 58049,
+      "latestReport": "test-results/viktor-final.json"
+    },
+    {
+      "case": "next 100 card effects in complete mixed-deck games import-A versus import-B, seed 31: legal progress, read-only queries and resumable choices",
+      "originalAssertionFailure": "A legitimate Pack of Wonders board selection with Hidden cardTypes was rejected by the saved-state validator",
+      "implementationFix": "Allow Hidden only for boardCards selection effects; positive choice continuation and negative malformed payload cases added",
+      "postFixPassingDurationMs": 46173,
+      "contendedSchedulingCheckDurationMs": 86977,
+      "previousBudgetMs": 60000,
+      "finalBudgetMs": 120000,
+      "latestPassingDurationMs": 49603,
+      "isolatedPassUsedStricterPreviousBudget": true,
+      "latestReport": "test-results/import-100-yield-isolated.json"
+    },
+    {
+      "case": "saved board card selections restores Pack of Wonders before and after selecting a unit, gear or Hidden card",
+      "originalStatus": "New fixture had an unrelated cleanup expectation corrected",
+      "latestReport": "test-results/save-selection-fix.json",
+      "latestProcessExitCode": 0
+    }
+  ],
+  "testScheduling": {
+    "remedy": "Long deterministic game fixtures yield through a zero-delay timer every 25 actions so runner result and cancellation IPC remains responsive",
+    "preserved": "All existing simulation seeds, action limits, game decisions and invariant assertions",
+    "fixtureSourceSHA256": {
+      "tests/simulation.test.ts": "2de05ce6840e8829c15a73af0d0bcb6c0dbd2fd9b528d8abd91eb568c276223e",
+      "tests/catalog-integration.test.ts": "86a5e271685cc0b9d27d28d55cc854090c8edc218f35bafa3297a70478676581",
+      "tests/precon-integration.test.ts": "7279dfa07e618f8156ed5093c78469161752a95c44ba83b0b5cc6e4e2121f5be",
+      "tests/native-flow.test.ts": "d38b22a638fcf274a46072b92f513f1343ca0affbbae723b73fb2e84119e2cdb",
+      "tests/persistence.test.ts": "31596d3faf53ecee718e11137462999fa0e3afd4b4df7714cf1d2ce4bf239a9d",
+      "tests/import-100-integration.test.ts": "b19a7e338687fd35562f68de0ae74153cfb29daf0f674287bfddecf63675d03a"
+    },
+    "representativeReports": [
+      "test-results/viktor-final.json",
+      "test-results/simulation-ipc-final.json",
+      "test-results/catalog-ipc-final.json",
+      "test-results/long-loop-yield-checkpoint.json",
+      "test-results/import-100-yield-isolated.json"
+    ],
+    "runnerRPCErrorsInRepresentativeLogs": 0,
+    "note": "The four-worker batch retained its measured seed-31 timeout and afterEach hook timeout; three other cases passed. Its exact isolated seed-31 rerun passed under the original 60 s limit. No unresolved assertion or runner RPC error remains in the final case inventory."
+  },
+  "productionPersistenceSourceSHA256": "7e5f7f8d79956a5982ca262b3a021ea5651083ed756f9157e6739eb0bb3d1418",
+  "reportHelperChecks": {
+    "passedSyntheticScenarios": 15,
+    "actualProcessExitCode": 0,
+    "log": "test-results/report-helper-final.log",
+    "logSHA256": "ede72ed5fcbcbb0e5cc764a0a96d8379118cf9d4b9576863278ee54b21b85c35"
+  },
+  "ciRunnerStatusGuard": {
+    "workflow": ".github/workflows/full-regression.yml",
+    "sha256": "6de518bf4d6abe7bc93859687dda71450062281971bf8f038677de9c6553e49e",
+    "requirement": "Both full-suite and precon-matrix upstream GitHub jobs must finish with success, in addition to exact JSON assertion coverage; artifact upload remains enabled after failure"
+  },
+  "sourceReports": [
+    {
+      "path": "test-results/ai-catalog-final-checkpoint.json",
+      "startTime": 1791404517233,
+      "success": true,
+      "passed": 73,
+      "failed": 0,
+      "pending": 0,
+      "sha256": "7369224b266e2013418763e131565774db96c705a3ca6d136024158508ec65bd",
+      "casesUsedInFinalInventory": 20
+    },
+    {
+      "path": "test-results/simulation-progress-recovered.json",
+      "startTime": null,
+      "checkpointTime": 1791406081272,
+      "success": false,
+      "passed": 2,
+      "failed": 1,
+      "pending": 0,
+      "recovery": {
+        "kind": "retained-completed-assertions",
+        "checkpointTimeMeaning": "Modification time of the retained evidence log; the original Vitest launch timestamp is unavailable",
+        "successScope": "Only the assertions explicitly represented in this evidence subset",
+        "note": "Completed Vitest cases were captured from the live worker debugger at the recorded time. The in-progress case and all unexecuted cases are excluded; the Annie mirror timeout is retained.",
+        "sources": [
+          {
+            "path": "test-results/simulation-progress.json",
+            "sha256": "c67a53791b37d58cf6f0a959d741841a14410ad41e83912faf47eb7bc30b16de",
+            "lastModified": "2026-10-07T20:48:01.272Z"
+          }
+        ]
+      },
+      "sha256": "e721fba011ae85afd6ee95235bfcccbd95cc19f57228a529de779b6a7c07d76a",
+      "casesUsedInFinalInventory": 2
+    },
+    {
+      "path": "test-results/full-suite-recovered.json",
+      "startTime": null,
+      "checkpointTime": 1791406081320,
+      "success": false,
+      "passed": 1302,
+      "failed": 1,
+      "pending": 0,
+      "recovery": {
+        "kind": "retained-completed-assertions",
+        "checkpointTimeMeaning": "Modification time of the retained evidence log; the original Vitest launch timestamp is unavailable",
+        "successScope": "Only the assertions explicitly represented in this evidence subset",
+        "note": "Original full run was interrupted by an environment restart. Entire passing file summaries are recovered only when their test counts exactly match the launch manifest. Explicit persistence results retain its timeout.",
+        "sources": [
+          {
+            "path": "test-results/full-suite.log",
+            "sha256": "0706e9ce6a162bb8f09474a7599f8c7ea05ca8f80d28ca54be63f62d6a271eb2",
+            "lastModified": "2026-10-07T20:48:01.320Z"
+          },
+          {
+            "path": "test-results/expected-tests.json",
+            "sha256": "6d6671de6ca80f514e3148efea739bb73454e66c556f026d8ad798884cf6b2c3",
+            "lastModified": "2026-10-07T20:27:31.816Z"
+          }
+        ]
+      },
+      "sha256": "038dfbda196b45ec4951e045973d3ce0f1725bff8ad1324cddd3de7250ff2816",
+      "casesUsedInFinalInventory": 1139
+    },
+    {
+      "path": "test-results/github-required-recovered.json",
+      "startTime": null,
+      "checkpointTime": 1791406690774,
+      "success": true,
+      "passed": 547,
+      "failed": 0,
+      "pending": 0,
+      "recovery": {
+        "kind": "retained-completed-assertions",
+        "checkpointTimeMeaning": "Modification time of the retained evidence log; the original Vitest launch timestamp is unavailable",
+        "successScope": "Only the assertions explicitly represented in this evidence subset",
+        "note": "GitHub Actions run 37684919489 passed on implementation commit 8a1bfca67a2f153bf044ce3356cc49b50547d7a8. Complete passing file summaries with exact collected counts are recovered. Its partial persistence invocation has skipped tests and is excluded.",
+        "sources": [
+          {
+            "path": "test-results/github-required-8a1bfca.log",
+            "sha256": "9d353676b991e0f1b494a6022cf8fc54cc1e5017faade94cabe657e44b23b55b",
+            "lastModified": "2026-10-07T20:58:10.774Z"
+          },
+          {
+            "path": "test-results/expected-tests-ci.json",
+            "sha256": "4d5afdf885f8098f1a9c994a06a018a9491662a86fdce3a476da6f91ab201609",
+            "lastModified": "2026-10-07T21:16:01.488Z"
+          }
+        ]
+      },
+      "sha256": "aa76be7c54ea6a1624ff5cbbf91a37da47a35ca997caa73efd18ca8e17681aa4",
+      "casesUsedInFinalInventory": 510
+    },
+    {
+      "path": "test-results/full-resume-checkpoint.json",
+      "startTime": 1791406951605,
+      "success": false,
+      "passed": 349,
+      "failed": 1,
+      "pending": 238,
+      "recovery": {
+        "kind": "native-gracefully-cancelled-continuation",
+        "successScope": "Only individually completed, named native assertion results; the original process was unsuccessful",
+        "note": "After all selected practice simulation cases completed, Vitest.cancelCurrentRun waited for running tests to finish and stopped remaining tasks so disjoint remaining cases could run in parallel. The native partial report retains its deterministic-replay timeout.",
+        "originalProcessExitCode": 1,
+        "cancellation": {
+          "requestedAt": "2026-10-07T21:39:47.871Z",
+          "method": "Vitest.cancelCurrentRun(\"keyboard-input\")",
+          "guarantee": "Vitest waits until all running tests are finished before cancelling; no active game is forcibly terminated",
+          "selectedInstances": 1
+        },
+        "sources": [
+          {
+            "path": "test-results/full-resume.json",
+            "sha256": "1867dcc790a171bbfcb2f02830430266eee2f84ca3c5fcbc83c31080ed22a1e9"
+          },
+          {
+            "path": "test-results/full-resume.log",
+            "sha256": "9f93fab101ecc51d5f651bab1776a0cb83dad263706c40784d9ff739683cf7c0"
+          }
+        ],
+        "runnerErrors": [
+          {
+            "message": "[vitest-worker]: Timeout calling \"onTaskUpdate\"",
+            "count": 2,
+            "classification": "Runner result acknowledgement timeout during synchronous CPU-heavy test loops"
+          }
+        ],
+        "qualification": "Passed assertions are retained only where native assertion results and verbose completed-case evidence agree. Original assertion failures remain failed until a later executed passing case supersedes them. Native JSON did not include these runner errors; this metadata preserves them. The final complete inventory is checkpoint coverage, not a clean uninterrupted original run.",
+        "runnerRemedy": "Cooperative event-loop yields every 25 game actions in long test fixtures preserve all seeds, decisions and assertions; fresh representative process receipts must verify exit 0 and no unhandled errors.",
+        "completedVerboseCrossCheck": {
+          "nativePassedAssertions": 349,
+          "exactPassedVerboseMatches": 349,
+          "missingVerboseMatches": 0
+        }
+      },
+      "sha256": "4d355867a11d314daeb9d5fa8a8c1c30b4353bf2e5db10c63ca83aaa73f01668",
+      "casesUsedInFinalInventory": 341
+    },
+    {
+      "path": "test-results/benchmark-resume-checkpoint.json",
+      "startTime": 1791407006114,
+      "success": true,
+      "passed": 6,
+      "failed": 0,
+      "pending": 0,
+      "sha256": "c83a5477064bb0886689a0e7673fea73fbc1598290b586ce4abc08c863f42b2f",
+      "casesUsedInFinalInventory": 6
+    },
+    {
+      "path": "test-results/online-seat-label-checkpoint.json",
+      "startTime": 1791407821974,
+      "success": true,
+      "passed": 1,
+      "failed": 0,
+      "pending": 19,
+      "sha256": "fef02cae15714d3bd315f6a1970bffa304f24dac74ac75f9cc9fbef7545f8b1f",
+      "casesUsedInFinalInventory": 1
+    },
+    {
+      "path": "test-results/tail-0-checkpoint.json",
+      "startTime": 1791409408213,
+      "success": false,
+      "passed": 8,
+      "failed": 1,
+      "pending": 29,
+      "recovery": {
+        "kind": "native-executed-assertion-checkpoint",
+        "successScope": "Only individually completed, named native assertion results; the original process was unsuccessful",
+        "originalProcessExitCode": 1,
+        "runnerErrors": [
+          {
+            "message": "[vitest-worker]: Timeout calling \"onTaskUpdate\"",
+            "count": 2,
+            "classification": "Runner result acknowledgement timeout during synchronous CPU-heavy test loops"
+          }
+        ],
+        "qualification": "Passed assertions are retained only where native assertion results and verbose completed-case evidence agree. Original assertion failures remain failed until a later executed passing case supersedes them. Native JSON did not include these runner errors; this metadata preserves them. The final complete inventory is checkpoint coverage, not a clean uninterrupted original run.",
+        "runnerRemedy": "Cooperative event-loop yields every 25 game actions in long test fixtures preserve all seeds, decisions and assertions; fresh representative process receipts must verify exit 0 and no unhandled errors.",
+        "sources": [
+          {
+            "path": "test-results/tail-0.json",
+            "sha256": "2d136417eb112eebf64e26fabd7a6a3d2db7452ee71c5e1f72d6ca607b5480c8"
+          },
+          {
+            "path": "test-results/tail-0.log",
+            "sha256": "50f1a207b0fe1283cb13158765c42d2861a0684a0f9d121bef6183a458b7bd68"
+          }
+        ],
+        "completedVerboseCrossCheck": {
+          "nativePassedAssertions": 8,
+          "exactPassedVerboseMatches": 8,
+          "missingVerboseMatches": 0
+        }
+      },
+      "sha256": "7667f5f77b0e13e710e56c5a4a0aa0dd36e78557024b65587163ead61b96493f",
+      "casesUsedInFinalInventory": 7
+    },
+    {
+      "path": "test-results/tail-2-checkpoint.json",
+      "startTime": 1791409408229,
+      "success": false,
+      "passed": 9,
+      "failed": 1,
+      "pending": 50,
+      "recovery": {
+        "kind": "native-executed-assertion-checkpoint",
+        "successScope": "Only individually completed, named native assertion results; the original process was unsuccessful",
+        "originalProcessExitCode": 1,
+        "runnerErrors": [
+          {
+            "message": "[vitest-worker]: Timeout calling \"onTaskUpdate\"",
+            "count": 1,
+            "classification": "Runner result acknowledgement timeout during synchronous CPU-heavy test loops"
+          }
+        ],
+        "qualification": "Passed assertions are retained only where native assertion results and verbose completed-case evidence agree. Original assertion failures remain failed until a later executed passing case supersedes them. Native JSON did not include these runner errors; this metadata preserves them. The final complete inventory is checkpoint coverage, not a clean uninterrupted original run.",
+        "runnerRemedy": "Cooperative event-loop yields every 25 game actions in long test fixtures preserve all seeds, decisions and assertions; fresh representative process receipts must verify exit 0 and no unhandled errors.",
+        "sources": [
+          {
+            "path": "test-results/tail-2.json",
+            "sha256": "d6a1d5cadb8ccb286abcfe7c0bc8d693bac16bbc843f0fc63ca592476ccfe84b"
+          },
+          {
+            "path": "test-results/tail-2.log",
+            "sha256": "fd8e3f435ef4058fe245d298cd315c1c82d7f668f46ce32d725fd0989fc2d7ac"
+          }
+        ],
+        "completedVerboseCrossCheck": {
+          "nativePassedAssertions": 9,
+          "exactPassedVerboseMatches": 9,
+          "missingVerboseMatches": 0
+        }
+      },
+      "sha256": "1fd1156c8682241379e94ce5359e3499a3f4ca56b3f5e6e9c4a3cefa8374a34a",
+      "casesUsedInFinalInventory": 7
+    },
+    {
+      "path": "test-results/tail-1.json",
+      "startTime": 1791409408599,
+      "success": true,
+      "passed": 247,
+      "failed": 0,
+      "pending": 21,
+      "sha256": "4a5cd4fe42dbc150f6d8572875001e1a4a748ae2ab25dd11b12f7f2f796f9cca",
+      "casesUsedInFinalInventory": 247
+    },
+    {
+      "path": "test-results/save-validation-fix.json",
+      "startTime": 1791409893247,
+      "success": false,
+      "passed": 57,
+      "failed": 1,
+      "pending": 0,
+      "sha256": "7a8a01b3f6f91a3d6a39334058a7904a28b9e23e7edeb34aeeeb1987ca0b5e7d",
+      "casesUsedInFinalInventory": 55
+    },
+    {
+      "path": "test-results/save-selection-fix.json",
+      "startTime": 1791410020713,
+      "success": true,
+      "passed": 2,
+      "failed": 0,
+      "pending": 19,
+      "sha256": "b19038bc4c0ea138c36d2f49db8bca2eb4f60184fa7fa1180b0571ce41aae345",
+      "casesUsedInFinalInventory": 2
+    },
+    {
+      "path": "test-results/import-100-save-fix.json",
+      "startTime": 1791410035706,
+      "success": true,
+      "passed": 2,
+      "failed": 0,
+      "pending": 0,
+      "sha256": "95c263799f7262964e973752cddc6616ad5a2dab240ff954a6f54768348a649a",
+      "casesUsedInFinalInventory": 0
+    },
+    {
+      "path": "test-results/viktor-final.json",
+      "startTime": 1791410269089,
+      "success": true,
+      "passed": 1,
+      "failed": 0,
+      "pending": 14,
+      "sha256": "ec58a83cb96a12e6cffa956f2a1ce416ad0ba43b537f33648d5d3e52d4e103b8",
+      "casesUsedInFinalInventory": 1
+    },
+    {
+      "path": "test-results/long-loop-yield-checkpoint.json",
+      "startTime": 1791410356058,
+      "success": false,
+      "passed": 3,
+      "failed": 1,
+      "pending": 24,
+      "sha256": "ba6293770925b70b585d965034d71a8a140af03b7c54d316891f2a97fcf7e463",
+      "casesUsedInFinalInventory": 3
+    },
+    {
+      "path": "test-results/simulation-ipc-final.json",
+      "startTime": 1791410359876,
+      "success": true,
+      "passed": 2,
+      "failed": 0,
+      "pending": 25,
+      "sha256": "6223fd74657384cfe903c59617bd0a930202ea076f45e68277df86a6d4fa6753",
+      "casesUsedInFinalInventory": 2
+    },
+    {
+      "path": "test-results/catalog-ipc-final.json",
+      "startTime": 1791410361398,
+      "success": true,
+      "passed": 1,
+      "failed": 0,
+      "pending": 15,
+      "sha256": "892d03d3ad57ecbfe8f392c92ebe7937c21f131f83f26f75c05b14388bc5f35f",
+      "casesUsedInFinalInventory": 1
+    },
+    {
+      "path": "test-results/precon-matrix-final.json",
+      "startTime": null,
+      "checkpointTime": 1791410403427,
+      "success": true,
+      "passed": 223,
+      "failed": 0,
+      "pending": 0,
+      "recovery": {
+        "kind": "reconciled-executed-checkpoints",
+        "successScope": "All unique expected cases have a latest executed passing result",
+        "note": "This combines retained completed cases with executed continuation reports. It is not an uninterrupted whole-file Vitest run. Unselected pending cases in continuation reports do not replace completed evidence.",
+        "sources": [
+          {
+            "path": "test-results/precon-recovered.json",
+            "sha256": "93fa4c630d32cf4154aad6e4330be6aafd97135e97c4c32f4c839f938cf709a6",
+            "startTime": null,
+            "checkpointTime": 1791406409074,
+            "success": true,
+            "recovery": {
+              "kind": "retained-completed-assertions",
+              "checkpointTimeMeaning": "Modification time of the retained evidence log; the original Vitest launch timestamp is unavailable",
+              "successScope": "Only the assertions explicitly represented in this evidence subset",
+              "note": "Three original shard runs were interrupted by an environment restart. Only verbose completed passing cases are recovered; repeated focused cases are deduplicated. Original pair identities and seeds are unchanged.",
+              "sources": [
+                {
+                  "path": "test-results/precon-shard-0.log",
+                  "sha256": "eb8b46c6eeb2a16a013b3fd44c6d083a0e353a0f1930f94c7c20e74960f19e24",
+                  "lastModified": "2026-10-07T20:52:28.984Z"
+                },
+                {
+                  "path": "test-results/precon-shard-1.log",
+                  "sha256": "2d681f4c3df7a6e13e0d4e0429996c6e059a0af358673d33d87dc0666660d982",
+                  "lastModified": "2026-10-07T20:52:36.880Z"
+                },
+                {
+                  "path": "test-results/precon-shard-2.log",
+                  "sha256": "fee82b66654f3d8df994acfc7b414a923b01109498c95cac6d87f35605b0e0ce",
+                  "lastModified": "2026-10-07T20:53:29.074Z"
+                }
+              ]
+            }
+          },
+          {
+            "path": "test-results/precon-resume-0.json",
+            "sha256": "9cb7dbc38e85280d9ad84b8bc57fccff69543f81f9e0cc4538f2ec0ccd1191ac",
+            "startTime": 1791406840676,
+            "success": true
+          },
+          {
+            "path": "test-results/precon-resume-1.json",
+            "sha256": "ec5e9a114df5c4c7e2cd61688b28a100b08ad127efc236ae3ee730a904894872",
+            "startTime": 1791406840684,
+            "success": true
+          },
+          {
+            "path": "test-results/precon-focused-final.json",
+            "sha256": "3db244974364913776939d1e669acc19dd7dd7a556106c21296e36e3da24a545",
+            "startTime": 1791410270535,
+            "success": true
+          }
+        ]
+      },
+      "sha256": "83fe029b360d81c59bbd256e51bb624e83c5f3a14397a632428b2ce18b91b60d",
+      "casesUsedInFinalInventory": 223
+    },
+    {
+      "path": "test-results/import-100-yield-isolated.json",
+      "startTime": 1791410580012,
+      "success": true,
+      "passed": 1,
+      "failed": 0,
+      "pending": 1,
+      "sha256": "934dd1198112f0b1f14d909f04c4f0280b79c8b84b6e8026d3b0d1027a37d159",
+      "casesUsedInFinalInventory": 1
+    }
+  ],
+  "perFileCoverage": [
+    {
+      "file": "tests/ai-acceptance.test.ts",
+      "passedUniqueCases": 31,
+      "canonicalIdentitySHA256": "5c55f7319124b1f35aa1abf89d115163e12d77c57c21a644257da5192e5285ed",
+      "sourceReportCounts": [[2, 31]]
+    },
+    {
+      "file": "tests/ai-inspection-ownership.test.ts",
+      "passedUniqueCases": 8,
+      "canonicalIdentitySHA256": "1a0187d2b318ca37a7e6da9e5ede4004db7c64ef58523c3ddbf13a67f87491a5",
+      "sourceReportCounts": [[3, 8]]
+    },
+    {
+      "file": "tests/ai-prepared-fallback.test.ts",
+      "passedUniqueCases": 4,
+      "canonicalIdentitySHA256": "c36f42b9d54d0f5496459d27376383c9ee60a162b746c91f75818115b4e5dbf0",
+      "sourceReportCounts": [[3, 4]]
+    },
+    {
+      "file": "tests/ai-profiles.test.ts",
+      "passedUniqueCases": 10,
+      "canonicalIdentitySHA256": "887549aaea9bae27bb2ad5710cac9c599abc775429b37d61e1a97231c3c36916",
+      "sourceReportCounts": [[3, 10]]
+    },
+    {
+      "file": "tests/audit-storage.test.ts",
+      "passedUniqueCases": 5,
+      "canonicalIdentitySHA256": "953e78f00eb51a12bc89a434be282cacc9cd4d61155cc3ec026c37dd0e2fe1bf",
+      "sourceReportCounts": [[3, 5]]
+    },
+    {
+      "file": "tests/battlefield-picker.test.ts",
+      "passedUniqueCases": 16,
+      "canonicalIdentitySHA256": "b19277857533437b76cf53f19420cf05ec5d3b69d544cc5682843664b657d448",
+      "sourceReportCounts": [[9, 16]]
+    },
+    {
+      "file": "tests/blob-room-storage.test.ts",
+      "passedUniqueCases": 4,
+      "canonicalIdentitySHA256": "98b0141620bf1cf70ed6be3e3f73540d7928a5a5249e40f35cb19499ed406bc7",
+      "sourceReportCounts": [[3, 4]]
+    },
+    {
+      "file": "tests/bot-benchmark-resume.test.ts",
+      "passedUniqueCases": 6,
+      "canonicalIdentitySHA256": "d2aa158880a197fc1313cc191dbfcd770b244beac8f6939759841fa25db52170",
+      "sourceReportCounts": [[5, 6]]
+    },
+    {
+      "file": "tests/bot-tactics.test.ts",
+      "passedUniqueCases": 11,
+      "canonicalIdentitySHA256": "decfea8f49744acae4d0fb8250d6619a9ad74ca977727666329a56c2bcd6da8a",
+      "sourceReportCounts": [[0, 11]]
+    },
+    {
+      "file": "tests/card-registry.test.ts",
+      "passedUniqueCases": 10,
+      "canonicalIdentitySHA256": "0c24d5f15dd0f7eaeb363f0bda91f024eb86cd537ec7c54db21d4e25bcb2d4cb",
+      "sourceReportCounts": [[3, 10]]
+    },
+    {
+      "file": "tests/card-script-compiler.test.ts",
+      "passedUniqueCases": 84,
+      "canonicalIdentitySHA256": "8a013bef19f93cfcbc346626a269efbfa9a9fb3e4865122e7da601dfec677e50",
+      "sourceReportCounts": [[3, 84]]
+    },
+    {
+      "file": "tests/card-wave10.test.ts",
+      "passedUniqueCases": 43,
+      "canonicalIdentitySHA256": "68a4fbb1013224cd0cc9bc7664fccd03fa72b6ecb4455e233739c29fcb812df1",
+      "sourceReportCounts": [[2, 43]]
+    },
+    {
+      "file": "tests/card-wave11.test.ts",
+      "passedUniqueCases": 32,
+      "canonicalIdentitySHA256": "0bd83baa3c1edd8790ab636d9597ee9634d39c81eb32b414e03ff184e9e79c74",
+      "sourceReportCounts": [[2, 32]]
+    },
+    {
+      "file": "tests/card-wave12.test.ts",
+      "passedUniqueCases": 42,
+      "canonicalIdentitySHA256": "2bed72b2eb4784773823f174af8e3ad171931a179b949dc7790125a8ebaf30fc",
+      "sourceReportCounts": [[2, 42]]
+    },
+    {
+      "file": "tests/card-wave13.test.ts",
+      "passedUniqueCases": 65,
+      "canonicalIdentitySHA256": "c6a47a88404c59aff9e0cce1938a57f09adfd74046afdab77e7104ad99ff1392",
+      "sourceReportCounts": [[3, 65]]
+    },
+    {
+      "file": "tests/card-wave14.test.ts",
+      "passedUniqueCases": 23,
+      "canonicalIdentitySHA256": "c8df4a532d5521d1476019f326393a55530ac76251b511e4a73d6b7ba1786714",
+      "sourceReportCounts": [[3, 23]]
+    },
+    {
+      "file": "tests/card-wave15.test.ts",
+      "passedUniqueCases": 38,
+      "canonicalIdentitySHA256": "ef92fa1d27af23dcc4c9fa1c450c2eec4d1ebe19cc455b1925b64edfbc777a92",
+      "sourceReportCounts": [[3, 38]]
+    },
+    {
+      "file": "tests/card-wave16.test.ts",
+      "passedUniqueCases": 13,
+      "canonicalIdentitySHA256": "e69efd079b523395796b652efd4f4cc17ebf4f6ae467c15388fdd64785cb7b6a",
+      "sourceReportCounts": [[3, 13]]
+    },
+    {
+      "file": "tests/card-wave17.test.ts",
+      "passedUniqueCases": 12,
+      "canonicalIdentitySHA256": "4832dd5cd5a085d94fe10c0c30680dd7caf2b8dd0fa138f67fd6e0f9555fd837",
+      "sourceReportCounts": [[3, 12]]
+    },
+    {
+      "file": "tests/card-wave18.test.ts",
+      "passedUniqueCases": 12,
+      "canonicalIdentitySHA256": "d57594f4097fc1aa35aa80d8a437938fa59b7b2c7aab3f0e5561a7a156ecfbc1",
+      "sourceReportCounts": [[3, 12]]
+    },
+    {
+      "file": "tests/card-wave19.test.ts",
+      "passedUniqueCases": 10,
+      "canonicalIdentitySHA256": "a7d019e5dd4cf0f8f834788c8c3494ce9132d0af72a3709a596090a8b406cbe3",
+      "sourceReportCounts": [[3, 10]]
+    },
+    {
+      "file": "tests/card-wave20.test.ts",
+      "passedUniqueCases": 6,
+      "canonicalIdentitySHA256": "300cb60acdb0cd81f7a2a1793c5e1d844ca7956f767351dd8f08e3dd0ebeaccf",
+      "sourceReportCounts": [[3, 6]]
+    },
+    {
+      "file": "tests/card-wave21.test.ts",
+      "passedUniqueCases": 7,
+      "canonicalIdentitySHA256": "9f654a223802e5d04f56d7b277984767014402533025842c2d636d36cd444177",
+      "sourceReportCounts": [[3, 7]]
+    },
+    {
+      "file": "tests/card-wave22.test.ts",
+      "passedUniqueCases": 5,
+      "canonicalIdentitySHA256": "430a1cb6e90540c9b70bdf353ee62f52a9d809121c21c1bd9c3116ccfc043904",
+      "sourceReportCounts": [[3, 5]]
+    },
+    {
+      "file": "tests/card-wave23.test.ts",
+      "passedUniqueCases": 5,
+      "canonicalIdentitySHA256": "92d121217dc927d2c5ec18c9db2212a46a12309335248630ed2a3af41543dda0",
+      "sourceReportCounts": [[3, 5]]
+    },
+    {
+      "file": "tests/card-wave24.test.ts",
+      "passedUniqueCases": 6,
+      "canonicalIdentitySHA256": "5b4b7848064431f8d1199b005c5b51b88da2a16634edfe4a03acd1df755f596c",
+      "sourceReportCounts": [[3, 6]]
+    },
+    {
+      "file": "tests/card-wave25.test.ts",
+      "passedUniqueCases": 6,
+      "canonicalIdentitySHA256": "dfee51b8679780a3f772a8041c79dd8a7bc1a891e838a45225903a670b9b8ce8",
+      "sourceReportCounts": [[3, 6]]
+    },
+    {
+      "file": "tests/card-wave26.test.ts",
+      "passedUniqueCases": 5,
+      "canonicalIdentitySHA256": "003636d7abd62f067f8060949ae4fd8897c0c799d3c4741841ea3c69c09f9b34",
+      "sourceReportCounts": [[3, 5]]
+    },
+    {
+      "file": "tests/card-wave5.test.ts",
+      "passedUniqueCases": 55,
+      "canonicalIdentitySHA256": "4a1579baaacdd4e4c2c94c9b57b5b733fcf1c2907fc5ad3afc17323d44c2392b",
+      "sourceReportCounts": [[2, 55]]
+    },
+    {
+      "file": "tests/card-wave6.test.ts",
+      "passedUniqueCases": 47,
+      "canonicalIdentitySHA256": "e76c762118baae06ab472205eb839f39766093ad5f320eacb7675e246b3f06de",
+      "sourceReportCounts": [[2, 47]]
+    },
+    {
+      "file": "tests/card-wave7.test.ts",
+      "passedUniqueCases": 51,
+      "canonicalIdentitySHA256": "dda069bb182805018fbb7387fa309d21a41dc9e2afaa91fb3bf1ea93d16db834",
+      "sourceReportCounts": [[2, 51]]
+    },
+    {
+      "file": "tests/card-wave8.test.ts",
+      "passedUniqueCases": 46,
+      "canonicalIdentitySHA256": "4231c774431630e6aa679b3507996ce3d569dcea58f64794d79f6df04fe02852",
+      "sourceReportCounts": [[2, 46]]
+    },
+    {
+      "file": "tests/card-wave9.test.ts",
+      "passedUniqueCases": 48,
+      "canonicalIdentitySHA256": "320d6accaf63bfe8b5c4706b6188b39ecfa97cd271b3548d80f8c9505f8e71b8",
+      "sourceReportCounts": [[2, 48]]
+    },
+    {
+      "file": "tests/catalog-core.test.ts",
+      "passedUniqueCases": 11,
+      "canonicalIdentitySHA256": "66332ad23dc9eebf37c5cfa46bcba7264d83820926737d29cdade678a591a49a",
+      "sourceReportCounts": [[3, 11]]
+    },
+    {
+      "file": "tests/catalog-integration.test.ts",
+      "passedUniqueCases": 16,
+      "canonicalIdentitySHA256": "7d91b64fcf43bf30dbfe614f0ed0c8ec2dd54905713819f65ddb44f89f03e277",
+      "sourceReportCounts": [
+        [4, 4],
+        [7, 2],
+        [8, 4],
+        [9, 5],
+        [16, 1]
+      ]
+    },
+    {
+      "file": "tests/catalog-sync.test.ts",
+      "passedUniqueCases": 26,
+      "canonicalIdentitySHA256": "a86316cbd17f15ae04420c279bd99dfd247cddf5168c9a3cbaca5ef4989ead44",
+      "sourceReportCounts": [[4, 26]]
+    },
+    {
+      "file": "tests/champion-zone.test.ts",
+      "passedUniqueCases": 14,
+      "canonicalIdentitySHA256": "3c8c59634cb3ffb0d8ee1ab21932bcc41618a0ad89a0d619b53da104e20e7fd6",
+      "sourceReportCounts": [[4, 14]]
+    },
+    {
+      "file": "tests/combat-panel.test.ts",
+      "passedUniqueCases": 9,
+      "canonicalIdentitySHA256": "c456c98aa77537fd5267ffbb65b629a40f81b07e05723af7da88a4ec8bfc4d02",
+      "sourceReportCounts": [[4, 9]]
+    },
+    {
+      "file": "tests/combat-review.test.ts",
+      "passedUniqueCases": 10,
+      "canonicalIdentitySHA256": "32cb14177ce7fef6f63084e750be9c280c13a71fae65bfc07c7ff902973e4b2a",
+      "sourceReportCounts": [[4, 10]]
+    },
+    {
+      "file": "tests/decision-presentation.test.ts",
+      "passedUniqueCases": 5,
+      "canonicalIdentitySHA256": "ad040fe16321a8e79e9d3d0b992554f294678027039e091f1a5d46c969819c0e",
+      "sourceReportCounts": [[9, 5]]
+    },
+    {
+      "file": "tests/deck-builder.test.ts",
+      "passedUniqueCases": 11,
+      "canonicalIdentitySHA256": "d94c029471e8c177b83b58a121c061faa89eedf87a414c3428b208e99dddde35",
+      "sourceReportCounts": [[3, 11]]
+    },
+    {
+      "file": "tests/deck-import.test.ts",
+      "passedUniqueCases": 17,
+      "canonicalIdentitySHA256": "d1eb511b6529f46b500fb40edf10e315eecf0761128bd9a12a3f9183be7ddc68",
+      "sourceReportCounts": [[3, 17]]
+    },
+    {
+      "file": "tests/deck-sources.test.ts",
+      "passedUniqueCases": 16,
+      "canonicalIdentitySHA256": "759895b315cd2908cf3fac4e54935c1fd9a60e6eb8ad8cb5563f2e4e76b756f0",
+      "sourceReportCounts": [[9, 16]]
+    },
+    {
+      "file": "tests/effect-feedback.test.ts",
+      "passedUniqueCases": 5,
+      "canonicalIdentitySHA256": "9568af60cfb0f7bdf9a32474ac1b0e3d0ccfba5121ea75398c6e3e61f858b4a8",
+      "sourceReportCounts": [[9, 5]]
+    },
+    {
+      "file": "tests/engine.test.ts",
+      "passedUniqueCases": 6,
+      "canonicalIdentitySHA256": "ac7641f33bf6e3fa1ec3b156cfb4c9b6e96610f83c9d620444abe2d9b0fa2b5e",
+      "sourceReportCounts": [[3, 6]]
+    },
+    {
+      "file": "tests/event-highlights.test.ts",
+      "passedUniqueCases": 13,
+      "canonicalIdentitySHA256": "73bec6bd8532222a99d10b8859cfab07a03921178253863b784d89f3bcd9017c",
+      "sourceReportCounts": [[4, 13]]
+    },
+    {
+      "file": "tests/exhausted-surfaces.test.ts",
+      "passedUniqueCases": 5,
+      "canonicalIdentitySHA256": "a7362ed5e75160211b05c4724e0a4efe7b2b5dc0730e81d73dfbc2372c076d18",
+      "sourceReportCounts": [[9, 5]]
+    },
+    {
+      "file": "tests/exhausted-token.test.ts",
+      "passedUniqueCases": 13,
+      "canonicalIdentitySHA256": "b4cb880bf910cc0f25cf46a3db38aa5dbcf2540299915f53c8315ef3f5c71a90",
+      "sourceReportCounts": [[9, 13]]
+    },
+    {
+      "file": "tests/hidden-card-view.test.ts",
+      "passedUniqueCases": 6,
+      "canonicalIdentitySHA256": "33247b38f2d023c92a8997ef243b56174ad6dfcd4dad2ec2de80607c96aff1f6",
+      "sourceReportCounts": [[9, 6]]
+    },
+    {
+      "file": "tests/hidden-flow.test.ts",
+      "passedUniqueCases": 6,
+      "canonicalIdentitySHA256": "978a838f82b88ad57190bce2e4054a0c87e250b25660cc4a94166a22e890dff5",
+      "sourceReportCounts": [[9, 6]]
+    },
+    {
+      "file": "tests/i18n.test.ts",
+      "passedUniqueCases": 7,
+      "canonicalIdentitySHA256": "e6c9f0b66e62a99c68e5314f9f8e3ecb09912dc06ea4fef4ec9538a4bd7d15ab",
+      "sourceReportCounts": [[4, 7]]
+    },
+    {
+      "file": "tests/import-100-integration.test.ts",
+      "passedUniqueCases": 2,
+      "canonicalIdentitySHA256": "abdaf31d69dab3c189d747184035be016a1f17a12f18dbb22a7b27a6964582f7",
+      "sourceReportCounts": [
+        [14, 1],
+        [18, 1]
+      ]
+    },
+    {
+      "file": "tests/import-100.test.ts",
+      "passedUniqueCases": 102,
+      "canonicalIdentitySHA256": "15e251f1c743e479b780ef1cc6a619ee40c43fa2ba310ecdeaaab1d72fc1fc5b",
+      "sourceReportCounts": [[9, 102]]
+    },
+    {
+      "file": "tests/import-107.test.ts",
+      "passedUniqueCases": 115,
+      "canonicalIdentitySHA256": "4279028991e9a1a58d56f37a10acfe2cc258f69ed50817e7992b5cc5dc23a483",
+      "sourceReportCounts": [[4, 115]]
+    },
+    {
+      "file": "tests/imported-interactions.test.ts",
+      "passedUniqueCases": 4,
+      "canonicalIdentitySHA256": "227a69b3e3f907bcffeba6a055c2d994fbd97eb75eed661f578e7ab09ec997af",
+      "sourceReportCounts": [[3, 4]]
+    },
+    {
+      "file": "tests/imported-mixed-games.test.ts",
+      "passedUniqueCases": 2,
+      "canonicalIdentitySHA256": "d0b96d3410f723e0b2047f230dbb6df5e5d346d3f95ba2b2403647491ad9170d",
+      "sourceReportCounts": [[4, 2]]
+    },
+    {
+      "file": "tests/legend-zones.test.ts",
+      "passedUniqueCases": 38,
+      "canonicalIdentitySHA256": "0c479a9a694bac49c62e382d00c56be5204352846e2de33ce347288d8002fbd7",
+      "sourceReportCounts": [[4, 38]]
+    },
+    {
+      "file": "tests/lobby-decks.test.ts",
+      "passedUniqueCases": 5,
+      "canonicalIdentitySHA256": "9712a2c13238029b2145439e666fc2d1920ae3f4f75362af24451e9402df3bc7",
+      "sourceReportCounts": [[4, 5]]
+    },
+    {
+      "file": "tests/match-history.test.ts",
+      "passedUniqueCases": 14,
+      "canonicalIdentitySHA256": "c4ac9244cec6c27d0524cbd96145a2c7dc6d5195690473595ea3e9ed7da479eb",
+      "sourceReportCounts": [[10, 14]]
+    },
+    {
+      "file": "tests/match-series.test.ts",
+      "passedUniqueCases": 12,
+      "canonicalIdentitySHA256": "2fb82040114ab940fda02eef83e35393926454eeb29c04b4c025a3b2f6eef29e",
+      "sourceReportCounts": [[3, 12]]
+    },
+    {
+      "file": "tests/match-setup.test.ts",
+      "passedUniqueCases": 5,
+      "canonicalIdentitySHA256": "bb517cf437ab491441c8d913e599b8425ec3e317537a1c3e16e43998f558dfd9",
+      "sourceReportCounts": [[3, 5]]
+    },
+    {
+      "file": "tests/mobile-duel-fixtures.test.ts",
+      "passedUniqueCases": 13,
+      "canonicalIdentitySHA256": "2cd0d7105dd0dff61de1cfa3921ee8ab8fc03396911325bf0054a4c1e658e975",
+      "sourceReportCounts": [[4, 13]]
+    },
+    {
+      "file": "tests/mobile-presentation.test.ts",
+      "passedUniqueCases": 16,
+      "canonicalIdentitySHA256": "93d2e3fcf5fc8b5822ef723a75823974305a1338e47e745903c51f38b05d7ee7",
+      "sourceReportCounts": [[3, 16]]
+    },
+    {
+      "file": "tests/movement-flow.test.ts",
+      "passedUniqueCases": 5,
+      "canonicalIdentitySHA256": "62d636e8530de31f18136fe178d83cd543850aae1f13ab83d3e1aacd963b84cb",
+      "sourceReportCounts": [[9, 5]]
+    },
+    {
+      "file": "tests/native-flow.test.ts",
+      "passedUniqueCases": 5,
+      "canonicalIdentitySHA256": "f50c2417bbea68dd01ba0d5e4bb2ae622201c15419f2a2de445d0e058517613a",
+      "sourceReportCounts": [
+        [9, 4],
+        [14, 1]
+      ]
+    },
+    {
+      "file": "tests/new-bot.test.ts",
+      "passedUniqueCases": 9,
+      "canonicalIdentitySHA256": "a76581f6ae5dafe0c8161b57958133a298285b0290119f3d68a2d7649cb6f5dd",
+      "sourceReportCounts": [[0, 9]]
+    },
+    {
+      "file": "tests/online-api.test.ts",
+      "passedUniqueCases": 5,
+      "canonicalIdentitySHA256": "f1e307ce6db58612cb5b07ccf8f14d7bf61e1efc094b78f3f746f43617b55751",
+      "sourceReportCounts": [[9, 5]]
+    },
+    {
+      "file": "tests/online-client.test.ts",
+      "passedUniqueCases": 10,
+      "canonicalIdentitySHA256": "f717b8604815ab2e20448d4419e467cad83cebd4d041dfbbf7caa89ce00d18de",
+      "sourceReportCounts": [[9, 10]]
+    },
+    {
+      "file": "tests/online-mulligan.test.ts",
+      "passedUniqueCases": 1,
+      "canonicalIdentitySHA256": "f315e9ec76b5f341280252f2b28ce68175060d3c1e3199f8b59d1a3a760f6004",
+      "sourceReportCounts": [[9, 1]]
+    },
+    {
+      "file": "tests/online-rooms.test.ts",
+      "passedUniqueCases": 20,
+      "canonicalIdentitySHA256": "de25b5be5f8041d6b9e78db9c95059fe89514d11c5de2aec5edafb23c499138c",
+      "sourceReportCounts": [
+        [3, 19],
+        [6, 1]
+      ]
+    },
+    {
+      "file": "tests/origins-extra.test.ts",
+      "passedUniqueCases": 50,
+      "canonicalIdentitySHA256": "a967804672dc8d8de5acbbba483704ed737fb9041b8b1a0de4a611940fbeb051",
+      "sourceReportCounts": [[2, 50]]
+    },
+    {
+      "file": "tests/origins-more.test.ts",
+      "passedUniqueCases": 50,
+      "canonicalIdentitySHA256": "638cde3a1edc070e24e19424076780333fc74b516ecfa20943e1b8c6430638dd",
+      "sourceReportCounts": [[2, 50]]
+    },
+    {
+      "file": "tests/origins-wave3.test.ts",
+      "passedUniqueCases": 57,
+      "canonicalIdentitySHA256": "cfc53c2e33ba066b524752846dc2e37202a529583dd5099ef1a9c9cf46bc2609",
+      "sourceReportCounts": [[2, 57]]
+    },
+    {
+      "file": "tests/origins-wave4.test.ts",
+      "passedUniqueCases": 63,
+      "canonicalIdentitySHA256": "e4b03290567e0cd4fe2ae69612e2d08da6185f8e51fbc93ad7e080124f54ddf5",
+      "sourceReportCounts": [[2, 63]]
+    },
+    {
+      "file": "tests/payment-decisions.test.ts",
+      "passedUniqueCases": 17,
+      "canonicalIdentitySHA256": "3666832f554fd55950e80f86e271fa0906fa81908d914416077e23b72453dffb",
+      "sourceReportCounts": [[3, 17]]
+    },
+    {
+      "file": "tests/persistence.test.ts",
+      "passedUniqueCases": 21,
+      "canonicalIdentitySHA256": "213adbe01a7b10b544f184809098b44516ce5266e605a4dd83158bca7961c284",
+      "sourceReportCounts": [
+        [10, 18],
+        [11, 2],
+        [14, 1]
+      ]
+    },
+    {
+      "file": "tests/playback.test.ts",
+      "passedUniqueCases": 8,
+      "canonicalIdentitySHA256": "b69c4f44d98e35a20ad440bfddc6e56e0ce6df36406a942127e142caf7ee4542",
+      "sourceReportCounts": [[9, 8]]
+    },
+    {
+      "file": "tests/precon-effects.test.ts",
+      "passedUniqueCases": 223,
+      "canonicalIdentitySHA256": "370b93ac33c5cc9f344fc897263630038a73afe7ff26801c89ebf9e2d35aeceb",
+      "sourceReportCounts": [[17, 223]]
+    },
+    {
+      "file": "tests/precon-integration.test.ts",
+      "passedUniqueCases": 15,
+      "canonicalIdentitySHA256": "fc953494e4a15d58e559e17ddf8e8020e32f086126f8db5d3d8d58e3a9edec3c",
+      "sourceReportCounts": [
+        [7, 5],
+        [8, 3],
+        [9, 6],
+        [13, 1]
+      ]
+    },
+    {
+      "file": "tests/precon-timing.test.ts",
+      "passedUniqueCases": 5,
+      "canonicalIdentitySHA256": "573a8945e622993d60ee45498652e07c80e1c4b6b89cf269a347973e7c945e30",
+      "sourceReportCounts": [[4, 5]]
+    },
+    {
+      "file": "tests/public-hand-reveals.test.ts",
+      "passedUniqueCases": 9,
+      "canonicalIdentitySHA256": "84490d5a70914e7a5e6fb282927bea41633d7345dded0287befec2a226c00fc9",
+      "sourceReportCounts": [[3, 9]]
+    },
+    {
+      "file": "tests/rules-errata.test.ts",
+      "passedUniqueCases": 8,
+      "canonicalIdentitySHA256": "64b5efd38987583ce16c8f6b768481780ea563766a090f881b6250aebeb3c02e",
+      "sourceReportCounts": [[3, 8]]
+    },
+    {
+      "file": "tests/rules-regression.test.ts",
+      "passedUniqueCases": 25,
+      "canonicalIdentitySHA256": "2ea4973621db4463da3698d19f4aab212615d0961d1b5fa0feb92dcc6a7969e9",
+      "sourceReportCounts": [[3, 25]]
+    },
+    {
+      "file": "tests/rune-feedback.test.ts",
+      "passedUniqueCases": 3,
+      "canonicalIdentitySHA256": "1e8bc32d3bbf169dce1427811c73fdb1c8339e6b489a38807a1b946121d96d6f",
+      "sourceReportCounts": [[9, 3]]
+    },
+    {
+      "file": "tests/session-storage.test.ts",
+      "passedUniqueCases": 23,
+      "canonicalIdentitySHA256": "85249e3b039d1d82968ca36bc4e4f03d8e8bd19510d9d71f7a0723067cbdd426",
+      "sourceReportCounts": [[10, 23]]
+    },
+    {
+      "file": "tests/simulation.test.ts",
+      "passedUniqueCases": 27,
+      "canonicalIdentitySHA256": "9e8daebda4ebe5ae5b8178995b46434280efba09fc3909d3edff7ee3fe12da11",
+      "sourceReportCounts": [
+        [1, 2],
+        [4, 23],
+        [15, 2]
+      ]
+    },
+    {
+      "file": "tests/spiritforged-extra.test.ts",
+      "passedUniqueCases": 52,
+      "canonicalIdentitySHA256": "6945705458056accae5e32aed5775736830b57a68ecded753d3525cc6ea5e892",
+      "sourceReportCounts": [[2, 52]]
+    },
+    {
+      "file": "tests/spiritforged.test.ts",
+      "passedUniqueCases": 42,
+      "canonicalIdentitySHA256": "24aef77bc3f8fd689bbeb05111439babb9eccc3b33d377e64e6ff7c36c0a6d98",
+      "sourceReportCounts": [[2, 42]]
+    },
+    {
+      "file": "tests/stack-presentation.test.ts",
+      "passedUniqueCases": 10,
+      "canonicalIdentitySHA256": "b5b020ac6df44132394200aeb517e470a51b7698120ac70416d58608116a5fa8",
+      "sourceReportCounts": [[9, 10]]
+    },
+    {
+      "file": "tests/status-presentation.test.ts",
+      "passedUniqueCases": 10,
+      "canonicalIdentitySHA256": "af96122851279e8b261dd6c69c417135e1293d00ea23b109da221bff2a433431",
+      "sourceReportCounts": [[9, 10]]
+    },
+    {
+      "file": "tests/status-token-surfaces.test.ts",
+      "passedUniqueCases": 6,
+      "canonicalIdentitySHA256": "dce53bb81849c0abb462818d472754e0641e658a9285fc7729dc5b24ebcb37b7",
+      "sourceReportCounts": [[9, 6]]
+    },
+    {
+      "file": "tests/step-flow.test.ts",
+      "passedUniqueCases": 12,
+      "canonicalIdentitySHA256": "60e2091b0019bf6180b6eda318c18a5f4eda60ee3e8f8b5199ddfe04743164f4",
+      "sourceReportCounts": [[4, 12]]
+    },
+    {
+      "file": "tests/table-moments.test.ts",
+      "passedUniqueCases": 8,
+      "canonicalIdentitySHA256": "3310094fe24d11f4bfa53f3a6ba39f094b2b18fdf22e077623cef9e9987969b4",
+      "sourceReportCounts": [[4, 8]]
+    },
+    {
+      "file": "tests/training.test.ts",
+      "passedUniqueCases": 12,
+      "canonicalIdentitySHA256": "b386d632050684c4acb82ad9165ab15bd948cce051b0dc9e8581cb69c48da964",
+      "sourceReportCounts": [[3, 12]]
+    },
+    {
+      "file": "tests/trigger-finalization.test.ts",
+      "passedUniqueCases": 19,
+      "canonicalIdentitySHA256": "b40d14d8abb33585c0d444c70bc7e87a68f2b0ec04670a839d835128651307e2",
+      "sourceReportCounts": [[4, 19]]
+    },
+    {
+      "file": "tests/turn-presentation.test.ts",
+      "passedUniqueCases": 6,
+      "canonicalIdentitySHA256": "c89f585293959bb6c624a6ed1efd19036b91ccf9a48cb04dd4085df3f6a564a5",
+      "sourceReportCounts": [[4, 6]]
+    },
+    {
+      "file": "tests/unleashed-extra.test.ts",
+      "passedUniqueCases": 118,
+      "canonicalIdentitySHA256": "2d606153f03696e9e1bb36d16c1aedae48afdd69c245b6fab9a787f3ec780c8b",
+      "sourceReportCounts": [[2, 118]]
+    },
+    {
+      "file": "tests/unleashed-wave3.test.ts",
+      "passedUniqueCases": 66,
+      "canonicalIdentitySHA256": "bc58677fa972924f000d6ed1737499d9c02e067da9305c1a1778f9e632d883b1",
+      "sourceReportCounts": [[2, 66]]
+    },
+    {
+      "file": "tests/unleashed-wave4.test.ts",
+      "passedUniqueCases": 49,
+      "canonicalIdentitySHA256": "02ab4f2be9b90f1e981ac4a7b79125dca391ed80de8f6432faff7f2179a3a461",
+      "sourceReportCounts": [[2, 49]]
+    },
+    {
+      "file": "tests/unleashed.test.ts",
+      "passedUniqueCases": 26,
+      "canonicalIdentitySHA256": "862c88d3c4f3e17d2f26ccf2b744c8b5e1f57309d31bd7ada5798c2eb3b67e59",
+      "sourceReportCounts": [[2, 26]]
+    },
+    {
+      "file": "tests/vendetta-edge.test.ts",
+      "passedUniqueCases": 6,
+      "canonicalIdentitySHA256": "b3a7a0f9622b316d160392645b14f5a644ad8a8c3dc73c92137d8056f82d88c7",
+      "sourceReportCounts": [[4, 6]]
+    },
+    {
+      "file": "tests/vendetta-extra.test.ts",
+      "passedUniqueCases": 53,
+      "canonicalIdentitySHA256": "143399415884619146c1e1d852ab865f925a28740dd121e071b7170430379b16",
+      "sourceReportCounts": [[2, 53]]
+    },
+    {
+      "file": "tests/vendetta-wave3.test.ts",
+      "passedUniqueCases": 66,
+      "canonicalIdentitySHA256": "f8d64bcd0818f302aa51514710bf423fc3babc043f6ca6d727556d652a1d9bfe",
+      "sourceReportCounts": [[2, 66]]
+    },
+    {
+      "file": "tests/vendetta-wave4.test.ts",
+      "passedUniqueCases": 52,
+      "canonicalIdentitySHA256": "6ad544f73945c4f6b1659ac092d2bdacbd1c4f039ac090800238222f271f2efd",
+      "sourceReportCounts": [[2, 52]]
+    },
+    {
+      "file": "tests/vendetta.test.ts",
+      "passedUniqueCases": 6,
+      "canonicalIdentitySHA256": "2683d7fd9f947fcc67ec8eedcafdb90932f4f3d3ee5efbad83c67bf69b4ebfb0",
+      "sourceReportCounts": [[4, 6]]
+    }
+  ]
+}

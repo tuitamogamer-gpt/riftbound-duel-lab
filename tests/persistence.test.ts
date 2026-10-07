@@ -9,7 +9,7 @@ import { getBotAction } from "../src/game/bot";
 import { parseSession, validState } from "../src/persistence";
 import type { GameState, Unit } from "../src/game/types";
 import { cards } from "../src/data/cards";
-import { fixture, unit } from "./fixtures/cards";
+import { act, chain, fixture, ogn, sfd, unit } from "./fixtures/cards";
 describe("saved manual Proceed session", () => {
   it("restores the precise event being reviewed without advancing", () => {
     const before = createGame({ seed: 25 });
@@ -121,6 +121,80 @@ describe("saved dual Unit/Gear card identities", () => {
     const state = hybridState();
     const malformed = JSON.parse(JSON.stringify(state));
     malformed.gears[0].cardId = "unknown-card";
+    expect(parseSession(JSON.stringify(malformed)).match).toBeNull();
+  });
+});
+
+describe("saved board card selections", () => {
+  const packChoice = () => {
+    let state = fixture();
+    state.units = [unit("ally")];
+    state.gears = [
+      { id: "pack", cardId: ogn(181), owner: 0, ready: true },
+      { id: "gear", cardId: sfd(33), owner: 0, ready: true },
+    ];
+    state.hidden = [
+      {
+        id: "hidden",
+        cardId: ogn(121),
+        owner: 0,
+        location: "field:0",
+        hiddenTurn: 0,
+      },
+      {
+        id: "enemy-hidden",
+        cardId: ogn(121),
+        owner: 1,
+        location: "field:1",
+        hiddenTurn: 0,
+      },
+    ];
+    return act(state, (action) => action.sourceId === "pack");
+  };
+
+  it("restores Pack of Wonders before and after selecting a unit, gear or Hidden card", () => {
+    const paused = packChoice();
+    expect(paused.pendingChoice?.effect?.cardTypes).toEqual([
+      "Unit",
+      "Gear",
+      "Hidden",
+    ]);
+    const restored = parseSession(JSON.stringify({ match: paused })).match!;
+    expect(restored).toEqual(paused);
+    expect(getLegalActions(restored, restored.priorityPlayer)).toEqual(
+      getLegalActions(paused, paused.priorityPlayer),
+    );
+    const choices = getLegalActions(restored, restored.priorityPlayer);
+    expect(choices.some((action) => action.targetId === "pack")).toBe(false);
+    expect(choices.some((action) => action.targetId === "enemy-hidden")).toBe(
+      false,
+    );
+
+    for (const [id, cardId] of [
+      ["ally", ogn(49)],
+      ["gear", sfd(33)],
+      ["hidden", ogn(121)],
+    ]) {
+      const selected = act(restored, `choose-board:${id}`);
+      const selectedSave = parseSession(JSON.stringify(selected)).match!;
+      expect(selectedSave).toEqual(selected);
+      const result = chain(act(selectedSave, "choose-board:done"));
+      expect(result).toEqual(chain(act(selected, "choose-board:done")));
+      expect(result.players[0].hand).toContain(cardId);
+    }
+  });
+
+  it("rejects unknown board card types and Hidden types outside board selection effects", () => {
+    const paused = packChoice();
+    for (const cardTypes of [["Unit", "Unknown"], ["Hidden", 1], "Hidden"]) {
+      const malformed = structuredClone(paused);
+      malformed.pendingChoice!.effect!.cardTypes = cardTypes as never;
+      expect(parseSession(JSON.stringify(malformed)).match).toBeNull();
+    }
+    const malformed = structuredClone(paused);
+    malformed.pendingChoice!.effects = [
+      { type: "draw", amount: 1, cardTypes: ["Hidden"] },
+    ];
     expect(parseSession(JSON.stringify(malformed)).match).toBeNull();
   });
 });
@@ -274,7 +348,7 @@ describe("saved state structural recovery", () => {
     }
   });
 
-  it("restores every real event frame across all four decks without advancing it", () => {
+  it("restores every real event frame across all four decks without advancing it", async () => {
     for (const [index, deck] of [
       "annie",
       "lux",
@@ -311,6 +385,8 @@ describe("saved state structural recovery", () => {
           expect(restored.review?.frames[frame]).toEqual(result.frames[frame]);
         }
         state = result.state;
+        if (step % 25 === 24)
+          await new Promise<void>((resolve) => setTimeout(resolve, 0));
       }
     }
     // This walks up to 480 real bot actions, including planning and every save

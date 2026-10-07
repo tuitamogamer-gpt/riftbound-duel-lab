@@ -24,7 +24,25 @@ The loopback browser fixture [bot-loading-preview.html](../tests/bot-loading-pre
 
 ## Fresh paired catalog pilot
 
-The 32-game pilot is still running. No current strength result is claimed before the cohort completes.
+All 32 games completed with a winner and zero illegal or blocked games. These are outcomes from this small fixed cohort, not evidence of a general difficulty ordering.
+
+| Comparison    | Games | Wins   | Decisions | Legal fallbacks | Incomplete searches | Illegal / blocked |
+| ------------- | ----: | ------ | --------: | --------------: | ------------------: | ----------------- |
+| Hard / Normal |    16 | 10 / 6 |     2,356 |               1 |                 280 | 0 / 0             |
+| Expert / Hard |    16 | 10 / 6 |     2,527 |               0 |                  40 | 0 / 0             |
+
+Validated legal fallbacks: Normal 1. Incomplete searches still selected actions validated by the real engine. No game reached the action cap or repeated-state guard.
+
+| Comparison    | Policy | Decisions | p50 ms |  p95 ms | Maximum ms | Maximum completed depth | Multiple-sample decisions |
+| ------------- | ------ | --------: | -----: | ------: | ---------: | ----------------------: | ------------------------: |
+| Hard / Normal | Hard   |     1,174 |  372.1 | 4,666.7 |   17,667.7 |                       3 |                       954 |
+| Hard / Normal | Normal |     1,182 |  114.6 | 2,033.6 |   12,687.9 |                       2 |                         0 |
+| Expert / Hard | Expert |     1,273 |  207.6 | 4,436.0 |   37,202.5 |                       4 |                     1,050 |
+| Expert / Hard | Hard   |     1,254 |  123.7 | 2,108.4 |    5,535.3 |                       3 |                     1,037 |
+
+These timings measure the direct fixed-node benchmark with interactive wall-time cutoffs disabled. Browser responsiveness and worker recovery were checked separately. Shared CPU contention affects the timings.
+
+The [complete report and cohort audit](bot-catalog-benchmark-2026-10-07.json) record all 32 unique comparison/pair/side keys, exact seeds, decks, and policy seat assignments. Each policy has eight first-player games per comparison. The retained 14 completed-game records were verified unchanged.
 
 Run the current cohort with:
 
