@@ -74,10 +74,10 @@ jobs:
           --maxWorkers=2 --testTimeout=30000
           --reporter=default --reporter=json
           --outputFile=test-results/required-checks.json
-      - name: Saved hybrid identities and unfinished card resolution
+      - name: Saved hybrid identities, board-card choices and unfinished resolution
         run: >-
           npm test -- tests/persistence.test.ts
-          --testNamePattern "saved dual Unit/Gear card identities|expanded precon saves and unfinished spell resolution|saved manual Proceed session"
+          --testNamePattern "saved dual Unit/Gear card identities|saved board card selections|expanded precon saves and unfinished spell resolution|saved manual Proceed session"
           --maxWorkers=2 --testTimeout=30000
           --reporter=default --reporter=json
           --outputFile=test-results/required-save-checks.json
