@@ -2,6 +2,7 @@ import { isCardType } from "../data/cards";
 import { getDeckFromCode } from "@piltoverarchive/riftbound-deck-codes";
 import { cardsById, type Card } from "../data/cards";
 import { gameplayFingerprint } from "../data/card-identity";
+import { MAX_MAIN_DECK_SIZE } from "../data/decks";
 import {
   parseDeckText,
   resolveImportCard,
@@ -65,10 +66,11 @@ function checkEnvelope(code: string) {
   const section = (max: number) => {
     const counts = version >= 5 ? integer(100) : max;
     for (let i = 0; i < counts; i++) {
-      if (version >= 5 && integer(100) === 0) throw new Error("Zero count");
+      if (version >= 5 && integer(MAX_MAIN_DECK_SIZE) === 0)
+        throw new Error("Zero count");
       const groups = integer(100);
       for (let g = 0; g < groups; g++) {
-        const cards = integer(100);
+        const cards = integer(MAX_MAIN_DECK_SIZE);
         byte();
         byte();
         for (let c = 0; c < cards; c++) number();
@@ -149,7 +151,10 @@ export function importDeckSource(
   }
   // v1/v2 codes and sectionless site exports need an explicit chosen champion.
   // Offer only the actual Champion Units in the imported list, never guess.
-  const result = parseDeckText(normalizedText, options);
+  const result = parseDeckText(normalizedText, {
+    ...options,
+    ...(isCode ? { mainIncludesChampion: true } : {}),
+  });
   const candidates = new Map<string, Card>();
   if (result.issues.some((issue) => issue.code === "champion-count")) {
     let inSideboard = false;

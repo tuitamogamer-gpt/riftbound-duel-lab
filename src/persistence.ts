@@ -1,8 +1,10 @@
 import { isCardType, getCard } from "./data/cards";
-import type { GameState } from "./game/types";
+import type { GameAction, GameState } from "./game/types";
 import type { Review } from "./components/StepFlow";
 import { cardsById } from "./data/cards";
 import { getLegalActions } from "./game/engine";
+import { syncHybridObjects } from "./game/card-wave19";
+import { validPublicHandReveal } from "./game/hand-reveals";
 
 export const SAVE_KEY = "riftbound-duel-save-v1";
 export interface SavedSession {
@@ -559,6 +561,9 @@ export function validState(x: unknown, actionable = true): x is GameState {
     !isObject(x) ||
     x.version !== 1 ||
     !optionalCount(x.revision) ||
+    (x.publicReveals !== undefined &&
+      (!validPublicHandReveal(x.publicReveals) ||
+        x.publicReveals.turn > x.turn)) ||
     (x.botSettings !== undefined &&
       (!isObject(x.botSettings) ||
         !["beginner", "normal", "hard", "expert"].includes(
@@ -902,7 +907,7 @@ export function validState(x: unknown, actionable = true): x is GameState {
   return true;
 }
 
-function validAction(x: unknown): boolean {
+export function validAction(x: unknown): x is GameAction {
   return (
     isObject(x) &&
     typeof x.id === "string" &&
@@ -948,7 +953,10 @@ export function parseSession(raw: string | null): SavedSession {
   if (!raw) return empty;
   try {
     const value: unknown = JSON.parse(raw);
-    if (validState(value)) return { match: value, review: null };
+    if (validState(value)) {
+      syncHybridObjects(value);
+      return { match: value, review: null };
+    }
     if (!isObject(value) || !validState(value.match)) return empty;
     const r = value.review;
     const validReview =
@@ -1003,6 +1011,14 @@ export function parseSession(raw: string | null): SavedSession {
       validAction(r.action) &&
       JSON.stringify(r.final) === JSON.stringify(value.match) &&
       JSON.stringify(r.frames.at(-1).state) === JSON.stringify(r.final);
+    // JSON separates Unit/Gear aliases. Rebind only after validating the save
+    // and review consistency, so both indexes continue to represent one card.
+    syncHybridObjects(value.match);
+    if (validReview) {
+      syncHybridObjects(r.before);
+      syncHybridObjects(r.final);
+      for (const frame of r.frames) syncHybridObjects(frame.state);
+    }
     return {
       match: value.match,
       review: validReview ? (r as unknown as Review) : null,

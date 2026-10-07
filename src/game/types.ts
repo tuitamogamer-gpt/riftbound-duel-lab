@@ -1,4 +1,5 @@
 import type { StarterDeck } from "../data/decks";
+import type { PublicHandReveal } from "./hand-reveals";
 export type PlayerId = 0 | 1;
 export type TurnStep = "awaken" | "beginning" | "channel" | "draw" | "main";
 export type Domain = string;
@@ -236,6 +237,8 @@ export interface PendingCardPlay {
   spec: CardPlaySpec;
 }
 export interface GameState {
+  /** Last historical public hand reveal, stored separately from current hands. */
+  publicReveals?: PublicHandReveal;
   selectedInspections?: {
     id: string;
     owner: PlayerId;

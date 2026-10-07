@@ -1,0 +1,115 @@
+name: Complete regression and precon matrix
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: full-regression-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  full-suite:
+    name: Full suite including mixed-deck games
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run cards:check
+      - name: Collect every expected test in the current checkout
+        run: npx vitest list --json=test-results/expected-tests.json --maxWorkers=2
+      - name: Every suite outside the separately reported precon matrix
+        run: >-
+          npm test -- --exclude tests/precon-effects.test.ts
+          --maxWorkers=2 --testTimeout=30000 --hookTimeout=30000
+          --reporter=default --reporter=json
+          --outputFile=test-results/full-suite.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: full-suite-report
+          path: |
+            test-results/full-suite.json
+            test-results/expected-tests.json
+          if-no-files-found: ignore
+
+  precon-matrix:
+    name: Precon matrix shard ${{ matrix.shard }} of 3
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2]
+    env:
+      PRECON_SHARD: ${{ matrix.shard }}/3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Complete published precon suite
+        run: >-
+          npm test -- tests/precon-effects.test.ts
+          --maxWorkers=1 --testTimeout=30000 --hookTimeout=30000
+          --reporter=verbose --reporter=json
+          --outputFile=test-results/precon-shard-${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: precon-shard-${{ matrix.shard }}
+          path: test-results/precon-shard-${{ matrix.shard }}.json
+          if-no-files-found: ignore
+
+  verify-precon-matrix:
+    name: Verify the complete suite and all 169 published pairings
+    needs: [full-suite, precon-matrix]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: precon-shard-*
+          merge-multiple: true
+          path: test-results
+      - uses: actions/download-artifact@v4
+        with:
+          name: full-suite-report
+          path: test-results
+      - name: Reject missing, duplicate, skipped or failed pairings
+        run: >-
+          node scripts/verify-precon-report.mjs
+          test-results/precon-shard-0.json
+          test-results/precon-shard-1.json
+          test-results/precon-shard-2.json
+      - name: Require every unique collected test to pass
+        run: >-
+          node scripts/summarize-regression-reports.mjs
+          --expected=test-results/expected-tests.json
+          --output=test-results/regression-summary.json
+          test-results/full-suite.json
+          test-results/precon-shard-0.json
+          test-results/precon-shard-1.json
+          test-results/precon-shard-2.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: complete-precon-matrix-reports
+          path: test-results/*.json
+          if-no-files-found: ignore

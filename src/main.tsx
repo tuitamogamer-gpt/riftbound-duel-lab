@@ -27,6 +27,11 @@ import "./match-skin.css";
 import "./desktop-table.css";
 import "./components/PlaybackSpeed.css";
 import "./mobile-table.css";
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  void navigator.serviceWorker.register("/sw.js").catch(() => {
+    // Online play and browser saves remain available if offline setup fails.
+  });
+}
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <LanguageProvider>

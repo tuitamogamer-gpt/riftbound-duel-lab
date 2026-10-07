@@ -1,10 +1,19 @@
 import { getCard } from "../../data/cards";
 import { getScript } from "../scripts";
+import type { CardScript, Effect } from "../types";
 
 export type Difficulty = "beginner" | "normal" | "hard" | "expert";
 export type Profile =
-  "aggressive" | "tempo" | "control" | "combo" | "big-units";
-export const BOT_VERSION = "battlefield-planner-1";
+  | "aggressive"
+  | "tempo"
+  | "control"
+  | "combo"
+  | "big-units"
+  | "equipment"
+  | "xp"
+  | "tokens"
+  | "recursion";
+export const BOT_VERSION = "battlefield-planner-2";
 /** Initial measured/tunable limits, not claims of optimal strength. */
 export const DIFFICULTIES = {
   beginner: {
@@ -44,15 +53,83 @@ export const DIFFICULTIES = {
     replies: 4,
   },
 } as const;
+export interface CardStrategy {
+  equipment: boolean;
+  xp: boolean;
+  tokens: boolean;
+  recursion: boolean;
+}
+const strategies = new Map<string, Readonly<CardStrategy>>();
+/** Printed rules and explicit scripts only; no live or hidden game state. */
+export function cardStrategy(id: string): Readonly<CardStrategy> {
+  const cached = strategies.get(id);
+  if (cached) return cached;
+  const card = getCard(id),
+    script = getScript(id);
+  const flattened: Effect[] = [];
+  const collect = (effects: Effect[] = []) => {
+    for (const effect of effects) {
+      flattened.push(effect);
+      collect(effect.effects);
+    }
+  };
+  const hooks: (keyof CardScript)[] = [
+    "spell",
+    "onPlay",
+    "onDeath",
+    "onAttack",
+    "onDefend",
+    "onMove",
+    "onHold",
+    "onConquer",
+    "onBegin",
+    "onEnd",
+    "onDiscard",
+  ];
+  for (const hook of hooks) collect(script?.[hook] as Effect[] | undefined);
+  for (const ability of script?.abilities ?? []) collect(ability.effects);
+  for (const mode of script?.spellModes ?? []) collect(mode.effects);
+  for (const effects of Object.values(script?.equipment ?? {}))
+    if (
+      Array.isArray(effects) &&
+      effects.some((value) => typeof value === "object")
+    )
+      collect(effects as Effect[]);
+  const strategy = Object.freeze({
+    equipment:
+      card.type === "Gear" || /\bequip(?:ped|ment)?\b/i.test(card.text),
+    xp:
+      /\bXP\b|\bHunt\b|\bexperience\b/i.test(card.text) ||
+      flattened.some((effect) => /(?:^|:)xp$/.test(effect.custom ?? "")),
+    tokens:
+      flattened.some((effect) => effect.type === "token") ||
+      /create[^.]*token|token[^.]*create/i.test(card.text),
+    recursion:
+      flattened.some(
+        (effect) =>
+          effect.type === "retrieve" ||
+          (effect.type === "playCard" && effect.play?.zone === "trash"),
+      ) || /(?:play|return|retrieve)[^.]*\btrash\b/i.test(card.text),
+  });
+  strategies.set(id, strategy);
+  return strategy;
+}
+
+/** Identity-blind profile inference from an unordered, legitimately known list. */
 export function inferProfile(list: string[]): Profile {
   let cheap = 0,
     big = 0,
     removal = 0,
     synergy = 0,
     tricks = 0;
+  const themes = { equipment: 0, xp: 0, tokens: 0, recursion: 0 };
   for (const id of list) {
+    if (id === "unknown") continue;
     const c = getCard(id),
       sc = getScript(id);
+    const strategy = cardStrategy(id);
+    for (const key of Object.keys(themes) as (keyof typeof themes)[])
+      if (strategy[key]) themes[key]++;
     if (c.type === "Unit") {
       if ((c.energy ?? 0) <= 3) cheap++;
       if ((c.energy ?? 0) >= 5) big++;
@@ -74,6 +151,11 @@ export function inferProfile(list: string[]): Profile {
       if (["ready", "might", "buff", "keyword"].includes(e.type)) tricks++;
     }
   }
+  const themed = (
+    Object.entries(themes) as [keyof typeof themes, number][]
+  ).sort((a, b) => b[1] - a[1])[0];
+  // Density scales with larger imported decks; a small splash is not a profile.
+  if (themed[1] >= Math.max(4, Math.ceil(list.length * 0.15))) return themed[0];
   return synergy > 9
     ? "combo"
     : removal > cheap

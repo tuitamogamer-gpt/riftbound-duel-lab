@@ -134,6 +134,8 @@ describe("additional catalog cards in mixed expansion games", () => {
           `${a}/${b} stopped at turn ${s.turn}/${s.phase}`,
         ).not.toBeNull();
         conservation(s);
-      }, 30_000);
+        // Preserve the complete game and every invariant when deterministic bot
+        // planning shares the runner with the full precon matrix.
+      }, 240_000);
     }
 });

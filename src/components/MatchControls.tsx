@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { findCard, type CatalogCard } from "../catalog";
 import { cardArtUrl } from "../data/art";
 import { Card } from "./Card";
 import { readableText } from "../data/cards";
 import { decisionActions, selectedCardId, sourceActions } from "../game/flow";
+import {
+  damageAssignmentSummary,
+  decisionReason,
+} from "../game/decision-reasons";
 import type { GameAction, GameState } from "../game/types";
 import { useI18n } from "../i18n";
 import type { Review } from "./StepFlow";
@@ -26,6 +30,7 @@ export function MatchControls({
   target,
   clear,
   act,
+  requestAction,
   review,
   busy,
   paused,
@@ -40,6 +45,8 @@ export function MatchControls({
   target: string | null;
   clear: () => void;
   act: (action: GameAction) => void;
+  /** Optional payment-aware dispatcher; the engine still validates confirmation. */
+  requestAction?: (action: GameAction) => void;
   review: Review | null;
   busy: boolean;
   paused: boolean;
@@ -49,6 +56,9 @@ export function MatchControls({
   inspect: (card: CatalogCard) => void;
 }) {
   const { t } = useI18n();
+  const dispatch = requestAction ?? act;
+  const damageSummary =
+    !review && game.phase === "damage" ? damageAssignmentSummary(game) : null;
   const window = priorityWindow(game);
   const stackView = getActionStackView(game, review);
   const forcedPass =
@@ -121,8 +131,12 @@ export function MatchControls({
       [...(action.cardIndices ?? [])].sort().join() ===
         [...mulligan].sort().join(),
   );
-  const ownUnit = game.units.find(
-    (unit) => unit.id === selected && unit.owner === 0,
+  const blockedReason = useMemo(
+    () =>
+      !busy && !review && !paused && !available.length
+        ? decisionReason(game, legal, selected, target)
+        : null,
+    [game, legal, selected, target, busy, review, paused, available.length],
   );
   const title = paused
     ? "Game paused"
@@ -156,9 +170,8 @@ export function MatchControls({
                 ? actions.some((action) => action.targetId)
                   ? "Choose a highlighted target or an available move."
                   : readableText(card.text) || "Choose a move."
-                : ownUnit && !ownUnit.ready
-                  ? "This unit is exhausted. It readies at the start of your turn."
-                  : "No legal play now. Check the cost, timing and available targets."
+                : (blockedReason ??
+                  "This card has no legal target, destination or available effect in this position.")
             : game.phase === "damage"
               ? "Click a highlighted enemy to assign your damage."
               : game.phase === "move"
@@ -222,7 +235,7 @@ export function MatchControls({
                 t("Hidden · base cost ignored")
               ) : (
                 <>
-                  {t(card.type)} · {card.energy ?? 0} {t("ENERGY")} ·{" "}
+                  {t("Printed cost")} · {card.energy ?? 0} {t("ENERGY")} ·{" "}
                   {card.power ?? 0} {t("power")}
                 </>
               )}
@@ -230,10 +243,8 @@ export function MatchControls({
           )}
         </strong>
         <p>
-          {game.combat &&
-            !review &&
-            game.phase === "damage" &&
-            `${t("Damage remaining: {count}", { count: game.combat.remaining[0] })} · `}
+          {damageSummary &&
+            `${t("Damage remaining: {count}", { count: damageSummary.remaining })} · ${t("{count} lethal assignments", { count: damageSummary.lethal })} · `}
           {movement && !review && !paused && !busy
             ? t("{count} selected → {destination}. {instruction}", {
                 count: movement.unitIds.length,
@@ -322,7 +333,7 @@ export function MatchControls({
           <button
             className="gold-button"
             disabled={!keep}
-            onClick={() => keep && act(keep)}
+            onClick={() => keep && dispatch(keep)}
           >
             {mulligan.length === 1
               ? t("Replace 1 card")
@@ -355,7 +366,7 @@ export function MatchControls({
                   <button
                     key={action.id}
                     className="context-action"
-                    onClick={() => act(action)}
+                    onClick={() => dispatch(action)}
                     title={t(action.detail)}
                   >
                     {optionCard?.image && (
@@ -398,7 +409,7 @@ export function MatchControls({
             {cancel && (
               <button
                 className="secondary-decision"
-                onClick={() => act(cancel)}
+                onClick={() => dispatch(cancel)}
               >
                 {t("Cancel movement")}
               </button>
@@ -407,7 +418,7 @@ export function MatchControls({
               <button
                 className="gold-button confirm-decision"
                 disabled={!confirm}
-                onClick={() => confirm && act(confirm)}
+                onClick={() => confirm && dispatch(confirm)}
               >
                 {movement
                   ? movement.unitIds.length === 1
@@ -422,7 +433,7 @@ export function MatchControls({
             {ending && (
               <button
                 className={`gold-button end-turn ${selected && actions.length ? "secondary-ending" : ""}`}
-                onClick={() => act(ending)}
+                onClick={() => dispatch(ending)}
               >
                 {t(
                   ending.category === "end"

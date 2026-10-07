@@ -6,6 +6,7 @@ import {
 } from "./text-sources";
 import { getCard } from "../data/cards";
 import { getKeywords } from "./engine";
+import { recordPublicHandReveal } from "./hand-reveals";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
 import type {
   CardScript,
@@ -189,6 +190,7 @@ export const unleashedWave4Module: ExpansionModule = {
         s.players[p].xp = (s.players[p].xp ?? 0) + (e.amount ?? 1);
         break;
       case "scuttle":
+        recordPublicHandReveal(s, opponent(p), "unl-053-219");
         ctx.log?.(
           s,
           `${s.players[opponent(p)].name} reveals: ${s.players[opponent(p)].hand.map((c) => getCard(c).name).join(", ") || "empty hand"}.`,
@@ -245,6 +247,7 @@ export const unleashedWave4Module: ExpansionModule = {
       }
       case "investigator": {
         const hand = s.players[opponent(p)].hand;
+        recordPublicHandReveal(s, opponent(p), "unl-135-219");
         ctx.log?.(
           s,
           `${s.players[opponent(p)].name} reveals: ${hand.map((c) => getCard(c).name).join(", ") || "empty hand"}.`,

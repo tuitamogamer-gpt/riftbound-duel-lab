@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getCodeFromDeck } from "@piltoverarchive/riftbound-deck-codes";
-import { starterDecks } from "../src/data/decks";
+import { starterDecks, MAX_MAIN_DECK_SIZE } from "../src/data/decks";
 import { cardsById } from "../src/data/cards";
 import { importDeckSource } from "../src/game/deck-sources";
 import {
@@ -66,6 +66,41 @@ describe("website deck exchange", () => {
           .join("\n")}`,
       ).playable,
     ).toBe(true);
+  });
+  it.each([40, 41])(
+    "imports a larger %i-card draw deck from codec and legacy packets without losing an extra champion",
+    (count) => {
+      const d = example();
+      d.main.push({ cardId: d.championId, count: count - 39 });
+      for (const includeChoice of [true, false]) {
+        const result = importDeckSource(encoded(d, includeChoice), {
+          championId: d.championId,
+        });
+        expect(
+          result.issues.filter((item) => item.severity === "error"),
+        ).toEqual([]);
+        expect(result.deck?.main).toEqual(d.main);
+        expect(result.deck?.main.reduce((n, entry) => n + entry.count, 0)).toBe(
+          count,
+        );
+        expect(importDeckSource(exportDeckText(result.deck!)).deck).toEqual(
+          result.deck,
+        );
+      }
+    },
+  );
+  it("decodes legal unlimited copies above the old codec quantity bound", () => {
+    const d = example();
+    d.main = [{ cardId: "ven-097-166", count: MAX_MAIN_DECK_SIZE - 1 }];
+    const result = importDeckSource(encoded(d));
+    expect(result.issues.filter((item) => item.severity === "error")).toEqual(
+      [],
+    );
+    expect(result.deck?.main).toEqual(d.main);
+    d.main[0].count = MAX_MAIN_DECK_SIZE + 1;
+    expect(importDeckSource(encoded(d)).issues[0].code).toBe(
+      "deck-code-invalid",
+    );
   });
   it("preserves sideboard across code, text export, local save and reload", () => {
     const d = example();

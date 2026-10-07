@@ -1,0 +1,87 @@
+name: Required checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: required-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  catalog-rules-build:
+    name: Catalog, core rules and production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run cards:check
+      - name: Core and imported-rule regressions
+        run: >-
+          npm test --
+          tests/engine.test.ts
+          tests/rules-regression.test.ts
+          tests/rules-errata.test.ts
+          tests/card-registry.test.ts
+          tests/card-script-compiler.test.ts
+          tests/catalog-core.test.ts
+          tests/deck-import.test.ts
+          tests/match-setup.test.ts
+          tests/session-storage.test.ts
+          tests/payment-decisions.test.ts
+          tests/deck-builder.test.ts
+          tests/training.test.ts
+          tests/ai-profiles.test.ts
+          tests/ai-prepared-fallback.test.ts
+          tests/ai-inspection-ownership.test.ts
+          tests/public-hand-reveals.test.ts
+          tests/online-rooms.test.ts
+          tests/online-mulligan.test.ts
+          tests/blob-room-storage.test.ts
+          tests/audit-storage.test.ts
+          tests/match-series.test.ts
+          tests/match-history.test.ts
+          tests/mobile-presentation.test.ts
+          tests/card-wave13.test.ts
+          tests/card-wave14.test.ts
+          tests/card-wave15.test.ts
+          tests/card-wave16.test.ts
+          tests/card-wave17.test.ts
+          tests/card-wave18.test.ts
+          tests/card-wave19.test.ts
+          tests/card-wave20.test.ts
+          tests/card-wave21.test.ts
+          tests/card-wave22.test.ts
+          tests/card-wave23.test.ts
+          tests/card-wave24.test.ts
+          tests/card-wave25.test.ts
+          tests/card-wave26.test.ts
+          tests/imported-interactions.test.ts
+          --maxWorkers=2 --testTimeout=30000
+          --reporter=default --reporter=json
+          --outputFile=test-results/required-checks.json
+      - name: Saved hybrid identities and unfinished card resolution
+        run: >-
+          npm test -- tests/persistence.test.ts
+          --testNamePattern "saved dual Unit/Gear card identities|expanded precon saves and unfinished spell resolution|saved manual Proceed session"
+          --maxWorkers=2 --testTimeout=30000
+          --reporter=default --reporter=json
+          --outputFile=test-results/required-save-checks.json
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: required-checks-report
+          path: |
+            test-results/required-checks.json
+            test-results/required-save-checks.json
+          if-no-files-found: ignore

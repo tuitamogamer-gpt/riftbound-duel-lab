@@ -120,11 +120,21 @@ function simulate(playerDeckId: string, botDeckId: string, seed: number) {
 }
 
 describe("all supported deck matchups complete through legal bot actions", () => {
+  // This unchanged three-seed case measured 275s while five CPU-heavy jobs shared four cores.
+  const measuredLongCases = new Set(["annie/annie"]);
   for (const player of starterDecks)
     for (const opponent of starterDecks) {
-      it(`${player.name} vs ${opponent.name}: three seeded complete games`, () => {
-        for (const seed of seeds) simulate(player.id, opponent.id, seed);
-      }, 60_000);
+      it(
+        `${player.name} vs ${opponent.name}: three seeded complete games`,
+        () => {
+          for (const seed of seeds) simulate(player.id, opponent.id, seed);
+          // Three complete deterministic games can exceed a minute when other
+          // integration jobs share the runner. Preserve every seed and invariant.
+        },
+        measuredLongCases.has(`${player.id}/${opponent.id}`)
+          ? 300_000
+          : 240_000,
+      );
     }
 });
 

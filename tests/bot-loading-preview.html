@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bot worker lifecycle fixture</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import React, { useState } from "react";
+      import { createRoot } from "react-dom/client";
+      import { createGame, applyAction } from "/src/game/engine.ts";
+      import { useBotDecision } from "/src/hooks/useBotDecision.ts";
+      if (!["127.0.0.1", "localhost"].includes(location.hostname))
+        throw new Error("Loopback fixture only");
+      const scenario =
+        new URLSearchParams(location.search).get("scenario") ?? "real";
+      const qa = (window.__botQA = { events: [], workers: [], requests: [] });
+      const RealWorker = window.Worker;
+      class ControlledWorker extends EventTarget {
+        constructor() {
+          super();
+          qa.events.push("created");
+          qa.workers.push(this);
+        }
+        postMessage(request) {
+          qa.events.push("requested");
+          qa.requests.push(request);
+          if (scenario === "error")
+            setTimeout(() => this.dispatchEvent(new Event("error")), 0);
+        }
+        terminate() {
+          qa.events.push("terminated");
+        }
+        emit(request, decision = request.request.fallbackDecision) {
+          this.dispatchEvent(
+            new MessageEvent("message", {
+              data: {
+                id: request.request.id,
+                result: {
+                  decision,
+                  action: request.request.legalOptions[0],
+                  trace: {
+                    requestId: request.request.id,
+                    observationVersion: request.observation.version,
+                    configVersion: "fixture",
+                    seed: 1,
+                    difficulty: "normal",
+                    profile: "aggressive",
+                    selected: decision.optionId,
+                    alternatives: [],
+                    nodes: 0,
+                    generated: 0,
+                    durationMs: 1,
+                    completedDepth: 0,
+                    usedFallback: true,
+                    incomplete: true,
+                    confirmedWin: false,
+                    sampleCount: 0,
+                    reason: "Prepared fixture decision",
+                  },
+                },
+              },
+            }),
+          );
+        }
+      }
+      if (scenario === "startup")
+        window.Worker = class {
+          constructor() {
+            qa.events.push("failed-start");
+            throw new Error("Worker blocked");
+          }
+        };
+      else if (scenario !== "real") window.Worker = ControlledWorker;
+      else
+        window.Worker = new Proxy(RealWorker, {
+          construct(target, args) {
+            const worker = Reflect.construct(target, args);
+            qa.events.push("created");
+            qa.workers.push(worker);
+            const post = worker.postMessage.bind(worker),
+              terminate = worker.terminate.bind(worker);
+            worker.postMessage = (request) => {
+              qa.events.push("requested");
+              qa.requests.push(request);
+              post(request);
+            };
+            worker.terminate = () => {
+              qa.events.push("terminated");
+              terminate();
+            };
+            return worker;
+          },
+        });
+      function Fixture() {
+        const [match, setMatch] = useState(null),
+          [enabled, setEnabled] = useState(true);
+        const bot = useBotDecision(match, enabled);
+        qa.current = { match, result: bot.result, error: bot.error, enabled };
+        return React.createElement(
+          "main",
+          {},
+          React.createElement(
+            "button",
+            {
+              onClick: () => setMatch(createGame({ seed: 44, firstPlayer: 0 })),
+            },
+            "Human first",
+          ),
+          React.createElement(
+            "button",
+            {
+              onClick: () => setMatch(createGame({ seed: 44, firstPlayer: 1 })),
+            },
+            "Bot first",
+          ),
+          React.createElement(
+            "button",
+            {
+              onClick: () => setMatch(createGame({ seed: 81, firstPlayer: 1 })),
+            },
+            "New bot match",
+          ),
+          React.createElement(
+            "button",
+            { onClick: () => setEnabled((value) => !value) },
+            "Toggle pause",
+          ),
+          React.createElement(
+            "button",
+            { onClick: () => setMatch(null) },
+            "Lobby",
+          ),
+          React.createElement(
+            "button",
+            {
+              disabled: !bot.result,
+              onClick: () => setMatch(applyAction(match, bot.result.action)),
+            },
+            "Apply decision",
+          ),
+          React.createElement(
+            "output",
+            {
+              "data-result": bot.result?.decision.optionId ?? "",
+              "data-error": bot.error,
+            },
+            bot.result?.trace.reason ?? "Waiting",
+          ),
+        );
+      }
+      createRoot(document.getElementById("root")).render(
+        React.createElement(Fixture),
+      );
+    </script>
+  </body>
+</html>

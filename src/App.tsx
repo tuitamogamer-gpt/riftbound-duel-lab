@@ -8,6 +8,8 @@ import {
   useMemo,
   useRef,
   useState,
+  lazy,
+  Suspense,
 } from "react";
 import {
   ArrowLeft,
@@ -22,6 +24,7 @@ import {
   RotateCcw,
   Search,
   Shield,
+  Save,
   Swords,
   Trophy,
   Volume2,
@@ -31,7 +34,13 @@ import {
 } from "lucide-react";
 import { catalog, findCard, domainColors } from "./catalog";
 import type { CatalogCard } from "./catalog";
-import { parseSession, SAVE_KEY } from "./persistence";
+import type { SavedSession } from "./persistence";
+import { readStoredSession } from "./session-storage";
+import { useSessionStorage } from "./hooks/useSessionStorage";
+import { SessionManager, SessionStatus } from "./components/SessionManager";
+import { OfflineTools } from "./components/OfflineTools";
+import { PaymentPicker } from "./components/PaymentPicker";
+import { shouldOfferPayment } from "./game/payment-presentation";
 import { cardArtUrl } from "./data/art";
 import { catalogMeta } from "./data/cards";
 import { type StarterDeck } from "./data/decks";
@@ -96,14 +105,55 @@ import {
 } from "./components/StepFlow";
 import type { Review } from "./components/StepFlow";
 import { scripts } from "./game/scripts";
-import type { GameAction, GameState, LocationId, Unit } from "./game/types";
+import type {
+  GameAction,
+  GameOptions,
+  GameState,
+  LocationId,
+  Unit,
+} from "./game/types";
+import {
+  createSeries,
+  loadMatchSeries,
+  saveMatchSeries,
+  clearMatchSeries,
+  recordSeriesGame,
+  seriesMatchesGame,
+  seriesGameOptions,
+  type MatchSeries,
+} from "./game/match-series";
 import "./interaction.css";
 import { BOT_AUDIT_KEY, createReplay, type BotReplay } from "./game/ai/replay";
+import { recoverStoredAudit } from "./game/ai/audit-storage";
 import type { BotTrace } from "./game/ai/planner";
 import { useBotDecision } from "./hooks/useBotDecision";
-import { publicExplanation } from "./game/ai/planner";
 import { DIFFICULTIES, type Difficulty } from "./game/ai/config";
-import { publicDecisionPresentation } from "./game/ai/presentation";
+import {
+  publicDecisionPresentation,
+  publicExplanation,
+} from "./game/ai/presentation";
+import "./roadmap.css";
+const DeckBuilder = lazy(() =>
+  import("./components/DeckBuilder").then((module) => ({
+    default: module.DeckBuilder,
+  })),
+);
+const TrainingLab = lazy(() =>
+  import("./components/TrainingLab").then((module) => ({
+    default: module.TrainingLab,
+  })),
+);
+const SeriesPanel = lazy(() =>
+  import("./components/SeriesPanel").then((module) => ({
+    default: module.SeriesPanel,
+  })),
+);
+const MatchHistory = lazy(() =>
+  import("./components/MatchHistory").then((module) => ({
+    default: module.MatchHistory,
+  })),
+);
+const OnlineDuel = lazy(() => import("./components/OnlineDuel"));
 
 const BoardInteraction = createContext<{
   game: GameState | null;
@@ -112,13 +162,6 @@ const BoardInteraction = createContext<{
   choose: (id: string) => void;
 }>({ game: null, legal: [], actions: [], choose: () => {} });
 
-const freshRead = () => {
-  try {
-    return parseSession(localStorage.getItem(SAVE_KEY));
-  } catch {
-    return { match: null, review: null };
-  }
-};
 const supported = (c: CatalogCard) =>
   Boolean(scripts[c.id]) || c.type === "Rune";
 const catalogSets = [
@@ -157,11 +200,55 @@ export default function App() {
   const compactTable = useCompactTable();
   const [handExpanded, setHandExpanded] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [screen, setScreen] = useState<"lobby" | "game" | "library">("lobby");
+  const [sessionManagerOpen, setSessionManagerOpen] = useState(false);
+  const [paymentAction, setPaymentAction] = useState<GameAction | null>(null);
+  const [manualPayment, setManualPayment] = useState(() => {
+    try {
+      return localStorage.getItem("riftbound-payment-mode") === "manual";
+    } catch {
+      return false;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "riftbound-payment-mode",
+        manualPayment ? "manual" : "auto",
+      );
+    } catch {
+      /* Preference can remain in memory. */
+    }
+  }, [manualPayment]);
+  const [screen, setScreen] = useState<
+    | "lobby"
+    | "game"
+    | "library"
+    | "builder"
+    | "training"
+    | "history"
+    | "online"
+    | "series"
+  >(() =>
+    typeof window !== "undefined" && window.location.hash.startsWith("#duel=")
+      ? "online"
+      : "lobby",
+  );
+  useEffect(() => {
+    const openInvite = () => {
+      if (window.location.hash.startsWith("#duel=")) setScreen("online");
+    };
+    window.addEventListener("hashchange", openInvite);
+    return () => window.removeEventListener("hashchange", openInvite);
+  }, []);
+  const [builderDeck, setBuilderDeck] = useState<StarterDeck | undefined>();
+  const [series, setSeries] = useState(loadMatchSeries);
+  const [seriesSaveError, setSeriesSaveError] = useState(false);
+  const [matchFormat, setMatchFormat] = useState<"single" | "bo3">("single");
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
     setHandExpanded(false);
     setMobileMenuOpen(false);
+    setPaymentAction(null);
   }, [screen]);
   useEffect(() => {
     if (!compactTable) {
@@ -169,28 +256,29 @@ export default function App() {
       setMobileMenuOpen(false);
     }
   }, [compactTable]);
-  const [saved] = useState(freshRead);
+  const [stored] = useState(readStoredSession);
+  const saved = stored.session;
   const [match, setGame] = useState<GameState | null>(saved.match);
   const [review, setReview] = useState<Review | null>(saved.review);
   const audit = useRef<BotReplay | null>(null);
+  const archiveAttempt = useRef("");
+  const [historySaveError, setHistorySaveError] = useState(false);
   const pendingBotTrace = useRef<BotTrace | undefined>(undefined);
   useEffect(() => {
     try {
-      const stored = JSON.parse(
-        localStorage.getItem(BOT_AUDIT_KEY) ?? "null",
-      ) as BotReplay | null;
-      if (
-        stored &&
-        saved.match &&
-        stored.initial.seed === saved.match.seed &&
-        stored.finalRevision === saved.match.revision
-      )
-        audit.current = stored;
+      audit.current = recoverStoredAudit(
+        localStorage.getItem(BOT_AUDIT_KEY),
+        saved.match,
+      );
     } catch {
       /* Old or incomplete telemetry does not affect the game. */
     }
   }, [saved]);
   const [paused, setPaused] = useState(saved.paused ?? false);
+  const saveController = useSessionStorage(
+    { match, review, paused },
+    { initialRead: stored },
+  );
   const [playbackSpeed, setPlaybackSpeed] = useState(() => readPlaybackSpeed());
   useEffect(() => {
     try {
@@ -209,6 +297,13 @@ export default function App() {
     return () => document.removeEventListener("visibilitychange", update);
   }, []);
   const game = review?.frames[review.index]?.state || match;
+  useEffect(() => {
+    if (!match || review || match.winner === null) return;
+    setSeries((current) => (current ? recordSeriesGame(current, match) : null));
+  }, [match, review]);
+  useEffect(() => {
+    if (series) setSeriesSaveError(!saveMatchSeries(series));
+  }, [series]);
   const [mobileZone, setMobileZone] = useMobileBoardZone(game, review);
   const status = game
     ? matchStatus(game, { paused, reviewing: !!review })
@@ -254,6 +349,36 @@ export default function App() {
     loadImportedDecks(),
   );
   const allDecks = useMemo(() => [...decks, ...importedDecks], [importedDecks]);
+  useEffect(() => {
+    if (
+      !match ||
+      review ||
+      match.winner === null ||
+      !audit.current ||
+      audit.current.finalRevision !== match.revision
+    )
+      return;
+    const key = `${match.seed}:${match.revision}`;
+    if (archiveAttempt.current === key) return;
+    archiveAttempt.current = key;
+    const replay = structuredClone(audit.current);
+    void import("./game/match-history")
+      .then(({ writeCompletedMatch }) => {
+        const names =
+          series && seriesMatchesGame(series, match)
+            ? series.decks
+            : match.players.map((player) =>
+                allDecks.find((deck) => deck.id === player.deckId),
+              );
+        const result = writeCompletedMatch(replay, {
+          final: match,
+          playerDeckName: names[0]?.name,
+          opponentDeckName: names[1]?.name,
+        });
+        setHistorySaveError(!result.saved);
+      })
+      .catch(() => setHistorySaveError(true));
+  }, [match, review, allDecks, series]);
   const [deckGroup, setDeckGroup] = useState("Precon");
   const [importOpen, setImportOpen] = useState(false);
   const [deckDetails, setDeckDetails] = useState<StarterDeck | null>(null);
@@ -289,6 +414,9 @@ export default function App() {
   const [difficulty, setDifficulty] = useState<Difficulty>(
     saved.match?.botSettings?.difficulty ?? "normal",
   );
+  const [firstPlayerChoice, setFirstPlayerChoice] = useState<
+    "random" | "you" | "bot"
+  >("random");
   const [botReason, setBotReason] = useState("");
   const [confirmNew, setConfirmNew] = useState(false);
   const legal = useMemo(
@@ -296,29 +424,39 @@ export default function App() {
     [match, review, paused],
   );
   useEffect(() => {
-    if (match)
+    if (match && audit.current)
       try {
-        localStorage.setItem(
-          SAVE_KEY,
-          JSON.stringify({ match, review, paused }),
-        );
-        if (audit.current)
-          localStorage.setItem(BOT_AUDIT_KEY, JSON.stringify(audit.current));
-      } catch {}
+        localStorage.setItem(BOT_AUDIT_KEY, JSON.stringify(audit.current));
+      } catch {
+        /* Diagnostic storage cannot prevent the primary duel save. */
+      }
   }, [match, review, paused]);
   const doAction = useCallback(
     (action: GameAction) => {
       if (!match || review) return;
+      if (
+        manualPayment &&
+        !action.paymentRuneOrder &&
+        shouldOfferPayment(match, action)
+      ) {
+        setPaymentAction(action);
+        return;
+      }
       try {
         const result = applyActionStepped(match, action);
-        audit.current ??= createReplay(match);
-        audit.current.decisions.push({
-          action: structuredClone(action),
-          ...(pendingBotTrace.current
-            ? { trace: pendingBotTrace.current }
-            : {}),
-        });
-        audit.current.finalRevision = result.state.revision ?? 0;
+        try {
+          audit.current ??= createReplay(match);
+          audit.current.decisions.push({
+            action: structuredClone(action),
+            ...(pendingBotTrace.current
+              ? { trace: pendingBotTrace.current }
+              : {}),
+          });
+          audit.current.finalRevision = result.state.revision ?? 0;
+        } catch {
+          audit.current = null;
+          // A resolved engine action still commits when optional diagnostics fail.
+        }
         pendingBotTrace.current = undefined;
         setTarget(null);
         setMulligan([]);
@@ -348,7 +486,7 @@ export default function App() {
         setPaused(true);
       }
     },
-    [match, review, muted],
+    [match, review, muted, manualPayment],
   );
 
   const botEnabled =
@@ -363,6 +501,8 @@ export default function App() {
     !pileView &&
     !handExpanded &&
     !mobileMenuOpen &&
+    !sessionManagerOpen &&
+    !paymentAction &&
     !confirmNew &&
     !logOpen;
   const bot = useBotDecision(match, botEnabled);
@@ -387,6 +527,8 @@ export default function App() {
       pileView ||
       handExpanded ||
       mobileMenuOpen ||
+      sessionManagerOpen ||
+      paymentAction ||
       confirmNew ||
       logOpen
     )
@@ -430,6 +572,8 @@ export default function App() {
     pileView,
     handExpanded,
     mobileMenuOpen,
+    sessionManagerOpen,
+    paymentAction,
     confirmNew,
     logOpen,
     difficulty,
@@ -524,7 +668,8 @@ export default function App() {
   const importDeck = (deck: StarterDeck) => {
     const next = [...importedDecks.filter((d) => d.id !== deck.id), deck];
     try {
-      saveImportedDecks(next);
+      if (!saveImportedDecks(next))
+        throw new Error("Deck storage failed. Export a copy and try again.");
       setImportedDecks(next);
       setPlayerDeck(deck.id);
       setDeckGroup("Moji");
@@ -543,37 +688,107 @@ export default function App() {
     link.click();
     URL.revokeObjectURL(url);
   };
+  const saveBuiltDeck = (deck: StarterDeck, previousId?: string) => {
+    const next = [
+      ...importedDecks.filter(
+        (item) => item.id !== deck.id && item.id !== previousId,
+      ),
+      deck,
+    ];
+    if (!saveImportedDecks(next)) {
+      setError("Deck storage failed. Export a copy and try again.");
+      return false;
+    }
+    setImportedDecks(next);
+    setPlayerDeck(deck.id);
+    if (previousId === botDeck) setBotDeck(deck.id);
+    setDeckGroup("Moji");
+    setScreen("lobby");
+    return true;
+  };
+  const deleteBuiltDeck = (id: string) => {
+    const next = importedDecks.filter((deck) => deck.id !== id);
+    if (!saveImportedDecks(next)) return false;
+    setImportedDecks(next);
+    if (playerDeck === id) setPlayerDeck(decks[0].id);
+    if (botDeck === id) setBotDeck(decks[1].id);
+    setBuilderDeck(undefined);
+    setScreen("lobby");
+    return true;
+  };
+  const launchGame = (options: GameOptions, nextSeries: MatchSeries | null) => {
+    const nextGame = createGame(options);
+    setGame(nextGame);
+    setSeries(nextSeries);
+    if (!nextSeries) {
+      clearMatchSeries();
+      setSeriesSaveError(false);
+    }
+    audit.current = createReplay(nextGame);
+    archiveAttempt.current = "";
+    setHistorySaveError(false);
+    pendingBotTrace.current = undefined;
+    setReview(null);
+    setBotReason("");
+    setPaused(false);
+    setMulligan([]);
+    setPaymentAction(null);
+    setTarget(null);
+    setSelected(null);
+    setError("");
+    setScreen("game");
+    setConfirmNew(false);
+  };
+  const startSeriesGame = (next: MatchSeries) => {
+    try {
+      launchGame(seriesGameOptions(next), next);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    }
+  };
+  const resumeSeries = () => {
+    if (!series) return;
+    if (series.phase !== "playing") setScreen("series");
+    else if (match && seriesMatchesGame(series, match)) setScreen("game");
+    else startSeriesGame(series);
+  };
   const start = () => {
     try {
       if (!matchReady)
         throw new Error(
           "Nisu sve karte izabranog špila podržane za igranje. Pogledaj sastav špila.",
         );
-      setGame(
-        createGame({
-          playerDeckId: playerDeck,
-          playerDeck: selectedPlayerDeck,
-          botDeck: selectedBotDeck,
-          botDeckId: botDeck,
-          playerBattlefieldId: playerBattlefield,
-          botBattlefieldId: botBattlefield,
-          seed: Math.floor(Math.random() * 2147483646) + 1,
-          botDifficulty: difficulty,
-          botSeed: Math.floor(Math.random() * 2147483646) + 1,
-        }),
+      const options: GameOptions = {
+        firstPlayer:
+          firstPlayerChoice === "you"
+            ? 0
+            : firstPlayerChoice === "bot"
+              ? 1
+              : Math.random() < 0.5
+                ? 0
+                : 1,
+        playerDeckId: playerDeck,
+        playerDeck: selectedPlayerDeck,
+        botDeck: selectedBotDeck,
+        botDeckId: botDeck,
+        playerBattlefieldId: playerBattlefield,
+        botBattlefieldId: botBattlefield,
+        seed: Math.floor(Math.random() * 2147483646) + 1,
+        botDifficulty: difficulty,
+        botSeed: Math.floor(Math.random() * 2147483646) + 1,
+      };
+      const nextSeries =
+        matchFormat === "bo3"
+          ? createSeries({
+              ...options,
+              playerDeck: selectedPlayerDeck!,
+              botDeck: selectedBotDeck!,
+            })
+          : null;
+      launchGame(
+        nextSeries ? seriesGameOptions(nextSeries) : options,
+        nextSeries,
       );
-      audit.current = null;
-      pendingBotTrace.current = undefined;
-      localStorage.removeItem(BOT_AUDIT_KEY);
-      setReview(null);
-      setBotReason("");
-      setPaused(false);
-      setMulligan([]);
-      setTarget(null);
-      setSelected(null);
-      setError("");
-      setScreen("game");
-      setConfirmNew(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
@@ -590,6 +805,25 @@ export default function App() {
             : "Trening",
       );
     }
+  };
+  const restoreSession = (session: SavedSession) => {
+    if (!session.match) return;
+    setGame(session.match);
+    setReview(session.review);
+    setPaused(true);
+    setSelected(null);
+    setTarget(null);
+    setMulligan([]);
+    setInspected(null);
+    setPileView(null);
+    setHandExpanded(false);
+    setMobileMenuOpen(false);
+    setSessionManagerOpen(false);
+    setPaymentAction(null);
+    pendingBotTrace.current = undefined;
+    audit.current = null;
+    setError("");
+    setScreen("game");
   };
   const header = (
     <header className="topbar">
@@ -651,50 +885,188 @@ export default function App() {
         </a>
         {screen !== "game" && header}
         {screen === "lobby" && (
-          <Lobby
-            allDecks={allDecks}
-            visibleDecks={visibleDecks}
-            playerDeck={selectedPlayerDeck}
-            botDeck={selectedBotDeck}
-            deckGroup={deckGroup}
-            difficulty={difficulty}
-            importedCount={importedDecks.length}
-            ready={matchReady}
-            hasMatch={Boolean(match)}
-            matchEnded={Boolean(match && match.winner !== null && !review)}
-            onGroup={setDeckGroup}
-            onPlayer={chooseDeck}
-            onBot={setBotDeck}
-            onDifficulty={(value) => setDifficulty(value as Difficulty)}
-            onStart={() =>
-              match && (review || match.winner === null)
-                ? setConfirmNew(true)
-                : start()
-            }
-            onResume={() => setScreen("game")}
-            onImport={() => setImportOpen(true)}
-            onDetails={setDeckDetails}
-            onExport={exportDeck}
-            onHelp={() => setHelp(true)}
-            onLibrary={() => setScreen("library")}
-            playerBattlefield={playerBattlefield}
-            botBattlefield={botBattlefield}
-            onPlayerBattlefield={(id) =>
-              setFieldChoices((current) => ({
-                ...current,
-                [`player:${playerDeck}`]: id,
-              }))
-            }
-            onBotBattlefield={(id) =>
-              setFieldChoices((current) => ({
-                ...current,
-                [`bot:${botDeck}`]: id,
-              }))
-            }
-            onInspect={setInspected}
-          />
+          <>
+            <Lobby
+              allDecks={allDecks}
+              visibleDecks={visibleDecks}
+              playerDeck={selectedPlayerDeck}
+              botDeck={selectedBotDeck}
+              deckGroup={deckGroup}
+              difficulty={difficulty}
+              firstPlayerChoice={firstPlayerChoice}
+              onFirstPlayerChoice={setFirstPlayerChoice}
+              matchFormat={matchFormat}
+              onMatchFormat={setMatchFormat}
+              importedCount={importedDecks.length}
+              ready={matchReady}
+              hasMatch={Boolean(match)}
+              matchEnded={Boolean(match && match.winner !== null && !review)}
+              onGroup={setDeckGroup}
+              onPlayer={chooseDeck}
+              onBot={setBotDeck}
+              onDifficulty={(value) => setDifficulty(value as Difficulty)}
+              onStart={() =>
+                match && (review || match.winner === null)
+                  ? setConfirmNew(true)
+                  : start()
+              }
+              onResume={() => setScreen("game")}
+              onImport={() => setImportOpen(true)}
+              onDetails={setDeckDetails}
+              onExport={exportDeck}
+              onHelp={() => setHelp(true)}
+              onLibrary={() => setScreen("library")}
+              onBuildDeck={() => {
+                setBuilderDeck(selectedPlayerDeck);
+                setScreen("builder");
+              }}
+              onTraining={() => setScreen("training")}
+              playerBattlefield={playerBattlefield}
+              botBattlefield={botBattlefield}
+              onPlayerBattlefield={(id) =>
+                setFieldChoices((current) => ({
+                  ...current,
+                  [`player:${playerDeck}`]: id,
+                }))
+              }
+              onBotBattlefield={(id) =>
+                setFieldChoices((current) => ({
+                  ...current,
+                  [`bot:${botDeck}`]: id,
+                }))
+              }
+              onInspect={setInspected}
+            />
+            <div className="product-tools">
+              <button
+                className="outline-button"
+                onClick={() => setScreen("online")}
+              >
+                <Swords size={16} />
+                {t("Private duel")}
+              </button>
+              <button
+                className="outline-button"
+                onClick={() => setScreen("history")}
+              >
+                <History size={16} />
+                {t("Match history")}
+              </button>
+              {series && (
+                <button className="outline-button" onClick={resumeSeries}>
+                  <Trophy size={16} />
+                  {t(
+                    series.phase === "complete"
+                      ? "Series results"
+                      : series.phase === "playing" &&
+                          (!match || !seriesMatchesGame(series, match))
+                        ? "Restart series game"
+                        : "Resume series",
+                  )}{" "}
+                  · {series.scores[0]}–{series.scores[1]}
+                </button>
+              )}
+              <SessionManager
+                controller={saveController}
+                session={{ match, review, paused }}
+                open={sessionManagerOpen}
+                onOpenChange={setSessionManagerOpen}
+                onRestore={restoreSession}
+              />
+            </div>
+            {seriesSaveError && (
+              <p className="series-save-warning" role="alert">
+                {t(
+                  "Series progress could not be saved. Export your duel before closing this page.",
+                )}
+              </p>
+            )}
+            <OfflineTools decks={[selectedPlayerDeck, selectedBotDeck]} />
+          </>
         )}
         {screen === "library" && <Library inspect={setInspected} />}
+        {screen === "builder" && (
+          <Suspense
+            fallback={
+              <p className="route-loading" role="status">
+                {t("Loading…")}
+              </p>
+            }
+          >
+            <DeckBuilder
+              initialDeck={builderDeck}
+              availableDecks={allDecks}
+              onSave={saveBuiltDeck}
+              onDelete={deleteBuiltDeck}
+              onClose={() => setScreen("lobby")}
+            />
+          </Suspense>
+        )}
+        {screen === "training" && (
+          <Suspense
+            fallback={
+              <p className="route-loading" role="status">
+                {t("Loading…")}
+              </p>
+            }
+          >
+            <TrainingLab onBack={() => setScreen("lobby")} />
+          </Suspense>
+        )}
+        {screen === "online" && (
+          <Suspense
+            fallback={
+              <p className="route-loading" role="status">
+                {t("Loading…")}
+              </p>
+            }
+          >
+            <OnlineDuel
+              availableDecks={allDecks}
+              onBack={() => {
+                if (window.location.hash.startsWith("#duel="))
+                  window.history.replaceState(
+                    null,
+                    "",
+                    window.location.pathname + window.location.search,
+                  );
+                setScreen("lobby");
+              }}
+            />
+          </Suspense>
+        )}
+        {screen === "history" && (
+          <Suspense
+            fallback={
+              <p className="route-loading" role="status">
+                {t("Loading…")}
+              </p>
+            }
+          >
+            <MatchHistory onBack={() => setScreen("lobby")} />
+          </Suspense>
+        )}
+        {screen === "series" && series && (
+          <Suspense
+            fallback={
+              <p className="route-loading" role="status">
+                {t("Loading…")}
+              </p>
+            }
+          >
+            <SeriesPanel
+              series={series}
+              onClose={() => setScreen("lobby")}
+              onStartGame={startSeriesGame}
+              onChange={(next) => {
+                setSeries(next);
+                const saved = saveMatchSeries(next);
+                setSeriesSaveError(!saved);
+                return saved;
+              }}
+            />
+          </Suspense>
+        )}
         {screen === "game" && game && (
           <main
             className="game-layout"
@@ -709,6 +1081,8 @@ export default function App() {
               !!pileView ||
               handExpanded ||
               mobileMenuOpen ||
+              sessionManagerOpen ||
+              !!paymentAction ||
               help ||
               logOpen ||
               confirmNew
@@ -809,6 +1183,24 @@ export default function App() {
               >
                 <CircleHelp size={18} />
               </button>
+              <button
+                className="icon-button"
+                data-mobile-secondary
+                aria-label={t("Saved duels")}
+                onClick={() => setSessionManagerOpen(true)}
+              >
+                <Save size={18} />
+              </button>
+              <button
+                className="icon-button"
+                data-mobile-secondary
+                aria-label={t("Rune payment mode")}
+                title={t(manualPayment ? "Choose runes" : "Automatic payment")}
+                onClick={() => setManualPayment((value) => !value)}
+                aria-pressed={manualPayment}
+              >
+                <Zap size={18} />
+              </button>
               {compactTable && (
                 <button
                   className="icon-button mobile-menu-button"
@@ -817,6 +1209,13 @@ export default function App() {
                   aria-haspopup="dialog"
                 >
                   <Menu size={20} />
+                  {(saveController.status === "failed" ||
+                    saveController.status === "unavailable") && (
+                    <i
+                      className="save-warning-dot"
+                      aria-label={t("Save failed")}
+                    />
+                  )}
                 </button>
               )}
             </div>
@@ -1103,6 +1502,10 @@ export default function App() {
                 showHelp={() => setHelp(true)}
                 leave={() => setScreen("lobby")}
                 botReason={thinking && !review ? "Bot is thinking…" : botReason}
+                showSaved={() => setSessionManagerOpen(true)}
+                saveStatus={<SessionStatus controller={saveController} />}
+                manualPayment={manualPayment}
+                onManualPaymentChange={setManualPayment}
               />
             )}
             {pileView && (
@@ -1161,9 +1564,46 @@ export default function App() {
                   {game.players[0].points} : {game.players[1].points} ·{" "}
                   {game.turn} {t("poteza")}{" "}
                 </p>
+                {series &&
+                  seriesMatchesGame(series, game) &&
+                  series.phase !== "playing" && (
+                    <button
+                      className="gold-button"
+                      onClick={() => setScreen("series")}
+                    >
+                      <Trophy size={17} />
+                      {t(
+                        series.phase === "complete"
+                          ? "Series results"
+                          : "Next game · sideboard",
+                      )}{" "}
+                      · {series.scores[0]}–{series.scores[1]}
+                    </button>
+                  )}
+                {seriesSaveError && series && (
+                  <p role="alert">
+                    {t(
+                      "Series progress could not be saved. Export your duel before closing this page.",
+                    )}
+                  </p>
+                )}
                 <button className="gold-button" onClick={start}>
                   {t("Novi duel")} <RotateCcw size={17} />
                 </button>
+                <button
+                  className="outline-button"
+                  onClick={() => setScreen("history")}
+                >
+                  <History size={16} />
+                  {t("Match history")}
+                </button>
+                {historySaveError && (
+                  <p role="alert">
+                    {t(
+                      "Match history could not be saved. Export the replay from the AI menu.",
+                    )}
+                  </p>
+                )}
                 <button
                   className="text-button"
                   onClick={() => setScreen("lobby")}
@@ -1213,7 +1653,11 @@ export default function App() {
                 </div>
               </div>
               <p>
-                {t("40 karata · 12 runa ·")}{" "}
+                {t("{count} cards · 12 runes ·", {
+                  count:
+                    1 +
+                    deckDetails.main.reduce((n, entry) => n + entry.count, 0),
+                })}{" "}
                 {
                   (deckDetails.battlefieldIds ?? [deckDetails.battlefieldId])
                     .length
@@ -1349,6 +1793,33 @@ export default function App() {
                   : undefined
             }
             onClose={() => setInspected(null)}
+          />
+        )}
+        {screen !== "lobby" && (
+          <SessionManager
+            controller={saveController}
+            session={{ match, review, paused }}
+            open={sessionManagerOpen}
+            onOpenChange={setSessionManagerOpen}
+            onRestore={restoreSession}
+            hideTrigger
+          />
+        )}
+        {paymentAction && match && screen === "game" && (
+          <PaymentPicker
+            key={`${match.revision}:${paymentAction.id}`}
+            game={match}
+            action={paymentAction}
+            onClose={() => setPaymentAction(null)}
+            onConfirm={(action) => {
+              setPaymentAction(null);
+              doAction({
+                ...action,
+                paymentRuneOrder:
+                  action.paymentRuneOrder ??
+                  match.players[action.player].runes.map((rune) => rune.id),
+              });
+            }}
           />
         )}
         {help && <Help close={() => setHelp(false)} />}

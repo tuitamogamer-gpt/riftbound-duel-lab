@@ -170,6 +170,56 @@ export interface CombatStep {
   // Unset while death triggers still have to resolve before control is settled.
   controller?: PlayerId | null;
 }
+/** The payment inspector exposes pools only, never a projected board or private cards. */
+export interface PaymentResources {
+  runes: GameState["players"][number]["runes"];
+  energy: number;
+  power: number;
+  typedPower: Record<string, number>;
+  showdownEnergy: number;
+  unitEnergy: number;
+  spellEnergy: number;
+  spellPower: number;
+  gearPower: number;
+}
+export interface PaymentReceipt {
+  player: PlayerId;
+  energy: number;
+  power: number;
+  before: PaymentResources;
+  after: PaymentResources;
+}
+let paymentReceipts: PaymentReceipt[] | null = null;
+// Only committed action clones belong to an inspection. Legal-action probes
+// also call pay() on projected clones and must never appear in its receipts.
+let paymentReceiptStates: WeakSet<GameState> | null = null;
+function paymentResources(s: GameState, p: PlayerId): PaymentResources {
+  const player = s.players[p];
+  return {
+    runes: structuredClone(player.runes),
+    energy: player.energy,
+    power: player.power ?? 0,
+    typedPower: { ...player.typedPower },
+    showdownEnergy: player.showdownEnergy ?? 0,
+    unitEnergy: player.unitEnergy ?? 0,
+    spellEnergy: player.spellEnergy ?? 0,
+    spellPower: player.spellPower ?? 0,
+    gearPower: player.gearPower ?? 0,
+  };
+}
+function recordRestrictedPayment(
+  s: GameState,
+  p: PlayerId,
+  energy: number,
+  power: number,
+) {
+  if (!paymentReceiptStates?.has(s)) return;
+  const receipt = paymentReceipts?.at(-1);
+  if (!receipt || receipt.player !== p) return;
+  receipt.energy += energy;
+  receipt.power += power;
+  receipt.after = paymentResources(s, p);
+}
 let stepFrames: StepFrame[] | null = null;
 const executingEffects = new WeakSet<GameState>();
 // Costs can cause triggers, but their choices wait until the play is finalized.
@@ -965,6 +1015,7 @@ function payAbility(
   s.players[p].gearPower = (s.players[p].gearPower ?? 0) - cost.gearPower;
   s.players[p].powerSpentThisTurn =
     (s.players[p].powerSpentThisTurn ?? 0) + cost.gearPower;
+  recordRestrictedPayment(s, p, cost.unitEnergy, cost.gearPower);
   return cost.actualEnergy;
 }
 /** Matching keeps universal Power available for costs whose domains have no rune. */
@@ -1047,6 +1098,18 @@ function pay(
   anyPower = 0,
   additionalPower: PowerGroup[] = [],
 ) {
+  const receipt =
+    paymentReceipts && paymentReceiptStates?.has(s)
+      ? {
+          player: p,
+          energy,
+          power:
+            power +
+            anyPower +
+            additionalPower.reduce((sum, group) => sum + group.power, 0),
+          before: paymentResources(s, p),
+        }
+      : null;
   const x = s.players[p];
   const restricted = s.combat ? Math.min(energy, x.showdownEnergy ?? 0) : 0;
   if (restricted) x.showdownEnergy = (x.showdownEnergy ?? 0) - restricted;
@@ -1082,6 +1145,8 @@ function pay(
     if (resource.domain) x.typedPower![resource.domain]--;
     else x.power = (x.power ?? 0) - 1;
   }
+  if (receipt)
+    paymentReceipts!.push({ ...receipt, after: paymentResources(s, p) });
 }
 function channel(s: GameState, p: PlayerId, n: number, ready = true) {
   const x = s.players[p];
@@ -1260,6 +1325,9 @@ function createPlayer(
 }
 export function createGame(options: GameOptions = {}): GameState {
   const seed = (options.seed ?? Date.now()) >>> 0 || 1;
+  // Setup and the mulligan proceed in the selected turn order (Core 110–118).
+  // Keep the programmatic default stable; the lobby resolves its random option.
+  const firstPlayer = options.firstPlayer ?? 0;
   const s: GameState = {
     version: 1,
     revision: 0,
@@ -1280,9 +1348,9 @@ export function createGame(options: GameOptions = {}): GameState {
     seed,
     rng: seed,
     turn: 0,
-    currentPlayer: options.firstPlayer ?? 0,
-    priorityPlayer: 0,
-    focusPlayer: 0,
+    currentPlayer: firstPlayer,
+    priorityPlayer: firstPlayer,
+    focusPlayer: firstPlayer,
     chainStarter: null,
     phase: "mulligan",
     players: [
@@ -7294,6 +7362,7 @@ function applyActionInternal(
   if (!legal) throw new Error(`Illegal action: ${id}`);
   const s: GameState = structuredClone(state);
   syncHybridObjects(s);
+  paymentReceiptStates?.add(s);
   const p = legal.player,
     x = s.players[p];
   if (typeof action !== "string" && action.paymentRuneOrder) {
@@ -7638,7 +7707,10 @@ function applyActionInternal(
     x.mulliganDone = true;
     log(s, `${x.name} replaced ${recycle.length} card(s).`, "info", p);
     if (s.players.every((x) => x.mulliganDone)) beginTurn(s, s.currentPlayer);
-    else s.priorityPlayer = otherPlayer(p);
+    else {
+      s.priorityPlayer = otherPlayer(p);
+      s.focusPlayer = s.priorityPlayer;
+    }
     return s;
   }
   if (s.pendingChoice?.kind === "custom") {
@@ -8074,6 +8146,12 @@ function applyActionInternal(
     x.gearPower = Math.max(0, (x.gearPower ?? 0) - cost.gearPower);
     x.powerSpentThisTurn =
       (x.powerSpentThisTurn ?? 0) + cost.spellPower + cost.gearPower;
+    recordRestrictedPayment(
+      s,
+      p,
+      cost.spellEnergy + cost.unitEnergy,
+      cost.spellPower + cost.gearPower,
+    );
     if (legal.additionalCostPaid && script.additionalCost?.xp)
       event(s, "stateChanged", p, c.id);
     if (c.id === "ogn-208-298" && legal.targetId)
@@ -8602,6 +8680,28 @@ export function deserializeGame(raw: string): GameState {
     throw new Error("Invalid game save");
   syncHybridObjects(state);
   return state;
+}
+
+/** Run the real resolver on its clone and return payment-only receipts.
+ * No resulting state, effect, draw, hidden face or random outcome is exposed.
+ * Restoring the previous recorder also makes nested synchronous inspection safe.
+ */
+export function inspectActionPayment(
+  state: GameState,
+  action: string | GameAction,
+): PaymentReceipt[] {
+  const previous = paymentReceipts;
+  const previousStates = paymentReceiptStates;
+  const collected: PaymentReceipt[] = [];
+  paymentReceipts = collected;
+  paymentReceiptStates = new WeakSet();
+  try {
+    applyAction(state, action);
+    return collected;
+  } finally {
+    paymentReceipts = previous;
+    paymentReceiptStates = previousStates;
+  }
 }
 
 /** Each returned event is inert until the interface advances its Proceed gate. */

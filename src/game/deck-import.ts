@@ -2,6 +2,7 @@ import { isCardType } from "../data/cards";
 import { cards, cardsById, type Card } from "../data/cards";
 import {
   canonicalCardName,
+  MAX_MAIN_DECK_SIZE,
   type DeckEntry,
   type StarterDeck,
 } from "../data/decks";
@@ -30,6 +31,8 @@ export interface DeckImportOptions {
   name?: string;
   championId?: string;
   format?: "standard" | "historical-precon";
+  /** Full site/codec lists include the chosen copy; sectioned app exports do not. */
+  mainIncludesChampion?: boolean;
 }
 export interface DeckImportResult {
   deck: StarterDeck | null;
@@ -257,7 +260,7 @@ export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
     if (
       !Number.isSafeInteger(entry.count) ||
       entry.count <= 0 ||
-      entry.count > 40
+      entry.count > MAX_MAIN_DECK_SIZE
     )
       issues.push(
         issue(
@@ -266,11 +269,18 @@ export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
           { cardId: entry.cardId },
         ),
       );
-  if (sum(deck.main) !== 39)
+  if (sum(deck.main) < 39)
     issues.push(
       issue(
         "main-count",
-        `Glavni špil mora imati 39 karata uz 1 odabranog championa; trenutno ${sum(deck.main)}.`,
+        `Glavni špil mora imati najmanje 39 karata uz 1 odabranog championa; trenutno ${sum(deck.main)}.`,
+      ),
+    );
+  if (sum(deck.main) >= MAX_MAIN_DECK_SIZE)
+    issues.push(
+      issue(
+        "main-size",
+        `Aplikacija podržava najviše ${MAX_MAIN_DECK_SIZE} karata u glavnom špilu, uključujući odabranog championa.`,
       ),
     );
   if (sum(deck.runes) !== 12)
@@ -487,6 +497,7 @@ export function parseDeckText(
     sideboard: [],
   };
   let section: Section | null = null;
+  let hasMainSection = false;
   let name = options.name?.trim() || "";
   let format = options.format ?? "standard";
   if (text.length > MAX_TEXT_LENGTH)
@@ -506,6 +517,7 @@ export function parseDeckText(
     const header = sectionHeader(raw);
     if (header) {
       section = header;
+      if (header === "main") hasMainSection = true;
       continue;
     }
     if (/^(#|\/\/)/.test(raw)) continue;
@@ -543,11 +555,15 @@ export function parseDeckText(
       count = Number(suffix[2]);
       value = suffix[1].trim();
     }
-    if (!Number.isSafeInteger(count) || count < 1 || count > 40) {
+    if (
+      !Number.isSafeInteger(count) ||
+      count < 1 ||
+      count > MAX_MAIN_DECK_SIZE
+    ) {
       issues.push(
         issue(
           "invalid-quantity",
-          "Količina mora biti cijeli broj od 1 do 40.",
+          `Količina mora biti cijeli broj od 1 do ${MAX_MAIN_DECK_SIZE}.`,
           { line: lineNumber },
         ),
       );
@@ -612,8 +628,11 @@ export function parseDeckText(
     champion = cardsById[sections.champion[0]?.cardId];
   if (!legend || !champion || !sections.battlefields.length)
     return { deck: null, issues, coverage: null, playable: false };
-  // Some list exporters include the chosen champion among all 40 main cards.
-  if (sum(sections.main) === 40) {
+  // Sectionless website lists contain the whole deck. Explicit Main/Champion
+  // sections follow our storage contract unless the exporter says otherwise.
+  // Deck size cannot disambiguate this once decks may have more than 40 cards.
+  const includesChampion = options.mainIncludesChampion ?? !hasMainSection;
+  if (includesChampion) {
     const entry =
       sections.main.find((entry) => entry.cardId === champion.id) ??
       sections.main.find(
@@ -627,12 +646,32 @@ export function parseDeckText(
       issues.push(
         issue(
           "champion-separated",
-          "Odabrani champion izdvojen je iz liste od 40 karata; u glavnom špilu ostaje 39.",
+          `Odabrani champion izdvojen je iz pune liste; u glavnom špilu ostaje ${sum(sections.main)} karata.`,
           { severity: "warning" },
         ),
       );
-    }
+    } else
+      issues.push(
+        issue(
+          "champion-missing-from-main",
+          "Puna lista glavnog špila mora sadržati odabranog championa.",
+        ),
+      );
   }
+  // Reject oversized battlefield quantities before expanding pasted entries.
+  if (sum(sections.battlefields) > 3)
+    return {
+      deck: null,
+      issues: [
+        ...issues,
+        issue(
+          "battlefield-count",
+          "Navedi 1 bojište za ovaj Duel ili komplet od 3 različita bojišta.",
+        ),
+      ],
+      coverage: null,
+      playable: false,
+    };
   const battlefields = sections.battlefields.flatMap((entry) =>
     Array<string>(entry.count).fill(entry.cardId),
   );

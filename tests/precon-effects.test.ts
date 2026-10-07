@@ -692,7 +692,7 @@ describe("Precon timing and public rules edge cases", () => {
 
 describe("all published starter precon matchups", () => {
   // Separate cases preserve every ordered pairing and allow the runner to report progress.
-  const pairs = officialPreconDecks.flatMap((a, i) =>
+  const allPairs = officialPreconDecks.flatMap((a, i) =>
     officialPreconDecks.map((b, j) => ({
       a,
       b,
@@ -701,6 +701,27 @@ describe("all published starter precon matchups", () => {
       name: `${a.id} vs ${b.id}`,
     })),
   );
+  const requestedShard = process.env.PRECON_SHARD;
+  let pairs = allPairs;
+  if (requestedShard !== undefined) {
+    const match = /^(\d+)\/(\d+)$/.exec(requestedShard);
+    const index = Number(match?.[1]);
+    const count = Number(match?.[2]);
+    if (
+      !match ||
+      !Number.isSafeInteger(index) ||
+      !Number.isSafeInteger(count) ||
+      count < 1 ||
+      count > allPairs.length ||
+      index < 0 ||
+      index >= count
+    )
+      throw new Error(
+        "PRECON_SHARD must identify a valid zero-based shard, such as 0/3.",
+      );
+    // Original order, pair identities and seeds remain identical to the full matrix.
+    pairs = allPairs.filter((_, ordinal) => ordinal % count === index);
+  }
   it.each(pairs)(
     "completes $name with card/rune conservation and no stuck decisions",
     async ({ a, b, i, j }) => {
@@ -756,7 +777,8 @@ describe("all published starter precon matchups", () => {
         throw new Error(`${a.id} vs ${b.id} turn${s.turn}: ${String(error)}`);
       }
     },
-    60000,
+    // Keep every action and invariant when deterministic planning shares a runner.
+    240000,
   );
 });
 

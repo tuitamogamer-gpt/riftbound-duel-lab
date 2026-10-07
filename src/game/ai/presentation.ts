@@ -1,5 +1,15 @@
 import type { StepFrame } from "../engine";
 import type { GameAction, GameState, PlayerId } from "../types";
+import type { BotResult } from "./planner";
+
+/** The trace projection allowed in an in-progress human interface. */
+export function publicExplanation(result: BotResult) {
+  return {
+    reason: result.trace.reason,
+    difficulty: result.trace.difficulty,
+    thinkingMs: Math.round(result.trace.durationMs),
+  };
+}
 
 /** Redact UI captions and effect metadata, while retaining engine snapshots for rendering. */
 export function publicDecisionPresentation(

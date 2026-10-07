@@ -1,4 +1,4 @@
-/** npx vite-node scripts/bot-benchmark.ts [pairs-per-comparison] [output.json] */
+/** npx vite-node scripts/bot-benchmark.ts [pairs] [output.json] [levels] [catalog] */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { cpus } from "node:os";
@@ -12,9 +12,12 @@ import {
 import {
   BOT_VERSION,
   DIFFICULTIES,
+  inferProfile,
   type Difficulty,
 } from "../src/game/ai/config";
 import type { GameState, PlayerId } from "../src/game/types";
+import { benchmarkDeckPairs, benchmarkList } from "./bot-benchmark-decks";
+const catalog = process.argv[5] === "catalog";
 const pairs = Math.max(1, Number(process.argv[2] ?? 6));
 const output = process.argv[3] ?? "test-results/bot-benchmark.json";
 mkdirSync(dirname(output), { recursive: true });
@@ -24,11 +27,7 @@ const comparisons: [Difficulty, Difficulty | "reference"][] = [
   ["hard", "normal"],
   ["expert", "hard"],
 ];
-const deckPairs = [
-  ["annie", "lux"],
-  ["garen", "master-yi"],
-  ["lux", "garen"],
-];
+const deckPairs = benchmarkDeckPairs(catalog);
 const report: any = {
   configVersion: BOT_VERSION,
   configuration: DIFFICULTIES,
@@ -42,13 +41,31 @@ const report: any = {
   },
   pairsPerComparison: pairs,
   deterministicNodes: true,
+  scope: catalog
+    ? "13 official precons and three legal modified/imported theme lists; equipment and tokens span expansions, XP remains within UNL"
+    : "four curated practice decks",
+  limitations:
+    "Small paired pilot; outcomes do not establish statistical superiority or a general difficulty ordering. Timings include observation, planning, and validation and may reflect shared-runner contention.",
+  deckLists: [
+    ...new Map(deckPairs.flat().map((deck) => [deck.id, deck])).values(),
+  ].map((deck) => ({
+    id: deck.id,
+    name: deck.name,
+    profile: inferProfile(benchmarkList(deck)),
+    format: deck.format ?? "standard",
+    legendId: deck.legendId,
+    championId: deck.championId,
+    main: deck.main,
+    runes: deck.runes,
+    battlefields: deck.battlefieldIds ?? [deck.battlefieldId],
+  })),
   comparisons: [],
 };
 function stateKey(s: GameState) {
   return JSON.stringify({ ...s, log: [], nextId: 0, revision: 0 });
 }
 for (const [strong, weak] of comparisons.filter(
-  ([level]) => !process.argv[4] || process.argv[4] === level,
+  ([level]) => !process.argv[4] || process.argv[4].split(",").includes(level),
 )) {
   const record: any = {
     strong,
@@ -59,6 +76,7 @@ for (const [strong, weak] of comparisons.filter(
     blocked: 0,
     fallbackDecisions: 0,
     decisions: 0,
+    incompleteDecisions: 0,
     timings: [],
     levels: {},
   };
@@ -66,10 +84,11 @@ for (const [strong, weak] of comparisons.filter(
     for (let side = 0; side < 2; side++) {
       const [left, right] = deckPairs[pair % deckPairs.length],
         seed = 1201 + pair * 31;
+      const gameStarted = performance.now();
       const firstPlayer = (pair % 2) as PlayerId;
       let s = createGame({
-        playerDeckId: left,
-        botDeckId: right,
+        playerDeck: left,
+        botDeck: right,
         seed,
         firstPlayer,
       });
@@ -107,6 +126,7 @@ for (const [strong, weak] of comparisons.filter(
               timings: [],
               sampledDecisions: 0,
               maxDepth: 0,
+              incompleteDecisions: 0,
             });
             levelMetrics.decisions++;
             levelMetrics.timings.push(duration);
@@ -117,6 +137,10 @@ for (const [strong, weak] of comparisons.filter(
               result.trace.completedDepth,
             );
             record.decisions++;
+            if (result.trace.incomplete) {
+              record.incompleteDecisions++;
+              levelMetrics.incompleteDecisions++;
+            }
             if (result.trace.usedFallback) record.fallbackDecisions++;
           }
           if (!action) throw new Error("No legal option");
@@ -134,17 +158,35 @@ for (const [strong, weak] of comparisons.filter(
       record.games.push({
         pair,
         side,
-        decks: [left, right],
+        decks: [left.id, right.id],
+        deckProfiles: [
+          inferProfile(benchmarkList(left)),
+          inferProfile(benchmarkList(right)),
+        ],
         seed,
         firstPlayer,
         winner: s.winner === null ? null : labels[s.winner],
         score: s.players.map((p) => p.points),
         turn: s.turn,
         decisions: steps,
+        durationMs: performance.now() - gameStarted,
         ...(error ? { error } : {}),
       });
       console.log(
         `${strong}/${weak} pair ${pair + 1}/${pairs} side ${side}: ${s.winner === null ? error : labels[s.winner]} · ${steps} decisions`,
+      );
+      // Keep a resumable diagnostic report even if a later game is interrupted.
+      writeFileSync(
+        output,
+        JSON.stringify(
+          {
+            ...report,
+            comparisons: [...report.comparisons, record],
+            status: "running",
+          },
+          null,
+          2,
+        ) + "\n",
       );
     }
   function summarize(times: number[]) {
@@ -166,3 +208,6 @@ for (const [strong, weak] of comparisons.filter(
   report.comparisons.push(record);
   writeFileSync(output, JSON.stringify(report, null, 2) + "\n");
 }
+report.status = "completed";
+report.completedAt = new Date().toISOString();
+writeFileSync(output, JSON.stringify(report, null, 2) + "\n");

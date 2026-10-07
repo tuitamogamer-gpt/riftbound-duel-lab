@@ -6,6 +6,14 @@ import { gameMessages } from "./game";
 import { tableMessages } from "./table";
 import { statusMessages } from "./status";
 import { mobileMessages } from "./mobile";
+import { roadmapMessages } from "./roadmap";
+import { recoveryMessages } from "./recovery";
+import { builderMessages } from "./builder";
+import { trainingMessages } from "./training";
+import { decisionMessages } from "./decisions";
+import { seriesMessages } from "./series";
+import { historyMessages } from "./history";
+import { onlineMessages } from "./online";
 
 export const locales = ["en", "sr", "it"] as const;
 export type Locale = (typeof locales)[number];
@@ -20,6 +28,14 @@ export const messages: Record<string, [string, string, string]> = {
   ...tableMessages,
   ...statusMessages,
   ...mobileMessages,
+  ...roadmapMessages,
+  ...recoveryMessages,
+  ...builderMessages,
+  ...trainingMessages,
+  ...decisionMessages,
+  ...seriesMessages,
+  ...historyMessages,
+  ...onlineMessages,
 };
 const localeIndex = { en: 0, sr: 1, it: 2 } as const;
 export const isLocale = (value: unknown): value is Locale =>

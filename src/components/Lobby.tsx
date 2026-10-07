@@ -32,6 +32,8 @@ type Props = {
   botDeck?: StarterDeck;
   deckGroup: string;
   difficulty: string;
+  firstPlayerChoice?: "random" | "you" | "bot";
+  onFirstPlayerChoice?: (choice: "random" | "you" | "bot") => void;
   importedCount: number;
   ready: boolean;
   hasMatch: boolean;
@@ -47,6 +49,10 @@ type Props = {
   onExport: (deck: StarterDeck) => void;
   onHelp: () => void;
   onLibrary: () => void;
+  onBuildDeck?: () => void;
+  onTraining?: () => void;
+  matchFormat?: "single" | "bo3";
+  onMatchFormat?: (format: "single" | "bo3") => void;
   playerBattlefield?: string;
   botBattlefield?: string;
   onPlayerBattlefield?: (id: string) => void;
@@ -369,7 +375,13 @@ export function Lobby(p: Props) {
                     {t("SNAGA")}
                   </span>
                   <span>
-                    <b>40</b>
+                    <b>
+                      {1 +
+                        p.playerDeck.main.reduce(
+                          (n, entry) => n + entry.count,
+                          0,
+                        )}
+                    </b>
                     {t("KARATA")}
                   </span>
                 </div>
@@ -405,7 +417,15 @@ export function Lobby(p: Props) {
               <div className="rift-deck-panel-actions">
                 <div>
                   <span>
-                    <Check size={14} /> {t("40 karata")}
+                    <Check size={14} />{" "}
+                    {t("{count} cards", {
+                      count:
+                        1 +
+                        (p.playerDeck?.main.reduce(
+                          (n, entry) => n + entry.count,
+                          0,
+                        ) ?? 39),
+                    })}
                   </span>
                   <span>
                     <Zap size={14} /> {t("12 runa")}
@@ -425,6 +445,12 @@ export function Lobby(p: Props) {
                 )}
               </div>
               <div className="rift-deck-utilities">
+                {p.onBuildDeck && (
+                  <button onClick={p.onBuildDeck}>
+                    <Layers3 size={15} />
+                    {t("Build a deck")}
+                  </button>
+                )}
                 <button onClick={p.onImport}>
                   <Upload size={15} /> {t("Uvezi špil")}
                 </button>
@@ -490,6 +516,33 @@ export function Lobby(p: Props) {
               onChange={p.onBotBattlefield ?? (() => {})}
               inspect={p.onInspect ?? (() => {})}
             />
+            <label className="rift-first-player">
+              <span>{t("Match format")}</span>
+              <select
+                value={p.matchFormat ?? "single"}
+                onChange={(event) =>
+                  p.onMatchFormat?.(event.target.value as "single" | "bo3")
+                }
+              >
+                <option value="single">{t("Single duel")}</option>
+                <option value="bo3">{t("Best of three")}</option>
+              </select>
+            </label>
+            <label className="rift-first-player">
+              <span>{t("Starting player")}</span>
+              <select
+                value={p.firstPlayerChoice ?? "random"}
+                onChange={(event) =>
+                  p.onFirstPlayerChoice?.(
+                    event.target.value as "random" | "you" | "bot",
+                  )
+                }
+              >
+                <option value="random">{t("Random starting player")}</option>
+                <option value="you">{t("You start")}</option>
+                <option value="bot">{t("Opponent starts")}</option>
+              </select>
+            </label>
             <fieldset className="rift-difficulty">
               <legend>{t("TEMPO TVOG IZAZOVA")}</legend>
               <div>
@@ -519,6 +572,12 @@ export function Lobby(p: Props) {
                 )}
               </p>
             </fieldset>
+            {p.onTraining && (
+              <button className="outline-button" onClick={p.onTraining}>
+                <BookOpen size={16} />
+                {t("Training lab")}
+              </button>
+            )}
             <div className="rift-match-preview">
               <span>{t("TVOJ SLJEDEĆI DUEL")}</span>
               <div>

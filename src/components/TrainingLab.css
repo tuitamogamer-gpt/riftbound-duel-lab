@@ -1,0 +1,400 @@
+.training-lab {
+  color: #172c35;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 32px clamp(16px, 4vw, 48px) 64px;
+}
+.training-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.training-header h1 {
+  margin: 8px 0;
+  font-family: Cinzel, serif;
+  font-size: clamp(26px, 4vw, 42px);
+}
+.training-header .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.training-progress {
+  margin-left: auto;
+  color: #876529;
+}
+.training-intro {
+  color: #5b6b6f;
+  line-height: 1.65;
+  max-width: 800px;
+}
+.training-lessons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 24px 0;
+}
+.training-lessons button {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 62px;
+  padding: 12px;
+  text-align: left;
+  border: 1px solid #30384a;
+  background: #111824;
+  color: #d2d9e6;
+  border-radius: 10px;
+  font: inherit;
+  cursor: pointer;
+}
+.training-lessons button.active {
+  border-color: #d6be82;
+  background: #29251b;
+}
+.training-lessons button > span {
+  display: grid;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  background: #263347;
+  color: #e7d49f;
+}
+.training-exercise {
+  color: #d2d9e6;
+  border: 1px solid #30384a;
+  background: #0d1420;
+  border-radius: 16px;
+  padding: 24px;
+}
+.training-instruction {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.training-instruction h2 {
+  color: #f1e5c9;
+  font-family: Cinzel, serif;
+  margin: 9px 0;
+  font-size: 23px;
+}
+.training-instruction p,
+.training-help p {
+  color: #bec6d5;
+  line-height: 1.6;
+}
+.training-reset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.training-lab .ghost-button,
+.training-lab .gold-button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: normal;
+  padding: 10px 14px;
+  border: 1px solid #526079;
+  border-radius: 6px;
+  color: #d2d9e6;
+  background: #202b3b;
+  cursor: pointer;
+  font: inherit;
+}
+.training-lab .gold-button {
+  color: #17212e;
+  background: #e5c778;
+  border-color: #e5c778;
+}
+.training-lab .gold-button:hover {
+  background: #f0d78f;
+}
+.training-lab .ghost-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.training-header > .ghost-button {
+  color: #172c35;
+  background: #fffaf0;
+  border-color: #172c3540;
+}
+.training-exercise .eyebrow {
+  color: #d6be82;
+}
+.training-lab button:focus-visible,
+.training-lab summary:focus-visible {
+  outline: 3px solid #74c9f6;
+  outline-offset: 3px;
+}
+.training-help {
+  border-bottom: 1px solid #30384a;
+  padding: 12px 0;
+}
+.training-help summary,
+.training-log summary {
+  cursor: pointer;
+  color: #d6be82;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.training-state {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  color: #c6cede;
+  padding: 18px 0;
+}
+.training-play-area {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 300px);
+  gap: 20px;
+  align-items: start;
+}
+.training-board {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  min-width: 0;
+}
+.training-zone,
+.training-hand {
+  background: #151e2d;
+  border: 1px solid #344052;
+  border-radius: 12px;
+  padding: 14px;
+  min-width: 0;
+}
+.training-zone:first-of-type,
+.training-hand {
+  grid-column: 1 / -1;
+}
+.training-zone h3,
+.training-hand h3,
+.training-chain h3 {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: #e0d7bb;
+}
+.training-zone h3 > span {
+  font-size: 11px;
+  color: #b4c2d8;
+  font-weight: 400;
+}
+.training-zone-cards {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.training-unit,
+.training-hand-card {
+  width: 112px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.training-lab .game-card.small {
+  width: 112px;
+  height: 156px;
+  min-height: 156px;
+  transform: none;
+  flex-shrink: 0;
+}
+.training-unit.enemy .game-card {
+  border-color: #c06970;
+}
+.training-unit.own .game-card {
+  border-color: #74a8c9;
+}
+.training-unit-name,
+.training-hand-card > strong {
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.training-unit-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  color: #f0d68d;
+  font-size: 13px;
+}
+.training-unit-stats > span,
+.training-hand-card > span {
+  font-size: 11px;
+  color: #b5c5d9;
+}
+.training-empty {
+  margin: 8px 0;
+  color: #8c9bb1;
+  font-size: 13px;
+}
+.training-chain {
+  grid-column: 1 / -1;
+  border: 1px solid #8f67a3;
+  border-radius: 10px;
+  padding: 14px;
+  background: #241d31;
+}
+.training-chain > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+}
+.training-chain > div > span {
+  color: #baaccf;
+  font-size: 12px;
+}
+.training-hidden,
+.training-private {
+  display: block;
+  margin-top: 12px;
+  min-height: 44px;
+  padding: 10px;
+  font: inherit;
+  font-size: 12px;
+  background: #27213c;
+  border: 1px dashed #a995cf;
+  border-radius: 8px;
+  color: #e2d3fd;
+}
+.training-hidden {
+  cursor: pointer;
+}
+.training-hidden.selected {
+  border-style: solid;
+  border-color: #f2d38a;
+}
+.training-private {
+  color: #a9b0c6;
+  background: #1c2331;
+  border-color: #586579;
+}
+.training-decision {
+  position: sticky;
+  top: 20px;
+  background: #1a2231;
+  border: 1px solid #364257;
+  border-radius: 12px;
+  padding: 18px;
+  min-width: 0;
+}
+.training-decision h3 {
+  color: #f1e5c9;
+  margin-top: 0;
+  font-size: 17px;
+}
+.training-decision p {
+  color: #bdc7d7;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.training-card-text {
+  padding: 14px 0;
+  border-top: 1px solid #344052;
+}
+.training-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.training-actions > button {
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  font-size: 13px;
+}
+.training-success > svg {
+  color: #8fd6ac;
+}
+.training-success h3 {
+  margin: 12px 0;
+  color: #a4e3bf;
+}
+.training-selection {
+  color: #e6cc8a !important;
+}
+.training-error {
+  color: #f0ae98 !important;
+}
+.training-log {
+  margin-top: 18px;
+  border-top: 1px solid #344052;
+}
+.training-log ol {
+  padding-left: 18px;
+  color: #aebbce;
+  font-size: 12px;
+  line-height: 1.6;
+}
+@media (max-width: 800px) {
+  .training-lab {
+    padding-top: 18px;
+  }
+  .training-header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .training-header .ghost-button {
+    flex: 0 0 auto;
+  }
+  .training-header h1 {
+    font-size: 24px;
+  }
+  .training-progress {
+    margin-left: 0;
+    width: 100%;
+    font-size: 13px;
+  }
+  .training-lessons {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding-bottom: 8px;
+  }
+  .training-lessons button {
+    flex: 0 0 210px;
+    scroll-snap-align: start;
+  }
+  .training-exercise {
+    padding: 16px;
+  }
+  .training-instruction {
+    flex-direction: column;
+  }
+  .training-play-area {
+    grid-template-columns: 1fr;
+  }
+  .training-board {
+    grid-template-columns: 1fr;
+  }
+  .training-decision {
+    position: static;
+  }
+  .training-zone-cards {
+    gap: 10px;
+  }
+  .training-zone {
+    padding: 12px;
+  }
+  .training-unit,
+  .training-hand-card {
+    width: 100px;
+  }
+  .training-lab .game-card.small {
+    width: 100px;
+    height: 140px;
+    min-height: 140px;
+  }
+}

@@ -22,6 +22,7 @@ export function DeckImport({
   const [text, setText] = useState(initialText);
   const [fileError, setFileError] = useState("");
   const [historical, setHistorical] = useState(false);
+  const [mainIncludesChampion, setMainIncludesChampion] = useState(false);
   const [name, setName] = useState("");
   const [championId, setChampionId] = useState("");
   const [reading, setReading] = useState(false);
@@ -31,11 +32,12 @@ export function DeckImport({
   const result = useMemo(
     () =>
       importDeckSource(text, {
+        ...(mainIncludesChampion ? { mainIncludesChampion: true } : {}),
         ...(historical ? { format: "historical-precon" as const } : {}),
         ...(name.trim() ? { name } : {}),
         ...(championId ? { championId } : {}),
       }),
-    [text, historical, name, championId],
+    [text, historical, name, championId, mainIncludesChampion],
   );
   const hasText = text.trim().length > 0;
   const errors = result.issues.filter((issue) => issue.severity === "error");
@@ -207,9 +209,19 @@ export function DeckImport({
         )}
       <p className="deck-import-hint">
         {t(
-          "Sekcije: Legend, Champion, Main Deck, Runes i Battlefields. Glavni špil: 39 karata + champion. Rune: 12. Bojišta: 1 za Duel ili komplet od 3.",
+          "Sections: Legend, Champion, Main Deck, Runes and Battlefields. Main: at least 39 cards plus the chosen champion. Runes: 12. Battlefields: 1 for practice or a pool of 3.",
         )}
       </p>
+      {result.sourceFormat === "text" && (
+        <label className="deck-import-historical">
+          <input
+            type="checkbox"
+            checked={mainIncludesChampion}
+            onChange={(event) => setMainIncludesChampion(event.target.checked)}
+          />
+          {t("My Main Deck section also includes the chosen champion.")}
+        </label>
+      )}
       <label className="deck-import-historical">
         <input
           type="checkbox"
@@ -257,12 +269,18 @@ export function DeckImport({
             <div>
               <strong>{t(result.deck.name)}</strong>
               <span>
-                {t("40 karata · 12 runa · {count} bojište/a · {domains}", {
-                  count: result.deck.battlefieldIds?.length ?? 1,
-                  domains: result.deck.domains
-                    .map((domain) => t(domain))
-                    .join(" / "),
-                })}
+                {t(
+                  "{total} cards · 12 runes · {count} battlefields · {domains}",
+                  {
+                    total:
+                      1 +
+                      result.deck.main.reduce((n, entry) => n + entry.count, 0),
+                    count: result.deck.battlefieldIds?.length ?? 1,
+                    domains: result.deck.domains
+                      .map((domain) => t(domain))
+                      .join(" / "),
+                  },
+                )}
               </span>
             </div>
           </div>

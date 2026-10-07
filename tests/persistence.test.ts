@@ -8,6 +8,8 @@ import {
 import { getBotAction } from "../src/game/bot";
 import { parseSession, validState } from "../src/persistence";
 import type { GameState, Unit } from "../src/game/types";
+import { cards } from "../src/data/cards";
+import { fixture, unit } from "./fixtures/cards";
 describe("saved manual Proceed session", () => {
   it("restores the precise event being reviewed without advancing", () => {
     const before = createGame({ seed: 25 });
@@ -58,6 +60,68 @@ describe("saved manual Proceed session", () => {
     const restored = parseSession(JSON.stringify({ match: final, review }));
     expect(restored.review).not.toBeNull();
     expect(restored.match?.winner).toBe(0);
+  });
+});
+
+describe("saved dual Unit/Gear card identities", () => {
+  const hybridState = () => {
+    const state = fixture();
+    const porobot = unit("saved-porobot");
+    porobot.cardId = cards.find(
+      (card) =>
+        card.set === "VEN" && card.collectorNumber === 58 && !card.variant,
+    )!.id;
+    state.units.push(porobot);
+    state.gears.push(porobot);
+    return state;
+  };
+  const expectSharedCard = (state: GameState) => {
+    const porobot = state.units.find((piece) => piece.id === "saved-porobot")!;
+    expect(porobot).toBeDefined();
+    expect(state.gears.find((piece) => piece.id === porobot.id)).toBe(porobot);
+    // Updating either index must update the same physical card after restore.
+    const gear = state.gears.find((piece) => piece.id === porobot.id)!;
+    gear.ready = !porobot.ready;
+    expect(porobot.ready).toBe(gear.ready);
+  };
+  it("rehydrates one shared card from both raw state and saved wrapper", () => {
+    const state = hybridState();
+    for (const value of [state, { match: state, review: null }]) {
+      const restored = parseSession(JSON.stringify(value));
+      expect(restored.match).not.toBeNull();
+      expectSharedCard(restored.match!);
+    }
+  });
+  it("rehydrates aliases in the match, review before/final and every displayed frame", () => {
+    const before = hybridState();
+    const action = getLegalActions(before, before.priorityPlayer).find(
+      (entry) => entry.category === "end",
+    )!;
+    const result = applyActionStepped(before, action);
+    const review = {
+      before,
+      final: result.state,
+      frames: result.frames,
+      index: 0,
+      action,
+    };
+    const restored = parseSession(
+      JSON.stringify({ match: result.state, review }),
+    );
+    expect(restored.review).not.toBeNull();
+    for (const state of [
+      restored.match!,
+      restored.review!.before,
+      restored.review!.final,
+      ...restored.review!.frames.map((frame) => frame.state),
+    ])
+      expectSharedCard(state);
+  });
+  it("still rejects malformed hybrid indexes before rehydration", () => {
+    const state = hybridState();
+    const malformed = JSON.parse(JSON.stringify(state));
+    malformed.gears[0].cardId = "unknown-card";
+    expect(parseSession(JSON.stringify(malformed)).match).toBeNull();
   });
 });
 
@@ -250,8 +314,8 @@ describe("saved state structural recovery", () => {
       }
     }
     // This walks up to 480 real bot actions, including planning and every save
-    // frame. Keep the assertions intact on slower CI/remote machines.
-  }, 240_000);
+    // frame. A contended four-core run took 265s; preserve every assertion.
+  }, 300_000);
 });
 
 function expandedGame(): GameState {

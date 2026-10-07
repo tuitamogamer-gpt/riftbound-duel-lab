@@ -7,8 +7,8 @@ import {
   iterateLegalActions,
 } from "../engine";
 import { getScript } from "../scripts";
-import type { GameState, PlayerId } from "../types";
-import type { Profile } from "./config";
+import type { Effect, GameState, PlayerId } from "../types";
+import { cardStrategy, type Profile } from "./config";
 export interface Evaluation {
   terminal: -1 | 0 | 1;
   utility: number;
@@ -51,10 +51,45 @@ export function evaluate(
           (sc?.onHold || sc?.onConquer ? 1.5 : 0) +
           (u.ready ? 1.2 : 0) +
           (profile === "combo" && sc?.abilities?.length ? 1 : 0) +
-          (profile === "big-units" && m >= 5 ? 0.8 : 0)
+          (profile === "big-units" && m >= 5 ? 0.8 : 0) +
+          (profile === "tokens" && cardStrategy(u.cardId).tokens ? 0.8 : 0)
         );
       }, 0);
-  const material = board(p) - board(q);
+  const gearValue = (actor: PlayerId) => {
+    const hasBearer = s.units.some((unit) => unit.owner === actor);
+    return s.gears
+      .filter((gear) => gear.owner === actor)
+      .reduce((n, gear) => {
+        const script = getScript(gear.cardId),
+          card = getCard(gear.cardId);
+        const attached = s.units.some((unit) => unit.id === gear.attachedTo);
+        const equipment = script?.equipment;
+        // Attached Might is already included in getMight. Gear itself survives a
+        // bearer and may provide public reusable abilities or a future attachment.
+        const reusable =
+          1 +
+          (card.energy ?? 0) * 0.15 +
+          (script?.abilities?.length ? 0.9 : 0) +
+          (equipment?.onAttack ||
+          equipment?.onConquer ||
+          equipment?.onHold ||
+          equipment?.onMove
+            ? 0.6
+            : 0);
+        const availableAttachment =
+          !attached && hasBearer
+            ? Math.max(0, script?.gearMight ?? 0) * 0.3
+            : 0;
+        return (
+          n +
+          (reusable +
+            availableAttachment +
+            (profile === "equipment" && hasBearer ? 0.5 : 0)) *
+            (gear.temporary ? 0.4 : 1)
+        );
+      }, 0);
+  };
+  const material = board(p) - board(q) + gearValue(p) - gearValue(q);
   const hold = (actor: PlayerId) => {
     if (
       s.units.some(
@@ -107,6 +142,31 @@ export function evaluate(
   const danger = opponentNear
     ? 160 + enemyHold * 30
     : Math.max(0, s.players[q].points + enemyHold - target + 2) * 14;
+  const recoveryTargets = (actor: PlayerId, effects: Effect[] = []) => {
+    const recoveries = effects.filter(
+      (effect) =>
+        effect.type === "retrieve" ||
+        (effect.type === "playCard" && effect.play?.zone === "trash"),
+    );
+    if (!recoveries.length) return null;
+    return s.players[actor].discard.filter((id) =>
+      recoveries.some((effect) => {
+        const card = getCard(id);
+        const types = effect.play?.cardTypes ?? effect.cardTypes;
+        const required = ["unit", "spell", "gear"].includes(
+          effect.condition ?? "",
+        )
+          ? effect.condition?.toLowerCase()
+          : undefined;
+        return (
+          (!types?.length || types.includes(card.type)) &&
+          (!required || card.type.toLowerCase() === required) &&
+          (effect.maxEnergy === undefined ||
+            (card.energy ?? 0) <= effect.maxEnergy)
+        );
+      }),
+    ).length;
+  };
   const playableHand = (actor: PlayerId) =>
     s.players[actor].hand.reduce((n, id) => {
       // The legality shell preserves public hand size without identities.
@@ -114,13 +174,22 @@ export function evaluate(
       const c = getCard(id),
         sc = getScript(id),
         r = getResources(s, actor);
+      const recovery = recoveryTargets(actor, sc?.spell);
       const useful =
-        c.type === "Unit" ||
-        sc?.spell?.some((e) => ["draw", "channel", "token"].includes(e.type)) ||
-        s.units.some((u) => u.owner !== actor);
+        recovery !== null
+          ? recovery > 0
+          : c.type === "Unit" ||
+            c.type === "Gear" ||
+            sc?.spell?.some((e) =>
+              ["draw", "channel", "token"].includes(e.type),
+            ) ||
+            s.units.some((u) => u.owner !== actor);
       return (
         n +
-        (useful ? 1 : 0.35) *
+        ((useful ? 1 : 0.35) +
+          (profile === "recursion" && recovery
+            ? Math.min(recovery, 3) * 0.2
+            : 0)) *
           Math.max(0.3, 1.5 - Math.max(0, (c.energy ?? 0) - r.energy) * 0.15)
       );
     }, 0);
@@ -150,9 +219,17 @@ export function evaluate(
     const x = s.players[actor],
       r = getResources(s, actor);
     // Future rune development matters; floating energy matters only with useful cards.
+    const experience = Math.max(0, x.xp ?? 0);
+    const xpValue =
+      profile === "xp"
+        ? Math.min(experience, 6) * 0.7 +
+          Math.min(Math.max(0, experience - 6), 6) * 0.15 +
+          (experience >= 3 ? 0.8 : 0) +
+          (experience >= 6 ? 1.3 : 0)
+        : experience * 0.5;
     return (
       x.runes.length * 1.4 +
-      (x.xp ?? 0) * 0.5 +
+      xpValue +
       (x.hand.length ? Math.min(r.energy, 5) * 0.35 : 0) +
       Object.values(x.typedPower ?? {}).reduce((a, b) => a + b, 0) * 0.25
     );

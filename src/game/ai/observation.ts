@@ -3,6 +3,7 @@ import { decksById } from "../../data/decks";
 import { getRulesCardId, getScript, isImplemented } from "../scripts";
 import type { GameState, PlayerId, PlayerState } from "../types";
 import { botRandom, hash } from "./config";
+import type { PublicHandReveal } from "../hand-reveals";
 
 type ObservedPlayer = Omit<
   PlayerState,
@@ -19,12 +20,20 @@ type ObservedPlayer = Omit<
 };
 export type ObservedState = Omit<
   GameState,
-  "players" | "seed" | "rng" | "nextId" | "log" | "botSettings"
+  | "players"
+  | "seed"
+  | "rng"
+  | "nextId"
+  | "log"
+  | "botSettings"
+  | "publicReveals"
 > & { players: [ObservedPlayer, ObservedPlayer] };
 export interface Observation {
   viewer: PlayerId;
   version: string;
   state: ObservedState;
+  /** Presentation of a past public reveal; excluded from policy inputs and hashes. */
+  publicReveals?: PublicHandReveal;
 }
 
 /** These module counters are all derived from public plays, moves and triggers.
@@ -51,10 +60,16 @@ const publicExtensionKeys = [
   "vendettaWave3",
   "vendettaWave4",
 ];
-function inspectedCards(s: GameState, viewer: PlayerId): string[] {
+function inspectedCards(s: GameState, viewer: PlayerId): [string[], string[]] {
+  const inspected: [string[], string[]] = [[], []];
   const choice = s.pendingChoice;
-  if (choice?.player !== viewer) return [];
-  if (choice.kind === "predict") return s.players[viewer].deck.slice(0, 1);
+  if (choice?.player !== viewer) return inspected;
+  if (choice.kind === "predict") {
+    const owner =
+      choice.effect?.who === "opponent" ? ((1 - viewer) as PlayerId) : viewer;
+    inspected[owner] = s.players[owner].deck.slice(0, 1);
+    return inspected;
+  }
   // Only these active inspection effects authorize looking at future cards.
   const counts: Record<string, number> = {
     "origins-more:stacked-selected": 3,
@@ -64,13 +79,18 @@ function inspectedCards(s: GameState, viewer: PlayerId): string[] {
     "wave14:herald-selected": 3,
   };
   for (const effect of choice.options?.flatMap((o) => o.effects ?? []) ?? []) {
-    if (effect.custom === "card-play:select" && effect.play?.zone === "top")
-      return s.players[viewer].deck.slice(0, effect.play.count ?? 1);
-    if (effect.custom && counts[effect.custom])
-      return s.players[viewer].deck.slice(
+    if (effect.custom === "card-play:select" && effect.play?.zone === "top") {
+      const owner = effect.play.zoneOwner ?? viewer;
+      inspected[owner] = s.players[owner].deck.slice(0, effect.play.count ?? 1);
+      return inspected;
+    }
+    if (effect.custom && counts[effect.custom]) {
+      inspected[viewer] = s.players[viewer].deck.slice(
         0,
         effect.lookCount ?? counts[effect.custom],
       );
+      return inspected;
+    }
     if (
       [
         "ven-wave3:predict-step",
@@ -81,11 +101,16 @@ function inspectedCards(s: GameState, viewer: PlayerId): string[] {
     ) {
       const payload = JSON.parse(effect.cardName ?? "{}");
       const viewed = payload.viewed ?? payload.top;
-      if (Array.isArray(viewed) && viewed.every((id) => typeof id === "string"))
-        return [...viewed];
+      if (
+        Array.isArray(viewed) &&
+        viewed.every((id) => typeof id === "string")
+      ) {
+        inspected[viewer] = [...viewed];
+        return inspected;
+      }
     }
   }
-  return [];
+  return inspected;
 }
 
 /** Only this adapter may see the live state. No live reference reaches policy/search. */
@@ -145,6 +170,7 @@ export function getObservation(s: GameState, viewer: PlayerId): Observation {
   }
   // Configuration is public; registered opponent deck identifiers/lists are not.
   if (s.matchConfig) state.matchConfig = structuredClone(s.matchConfig);
+  const inspected = inspectedCards(s, viewer);
   state.players = s.players.map((p) => {
     const { deck, runeDeck, hand, deckList, runeList, ...publicPlayer } = p;
     const own = p.id === viewer,
@@ -176,10 +202,10 @@ export function getObservation(s: GameState, viewer: PlayerId): Observation {
             ].sort(),
           }
         : {}),
-      ...(own && inspectedCards(s, viewer).length
+      ...(inspected[p.id].length
         ? {
-            knownTop: inspectedCards(s, viewer)[0],
-            knownTopCards: inspectedCards(s, viewer),
+            knownTop: inspected[p.id][0],
+            knownTopCards: inspected[p.id],
           }
         : {}),
     };
@@ -214,7 +240,14 @@ export function getObservation(s: GameState, viewer: PlayerId): Observation {
     : null;
   // Hash only information the observer may know; never hidden state or game RNG.
   const version = `${s.revision ?? 0}-${hash(JSON.stringify(state)).toString(16)}`;
-  return { viewer, version, state };
+  return {
+    viewer,
+    version,
+    state,
+    ...(s.publicReveals
+      ? { publicReveals: structuredClone(s.publicReveals) }
+      : {}),
+  };
 }
 const pool = [
   ...new Set(

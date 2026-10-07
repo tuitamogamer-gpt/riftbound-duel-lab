@@ -8,7 +8,10 @@ export interface DeckEntry {
   count: number;
 }
 
-/** The chosen champion is one of the deck's 40 cards; main contains the remaining 39. */
+/** Application resource limit, including the separately stored chosen champion. */
+export const MAX_MAIN_DECK_SIZE = 1000;
+
+/** Main stores at least 39 cards; the chosen champion is stored separately. */
 export interface StarterDeck {
   id: string;
   name: string;
@@ -170,7 +173,7 @@ export function validateDeck(deck: StarterDeck): string[] {
     if (
       !Number.isSafeInteger(entry.count) ||
       entry.count < 1 ||
-      entry.count > 40
+      entry.count > MAX_MAIN_DECK_SIZE
     )
       errors.push(`Invalid quantity: ${entry.cardId}`);
   }
@@ -187,8 +190,15 @@ export function validateDeck(deck: StarterDeck): string[] {
       ...errors,
       ...[...new Set(missing)].map((id) => `Unknown card: ${id}`),
     ];
-  if (deck.main.reduce((count, entry) => count + entry.count, 0) !== 39)
-    errors.push("Main deck must contain 39 cards plus the chosen champion.");
+  const mainCount = deck.main.reduce((count, entry) => count + entry.count, 0);
+  if (mainCount < 39)
+    errors.push(
+      "Main deck must contain at least 39 cards plus the chosen champion.",
+    );
+  if (mainCount >= MAX_MAIN_DECK_SIZE)
+    errors.push(
+      `This app supports up to ${MAX_MAIN_DECK_SIZE} main-deck cards, including the chosen champion.`,
+    );
   if (deck.runes.reduce((count, entry) => count + entry.count, 0) !== 12)
     errors.push("Rune deck must contain 12 runes.");
   const legend = getCard(deck.legendId),

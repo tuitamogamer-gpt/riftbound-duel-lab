@@ -23,7 +23,9 @@ function opening(firstPlayer: 0 | 1 = 0) {
     createGame({ seed: 44, firstPlayer }),
     "mulligan:",
   );
-  const action = getLegalActions(before, 1).find((a) => a.id === "mulligan:")!;
+  const action = getLegalActions(before, before.priorityPlayer).find(
+    (a) => a.id === "mulligan:",
+  )!;
   const result = applyActionStepped(before, action);
   return {
     before,

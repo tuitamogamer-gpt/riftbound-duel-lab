@@ -1,5 +1,17 @@
 # Validation evidence
 
+## Practice tools and recovery — 7 October 2026
+
+The current update adds starting-player selection, corrected inclusive deck imports, recoverable session backups, manual rune payment, a local deck builder, six training lessons, completed-match history, theme-aware AI evaluation, offline installation, best-of-three series and private-room infrastructure. Catalog consistency still reports **1,459 registered/playable entries and all 13 retail precons**, without fetching a new provider snapshot.
+
+Focused checks cover each feature and its integration. Real Chromium flows exercised builder editing/import/export, all six lessons, history capture after final review, series continuation and inventory-preserving sideboarding, session export/import/backups and failed-storage recovery. These checks used **320×568, 390×844, 844×390 and 1440×900** where applicable, with no page errors or horizontal document overflow. Manual payment also passed keyboard focus, cancellation and real resource retention checks in portrait and landscape.
+
+Worker checks cover actual planning, unavailable workers, worker errors, watchdog recovery, pause/resume and stale replies. Production-preview offline checks verified complete app/lazy-chunk/worker caching, selected-deck images, an uncached-first-use AI decision while offline, reload/resume and portrait-to-landscape rotation. The service-worker update check verified that an installed replacement waits for existing clients; their cached chunks remain usable offline until those clients close.
+
+Two separate browser contexts exercised room creation/invitation, both mulligans, legal moves, refresh/resume, credential separation, response-loss retries, departure, authorized inspection and historical public hand reveals. Local room checks use the explicit loopback development adapter. **Production room availability is not claimed:** Vercel returned HTTP 403 when creating the required private Blob store. The deployed UI reports unavailable storage until a store is connected; see [ONLINE-DUELS.md](ONLINE-DUELS.md).
+
+The complete regression partition and fresh 32-game AI pilot are still running for this implementation checkpoint. Their final machine-readable results will be recorded separately. Earlier time-budget failures remain recorded, with exact-case reruns required before claiming complete coverage. See [REGRESSION-CHECKS.md](REGRESSION-CHECKS.md) for the preserved seeds, assertions and mandatory aggregate checks, and [AI-CATALOG-UPDATE.md](AI-CATALOG-UPDATE.md) for AI methodology and limits.
+
 ## Mobile duel interaction layout — 7 October 2026
 
 The compact table now uses a public battlefield minimap, opponent-above-player board rows, a readable swipeable hand, a hand-reading sheet and a match menu. The response chain stays visible while changing zones. Landscape places the minimap on the left and hand/decision controls on the right. Both sheets pause automatic playback and restore keyboard focus. Card selection preserves the existing explicit action/target rules; private opponent Hidden faces remain concealed.

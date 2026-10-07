@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, BookOpen, History, Settings2, X } from "lucide-react";
 import { LanguageSelector, useI18n } from "../i18n";
@@ -15,6 +16,10 @@ export function MobileMatchMenu({
   showHelp,
   leave,
   botReason,
+  showSaved,
+  saveStatus,
+  manualPayment,
+  onManualPaymentChange,
 }: {
   open: boolean;
   close: () => void;
@@ -24,6 +29,10 @@ export function MobileMatchMenu({
   showHelp: () => void;
   leave: () => void;
   botReason: string;
+  showSaved?: () => void;
+  saveStatus?: ReactNode;
+  manualPayment?: boolean;
+  onManualPaymentChange?: (manual: boolean) => void;
 }) {
   const { t } = useI18n();
   const dialog = useRef<HTMLElement>(null);
@@ -90,12 +99,32 @@ export function MobileMatchMenu({
         </header>
         <div className="mobile-menu-settings">
           <LanguageSelector />
+          {onManualPaymentChange && (
+            <label className="mobile-menu-setting">
+              <span>{t("Rune payment mode")}</span>
+              <select
+                value={manualPayment ? "manual" : "auto"}
+                onChange={(event) =>
+                  onManualPaymentChange(event.target.value === "manual")
+                }
+              >
+                <option value="auto">{t("Automatic payment")}</option>
+                <option value="manual">{t("Choose runes")}</option>
+              </select>
+            </label>
+          )}
           <div className="mobile-menu-setting">
             <span>{t("Playback speed")}</span>
             <PlaybackSpeed speed={speed} onChange={setSpeed} />
           </div>
         </div>
         <div className="mobile-menu-links">
+          {showSaved && (
+            <button onClick={() => navigate(showSaved)}>
+              <History size={19} />
+              {t("Saved duels")}
+            </button>
+          )}
           <button onClick={() => navigate(showHistory)}>
             <History size={19} />
             {t("Dnevnik meča")}
@@ -109,6 +138,7 @@ export function MobileMatchMenu({
             {t("Špilovi")}
           </button>
         </div>
+        {saveStatus}
         <details className="mobile-menu-bot">
           <summary>{t("AI decision")}</summary>
           <p>{t(botReason || "The bot explains its last decision here.")}</p>

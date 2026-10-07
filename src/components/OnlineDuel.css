@@ -1,0 +1,509 @@
+.online-duel {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px 24px 45px;
+  color: #e1eee8;
+  font-family: "DM Sans", sans-serif;
+}
+.online-duel button,
+.online-duel input,
+.online-duel select {
+  min-height: 44px;
+  border: 1px solid #7fa2ab52;
+  border-radius: 8px;
+  background: #183642;
+  color: #e1eee8;
+  font:
+    500 12px "DM Sans",
+    sans-serif;
+}
+.online-duel button {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.online-duel button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.online-duel input,
+.online-duel select {
+  padding: 10px;
+  min-width: 0;
+  width: 100%;
+}
+.online-header,
+.online-header > div,
+.online-setup-actions,
+.online-match-status,
+.online-hand header,
+.online-decisions header,
+.online-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.online-header > div {
+  display: block;
+  flex: 1;
+}
+.online-header {
+  margin-bottom: 22px;
+}
+.online-header button,
+.online-setup-actions button,
+.online-confirm button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.online-duel h1,
+.online-duel h2,
+.online-duel h3 {
+  font-family: "Exo 2", sans-serif;
+  margin: 0;
+}
+.online-duel h1 {
+  font-size: clamp(20px, 3vw, 30px);
+}
+.online-duel h2 {
+  font-size: 21px;
+}
+.online-duel h3 {
+  font-size: 15px;
+}
+.online-duel p {
+  font-size: 12px;
+  line-height: 1.65;
+  color: #aec5cc;
+}
+.online-setup,
+.online-waiting {
+  max-width: 620px;
+  margin: 25px auto;
+  padding: 24px;
+  border: 1px solid #88a7b04d;
+  border-radius: 16px;
+  background: #17333fc4;
+}
+.online-duel label {
+  display: grid;
+  gap: 7px;
+  margin: 16px 0;
+  font-size: 12px;
+  color: #b8cdd3;
+}
+.online-notice {
+  padding: 12px;
+  border: 1px solid #bf9a5470;
+  border-radius: 9px;
+  background: #77613028;
+  color: #ecd8aa;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 12px 0;
+}
+.online-notice.error {
+  border-color: #d9926b7a;
+  background: #8d593124;
+}
+.online-notice button {
+  margin-left: 12px;
+}
+.online-invitation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  margin: 18px 0;
+}
+.online-match-status {
+  padding: 12px 14px;
+  border: 1px solid #a9bd8969;
+  border-radius: 9px;
+  background: #183b41;
+}
+.online-match-status span {
+  font-size: 12px;
+  color: #b8cdd3;
+}
+.online-zones {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0;
+}
+.online-zones button {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-height: 64px;
+}
+.online-zones button[aria-pressed="true"] {
+  border-color: #efce86;
+  box-shadow: 0 0 0 1px #efce8655;
+}
+.online-zones small {
+  color: #adc8bd;
+}
+.online-board {
+  border: 1px solid #94aca761;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.online-player-row {
+  min-height: 180px;
+  padding: 12px;
+  background: linear-gradient(110deg, #273f49, #142b37);
+}
+.online-player-row.own {
+  border-top: 1px solid #92b3a94f;
+  background: linear-gradient(110deg, #284c45, #17303a);
+}
+.online-player-row h3 {
+  margin-bottom: 9px;
+  font-size: 12px;
+  color: #bbcdd2;
+}
+.online-pieces {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  overflow-x: auto;
+  min-height: 130px;
+  padding: 2px 2px 8px;
+}
+.online-card-piece {
+  position: relative;
+  flex: 0 0 102px;
+  width: 102px;
+  display: grid;
+  gap: 4px;
+}
+.online-card-piece .game-card {
+  width: 102px;
+  height: 140px;
+  padding: 0;
+  min-height: 0;
+  max-width: none;
+}
+.online-card-piece .game-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 7px;
+}
+.online-card-piece > strong {
+  font-size: 11px;
+  line-height: 1.3;
+  min-height: 28px;
+  padding-right: 28px;
+}
+.online-card-piece > span {
+  font-size: 10px;
+  color: #e3d09d;
+}
+.online-duel .online-card-detail {
+  position: absolute;
+  right: 0;
+  top: 140px;
+  width: 32px;
+  min-height: 32px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.online-unit {
+  flex: 0 0 102px;
+}
+.online-attached {
+  display: grid;
+  gap: 4px;
+  margin-top: 7px;
+}
+.online-attached button {
+  font-size: 10px;
+  padding: 5px;
+}
+.online-hidden {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 11px;
+  color: #b6cbd4;
+  margin-top: 8px;
+}
+.online-hidden button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.online-hidden-card {
+  display: flex;
+  gap: 4px;
+}
+.online-chain {
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid #bdb18366;
+  border-radius: 8px;
+  background: #3a382932;
+}
+.online-chain h3 {
+  margin-bottom: 8px;
+}
+.online-chain button {
+  margin: 3px 6px 3px 0;
+}
+.online-hand {
+  margin: 16px 0;
+  padding: 14px;
+  background: #183b4080;
+  border: 1px solid #8daea052;
+  border-radius: 12px;
+}
+.online-hand header > span {
+  font-size: 11px;
+  color: #bbced2;
+}
+.online-hand > div {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 12px 2px 3px;
+  scroll-snap-type: x proximity;
+}
+.online-hand .online-card-piece {
+  scroll-snap-align: start;
+}
+.online-resources,
+.online-decisions {
+  padding: 15px;
+  border: 1px solid #86aba657;
+  border-radius: 10px;
+  margin: 12px 0;
+  background: #102a35b3;
+}
+.online-resources > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+.online-resources button.exhausted {
+  background: #4b392e;
+}
+.online-resources details {
+  border-top: 1px solid #7c9c9b48;
+  padding-top: 10px;
+  font-size: 12px;
+}
+.online-resources summary,
+.online-public-piles summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #d7d09a;
+}
+.online-rune-order {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 5px 0;
+}
+.online-rune-order span {
+  flex: 1;
+}
+.online-rune-order button {
+  width: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.online-action-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+.online-action-list button {
+  display: grid;
+  text-align: left;
+  gap: 4px;
+  overflow-wrap: anywhere;
+}
+.online-action-list small {
+  color: #adc5ce;
+  line-height: 1.45;
+}
+.online-action-list button[aria-pressed="true"] {
+  border-color: #e8ca89;
+  background: #414637;
+}
+.online-action-pages {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+  gap: 10px;
+}
+.online-confirm {
+  position: sticky;
+  bottom: 8px;
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e0c891;
+  border-radius: 9px;
+  background: #193838;
+  box-shadow: 0 5px 22px #0009;
+  z-index: 3;
+}
+.online-confirm strong {
+  flex: 1;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.online-confirm button:first-of-type {
+  background: #ac8f54;
+  color: #091b23;
+  border-color: #dfc58e;
+}
+.online-public-piles {
+  border: 1px solid #6f999c50;
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 12px;
+}
+.online-public-piles section {
+  margin: 12px 0;
+}
+.online-public-piles button {
+  margin: 5px 5px 0 0;
+}
+.online-footer {
+  margin-top: 20px;
+  font-size: 11px;
+  color: #a8bbc5;
+}
+.online-duel :focus-visible {
+  outline: 2px solid #edd598;
+  outline-offset: 2px;
+}
+@media (max-width: 700px) {
+  .online-duel {
+    padding: 12px 10px max(24px, env(safe-area-inset-bottom));
+  }
+  .online-header {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .online-header > button:first-child {
+    font-size: 0;
+    width: 44px;
+    padding: 0;
+  }
+  .online-header .eyebrow {
+    font-size: 9px;
+  }
+  .online-setup,
+  .online-waiting {
+    padding: 18px 13px;
+    margin: 16px 0;
+  }
+  .online-invitation {
+    grid-template-columns: 1fr;
+  }
+  .online-match-status {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .online-zones {
+    gap: 5px;
+  }
+  .online-zones button {
+    font-size: 10px;
+    padding: 5px;
+    min-height: 66px;
+  }
+  .online-player-row {
+    padding: 9px;
+    min-height: 160px;
+  }
+  .online-card-piece,
+  .online-unit {
+    width: 88px;
+    flex-basis: 88px;
+  }
+  .online-card-piece .game-card {
+    width: 88px;
+    height: 122px;
+  }
+  .online-duel .online-card-detail {
+    top: 122px;
+    width: 44px;
+    min-height: 44px;
+  }
+  .online-card-piece > strong {
+    padding-right: 0;
+    margin-top: 44px;
+    min-height: 28px;
+  }
+  .online-pieces {
+    gap: 9px;
+  }
+  .online-hand {
+    padding: 10px;
+  }
+  .online-hand header {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .online-action-list {
+    grid-template-columns: 1fr;
+  }
+  .online-confirm {
+    flex-wrap: wrap;
+    padding: 10px;
+    gap: 8px;
+  }
+  .online-confirm strong {
+    flex-basis: 100%;
+  }
+  .online-footer {
+    align-items: flex-start;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .online-duel * {
+    scroll-behavior: auto !important;
+  }
+}
+
+.online-public-reveal {
+  background: #17333fc4;
+  border: 1px solid #88a7b04d;
+  border-radius: 16px;
+  padding: 14px;
+  margin: 16px 0;
+}
+.online-public-reveal h3 {
+  margin: 0 0 8px;
+}
+.online-public-reveal p {
+  margin: 6px 0;
+  color: #aec5cc;
+}
+.online-revealed-cards {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 8px 0;
+}
+.online-revealed-cards .online-card-piece {
+  flex: 0 0 88px;
+}

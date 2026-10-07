@@ -235,6 +235,9 @@ export function CombatPanel({
           const removed = team.filter(
             (entry) => entry.status === "removed",
           ).length;
+          const lethalAssignments = team.filter(
+            (entry) => entry.incoming > 0 && entry.incoming >= entry.lethalAt,
+          ).length;
           return (
             <div
               className={`combat-team combat-team-${side === 0 ? "attacker" : "defender"} combat-owner-${player}`}
@@ -285,6 +288,8 @@ export function CombatPanel({
                             count: preview.remaining[player],
                           })
                         : t("Ishod još nije odlučen")}
+                      {stage === "assign" &&
+                        ` · ${t("{count} incoming lethal assignments", { count: lethalAssignments })}`}
                     </span>
                   </>
                 )}

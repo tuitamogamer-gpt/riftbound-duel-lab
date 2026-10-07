@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { cards } from "../src/data/cards";
-import { decks, starterDecks, validateDeck } from "../src/data/decks";
+import {
+  decks,
+  starterDecks,
+  validateDeck,
+  MAX_MAIN_DECK_SIZE,
+} from "../src/data/decks";
 import {
   exportDeckText,
   getDeckScriptCoverage,
@@ -85,14 +90,80 @@ describe("local deck-list imports", () => {
       "champion-count",
     );
   });
-  it("deducts the chosen champion once when a list includes all 40 main cards", () => {
+  it("deducts the chosen champion once from a sectionless full deck list", () => {
     const result = parseDeckText(
-      text().replace("Main Deck\n", "Main Deck\n1 ogs-001-024\n"),
+      `${example()
+        .main.map((entry) => `${entry.count} ${entry.cardId}`)
+        .join(
+          "\n",
+        )}\n1 ogs-001-024\nLegend\n1 ogs-017-024\nChampion\n1 ogs-001-024\nRunes\n6 ogn-007-298\n6 ogn-166-298\nBattlefields\n1 ogn-280-298`,
     );
     expect(result.deck?.main).toEqual(example().main);
     expect(result.issues.map((issue) => issue.code)).toEqual([
       "champion-separated",
     ]);
+  });
+  it.each([40, 41])(
+    "preserves a sectioned %i-card draw deck and its separately stored champion",
+    (count) => {
+      const d = example();
+      d.main.push({ cardId: d.championId, count: count - 39 });
+      expect(validateDeck(d)).toEqual([]);
+      const result = parseDeckText(exportDeckText(d));
+      expect(result.issues).toEqual([]);
+      expect(result.deck?.main).toEqual(d.main);
+      expect(result.deck?.main.reduce((n, entry) => n + entry.count, 0)).toBe(
+        count,
+      );
+      const local = storage();
+      expect(saveImportedDecks([result.deck!], local)).toBe(true);
+      expect(loadImportedDecks(local)).toEqual([result.deck]);
+    },
+  );
+  it("supports an explicit inclusive exporter without removing two chosen copies", () => {
+    const d = example();
+    d.main.push({ cardId: d.championId, count: 2 });
+    const inclusive = exportDeckText(d).replace(
+      `2 ${d.championId} #`,
+      `3 ${d.championId} #`,
+    );
+    const result = parseDeckText(inclusive, { mainIncludesChampion: true });
+    expect(result.deck?.main).toEqual(d.main);
+    expect(result.issues.map((item) => item.code)).toEqual([
+      "champion-separated",
+    ]);
+    expect(parseDeckText(exportDeckText(result.deck!)).deck).toEqual(
+      result.deck,
+    );
+    expect(
+      parseDeckText(text(), { mainIncludesChampion: true }).issues.map(
+        (item) => item.code,
+      ),
+    ).toContain("champion-missing-from-main");
+  });
+  it("rejects undersized decks while allowing unlimited copies within a stated application bound", () => {
+    const d = example();
+    d.main = [{ cardId: "ven-097-166", count: 38 }];
+    expect(validateImportedDeck(d).map((item) => item.code)).toContain(
+      "main-count",
+    );
+    d.main[0].count = MAX_MAIN_DECK_SIZE - 1;
+    expect(validateDeck(d)).toEqual([]);
+    const result = parseDeckText(exportDeckText(d));
+    expect(result.issues).toEqual([]);
+    expect(result.deck?.main).toEqual(d.main);
+    d.main[0].count = MAX_MAIN_DECK_SIZE;
+    expect(validateImportedDeck(d).map((item) => item.code)).toContain(
+      "main-size",
+    );
+    expect(parseDeckText(exportDeckText(d)).deck).toBeNull();
+    d.main[0].count = MAX_MAIN_DECK_SIZE + 1;
+    expect(validateImportedDeck(d).map((item) => item.code)).toContain(
+      "invalid-quantity",
+    );
+    expect(
+      parseDeckText(exportDeckText(d)).issues.map((item) => item.code),
+    ).toContain("invalid-quantity");
   });
   it("aggregates duplicate entries and enforces a copy limit including the chosen champion", () => {
     const value = text().replace(

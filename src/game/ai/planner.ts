@@ -631,11 +631,4 @@ export function chooseDecision(
     },
   };
 }
-/** This is the only trace projection suitable for an in-progress human interface. */
-export function publicExplanation(result: BotResult) {
-  return {
-    reason: result.trace.reason,
-    difficulty: result.trace.difficulty,
-    thinkingMs: Math.round(result.trace.durationMs),
-  };
-}
+export { publicExplanation } from "./presentation";
