@@ -1,6 +1,28 @@
 import type { Review } from "../components/StepFlow";
 import type { StepFrame } from "./engine";
 import { visibleTurnStep } from "./presentation";
+import { findCard } from "../catalog";
+import { getRulesCardId } from "./scripts";
+import type { Unit } from "./types";
+
+/** A signature champion arrives only after its public unit actually exists. */
+export function championMoment(review: Review | null): Unit | undefined {
+  if (!review || !Number.isInteger(review.index) || review.index < 0)
+    return undefined;
+  const state = review.frames[review.index]?.state;
+  const before = review.index
+    ? review.frames[review.index - 1]?.state
+    : review.before;
+  if (!state || !before) return undefined;
+  return state.units.find(
+    (unit) =>
+      !unit.token &&
+      !before.units.some((old) => old.id === unit.id) &&
+      !!findCard(unit.cardId) &&
+      getRulesCardId(unit.cardId) ===
+        getRulesCardId(state.players[unit.owner].championId),
+  );
+}
 
 /** Only compare the displayed frame with its predecessor, never the final state. */
 export function scoreMoment(review: Review | null): StepFrame["score"] {

@@ -379,6 +379,7 @@ export function Lobby(p: Props) {
               <StartingCardPair deck={p.playerDeck} onDetails={p.onDetails} />
             )}
             <BattlefieldPicker
+              deck={p.playerDeck}
               value={p.playerBattlefield ?? defaultBattlefield(p.playerDeck)}
               onChange={p.onPlayerBattlefield ?? (() => {})}
               inspect={p.onInspect ?? (() => {})}
@@ -484,6 +485,7 @@ export function Lobby(p: Props) {
             )}
             <BattlefieldPicker
               opponent
+              deck={p.botDeck}
               value={p.botBattlefield ?? defaultBattlefield(p.botDeck)}
               onChange={p.onBotBattlefield ?? (() => {})}
               inspect={p.onInspect ?? (() => {})}

@@ -1,7 +1,7 @@
 import type { Review } from "../components/StepFlow";
 import type { GameState, TurnStep } from "./types";
 import { getRuneChanges } from "./rune-presentation";
-import { scoreMoment, phaseMoment } from "./table-presentation";
+import { scoreMoment, phaseMoment, championMoment } from "./table-presentation";
 import type { PlaybackSpeed } from "./playback";
 
 export function visibleTurnStep(game: GameState): TurnStep {
@@ -60,6 +60,7 @@ function baseReviewDelay(review: Review): number {
   const frame = review.frames[review.index];
   if (!frame) return 500;
   const humanTurn = frame.state.currentPlayer === 0;
+  if (championMoment(review)) return 3000;
   if (scoreMoment(review)) return 3400;
   if (frame.draw)
     return frame.draw.player === 0

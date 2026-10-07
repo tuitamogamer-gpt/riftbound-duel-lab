@@ -1,5 +1,23 @@
 // UI labels and review summaries. Printed card rules and proper names stay in English.
 export const componentMessages: Record<string, [string, string, string]> = {
+  "Card set": ["Card set", "Set karata", "Espansione"],
+  "All sets": ["All sets", "Svi setovi", "Tutte le espansioni"],
+  "Rules tokens": ["Rules tokens", "Tokeni za igru", "Pedine di gioco"],
+  "Base printings only": [
+    "Base printings only",
+    "Samo osnovna izdanja",
+    "Solo stampe base",
+  ],
+  "{count} matching entries": [
+    "{count} matching entries",
+    "{count} pronađenih zapisa",
+    "{count} risultati",
+  ],
+  "{printings} printings · {tokens} rules tokens · Snapshot {date}": [
+    "{printings} printings · {tokens} rules tokens · Snapshot {date}",
+    "{printings} izdanja karata · {tokens} tokena za igru · Podaci od {date}",
+    "{printings} stampe · {tokens} pedine di gioco · Dati del {date}",
+  ],
   "Your gear and equipment": [
     "Your gear and equipment",
     "Tvoj gear i equipment",

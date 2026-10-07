@@ -5,6 +5,7 @@ import App from "../src/App";
 import { Lobby } from "../src/components/Lobby";
 import { decks, officialPreconDecks } from "../src/data/decks";
 import { LanguageProvider } from "../src/i18n";
+import { deckBattlefieldChoices } from "../src/game/battlefield-selection";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -79,4 +80,19 @@ describe("discoverable precon selection", () => {
       );
     },
   );
+
+  it("highlights the supplied battlefield pool for each selected hero", () => {
+    const html = renderLobby("Vendetta Showdown").replaceAll("&#x27;", "'");
+    for (const id of ["precon-zed", "precon-vex"])
+      for (const card of deckBattlefieldChoices(
+        decks.find((deck) => deck.id === id),
+      ))
+        expect(html).toContain(`aria-label="Select battlefield: ${card.name}"`);
+    expect(
+      html.match(/role="group" aria-label="Precon battlefields"/g),
+    ).toHaveLength(2);
+    expect(
+      html.match(/aria-label="Select battlefield:[^"]+" aria-pressed="true"/g),
+    ).toHaveLength(2);
+  });
 });

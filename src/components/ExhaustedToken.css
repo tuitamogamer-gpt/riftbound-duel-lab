@@ -48,12 +48,18 @@
   white-space: nowrap;
 }
 
-/* Raise unit markers enough to leave the separate Might badge unobstructed. */
+/* Unit cards reserve the upper-right corner for readiness. The artwork grows
+   14% beyond this box, so keep that corner inset and scale with small cards. */
 .unit-wrap .game-card > .exhausted-token {
-  right: 3px;
-  bottom: 14px;
-  width: 20px;
-  height: 20px;
+  top: 4px;
+  right: max(2px, 3%);
+  bottom: auto;
+  width: min(20px, 24%);
+  height: auto;
+}
+
+.unit-wrap .exhausted-token-label {
+  font-size: clamp(2px, 26cqi, 7px);
 }
 
 .game-card[data-card-footer] > .exhausted-token {
@@ -71,12 +77,6 @@
 }
 
 @media (max-width: 760px) {
-  .unit-wrap .game-card > .exhausted-token {
-    width: 18px;
-    height: 18px;
-    bottom: 12px;
-  }
-
   .champion-zone .game-card > .exhausted-token {
     width: 22px;
     height: 22px;

@@ -249,7 +249,9 @@ describe("saved state structural recovery", () => {
         state = result.state;
       }
     }
-  }, 30_000);
+    // This walks up to 480 real bot actions, including planning and every save
+    // frame. Keep the assertions intact on slower CI/remote machines.
+  }, 240_000);
 });
 
 function expandedGame(): GameState {

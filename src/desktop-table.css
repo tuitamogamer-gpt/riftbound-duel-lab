@@ -464,10 +464,25 @@
 .app.is-game .unit-info {
   font-size: 13px;
 }
-.app.is-game .unit-wrap .exhausted-token {
-  width: 20px;
-  height: 20px;
-  bottom: 12px;
+.app.is-game :is(.field-half, .base-units) > .unit-wrap > .unit-info {
+  left: calc(var(--unit-card-width) + 2px);
+}
+/* The dedicated details button remains available beside the card; a second
+   magnifier in the readiness corner would hide the Exhausted marker. */
+.app.is-game .unit-wrap .game-card > .card-zoom {
+  display: none;
+}
+/* Let the count fit between the status column and readiness marker, including
+   the small cards used by short desktop tables. Full effects stay in previews. */
+.app.is-game .unit-wrap .game-card.exhausted > .card-status-tokens {
+  container-type: inline-size;
+}
+.app.is-game .unit-wrap .game-card.exhausted .status-token-overflow {
+  left: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  font-size: clamp(3px, calc(100cqi - 11px), 7px);
 }
 .app.is-game .destination-button {
   padding: 4px 8px;

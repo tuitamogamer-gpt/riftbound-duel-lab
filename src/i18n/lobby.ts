@@ -1,5 +1,50 @@
 // UI copy and deck metadata. Product and card names retain their canonical names.
 export const lobbyMessages: Record<string, [string, string, string]> = {
+  "Precon battlefields": [
+    "Precon battlefields",
+    "Bojišta iz precona",
+    "Campi del precostruito",
+  ],
+  "Deck battlefields": [
+    "Deck battlefields",
+    "Bojišta iz špila",
+    "Campi del mazzo",
+  ],
+  "Supplied with precon": [
+    "Supplied with precon",
+    "U sastavu precona",
+    "Incluso nel precostruito",
+  ],
+  "Supplied with deck": [
+    "Supplied with deck",
+    "U sastavu špila",
+    "Incluso nel mazzo",
+  ],
+  "Choose one of the battlefields supplied with this deck.": [
+    "Choose one of the battlefields supplied with this deck.",
+    "Izaberi jedno od bojišta koja pripadaju ovom špilu.",
+    "Scegli uno dei campi di battaglia inclusi in questo mazzo.",
+  ],
+  "Select battlefield: {name}": [
+    "Select battlefield: {name}",
+    "Izaberi bojište: {name}",
+    "Scegli il campo: {name}",
+  ],
+  "Selected battlefield": [
+    "Selected battlefield",
+    "Izabrano bojište",
+    "Campo selezionato",
+  ],
+  "Or choose another battlefield": [
+    "Or choose another battlefield",
+    "Ili izaberi drugo bojište",
+    "Oppure scegli un altro campo",
+  ],
+  "Other supported battlefields": [
+    "Other supported battlefields",
+    "Ostala podržana bojišta",
+    "Altri campi supportati",
+  ],
   "Zalijepi Piltover Archive deck kod ili tekstualni izvoz sa deck-building sajta. Karte se provjeravaju prije čuvanja.":
     [
       "Paste a Piltover Archive deck code or a text export from a deck-building site. Cards are checked before saving.",

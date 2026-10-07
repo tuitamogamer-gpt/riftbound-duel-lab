@@ -1,8 +1,25 @@
 # Card import and executable coverage
 
-The catalog was fetched again on 6 October 2026. It contains every printing returned by the paginated Riftcodex API: 1,451 printings in eight sets, plus five local rules tokens. Provider completeness is checked against both pagination totals and each set's card count. It is not independent evidence that Riftcodex has every Riot publication or preview; its latest reported record update was 21 July 2026. No Radiance set is returned in this snapshot.
+<!-- card-catalog-summary:start -->
 
-Current checked snapshot: **1,249 executable entries and 207 unsupported entries**, including the five local rules tokens. These counts refer to printings, not unique gameplay cards. The [validation log](VALIDATION.md) records the current checks.
+Saved catalog fetched **6 October 2026**: **1,451 provider printings** in **8 sets**, plus **8 local rules tokens**. Completeness is relative to Riftcodex; its latest reported record update is **21 July 2026**.
+
+Executable registration: **1,459 / 1,459 entries**, with **0 unsupported** (1,108 scripted, 37 compiled, 314 aliases). Counts include printings and tokens, rather than only distinct card designs.
+
+Retail precons: **13 / 13** have complete executable coverage. All 13 lists have valid structure and complete catalog references. Historical retail contents and current tournament legality remain separate.
+<!-- card-catalog-summary:end -->
+
+Provider completeness is checked against both pagination totals and each set's card count. It does not establish that Riftcodex contains every Riot publication or preview. No Radiance set is returned in this snapshot. The generated summary above and [per-card inventory](card-coverage.json) are maintained by `cards:report` and verified by `cards:check`.
+
+## Current implementation — 7 October 2026
+
+The [next 100 printing batch](IMPORT-100-SOURCES.md) and [remaining 107 printing batch](IMPORT-107-SOURCES.md) completed executable registration for the saved catalog. The latter added three local rules tokens. Shared support now includes effect-directed plays, physical ownership, hybrid Unit/Gear objects, copied ability instances, death replacements, extra turns, multiple paid repeats, staged target declarations and deck inspection/reveal choices. Original provider records, card text, printing identities and constructed-ban flags are preserved.
+
+The [validation log](VALIDATION.md) records the actual completed test runs and their limits. Registration covers the full saved catalog; a registry entry alone does not prove every possible rules interaction.
+
+## Historical implementation checkpoints
+
+The wave sections below record coverage and remaining work at their own checkpoints. Their unsupported counts and limitations are historical; the generated summary above gives current coverage.
 
 ## Twelfth implementation wave — 7 October 2026
 
@@ -106,7 +123,7 @@ npm test
 npm run build
 ```
 
-`src/data/cards.json` preserves source card text, attributes and public artwork URLs. `src/data/catalog-meta.json` records fetch start/end, source totals, per-set counts, provider update time, a SHA-256 digest and the import's completeness scope. An incomplete response, duplicate provider ID, changed total, missing set, invalid card or unexplained removed printing aborts the import. Deliberate removals require running `node scripts/sync-cards.mjs --allow-removals`, followed by `npm run cards:report`. Old local IDs are retained when an upstream identifier changes unambiguously.
+`src/data/cards.json` preserves source card text, attributes and public artwork URLs. `src/data/catalog-meta.json` records fetch start/end, source totals, per-set counts, provider update time, a SHA-256 digest and the import's completeness scope. An incomplete response, duplicate provider ID, changed total, missing set, invalid card or unexplained removed printing aborts the import. Deliberate removals require running `node scripts/sync-cards.mjs --allow-removals`, followed by `npm run cards:report`. Old local IDs are retained when an upstream identifier changes unambiguously. Reporting also checks the saved catalog digest, IDs, per-set totals and bundled precon structure before publishing the inventory; `cards:check` verifies both documentation summaries as well as the JSON report.
 
 Every printing and local rules token is registered by `src/game/card-registry.ts`. The reproducible [card-coverage.json](card-coverage.json) contains every record, its executable script where available, its rules identity and one of these statuses:
 
@@ -123,8 +140,8 @@ The deck importer preserves the selected printing for storage and export. Match 
 
 Importer tests simulate changing or incomplete pagination, invalid fields, conflicting/changed source IDs, set totals and removed cards; they also check the saved catalog's digest. Registry tests enumerate every printing, reject false aliases, test alternate-art copy limits and reproduce the former Vendetta collector-number collision.
 
-Compiler and expansion tests execute real legal actions and assert costs, targets, effects, priority, source snapshots, choices and save restoration. Existing precon tests include all 169 ordered matchups, deterministic simulations, card conservation and manual review. These tests establish the checked behavior; a registry entry does not establish every interaction, and **the entire catalog is not yet playable**. The inventory gives exact remaining cards rather than silently treating unsupported text as blank.
+Compiler and expansion tests execute real legal actions and assert costs, targets, effects, priority, source snapshots, choices and save restoration. Existing precon tests include all 169 ordered matchups, deterministic simulations, card conservation and manual review. These tests establish the checked behavior; **full executable registration does not establish every interaction**. The inventory reports exact support status and any missing-effect reason after future catalog refreshes.
 
 The expanded modules cover Origins, Spiritforged, Unleashed and Vendetta. Shared regressions cover countering the selected spell, Flow banishment on counter, modes declared before responses, rune targets chosen before their trigger resolves, Empower events, no-combat-damage and movement restrictions, optional battlefield triggers, Spiderling's unlimited-copy rule, and play ordinals retained across reactions. Countered spells do not fire resolved-play triggers. Read-only queries do not mutate a match, and mixed-expansion games conserve cards and restore pending choices.
 
-Remaining work includes cards needing a generalized additional-cost/effect-play pipeline, sacrifice/self-recycle trigger costs, unrestricted board and independent multi-target choices, ownership changes, copy and replacement effects, extra turns, and equipment panels absent from the provider's text. Those cards are present in the catalog and registry with `unsupported` status. Importing all provider records is complete; implementing every card effect is not.
+Current remaining work is broader interaction validation and any new cards returned by a future provider refresh. The earlier unsupported mechanics are covered by later implementation batches; there are no unsupported entries in the current snapshot. Missing provider equipment panels remain preserved as provider text, with independently sourced printed effects supplied by explicit scripts and shown in card inspection.

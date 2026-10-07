@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Public table event QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Local QA on an isolated port. Fixture actions use the actual rules engine.
+      import {
+        championArrivalReview,
+        eventOpening,
+        eventReview,
+        equippedGearReview,
+        spellEventReview,
+      } from "./fixtures/event-highlights.ts";
+      import { championMoment } from "/src/game/table-presentation.ts";
+      import { publicTableEvents } from "/src/game/event-presentation.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      const params = new URLSearchParams(location.search);
+      const mode = params.get("mode") || "champion";
+      let review;
+      if (mode === "champion" || mode === "opponent-champion") {
+        review = championArrivalReview(mode === "champion" ? 0 : 1);
+        review.index = review.frames.findIndex((_, index) =>
+          championMoment({ ...review, index }),
+        );
+      } else if (["damage", "buff", "play", "counter"].includes(mode)) {
+        review = spellEventReview(mode);
+        review.index = review.frames.findIndex((_, index) =>
+          publicTableEvents({ ...review, index }).some(
+            (event) => event.kind === mode,
+          ),
+        );
+      } else if (mode === "equip") {
+        review = equippedGearReview();
+        review.index = review.frames.findIndex((_, index) =>
+          publicTableEvents({ ...review, index }).some(
+            (event) => event.kind === "equip",
+          ),
+        );
+      } else if (mode === "pass") {
+        review = eventReview(spellEventReview("play").final, "pass");
+      } else if (mode === "hidden") {
+        const game = eventOpening(1);
+        game.fields[1].controller = 1;
+        game.players[1].hand = ["ogn-083-298"];
+        review = eventReview(game, (action) => action.id.startsWith("hide:"));
+      } else if (mode === "opponent-draw") {
+        const game = eventOpening(1);
+        game.players[1].hand = ["ogn-058-298"];
+        game.units = [
+          {
+            id: "draw-target",
+            owner: 1,
+            cardId: "ogn-175-298",
+            location: "base:1",
+            ready: false,
+            damage: 0,
+            buff: 0,
+            temporaryMight: 0,
+            temporaryAssault: 0,
+            stunned: false,
+            gear: [],
+            summonedTurn: 1,
+          },
+        ];
+        review = eventReview(
+          game,
+          (action) =>
+            action.cardId === "ogn-058-298" && action.sourceId === "hand:0",
+        );
+        review = eventReview(eventReview(review.final, "pass").final, "pass");
+        review.index = review.frames.findIndex(
+          (frame) => frame.draw?.player === 1,
+        );
+      } else {
+        throw new Error(`Unknown public event fixture: ${mode}`);
+      }
+      if (review.index < 0) throw new Error(`No event frame for ${mode}`);
+      localStorage.setItem(
+        SAVE_KEY,
+        JSON.stringify({
+          match: review.final,
+          review,
+          paused: params.get("paused") !== "false",
+        }),
+      );
+      localStorage.setItem("riftbound-duel-language", "en");
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

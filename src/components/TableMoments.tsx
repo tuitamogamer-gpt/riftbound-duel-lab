@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Flag, Sparkles, Sun, Trophy, Wind } from "lucide-react";
+import { Crown, Flag, Sparkles, Sun, Trophy, Wind } from "lucide-react";
 import { findCard } from "../catalog";
 import type { CatalogCard } from "../catalog";
 import { cardArtUrl } from "../data/art";
@@ -8,6 +8,7 @@ import {
   momentKey,
   phaseMoment,
   scoreMoment,
+  championMoment,
 } from "../game/table-presentation";
 import { reviewDelay } from "../game/presentation";
 import type { PlaybackSpeed } from "../game/playback";
@@ -55,6 +56,9 @@ export function TableMoment({
   const score = scoreMoment(review);
   const draw = frame?.draw;
   const phase = phaseMoment(review);
+  const champion = championMoment(review);
+  if (review && champion)
+    return <ChampionEntrance review={review} playbackSpeed={playbackSpeed} />;
   if (!review || (!score && !draw && !phase)) return null;
   const player = score?.player ?? draw?.player ?? game.currentPlayer;
   const phaseInfo = phase && phases[phase];
@@ -184,6 +188,52 @@ export function TableMoment({
         <span className="moment-timer" aria-hidden="true">
           <i />
         </span>
+      </div>
+    </div>
+  );
+}
+
+/** A public portrait celebrates arrival while every table control stays usable. */
+export function ChampionEntrance({
+  review,
+  playbackSpeed = 1,
+}: {
+  review: Review;
+  playbackSpeed?: PlaybackSpeed;
+}) {
+  const { t } = useI18n();
+  const unit = championMoment(review);
+  const card = findCard(unit?.cardId);
+  if (!unit || !card) return null;
+  return (
+    <div
+      className={`champion-entrance champion-player-${unit.owner}`}
+      key={momentKey(review)}
+      style={
+        {
+          "--champion-duration": `${reviewDelay(review, playbackSpeed)}ms`,
+        } as CSSProperties
+      }
+      data-champion-arrival={unit.id}
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <span className="champion-entrance-halo" aria-hidden="true" />
+      <div className="champion-entrance-portrait" aria-hidden="true">
+        <img src={cardArtUrl(card)} alt="" />
+        <Crown className="champion-entrance-crown" size={21} />
+      </div>
+      <div className="champion-entrance-copy">
+        <span>
+          {t(
+            unit.owner === 0
+              ? "Your signature champion"
+              : "Opponent signature champion",
+          )}
+        </span>
+        <strong>{card.name}</strong>
+        <small>{t("Enters play")}</small>
       </div>
     </div>
   );

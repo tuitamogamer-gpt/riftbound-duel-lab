@@ -2,6 +2,8 @@
 
 Verified 2 October 2026. `src/data/precon-lists.json` imports all **13 released complete starter/preconstructed decks**: four Proving Grounds decks, three Origins Champion Decks, two Spiritforged Champion Decks, two Unleashed Champion Decks, and the Shen/Zed Vendetta Showdown pair. Radiance launches on 23 October and is not included in this snapshot. Seeded Pre-Rift packs are partial card pools, not complete starter decks.
 
+The source verification date describes the retail-list transcription. Catalog integrity and executable coverage are checked separately by `npm run cards:check`; the [generated inventory](card-coverage.json) includes a coverage entry for each of the 13 precons. All currently have complete catalog references, valid structure and executable registration. This does not establish every possible card interaction or current tournament legality.
+
 Every entry preserves 40 main-deck cards including its chosen champion, 12 runes, the printed legend, and all supplied battlefields. Proving Grounds provides **one battlefield per deck**; the remaining products provide three. Selecting a different supplied champion would move the current chosen champion into the main deck without changing contents. Bonus booster packs, tokens, and instructional inserts are not main-deck cards.
 
 Sources:

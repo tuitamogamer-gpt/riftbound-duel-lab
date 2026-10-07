@@ -645,11 +645,11 @@ export const appMessages: Record<string, [string, string, string]> = {
     "Podrška i izvori",
     "Supporto e fonti",
   ],
-  "Ovo je nezavisni eksperimentalni simulator. Dostupni špilovi sadrže karte podržane za igranje; puni katalog sadrži i karte koje još nisu podržane. Nije potpuna digitalna implementacija svih objavljenih Riftbound setova.":
+  "Ovo je nezavisni eksperimentalni simulator. Sve karte u spremljenom katalogu imaju podršku za igranje. Katalog je snimak Riftcodex podataka; podrška za karte ne potvrđuje sve moguće interakcije pravila.":
     [
-      "This is an independent experimental simulator. Available decks contain supported cards; the full library also includes cards that are not yet supported. It is not a complete digital implementation of every published Riftbound set.",
-      "Ovo je nezavisni eksperimentalni simulator. Dostupni špilovi sadrže karte podržane za igranje; puni katalog sadrži i karte koje još nisu podržane. Nije potpuna digitalna implementacija svih objavljenih Riftbound setova.",
-      "Questo è un simulatore sperimentale indipendente. I mazzi disponibili contengono carte supportate; il catalogo completo include anche carte non ancora supportate. Non è un’implementazione digitale completa di tutte le espansioni di Riftbound pubblicate.",
+      "This is an independent experimental simulator. Every card in the saved catalog has playable support. The catalog is a Riftcodex snapshot; card support does not verify every possible rules interaction.",
+      "Ovo je nezavisni eksperimentalni simulator. Sve karte u spremljenom katalogu imaju podršku za igranje. Katalog je snimak Riftcodex podataka; podrška za karte ne potvrđuje sve moguće interakcije pravila.",
+      "Questo è un simulatore sperimentale indipendente. Ogni carta nel catalogo salvato è supportata per il gioco. Il catalogo è un’istantanea di Riftcodex; il supporto delle carte non verifica ogni possibile interazione delle regole.",
     ],
   "Riotova Digital Tools Policy ne odobrava automatizovane Riftbound simulatore. Ovaj projekt nema Riot odobrenje.":
     [

@@ -392,11 +392,6 @@ body:has(.app.is-game) {
   bottom: -4px;
   line-height: 13px;
 }
-.app.is-game .unit-wrap .exhausted-token {
-  width: 17px;
-  height: 17px;
-  bottom: 9px;
-}
 .app.is-game .field-divider {
   height: 10px;
 }

@@ -2,7 +2,12 @@
   "schemaVersion": 1,
   "catalogFetchedAt": "2026-10-06T12:48:20.286Z",
   "provider": "Riftcodex",
+  "catalogScope": "All printings returned by /cards without set, new, rarity, or variant filters; completeness is relative to Riftcodex.",
+  "catalogSourceUpdatedAt": "2026-07-21T20:05:23.285938+00:00",
+  "catalogDataSha256": "0861c196b3100198a9fffa7b9465afc76a2e4b07db84e63e8efa6145fea25f6c",
   "providerPrintings": 1451,
+  "providerSets": 8,
+  "localRulesTokens": 8,
   "registered": 1459,
   "playable": 1459,
   "statuses": {
@@ -58,6 +63,125 @@
       "unsupported": 0
     }
   },
+  "precons": [
+    {
+      "id": "precon-annie",
+      "name": "Annie · Proving Grounds",
+      "product": "Proving Grounds",
+      "uniqueCards": 19,
+      "executableCards": 19,
+      "complete": true,
+      "missingCardIds": []
+    },
+    {
+      "id": "precon-lux",
+      "name": "Lux · Proving Grounds",
+      "product": "Proving Grounds",
+      "uniqueCards": 19,
+      "executableCards": 19,
+      "complete": true,
+      "missingCardIds": []
+    },
+    {
+      "id": "precon-garen",
+      "name": "Garen · Proving Grounds",
+      "product": "Proving Grounds",
+      "uniqueCards": 19,
+      "executableCards": 19,
+      "complete": true,
+      "missingCardIds": []
+    },
+    {
+      "id": "precon-master-yi",
+      "name": "Master Yi · Proving Grounds",
+      "product": "Proving Grounds",
+      "uniqueCards": 19,
+      "executableCards": 19,
+      "complete": true,
+      "missingCardIds": []
+    },
+    {
+      "id": "precon-jinx",
+      "name": "Jinx · Origins",
+      "product": "Origins",
+      "uniqueCards": 24,
+      "executableCards": 24,
+      "complete": true,
+      "missingCardIds": []
+    },
+    {
+      "id": "precon-viktor",
+      "name": "Viktor · Origins",
+      "product": "Origins",
+      "uniqueCards": 25,
+      "executableCards": 25,
+      "complete": true,
+      "missingCardIds": []
+    },
+    {
+      "id": "precon-lee-sin",
+      "name": "Lee Sin · Origins",
+      "product": "Origins",
+      "uniqueCards": 24,
+      "executableCards": 24,
+      "complete": true,
+      "missingCardIds": []
+    },
+    {
+      "id": "precon-fiora",
+      "name": "Fiora · Spiritforged",
+      "product": "Spiritforged",
+      "uniqueCards": 26,
+      "executableCards": 26,
+      "complete": true,
+      "missingCardIds": []
+    },
+    {
+      "id": "precon-rumble",
+      "name": "Rumble · Spiritforged",
+      "product": "Spiritforged",
+      "uniqueCards": 25,
+      "executableCards": 25,
+      "complete": true,
+      "missingCardIds": []
+    },
+    {
+      "id": "precon-vi",
+      "name": "Vi · Unleashed",
+      "product": "Unleashed",
+      "uniqueCards": 30,
+      "executableCards": 30,
+      "complete": true,
+      "missingCardIds": []
+    },
+    {
+      "id": "precon-vex",
+      "name": "Vex · Unleashed",
+      "product": "Unleashed",
+      "uniqueCards": 30,
+      "executableCards": 30,
+      "complete": true,
+      "missingCardIds": []
+    },
+    {
+      "id": "precon-shen",
+      "name": "Shen · Vendetta Showdown",
+      "product": "Vendetta Showdown",
+      "uniqueCards": 30,
+      "executableCards": 30,
+      "complete": true,
+      "missingCardIds": []
+    },
+    {
+      "id": "precon-zed",
+      "name": "Zed · Vendetta Showdown",
+      "product": "Vendetta Showdown",
+      "uniqueCards": 26,
+      "executableCards": 26,
+      "complete": true,
+      "missingCardIds": []
+    }
+  ],
   "entries": [
     {
       "name": "Svellsongur",

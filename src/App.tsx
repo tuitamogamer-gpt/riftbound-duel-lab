@@ -32,6 +32,7 @@ import { catalog, findCard, domainColors } from "./catalog";
 import type { CatalogCard } from "./catalog";
 import { parseSession, SAVE_KEY } from "./persistence";
 import { cardArtUrl } from "./data/art";
+import { catalogMeta } from "./data/cards";
 import { type StarterDeck } from "./data/decks";
 import { DeckImport } from "./components/DeckImport";
 import { Lobby } from "./components/Lobby";
@@ -68,6 +69,7 @@ import {
 import { PlaybackSpeed } from "./components/PlaybackSpeed";
 import { EffectTrails, FieldEffect } from "./components/EffectFeedback";
 import { ActionStack } from "./components/ActionStack";
+import { ScreenHighlight } from "./components/ScreenHighlight";
 import { BattlefieldMight } from "./components/BattlefieldMight";
 import {
   MobileBoardNav,
@@ -114,7 +116,9 @@ const freshRead = () => {
 };
 const supported = (c: CatalogCard) =>
   Boolean(scripts[c.id]) || c.type === "Rune";
-const uniqueCards = catalog.filter((c) => !c.variant);
+const catalogSets = [
+  ...new Map(catalog.map((card) => [card.set, card.setName])).entries(),
+];
 const locationName = (l?: string) =>
   l === "base:0"
     ? "Tvoja baza"
@@ -586,7 +590,7 @@ export default function App() {
           onClick={() => setScreen("library")}
         >
           <Layers3 size={16} />
-          {t("Karte")} <span className="nav-count">{uniqueCards.length}</span>
+          {t("Karte")} <span className="nav-count">{catalog.length}</span>
         </button>
         <button onClick={() => setHelp(true)}>
           <BookOpen size={16} />
@@ -842,7 +846,7 @@ export default function App() {
                       const c = findCard(field.cardId);
                       return (
                         <section
-                          className={`battlefield ${field.controller === 0 ? "owned" : field.controller === 1 ? "enemy-owned" : ""} ${game.combat?.fieldId === field.id ? "in-combat" : ""}`}
+                          className={`battlefield ${field.controller === 0 ? "owned" : field.controller === 1 ? "enemy-owned" : ""} ${game.combat?.fieldId === field.id ? "in-combat" : ""} ${highlights.fields.has(field.id) ? "event-field-highlight" : ""}`}
                           key={field.id}
                           data-field-id={field.id}
                           data-mobile-active={mobileZone === field.id}
@@ -1058,6 +1062,10 @@ export default function App() {
                     game={game}
                     review={review}
                     inspect={setInspected}
+                    playbackSpeed={playbackSpeed}
+                  />
+                  <ScreenHighlight
+                    review={review}
                     playbackSpeed={playbackSpeed}
                   />
                 </div>
@@ -1643,12 +1651,13 @@ function BoardZone({
 }) {
   const { t } = useI18n();
   const units = game.units.filter((u) => u.location === location);
+  const highlights = useHighlights();
   const interaction = useContext(BoardInteraction);
   const player = location === "base:0" ? 0 : 1;
   const hasGear = game.gears.some((gear) => gear.owner === player);
   return (
     <section
-      className={`base-zone${hasGear ? " has-gear" : ""}`}
+      className={`base-zone${hasGear ? " has-gear" : ""}${highlights.fields.has(location) ? " event-field-highlight" : ""}`}
       data-location={location}
     >
       <span className="zone-label">{t(title)}</span>
@@ -1684,25 +1693,29 @@ function BoardZone({
   );
 }
 function Library({ inspect }: { inspect: (c: CatalogCard) => void }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [search, setSearch] = useState(""),
     [domain, setDomain] = useState("Sve domene"),
     [type, setType] = useState("Sve vrste"),
+    [set, setSet] = useState("all"),
+    [baseOnly, setBaseOnly] = useState(false),
     [onlyScripted, setOnlyScripted] = useState(false),
     [limit, setLimit] = useState(60);
   const filtered = useMemo(
     () =>
-      uniqueCards.filter(
+      catalog.filter(
         (c) =>
+          (!baseOnly || !c.variant) &&
+          (set === "all" || c.set === set) &&
           (!search ||
-            `${c.name} ${c.text}`
+            `${c.name} ${c.text} ${c.id} ${c.set}`
               .toLowerCase()
               .includes(search.toLowerCase())) &&
           (domain === "Sve domene" || c.domains.includes(domain)) &&
           (type === "Sve vrste" || c.type === type) &&
           (!onlyScripted || supported(c)),
       ),
-    [search, domain, type, onlyScripted],
+    [search, domain, type, set, baseOnly, onlyScripted],
   );
   return (
     <main className="library" id="main-content">
@@ -1715,6 +1728,21 @@ function Library({ inspect }: { inspect: (c: CatalogCard) => void }) {
         {t(
           "Originalne karte i tekstovi efekata. Oznaka „Podržana” znači da je karta podržana u meču.",
         )}{" "}
+      </p>
+      <p className="catalog-snapshot">
+        {t("{printings} printings · {tokens} rules tokens · Snapshot {date}", {
+          printings: catalogMeta.count,
+          tokens: catalog.length - catalogMeta.count,
+          date: new Date(catalogMeta.fetchedAt).toLocaleDateString(
+            locale === "sr" ? "sr-Latn" : locale,
+            {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+              timeZone: "UTC",
+            },
+          ),
+        })}
       </p>
       <div className="library-filters">
         <div className="search-input">
@@ -1742,6 +1770,32 @@ function Library({ inspect }: { inspect: (c: CatalogCard) => void }) {
             ),
           )}
         </select>
+        <select
+          aria-label={t("Card set")}
+          value={set}
+          onChange={(e) => {
+            setSet(e.target.value);
+            setLimit(60);
+          }}
+        >
+          <option value="all">{t("All sets")}</option>
+          {catalogSets.map(([id, name]) => (
+            <option key={id} value={id}>
+              {id === "TOKEN" ? t("Rules tokens") : name}
+            </option>
+          ))}
+        </select>
+        <label className="scripted-filter">
+          <input
+            type="checkbox"
+            checked={baseOnly}
+            onChange={(e) => {
+              setBaseOnly(e.target.checked);
+              setLimit(60);
+            }}
+          />
+          {t("Base printings only")}
+        </label>
         <select
           aria-label={t("Vrsta karte")}
           value={type}
@@ -1771,7 +1825,7 @@ function Library({ inspect }: { inspect: (c: CatalogCard) => void }) {
         </label>
       </div>
       <div className="catalog-count">
-        {filtered.length} {t("KARATA")}{" "}
+        {t("{count} matching entries", { count: filtered.length })}{" "}
         <span> {t("Podaci su spremljeni lokalno uz aplikaciju")} </span>
       </div>
       <div className="catalog-grid">
@@ -1780,6 +1834,9 @@ function Library({ inspect }: { inspect: (c: CatalogCard) => void }) {
             <Card card={c} onClick={() => inspect(c)} />
             <div className="catalog-card-name">
               <strong>{c.name}</strong>
+              <small className="catalog-printing-id">
+                {c.set} · {c.id}
+              </small>
               <span
                 className={supported(c) ? "scripted-badge" : "catalog-badge"}
               >
@@ -1880,7 +1937,7 @@ function Help({ close }: { close: () => void }) {
           <h3> {t("Podrška i izvori")} </h3>
           <p>
             {t(
-              "Ovo je nezavisni eksperimentalni simulator. Dostupni špilovi sadrže karte podržane za igranje; puni katalog sadrži i karte koje još nisu podržane. Nije potpuna digitalna implementacija svih objavljenih Riftbound setova.",
+              "Ovo je nezavisni eksperimentalni simulator. Sve karte u spremljenom katalogu imaju podršku za igranje. Katalog je snimak Riftcodex podataka; podrška za karte ne potvrđuje sve moguće interakcije pravila.",
             )}{" "}
           </p>
           <p>

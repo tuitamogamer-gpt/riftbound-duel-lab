@@ -1,4 +1,5 @@
 .battlefield-picker {
+  min-width: 0;
   padding: 18px;
   margin: 18px 0;
   border: 1px solid #c9aa683d;
@@ -26,6 +27,8 @@
 }
 .battlefield-picker select {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding: 11px;
   border: 1px solid #55707d;
   border-radius: 5px;
@@ -33,11 +36,153 @@
   color: #e7eef0;
   font-size: 13px;
 }
+.battlefield-supplied-pool {
+  margin-bottom: 16px;
+}
+.battlefield-supplied-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 10px;
+}
+.battlefield-supplied-heading strong {
+  color: #f5dfa8;
+  font-size: 13px;
+}
+.battlefield-supplied-heading small {
+  color: #a8bdc7;
+  font-size: 10px;
+}
+.battlefield-supplied-pool > p {
+  margin: 5px 0 10px;
+  color: #a8bdc7;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.battlefield-supplied-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: 9px;
+}
+.battlefield-supplied-single {
+  max-width: 280px;
+}
+.battlefield-supplied-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #55707d;
+  border-radius: 5px;
+  background: #12232d;
+}
+.battlefield-supplied-card.is-selected {
+  border-color: #83e0c8;
+  box-shadow: 0 0 0 1px #83e0c8;
+}
+.picker-opponent .battlefield-supplied-card.is-selected {
+  border-color: #edca75;
+  box-shadow: 0 0 0 1px #edca75;
+}
+.battlefield-supplied-choice {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 108px;
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  border: 0;
+  color: #fff2d0;
+  background: #08111a;
+  text-align: left;
+  cursor: pointer;
+}
+.battlefield-supplied-choice > img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 45%;
+  transition: transform 0.25s;
+}
+.battlefield-supplied-choice:hover > img {
+  transform: scale(1.035);
+}
+.battlefield-supplied-copy {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 38px 10px 9px;
+  background: linear-gradient(transparent 10%, #08111aeb 94%);
+}
+.battlefield-supplied-copy strong {
+  color: #fff2d0;
+  font:
+    italic 700 16px "Exo 2",
+    sans-serif;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.battlefield-supplied-copy small {
+  color: #cfdbde;
+  font-size: 9px;
+  line-height: 1.3;
+}
+.battlefield-selected-badge {
+  position: absolute;
+  z-index: 1;
+  top: 7px;
+  right: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: calc(100% - 14px);
+  padding: 4px 6px;
+  border-radius: 3px;
+  color: #08232a;
+  background: #83e0c8;
+  font:
+    700 9px "DM Sans",
+    sans-serif;
+}
+.picker-opponent .battlefield-selected-badge {
+  background: #edca75;
+}
+.battlefield-supplied-inspect {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px;
+  border: 0;
+  border-top: 1px solid #55707d70;
+  background: #172a35;
+  color: #b8cdd7;
+  font-size: 10px;
+  cursor: pointer;
+}
+.battlefield-supplied-inspect:hover {
+  color: #fff2d0;
+  background: #233b47;
+}
+.battlefield-supplied-choice:focus-visible,
+.battlefield-supplied-inspect:focus-visible {
+  outline: 2px solid #ffe1a2;
+  outline-offset: -3px;
+}
 .battlefield-choice-preview {
   margin-top: 12px;
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  max-width: 340px;
+  aspect-ratio: 2 / 1;
   padding: 0;
   border: 1px solid #c9aa6860;
   border-radius: 6px;
@@ -99,8 +244,17 @@
   outline-offset: 3px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .battlefield-choice-preview img {
+  .battlefield-choice-preview img,
+  .battlefield-supplied-choice > img {
     transition: none;
+  }
+}
+@media (max-width: 480px) {
+  .battlefield-picker {
+    padding: 13px;
+  }
+  .battlefield-supplied-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
   }
 }
 /* The extra setup card makes this panel taller than a laptop viewport. */

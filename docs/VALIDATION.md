@@ -1,5 +1,15 @@
 # Validation evidence
 
+## Catalog consistency and public event presentation — 7 October 2026
+
+`cards:check` verifies the saved catalog digest, card identities, set totals, all 13 bundled precons, the executable inventory and generated documentation summaries. Coverage remains **1,451 provider printings + eight rules tokens, 1,459 executable / zero unsupported**. No provider refresh or card-rule changes were made in this revision. The library now exposes all printings, set filters, base-printing filters and ID search.
+
+Catalog/import checks passed **288 targeted tests**, including the two fast precon-library checks. UI/presentation/save checks cover **159 tests across 17 files**. The first UI run had one timeout in the existing 480-action bot/save-frame replay; all its assertions completed, but exceeded its 30-second budget. Its budget was increased to four minutes while retaining all assertions. The final persistence/event rerun passed **29 tests in two files**, including the unchanged replay assertions in 92.5 seconds. These runs overlap and are not additive totals. The complete suite and 169-matchup matrix were not repeated.
+
+Chromium checks exercised supplied battlefield tiles for both players, hero changes, retained per-deck choices, inspection, library totals, variant/token filters and exact ID search at **1440×900, 1280×720, 390×844 and 844×390**, without horizontal page overflow. Real engine fixtures verified champion arrivals for both players, damage, buffs, plays, counters, Equipment, Hidden privacy, opponent draws and quiet priority passes. Animation and reduced-motion checks also restored the same champion review after reload. Overlays remain nonblocking and paused cues remain visible.
+
+Exhausted artwork bounds were checked against Might, status markers and details controls at the same four sizes. Crowded fixtures use eight units in each base/battlefield and a 12-card hand. Production TypeScript/Vite compilation, `cards:check` and whitespace checks pass. The existing Vite bundle-size warning remains.
+
 ## Remaining 107 catalog entries — 7 October 2026
 
 The refreshed coverage report contains **1,459 executable / zero unsupported / 1,459 registered** entries, including 1,451 provider printings and eight rules tokens. All 107 frozen previously unsupported IDs now have executable registration; three new local rules tokens account for the increase in total entries. See the [exact source ledger](IMPORT-107-SOURCES.md).
