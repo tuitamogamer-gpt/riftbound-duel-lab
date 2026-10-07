@@ -10,6 +10,7 @@ import { CardStatusTokens } from "./CardStatusTokens";
 import { ExhaustedToken } from "./ExhaustedToken";
 import { RulesErrata } from "./RulesErrata";
 import { EquipmentRules } from "./EquipmentRules";
+import { useDialogFocus } from "../hooks/useDialogFocus";
 export function Card({
   card,
   onClick,
@@ -115,10 +116,12 @@ export function CardDetail({
   statuses?: CardStatus[];
 }) {
   const { t } = useI18n();
+  const dialog = useDialogFocus(onClose);
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <section
         className="modal card-detail"
+        ref={dialog}
         role="dialog"
         aria-modal="true"
         aria-label={card.name}

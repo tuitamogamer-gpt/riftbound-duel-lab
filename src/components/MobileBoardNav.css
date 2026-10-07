@@ -1,0 +1,151 @@
+.mobile-board-nav {
+  display: none;
+}
+
+@media (max-width: 800px), (max-width: 1000px) and (max-height: 500px) {
+  .mobile-board-nav {
+    grid-area: zones;
+    display: grid;
+    grid-template-columns: repeat(var(--mobile-zone-count, 4), minmax(0, 1fr));
+    gap: 5px;
+    min-height: 0;
+  }
+  .mobile-board-nav .mobile-zone-tile {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
+    min-width: 0;
+    min-height: 56px;
+    padding: 5px 5px 5px 7px;
+    overflow: hidden;
+    border: 1px solid #72908e80;
+    border-left: 3px solid #a6aaa780;
+    border-radius: 8px;
+    background: #13252f;
+    color: #dce7e6;
+    text-align: left;
+    touch-action: manipulation;
+  }
+  .mobile-zone-tile::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(100deg, #071c2dea 15%, #071c2da8 100%);
+  }
+  .mobile-zone-art {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 34%;
+    opacity: 0.8;
+    pointer-events: none;
+  }
+  .mobile-zone-tile[data-mobile-control="0"] {
+    border-left-color: #83e6c2;
+  }
+  .mobile-zone-tile[data-mobile-control="1"] {
+    border-left-color: #ff9ba7;
+  }
+  .mobile-board-nav .mobile-zone-tile[aria-pressed="true"] {
+    border-top-color: #e7cd87;
+    border-right-color: #e7cd87;
+    border-bottom-color: #e7cd87;
+    color: #fff0ca;
+    box-shadow:
+      inset 0 -2px #efd17c,
+      0 0 0 1px #efd17c35;
+  }
+  .mobile-zone-tile.has-target {
+    box-shadow: inset 0 0 0 1px #75edc7;
+  }
+  .mobile-zone-tile.has-event {
+    background: #354034;
+    outline: 1px solid #fff0ac85;
+    outline-offset: -3px;
+  }
+  .mobile-zone-tile.has-combat::after {
+    background: linear-gradient(100deg, #3c211ded, #071c2dbb);
+  }
+  .mobile-zone-name {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    padding-right: 8px;
+    overflow: hidden;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 11px;
+    min-height: 22px;
+    text-shadow: 0 1px 2px #000;
+  }
+  .mobile-zone-counts {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 3px;
+    line-height: 10px;
+  }
+  .mobile-zone-counts > span {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+    font-size: 10px;
+  }
+  .mobile-zone-counts :is(b, strong, small) {
+    font-size: inherit;
+    line-height: inherit;
+  }
+  .mobile-zone-counts svg {
+    flex: none;
+    opacity: 0.85;
+  }
+  .mobile-zone-counts .friendly-count {
+    color: #a5f1d7;
+  }
+  .mobile-zone-counts .enemy-count {
+    color: #ffb5be;
+  }
+  .mobile-zone-badges {
+    position: absolute;
+    top: 4px;
+    right: 3px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    color: #c7d9d6;
+  }
+  .mobile-zone-badges .mobile-target-dot {
+    color: #8affd3;
+  }
+  .mobile-zone-badges .mobile-combat-badge {
+    color: #ffca8f;
+  }
+  .mobile-zone-tile:focus-visible {
+    outline: 2px solid #fff1bd;
+    outline-offset: 1px;
+  }
+}
+
+@media (max-width: 1000px) and (max-height: 500px) and (min-aspect-ratio: 3/2) {
+  .mobile-zone-name {
+    -webkit-line-clamp: 1;
+    min-height: 11px;
+  }
+  .mobile-zone-counts {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 5px;
+  }
+  .mobile-zone-counts > span {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

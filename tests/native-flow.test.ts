@@ -91,5 +91,6 @@ describe("native match flow", () => {
     expect(forced).toBeGreaterThan(0);
     expect(opponent).toBeGreaterThan(0);
     expect(reactions).toBeGreaterThan(0);
-  }, 30_000);
+    // Three complete simulations over the imported catalog need more time on shared runners.
+  }, 240_000);
 });

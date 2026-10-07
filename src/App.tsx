@@ -18,6 +18,7 @@ import {
   Play,
   History,
   Layers3,
+  Menu,
   RotateCcw,
   Search,
   Shield,
@@ -58,7 +59,11 @@ import {
 import { isMovementSelection, sourceActions } from "./game/flow";
 import { gearStatuses, unitStatuses } from "./game/status-presentation";
 import { MatchControls } from "./components/MatchControls";
-import { CardPiles, PileDialog, type PileView } from "./components/CardPiles";
+import { PileDialog, type PileView } from "./components/CardPiles";
+import { HandTray } from "./components/HandTray";
+import { MobileMatchMenu } from "./components/MobileMatchMenu";
+import { useCompactTable } from "./hooks/useCompactTable";
+import { soleMobileTargetZone } from "./game/mobile-presentation";
 import { TurnFlow, ShowdownCue, CombatReadout } from "./components/TurnFlow";
 import { reviewDelay, automaticDelay, matchStatus } from "./game/presentation";
 import {
@@ -149,10 +154,21 @@ function sound() {
 export default function App() {
   const { t } = useI18n();
   const previewActive = useCardPreviewActive();
+  const compactTable = useCompactTable();
+  const [handExpanded, setHandExpanded] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [screen, setScreen] = useState<"lobby" | "game" | "library">("lobby");
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
+    setHandExpanded(false);
+    setMobileMenuOpen(false);
   }, [screen]);
+  useEffect(() => {
+    if (!compactTable) {
+      setHandExpanded(false);
+      setMobileMenuOpen(false);
+    }
+  }, [compactTable]);
   const [saved] = useState(freshRead);
   const [match, setGame] = useState<GameState | null>(saved.match);
   const [review, setReview] = useState<Review | null>(saved.review);
@@ -197,7 +213,6 @@ export default function App() {
   const status = game
     ? matchStatus(game, { paused, reviewing: !!review })
     : null;
-  const drawEvent = review?.frames[review.index]?.draw;
   useEffect(() => {
     if (!import.meta.env.DEV) return;
     Object.assign(window, {
@@ -346,6 +361,8 @@ export default function App() {
     !help &&
     !inspected &&
     !pileView &&
+    !handExpanded &&
+    !mobileMenuOpen &&
     !confirmNew &&
     !logOpen;
   const bot = useBotDecision(match, botEnabled);
@@ -368,6 +385,8 @@ export default function App() {
       help ||
       inspected ||
       pileView ||
+      handExpanded ||
+      mobileMenuOpen ||
       confirmNew ||
       logOpen
     )
@@ -409,6 +428,8 @@ export default function App() {
     help,
     inspected,
     pileView,
+    handExpanded,
+    mobileMenuOpen,
     confirmNew,
     logOpen,
     difficulty,
@@ -456,6 +477,13 @@ export default function App() {
       return;
     }
     setTarget(null);
+    if (compactTable) {
+      const zone = soleMobileTargetZone(
+        game,
+        sourceActions(game, legal, source),
+      );
+      if (zone) setMobileZone(zone);
+    }
     setSelected((current) => (current === source ? null : source));
   };
   useEffect(() => {
@@ -679,6 +707,8 @@ export default function App() {
               !visible ||
               !!inspected ||
               !!pileView ||
+              handExpanded ||
+              mobileMenuOpen ||
               help ||
               logOpen ||
               confirmNew
@@ -701,6 +731,9 @@ export default function App() {
                 role="status"
                 aria-live="polite"
               >
+                <small className="mobile-turn-number">
+                  {t("POTEZ")} {game.turn}
+                </small>
                 {t(status?.label)}
               </div>
               <details className="bot-explanation">
@@ -762,6 +795,8 @@ export default function App() {
                 className="icon-button"
                 onClick={() => setLogOpen(!logOpen)}
                 title={t("Dnevnik meča")}
+                aria-label={t("Dnevnik meča")}
+                data-mobile-secondary
               >
                 <History size={18} />
               </button>
@@ -769,9 +804,21 @@ export default function App() {
                 className="icon-button"
                 title={t("Pravila")}
                 onClick={() => setHelp(true)}
+                aria-label={t("Pravila")}
+                data-mobile-secondary
               >
                 <CircleHelp size={18} />
               </button>
+              {compactTable && (
+                <button
+                  className="icon-button mobile-menu-button"
+                  onClick={() => setMobileMenuOpen(true)}
+                  aria-label={t("Duel menu")}
+                  aria-haspopup="dialog"
+                >
+                  <Menu size={20} />
+                </button>
+              )}
             </div>
             <TurnFlow game={game} review={review} paused={paused} />
             <BoardInteraction.Provider
@@ -789,7 +836,18 @@ export default function App() {
                     zone={mobileZone}
                     select={setMobileZone}
                     actions={currentActions}
+                    review={review}
                   />
+                  {compactTable && (
+                    <div className="mobile-duel-chain">
+                      <ActionStack
+                        game={game}
+                        review={review}
+                        paused={paused}
+                        inspect={setInspected}
+                      />
+                    </div>
+                  )}
                   <ScoreTrack game={game} review={review} />
                   <PlayerBar game={game} player={1} inspect={setInspected} />
                   <div className="mobile-base-panel opponent-base-panel">
@@ -836,12 +894,14 @@ export default function App() {
                     />
                   </div>
                   <div className="battlefields">
-                    <ActionStack
-                      game={game}
-                      review={review}
-                      paused={paused}
-                      inspect={setInspected}
-                    />
+                    {!compactTable && (
+                      <ActionStack
+                        game={game}
+                        review={review}
+                        paused={paused}
+                        inspect={setInspected}
+                      />
+                    )}
                     {game.fields.map((field, i) => {
                       const c = findCard(field.cardId);
                       return (
@@ -989,74 +1049,35 @@ export default function App() {
                   </div>
                   <PlayerBar game={game} player={0} inspect={setInspected} />
                   <div className="player-cards">
-                    <section className="hand-section">
-                      <div className="hand-title">
-                        <span>
-                          {t("TVOJA RUKA")} <b>{game.players[0].hand.length}</b>
-                        </span>
-                        <span>
-                          {t("Click a card · choose a move in the center")}{" "}
-                        </span>
-                      </div>
-                      <div
-                        className="hand"
-                        style={
-                          {
-                            "--hand-count": Math.max(
-                              1,
-                              game.players[0].hand.length,
-                            ),
-                          } as React.CSSProperties
+                    <HandTray
+                      game={game}
+                      legal={legal}
+                      selected={selected}
+                      mulligan={mulligan}
+                      select={(source) => {
+                        if (game.phase === "mulligan") selectCard(source);
+                        else if (!review && !thinking && !paused) {
+                          setTarget(null);
+                          if (compactTable) {
+                            const zone = soleMobileTargetZone(
+                              game,
+                              sourceActions(game, legal, source),
+                            );
+                            if (zone) setMobileZone(zone);
+                          }
+                          setSelected((current) =>
+                            current === source ? null : source,
+                          );
                         }
-                      >
-                        {game.players[0].hand.map((id, i) => {
-                          const c = findCard(id);
-                          return c ? (
-                            <div
-                              className={`hand-card-wrap ${drawEvent?.player === 0 && i >= game.players[0].hand.length - drawEvent.count ? "hand-draw-arrival" : ""}`}
-                              style={
-                                review
-                                  ? ({
-                                      "--draw-duration": `${reviewDelay(review, playbackSpeed)}ms`,
-                                    } as React.CSSProperties)
-                                  : undefined
-                              }
-                              key={`${id}-${i}`}
-                            >
-                              <Card
-                                card={c}
-                                selected={
-                                  selected === `hand:${i}` ||
-                                  mulligan.includes(i)
-                                }
-                                onClick={() => selectCard(`hand:${i}`)}
-                                playable={
-                                  game.phase === "mulligan"
-                                    ? !game.players[0].mulliganDone
-                                    : legal.some(
-                                        (a) => a.sourceId === `hand:${i}`,
-                                      )
-                                }
-                                disabled={
-                                  game.phase !== "mulligan" &&
-                                  !legal.some((a) => a.sourceId === `hand:${i}`)
-                                }
-                              />
-                              <button
-                                className="card-info-button"
-                                aria-label={t("Detalji {card}", {
-                                  card: c.name,
-                                })}
-                                onClick={() => setInspected(c)}
-                              >
-                                ⓘ
-                              </button>
-                            </div>
-                          ) : null;
-                        })}
-                      </div>
-                      <CardPiles game={game} open={setPileView} />
-                    </section>
+                      }}
+                      inspect={setInspected}
+                      openPile={setPileView}
+                      review={review}
+                      playbackSpeed={playbackSpeed}
+                      expanded={handExpanded}
+                      onExpandedChange={setHandExpanded}
+                      interactive={!review && !thinking && !paused}
+                    />
                   </div>
                   <TableMoment
                     game={game}
@@ -1072,6 +1093,18 @@ export default function App() {
                 <EffectTrails review={review} />
               </div>
             </BoardInteraction.Provider>
+            {compactTable && (
+              <MobileMatchMenu
+                open={mobileMenuOpen}
+                close={() => setMobileMenuOpen(false)}
+                speed={playbackSpeed}
+                setSpeed={setPlaybackSpeed}
+                showHistory={() => setLogOpen(true)}
+                showHelp={() => setHelp(true)}
+                leave={() => setScreen("lobby")}
+                botReason={thinking && !review ? "Bot is thinking…" : botReason}
+              />
+            )}
             {pileView && (
               <PileDialog
                 game={game}
