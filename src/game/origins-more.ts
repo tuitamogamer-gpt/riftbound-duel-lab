@@ -1,3 +1,12 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { recycleCards, recycleRunes } from "./zone-events";
+import { isCardType } from "../data/cards";
+import { ruleFamily } from "./rule-families";
 import { takeTrashAt } from "./trash";
 import { getCard } from "../data/cards";
 import { getMight } from "./engine";
@@ -243,7 +252,7 @@ function choose(
 export const originsMoreModule: ExpansionModule = {
   might(s, u, value) {
     if (u.stunned) {
-      const count = s.units.filter(
+      const count = textUnits(s).filter(
         (v) =>
           v.owner !== u.owner &&
           v.location === u.location &&
@@ -251,15 +260,18 @@ export const originsMoreModule: ExpansionModule = {
       ).length;
       if (count) value = Math.max(1, value - 8 * count);
     }
-    if (
-      u.cardId === "ogn-232-298" &&
-      value >= 5 &&
-      s.combat &&
-      (s.combat.engaged ?? true) &&
-      s.combat.fieldId === u.location &&
-      s.combat.defender === u.owner
-    )
-      value++;
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (
+        u.cardId === "ogn-232-298" &&
+        value >= 5 &&
+        s.combat &&
+        (s.combat.engaged ?? true) &&
+        s.combat.fieldId === u.location &&
+        s.combat.defender === u.owner
+      )
+        value++;
+    }
     return value;
   },
   keywords(s, u) {
@@ -273,20 +285,24 @@ export const originsMoreModule: ExpansionModule = {
       (g) => g.owner === u.owner && g.cardId === "sfd-104-221",
     ))
       result.push("Deflect");
-    if (u.cardId === "ogn-232-298" && getMight(s, u) >= 5)
-      result.push("Deflect", "Ganking", "Shield");
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === "ogn-232-298" && getMight(s, u) >= 5)
+        result.push("Deflect", "Ganking", "Shield");
+    }
     return result;
   },
   cost(s, p, card) {
     const discount = (s as State).originsNextSpellDiscount?.[p];
-    return card.type === "Spell" && discount?.turn === s.turn
+    return isCardType(card, "Spell") && discount?.turn === s.turn
       ? { energy: -discount.amount }
       : {};
   },
   effect(s, p, e, ctx) {
     if (!e.custom?.startsWith("origins-more:")) return false;
     const key = e.custom.slice("origins-more:".length),
-      source = s.units.find((u) => u.id === ctx.sourceId) ?? ctx.lastUnit;
+      source =
+        abilityUnit(s, ctx.sourceId, ctx.abilityInstance) ?? ctx.lastUnit;
     const target = s.units.find((u) => u.id === ctx.targetId);
     const run = (effects: Effect[], targetId = ctx.targetId) =>
       ctx.runEffects(s, p, effects, targetId, ctx.sourceId, ctx.locationId);
@@ -371,7 +387,7 @@ export const originsMoreModule: ExpansionModule = {
           p,
           ctx,
           hand.flatMap((cardId, index) =>
-            key === "sabotage" && getCard(cardId).type === "Unit"
+            key === "sabotage" && isCardType(getCard(cardId), "Unit")
               ? []
               : [
                   option(
@@ -396,7 +412,7 @@ export const originsMoreModule: ExpansionModule = {
           hand = s.players[opponent].hand;
         if (hand[e.amount!] === e.cardName) {
           const [card] = hand.splice(e.amount!, 1);
-          if (e.condition === "sabotage") s.players[opponent].deck.push(card);
+          if (e.condition === "sabotage") recycleCards(s, opponent, [card], p);
           else ctx.discardCards(s, opponent, [card]);
         }
         break;
@@ -452,7 +468,7 @@ export const originsMoreModule: ExpansionModule = {
         run([{ type: "bounce" }], e.cardName);
         break;
       case "stacked-deck": {
-        const top = s.players[p].deck.slice(0, 3);
+        const top = s.players[p].deck.slice(0, e.lookCount ?? 3);
         choose(
           s,
           p,
@@ -469,14 +485,14 @@ export const originsMoreModule: ExpansionModule = {
         break;
       }
       case "stacked-selected": {
-        const top = s.players[p].deck.splice(0, 3),
+        const top = s.players[p].deck.splice(0, e.lookCount ?? 3),
           index = e.amount ?? 0;
         if (top[index]) s.players[p].hand.push(top.splice(index, 1)[0]);
-        s.players[p].deck.push(...ctx.shuffle!(s, top));
+        recycleCards(s, p, [...ctx.shuffle!(s, top)], p);
         break;
       }
       case "candlelit": {
-        const top = s.players[p].deck.slice(0, 2);
+        const top = s.players[p].deck.slice(0, e.lookCount ?? 2);
         if (top.length)
           choose(s, p, ctx, [
             option(p, "candle-keep", "Keep cards in the same order", [
@@ -512,7 +528,7 @@ export const originsMoreModule: ExpansionModule = {
         break;
       }
       case "candle-selected": {
-        const top = s.players[p].deck.splice(0, 2),
+        const top = s.players[p].deck.splice(0, e.lookCount ?? 2),
           mode = e.amount ?? 0;
         const kept =
           mode === 0
@@ -580,7 +596,7 @@ export const originsMoreModule: ExpansionModule = {
         source.owner,
         source.cardId,
         source.id,
-        effects,
+        textEffects(source, effects),
         source.location,
       );
     if (event === "unitPlayed" && u) {
@@ -590,21 +606,32 @@ export const originsMoreModule: ExpansionModule = {
       }
       if (u.cardId === "ogn-079-298" && s.players[other(p)].points >= 5)
         u.ready = true;
-      for (const seer of own(s, p).filter(
-        (v) => v.id !== u.id && v.cardId === "ogn-100-298",
-      ))
-        ctx.trigger(s, p, seer.cardId, u.id, [{ type: "predict" }], u.location);
+      for (const seer of own(s, p)
+        .flatMap((u) => textSources(s, u))
+        .filter((v) => v.id !== u.id && v.cardId === "ogn-100-298"))
+        ctx.trigger(
+          s,
+          p,
+          seer.cardId,
+          u.id,
+          textEffects(u, [{ type: "predict" }]),
+          u.location,
+        );
     }
-    if (event === "cardFinalized" && getCard(cardId).type === "Spell")
+    if (event === "cardFinalized" && isCardType(getCard(cardId), "Spell"))
       delete (s as State).originsNextSpellDiscount?.[p];
     if (event === "play" && ctx.fromHidden) {
-      for (const monk of own(s, p).filter((v) => v.cardId === "ogn-167-298"))
+      for (const monk of own(s, p)
+        .flatMap((u) => textSources(s, u))
+        .filter((v) => v.cardId === "ogn-167-298"))
         trigger(monk, [self("might", 2)]);
-      for (const broker of own(s, p).filter((v) => v.cardId === "sfd-121-221"))
+      for (const broker of own(s, p)
+        .flatMap((u) => textSources(s, u))
+        .filter((v) => v.cardId === "sfd-121-221"))
         trigger(broker, [effect("gold")]);
     }
     if (event === "move" && u) {
-      for (const bear of s.units.filter(
+      for (const bear of textUnits(s).filter(
         (v) =>
           v.owner !== p &&
           v.cardId === "ogn-158-298" &&
@@ -612,7 +639,7 @@ export const originsMoreModule: ExpansionModule = {
       ))
         if (locationId?.startsWith("field:"))
           trigger(bear, [{ type: "draw", amount: 1 }]);
-      if (u.cardId === "ogn-205-298") {
+      if (ruleFamily(u.cardId) === "ogn-205-298") {
         const map = ((s as State).originsMoveCounts ??= {}),
           old = map[u.id];
         map[u.id] = {
@@ -665,7 +692,7 @@ export const originsMoreModule: ExpansionModule = {
           u.owner,
           gear.cardId,
           gear.id,
-          [{ type: "buff", target: "friendlyUnit" }],
+          textEffects(gear, [{ type: "buff", target: "friendlyUnit" }]),
           `base:${u.owner}`,
         );
     }
@@ -685,7 +712,7 @@ export const originsMoreModule: ExpansionModule = {
             p,
             field.cardId,
             field.id,
-            [effect("obelisk")],
+            textEffects(field, [effect("obelisk")]),
             field.id,
           );
         if (field.cardId === "ogn-290-298")
@@ -694,7 +721,7 @@ export const originsMoreModule: ExpansionModule = {
             p,
             field.cardId,
             field.id,
-            [{ type: "score", amount: 1 }],
+            textEffects(field, [{ type: "score", amount: 1 }]),
             field.id,
           );
       }

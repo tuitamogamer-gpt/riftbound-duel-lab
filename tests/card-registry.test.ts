@@ -21,15 +21,14 @@ import {
 } from "../src/game/deck-import";
 
 describe("complete printing registry", () => {
-  it("keeps both hybrid Porobot records unavailable until Unit/Gear rules exist", () => {
+  it("registers both Porobot records with complete Unit and Gear support", () => {
     const porobots = cards.filter(
       (card) => canonicalCardName(card.name) === "patched porobot",
     );
     expect(porobots).toHaveLength(2);
     for (const card of porobots) {
-      expect(cardRegistry[card.id].status).toBe("unsupported");
-      expect(cardRegistry[card.id].reason).toContain("both Unit and Gear");
-      expect(getScript(card.id)).toBeUndefined();
+      expect(cardRegistry[card.id].status).not.toBe("unsupported");
+      expect(getScript(card.id)?.cardTypes).toEqual(["Unit", "Gear"]);
     }
   });
   it("cannot restore a hybrid card through compilation or printing aliases", () => {
@@ -153,9 +152,7 @@ describe("complete printing registry", () => {
     expect(result.playable).toBe(true);
   });
   it("blocks unsupported engine initialization even if a caller bypasses the lobby", () => {
-    const unsupported = cards.find(
-      (c) => c.type === "Unit" && !isImplemented(c.id),
-    )!;
+    const unsupported = { id: "future-unimplemented-card" };
     const deck = structuredClone(starterDecks[0]);
     deck.main[0].cardId = unsupported.id;
     expect(() => createGame({ playerDeck: deck })).toThrow("unsupported cards");

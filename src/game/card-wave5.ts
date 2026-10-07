@@ -1,3 +1,12 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { recycleCards, recycleRunes } from "./zone-events";
+import { changeMight } from "./card-wave19";
+import { unitTriggerEffects } from "./equipment";
 import { getKeywords } from "./engine";
 import { getScript } from "./scripts";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
@@ -135,16 +144,21 @@ function choose(
 
 export const cardWave5Module: ExpansionModule = {
   might(s, u, value) {
-    if (u.cardId === "sfd-085-221")
-      return value + s.gears.filter((g) => g.owner === u.owner).length;
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === "sfd-085-221")
+        value += s.gears.filter((g) => g.owner === u.owner).length;
+    }
     return value;
   },
   keywords(s, u) {
-    return u.cardId === "ogn-189-298" &&
+    return textSources(s, u).flatMap((u) =>
+      u.cardId === "ogn-189-298" &&
       u.movesTurn === s.turn &&
       (u.movesThisTurn ?? 0) >= 2
-      ? ["Prevent all damage"]
-      : [];
+        ? ["Prevent all damage"]
+        : [],
+    );
   },
   event(s, event, p, _cardId, sourceId, locationId, ctx) {
     const source = s.units.find((u) => u.id === sourceId);
@@ -160,15 +174,20 @@ export const cardWave5Module: ExpansionModule = {
     if (event === "attach") {
       const gear = s.gears.find((g) => g.id === sourceId);
       const unit = s.units.find((u) => u.id === gear?.attachedTo);
-      if (unit?.cardId === "sfd-119-221")
-        ctx.trigger(
-          s,
-          unit.owner,
-          unit.cardId,
-          unit.id,
-          [{ type: "draw", optional: true, triggerCost: { energy: 1 } }],
-          unit.location,
-        );
+      for (const instance of textSources(s, unit)) {
+        const unit = instance;
+        if (unit.cardId === "sfd-119-221")
+          ctx.trigger(
+            s,
+            unit.owner,
+            unit.cardId,
+            unit.id,
+            textEffects(unit, [
+              { type: "draw", optional: true, triggerCost: { energy: 1 } },
+            ]),
+            unit.location,
+          );
+      }
     }
     if (
       event === "hold" &&
@@ -177,9 +196,15 @@ export const cardWave5Module: ExpansionModule = {
       for (const unit of s.units.filter(
         (u) => u.owner === p && u.location === locationId,
       )) {
-        const effects = getScript(unit.cardId)?.onConquer;
-        if (effects)
-          ctx.trigger(s, p, unit.cardId, unit.id, effects, locationId);
+        for (const effects of unitTriggerEffects(s, unit, "onConquer"))
+          ctx.trigger(
+            s,
+            p,
+            unit.cardId,
+            unit.id,
+            textEffects(unit, effects),
+            locationId,
+          );
       }
     }
   },
@@ -191,7 +216,7 @@ export const cardWave5Module: ExpansionModule = {
         u.id === ctx.targetId &&
         (!e.fromHidden || u.location === ctx.locationId),
     );
-    const source = s.units.find((u) => u.id === ctx.sourceId);
+    const source = abilityUnit(s, ctx.sourceId, ctx.abilityInstance);
     const run = (effects: Effect[], targetId = ctx.targetId) =>
       ctx.runEffects(s, p, effects, targetId, ctx.sourceId, ctx.locationId);
     switch (key) {
@@ -276,8 +301,8 @@ export const cardWave5Module: ExpansionModule = {
           break;
         const aMight = ctx.getMight(s, a, false),
           bMight = ctx.getMight(s, b, false);
-        a.temporaryMight += bMight - ctx.getMight(s, a, false);
-        b.temporaryMight += aMight - ctx.getMight(s, b, false);
+        changeMight(s, p, a, bMight - ctx.getMight(s, a, false), true);
+        changeMight(s, p, b, aMight - ctx.getMight(s, b, false), true);
         break;
       }
       case "smoke-mirrors": {
@@ -326,8 +351,11 @@ export const cardWave5Module: ExpansionModule = {
       case "recycle-selected-rune": {
         const index = s.players[p].runes.findIndex((r) => r.id === e.cardName);
         if (index >= 0)
-          s.players[p].runeDeck.push(
-            s.players[p].runes.splice(index, 1)[0].domain,
+          recycleRunes(
+            s,
+            p,
+            [s.players[p].runes.splice(index, 1)[0].domain],
+            p,
           );
         break;
       }

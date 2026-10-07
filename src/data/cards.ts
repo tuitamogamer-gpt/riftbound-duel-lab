@@ -40,6 +40,22 @@ export const getCard = (id: string): Card => {
   if (!card) throw new Error(`Unknown card: ${id}`);
   return card;
 };
+/** The provider has one type column; Porobot's printed face has two types. */
+export const getCardTypes = (card: {
+  type: string;
+  set?: string;
+  collectorNumber?: number;
+}): string[] =>
+  card.set === "VEN" && card.collectorNumber === 58
+    ? ["Unit", "Gear"]
+    : [card.type];
+export function isCardType(
+  card:
+    { type: string; set?: string; collectorNumber?: number } | undefined | null,
+  type: string,
+): boolean {
+  return Boolean(card && getCardTypes(card).includes(type));
+}
 
 /** Human-readable symbol fallback while preserving the provider's English rules text. */
 export function readableText(text: string): string {

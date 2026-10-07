@@ -1,3 +1,12 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { recycleCards, recycleRunes } from "./zone-events";
+import { isCardType } from "../data/cards";
+import { getUnitTags } from "./board-rules";
 import { canPlayCard } from "./board-rules";
 import { getCard } from "../data/cards";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
@@ -290,10 +299,10 @@ const tribal = (cardId: string) =>
   getCard(cardId).tags.some((tag) => tribes.includes(tag));
 const tagCount = (s: GameState, p: PlayerId) =>
   tribes.filter((tag) =>
-    s.units.some((u) => u.owner === p && getCard(u.cardId).tags.includes(tag)),
+    s.units.some((u) => u.owner === p && getUnitTags(u).includes(tag)),
   ).length;
 const live = (s: GameState, p: PlayerId, card: number) =>
-  s.units.filter((u) => u.owner === p && u.cardId === id(card));
+  textUnits(s).filter((u) => u.owner === p && u.cardId === id(card));
 type Choice = {
   label: string;
   effects: Effect[];
@@ -336,7 +345,7 @@ function trigger(
   ctx: PreconContext,
   location = u.location,
 ) {
-  ctx.trigger(s, u.owner, u.cardId, u.id, effects, location);
+  ctx.trigger(s, u.owner, u.cardId, u.id, textEffects(u, effects), location);
 }
 function execute(
   s: GameState,
@@ -351,15 +360,34 @@ function execute(
 export const unleashedExtraModule: ExpansionModule = {
   might(s, u, value) {
     const state = data(s, false);
-    if (u.cardId === id(4) && state.paidSpell[u.owner]) value += 4;
-    if ([id(16), id(75)].includes(u.cardId) && xp(s, u.owner) >= 3) value++;
-    if (u.cardId === id(94) && xp(s, u.owner) >= 6) value++;
-    if (u.cardId === id(98) && xp(s, u.owner) >= 11) value += 4;
-    if (u.cardId === id(108) && state.gainedXP[u.owner]) value++;
-    if (u.cardId === id(76) && u.location.startsWith("field:"))
-      value += s.units.filter(
-        (a) => a.owner === u.owner && a.location === u.location && a.temporary,
-      ).length;
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === id(4) && state.paidSpell[u.owner]) value += 4;
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if ([id(16), id(75)].includes(u.cardId) && xp(s, u.owner) >= 3) value++;
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === id(94) && xp(s, u.owner) >= 6) value++;
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === id(98) && xp(s, u.owner) >= 11) value += 4;
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === id(108) && state.gainedXP[u.owner]) value++;
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === id(76) && u.location.startsWith("field:"))
+        value += s.units.filter(
+          (a) =>
+            a.owner === u.owner && a.location === u.location && a.temporary,
+        ).length;
+    }
     if (u.token) value += live(s, u.owner, 77).length;
     if (s.players[u.owner].legendId === id(191) && xp(s, u.owner) >= 6) value++;
     if (
@@ -385,11 +413,20 @@ export const unleashedExtraModule: ExpansionModule = {
   },
   keywords(s, u) {
     const result: string[] = [];
-    if (u.cardId === id(75) && xp(s, u.owner) >= 3) result.push("Ganking");
-    if (u.cardId === id(113) && xp(s, u.owner) >= 6)
-      result.push("Deflect", "Ganking");
-    if (u.cardId === id(108) && data(s, false).gainedXP[u.owner])
-      result.push("Ganking");
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === id(75) && xp(s, u.owner) >= 3) result.push("Ganking");
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === id(113) && xp(s, u.owner) >= 6)
+        result.push("Deflect", "Ganking");
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === id(108) && data(s, false).gainedXP[u.owner])
+        result.push("Ganking");
+    }
     if (u.token && live(s, u.owner, 58).length) result.push("Tank");
     if (
       data(s, false).shields[u.id] ||
@@ -403,14 +440,15 @@ export const unleashedExtraModule: ExpansionModule = {
     let energy = 0;
     if (card.id === id(91))
       energy -= xp(s, p) >= 11 ? 4 : xp(s, p) >= 6 ? 2 : 0;
-    if (card.type === "Unit" && card.supertype !== "Token")
+    if (isCardType(card, "Unit") && card.supertype !== "Token")
       energy += data(s, false).holdTax[p];
     return { energy };
   },
   effect(s, p, e, ctx) {
     if (!e.custom?.startsWith("unl-extra:")) return false;
     const key = e.custom.slice("unl-extra:".length);
-    const source = s.units.find((u) => u.id === ctx.sourceId) ?? ctx.lastUnit;
+    const source =
+      abilityUnit(s, ctx.sourceId, ctx.abilityInstance) ?? ctx.lastUnit;
     const target = s.units.find((u) => u.id === ctx.targetId);
     switch (key) {
       case "hold-tax":
@@ -553,12 +591,12 @@ export const unleashedExtraModule: ExpansionModule = {
         );
         break;
       case "select-top": {
-        const viewed = s.players[p].deck.slice(0, e.amount ?? 3);
+        const viewed = s.players[p].deck.slice(0, e.lookCount ?? e.amount ?? 3);
         const eligible = (cardId: string) =>
           e.condition === "largeSpell"
-            ? getCard(cardId).type === "Spell" &&
+            ? isCardType(getCard(cardId), "Spell") &&
               (getCard(cardId).energy ?? 0) >= 4
-            : getCard(cardId).type === "Unit";
+            : isCardType(getCard(cardId), "Unit");
         const choices = viewed.flatMap((cardId, index) =>
           eligible(cardId)
             ? [
@@ -604,10 +642,11 @@ export const unleashedExtraModule: ExpansionModule = {
           selection.index < 0
             ? undefined
             : viewed.splice(selection.index, 1)[0];
-        s.players[p].deck.push(...(ctx.shuffle?.(s, viewed) ?? viewed));
+        recycleCards(s, p, [...(ctx.shuffle?.(s, viewed) ?? viewed)], p);
         if (picked) {
           s.players[p].deck.unshift(picked);
           ctx.draw(s, p, 1);
+          ctx.cardEvent(s, "reveal", p, picked);
           ctx.log?.(
             s,
             `${s.players[p].name} reveals ${getCard(picked).name}.`,
@@ -627,7 +666,7 @@ export const unleashedExtraModule: ExpansionModule = {
         break;
       }
       case "predict-two": {
-        const viewed = s.players[p].deck.slice(0, 2);
+        const viewed = s.players[p].deck.slice(0, e.lookCount ?? 2);
         const keep =
           viewed.length === 2
             ? [[0, 1], [1, 0], [0], [1], []]
@@ -668,7 +707,7 @@ export const unleashedExtraModule: ExpansionModule = {
         const recycled = selection.viewed.filter(
           (_, index) => !selection.indices.includes(index),
         );
-        s.players[p].deck.push(...(ctx.shuffle?.(s, recycled) ?? recycled));
+        recycleCards(s, p, [...(ctx.shuffle?.(s, recycled) ?? recycled)], p);
         break;
       }
       case "verdict":
@@ -695,7 +734,7 @@ export const unleashedExtraModule: ExpansionModule = {
         if (!unit.token) {
           if (e.condition === "top")
             s.players[unit.owner].deck.unshift(unit.cardId);
-          else s.players[unit.owner].deck.push(unit.cardId);
+          else recycleCards(s, unit.owner, [unit.cardId], p);
         }
         break;
       }
@@ -716,7 +755,7 @@ export const unleashedExtraModule: ExpansionModule = {
     }
     if (
       event === "cardFinalized" &&
-      getCard(cardId).type === "Spell" &&
+      isCardType(getCard(cardId), "Spell") &&
       (ctx.energySpent ?? 0) >= 4
     )
       state.paidSpell[p] = true;
@@ -744,7 +783,7 @@ export const unleashedExtraModule: ExpansionModule = {
         const gear = s.gears.find((g) => g.id === sourceId);
         if (gear) gear.temporary = true;
       }
-      if (getCard(cardId).type === "Spell") {
+      if (isCardType(getCard(cardId), "Spell")) {
         for (const unit of live(s, p, 149))
           trigger(s, unit, [self("might", 2)], ctx);
         if ((ctx.energySpent ?? 0) >= 4) {
@@ -758,7 +797,7 @@ export const unleashedExtraModule: ExpansionModule = {
               p,
               field.cardId,
               field.id,
-              [{ type: "predict" }],
+              textEffects(field, [{ type: "predict" }]),
               field.id,
             );
         }
@@ -768,32 +807,38 @@ export const unleashedExtraModule: ExpansionModule = {
             p,
             field.cardId,
             field.id,
-            [
+            textEffects(field, [
               {
                 type: "might",
                 amount: 1,
                 target: "friendlyUnitHere",
                 optional: true,
               },
-            ],
+            ]),
             field.id,
           );
       }
     }
     if (event === "move" && source) {
-      if (source.cardId === id(22)) {
-        s.players[source.owner].energy++;
-        s.players[source.owner].power =
-          (s.players[source.owner].power ?? 0) + 1;
+      for (const textSource of textSources(s, source)) {
+        const source = textSource;
+        if (source.cardId === id(22)) {
+          s.players[source.owner].energy++;
+          s.players[source.owner].power =
+            (s.players[source.owner].power ?? 0) + 1;
+        }
       }
-      if (source.cardId === id(82) && ctx.previousLocation)
-        trigger(
-          s,
-          source,
-          [{ type: "token", cardName: "Sprite", location: "here" }],
-          ctx,
-          ctx.previousLocation,
-        );
+      for (const textSource of textSources(s, source)) {
+        const source = textSource;
+        if (source.cardId === id(82) && ctx.previousLocation)
+          trigger(
+            s,
+            source,
+            [{ type: "token", cardName: "Sprite", location: "here" }],
+            ctx,
+            ctx.previousLocation,
+          );
+      }
     }
     if (event === "death" && source) {
       for (const unit of live(s, source.owner, 68).filter(
@@ -814,7 +859,7 @@ export const unleashedExtraModule: ExpansionModule = {
           }
     }
     if (event === "combatEnd" && s.combat && (s.combat.engaged ?? true))
-      for (const unit of s.units.filter(
+      for (const unit of textUnits(s).filter(
         (u) =>
           u.location === locationId &&
           u.cardId === id(114) &&

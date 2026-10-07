@@ -9,6 +9,7 @@ import type { CardStatus } from "../game/status-presentation";
 import { CardStatusTokens } from "./CardStatusTokens";
 import { ExhaustedToken } from "./ExhaustedToken";
 import { RulesErrata } from "./RulesErrata";
+import { EquipmentRules } from "./EquipmentRules";
 export function Card({
   card,
   onClick,
@@ -158,6 +159,7 @@ export function CardDetail({
               t("Ova karta nema dodatni tekst efekta.")}
           </p>
           <RulesErrata name={card.name} />
+          <EquipmentRules cardId={card.id} />
           {statuses && statuses.length > 0 && (
             <section aria-label={t("Active effects")}>
               <CardStatusTokens statuses={statuses} expanded />

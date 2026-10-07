@@ -1,4 +1,15 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { recycleCards, recycleRunes } from "./zone-events";
+import { isCardType } from "../data/cards";
+import { detach as detachObject } from "./objects";
+import { getUnitTags } from "./board-rules";
 import { readyForbidden } from "./board-rules";
+import { equipDomains } from "./equipment";
 import { addToTrash, takeTrashAt } from "./trash";
 import { canPlayCard } from "./board-rules";
 import { cards, getCard, type Card } from "../data/cards";
@@ -144,7 +155,7 @@ type SpiritState = GameState & {
   spiritPeerlessBonus?: Record<string, number>;
 };
 const own = (s: GameState, p: PlayerId) => s.units.filter((u) => u.owner === p);
-const mech = (u: Unit) => getCard(u.cardId).tags.includes("Mech");
+const mech = (u: Unit) => getUnitTags(u).includes("Mech");
 const mighty = (s: GameState, p: PlayerId, ctx: PreconContext) =>
   own(s, p).filter((u) => ctx.getMight(s, u) >= 5);
 const base = (p: PlayerId): LocationId => `base:${p}`;
@@ -190,7 +201,8 @@ function attach(
 ) {
   const g = s.gears.find((g) => g.id === gearId),
     u = s.units.find((u) => u.id === unitId);
-  if (!g || !u || g.owner !== u.owner) return;
+  if (!g || !u || g.owner !== u.owner || g.attachedTo === u.id) return;
+  detachObject(s, g);
   for (const other of s.units)
     other.gear = other.gear.filter((id) => id !== g.id);
   g.attachedTo = u.id;
@@ -200,8 +212,7 @@ function attach(
 function detach(s: GameState, gearId: string) {
   const g = s.gears.find((g) => g.id === gearId);
   if (!g) return;
-  for (const u of s.units) u.gear = u.gear.filter((id) => id !== gearId);
-  delete g.attachedTo;
+  detachObject(s, g);
 }
 function hasEquip(c: Card) {
   return c.tags.includes("Equipment");
@@ -221,6 +232,7 @@ function weaponmasterCost(
         (cardId === "unl-188-219" ? ctx.getMight(s, unit) : 0),
     ),
     power: Math.max(0, script.equipCost - 1),
+    xp: script.equipXP ?? 0,
   };
 }
 function printedMight(s: GameState, u: Unit) {
@@ -233,13 +245,15 @@ function printedMight(s: GameState, u: Unit) {
       spiritforgedScripts[s.gears.find((g) => g.id === id)?.cardId ?? ""]
         ?.gearMight ?? 0;
   if (mech(u))
-    n += own(s, u.owner).filter((x) => x.cardId === "sfd-089-221").length;
+    n += own(s, u.owner)
+      .flatMap((u) => textSources(s, u))
+      .filter((x) => x.cardId === "sfd-089-221").length;
   return n;
 }
 function detectMighty(s: SpiritState, ctx: PreconContext) {
   const old = s.spiritMighty ?? {};
   const next: Record<string, boolean> = {};
-  for (const u of s.units) {
+  for (const u of textUnits(s)) {
     const now = ctx.getMight(s, u) >= 5;
     next[u.id] = now;
     if (!now || old[u.id]) continue;
@@ -256,13 +270,15 @@ function detectMighty(s: SpiritState, ctx: PreconContext) {
         [sf("fiora-channel", { cardName: u.id })],
         u.location,
       );
-    for (const f of own(s, p).filter((x) => x.cardId === "sfd-180-221"))
+    for (const f of own(s, p)
+      .flatMap((u) => textSources(s, u))
+      .filter((x) => x.cardId === "sfd-180-221"))
       ctx.trigger(
         s,
         p,
         f.cardId,
         f.id,
-        [sf("worthy-ready", { cardName: u.id })],
+        textEffects(f, [sf("worthy-ready", { cardName: u.id })]),
         u.location,
       );
   }
@@ -272,12 +288,14 @@ function detectMighty(s: SpiritState, ctx: PreconContext) {
 export const spiritforgedModule: ExpansionModule = {
   might(s, u, value) {
     if (mech(u)) {
-      value += own(s, u.owner).filter((x) => x.cardId === "sfd-089-221").length;
+      value += own(s, u.owner)
+        .flatMap((u) => textSources(s, u))
+        .filter((x) => x.cardId === "sfd-089-221").length;
       if (s.combat?.fieldId === u.location && (s.combat.engaged ?? true)) {
         if (s.combat.attacker === u.owner)
-          value += own(s, u.owner).filter(
-            (x) => x.cardId === "sfd-026-221",
-          ).length;
+          value += own(s, u.owner)
+            .flatMap((u) => textSources(s, u))
+            .filter((x) => x.cardId === "sfd-026-221").length;
         if (
           s.combat.defender === u.owner &&
           s.players[u.owner].legendId === "sfd-181-221"
@@ -291,12 +309,15 @@ export const spiritforgedModule: ExpansionModule = {
     if (!mech(u)) return [];
     return [
       ...own(s, u.owner)
+        .flatMap((u) => textSources(s, u))
         .filter((x) => x.cardId === "sfd-071-221")
         .flatMap(() => ["Deflect", "Ganking"]),
       ...own(s, u.owner)
+        .flatMap((u) => textSources(s, u))
         .filter((x) => x.cardId === "sfd-065-221")
         .map(() => "Vision"),
       ...own(s, u.owner)
+        .flatMap((u) => textSources(s, u))
         .filter((x) => x.cardId === "sfd-026-221")
         .map(() => "Assault"),
       ...(s.players[u.owner].legendId === "sfd-181-221" ? ["Shield"] : []),
@@ -312,7 +333,7 @@ export const spiritforgedModule: ExpansionModule = {
           (u) => (ctx?.getMight(s, u) ?? printedMight(s, u)) >= 5,
         ).length;
     if (
-      c.type === "Gear" &&
+      isCardType(c, "Gear") &&
       !c.tags.includes("Token") &&
       s.fields.some((f) => f.cardId === "sfd-213-221" && f.controller === p) &&
       (s as SpiritState).spiritGearTurn?.[p] !== s.turn
@@ -323,7 +344,7 @@ export const spiritforgedModule: ExpansionModule = {
   effect(s, p, e, ctx) {
     if (!e.custom?.startsWith("sfd:")) return false;
     const [key, ...arg] = e.custom.slice(4).split("|");
-    const source = s.units.find((u) => u.id === ctx.sourceId);
+    const source = abilityUnit(s, ctx.sourceId, ctx.abilityInstance);
     switch (key) {
       case "gold":
         ctx.spawnToken(s, p, "Gold", base(p), false);
@@ -368,10 +389,12 @@ export const spiritforgedModule: ExpansionModule = {
         const cost = weaponmasterCost(s, g.cardId, source, ctx);
         if (
           cost &&
-          ctx.canPay(s, p, cost.energy, cost.power, getCard(g.cardId).domains)
+          (s.players[p].xp ?? 0) >= cost.xp &&
+          ctx.canPay(s, p, cost.energy, cost.power, equipDomains(g.cardId))
         ) {
+          s.players[p].xp = (s.players[p].xp ?? 0) - cost.xp;
           if (cost.energy || cost.power)
-            ctx.pay(s, p, cost.energy, cost.power, getCard(g.cardId).domains);
+            ctx.pay(s, p, cost.energy, cost.power, equipDomains(g.cardId));
           attach(s, g.id, source.id, ctx);
         }
         break;
@@ -585,10 +608,11 @@ export const spiritforgedModule: ExpansionModule = {
       case "conservatory": {
         const id = s.players[p].deck[0];
         if (id) {
+          ctx.cardEvent(s, "reveal", p, id);
           ctx.log?.(s, `Ravenbloom Conservatory reveals ${getCard(id).name}.`);
-          if (getCard(id).type === "Spell")
+          if (isCardType(getCard(id), "Spell"))
             s.players[p].hand.push(s.players[p].deck.shift()!);
-          else s.players[p].deck.push(s.players[p].deck.shift()!);
+          else recycleCards(s, p, [s.players[p].deck.shift()!], p);
         }
         break;
       }
@@ -597,7 +621,7 @@ export const spiritforgedModule: ExpansionModule = {
         for (const u of own(s, p).filter((u) => u.id !== ctx.sourceId))
           for (const id of [...new Set(s.players[p].discard)]) {
             const c = getCard(id);
-            if (c.type !== "Unit" || !c.tags.includes("Mech")) continue;
+            if (!isCardType(c, "Unit") || !c.tags.includes("Mech")) continue;
             const cost = Math.max(0, (c.energy ?? 0) - ctx.getMight(s, u));
             if (!ctx.canPay(s, p, cost, c.power ?? 0, c.domains)) continue;
             for (const loc of [
@@ -632,7 +656,7 @@ export const spiritforgedModule: ExpansionModule = {
         ctx.pay(s, p, e.amount ?? 0, c.power ?? 0, c.domains);
         for (const gid of [...u.gear]) detach(s, gid);
         s.units = s.units.filter((x) => x.id !== uid);
-        if (!u.token) s.players[p].deck.push(u.cardId);
+        if (!u.token) recycleCards(s, p, [u.cardId], p);
         takeTrashAt(s, p, index);
         ctx.playUnit(s, p, id, loc as LocationId, false);
         ctx.log?.(
@@ -656,7 +680,7 @@ export const spiritforgedModule: ExpansionModule = {
     const u = s.units.find((u) => u.id === sourceId);
     if (
       event === "play" &&
-      getCard(cardId).type === "Gear" &&
+      isCardType(getCard(cardId), "Gear") &&
       !getCard(cardId).name.startsWith("Gold //") &&
       !s.gears.find((g) => g.id === sourceId)?.token &&
       !getCard(cardId).tags.includes("Token")
@@ -669,15 +693,15 @@ export const spiritforgedModule: ExpansionModule = {
       )
         u.ready = true;
       if (mech(u))
-        for (const forecaster of own(s, p).filter(
-          (x) => x.cardId === "sfd-065-221",
-        ))
+        for (const forecaster of own(s, p)
+          .flatMap((u) => textSources(s, u))
+          .filter((x) => x.cardId === "sfd-065-221"))
           ctx.trigger(
             s,
             p,
             forecaster.cardId,
             u.id,
-            [{ type: "predict", amount: 1 }],
+            textEffects(u, [{ type: "predict", amount: 1 }]),
             u.location,
           );
     }
@@ -691,7 +715,14 @@ export const spiritforgedModule: ExpansionModule = {
       const foes = at.filter((u) => u.owner !== p);
       if (at.filter((x) => x.owner === p).length === 1 && foes.length === 1)
         for (const f of at.filter((x) => x.cardId === "sfd-110-221"))
-          ctx.trigger(s, f.owner, f.cardId, f.id, [sf("peerless")], f.location);
+          ctx.trigger(
+            s,
+            f.owner,
+            f.cardId,
+            f.id,
+            textEffects(f, [sf("peerless")]),
+            f.location,
+          );
       const field = s.fields.find((f) => f.id === locationId);
       if (field?.cardId === "sfd-215-221" && s.combat?.engaged)
         ctx.trigger(
@@ -699,7 +730,7 @@ export const spiritforgedModule: ExpansionModule = {
           s.combat.defender,
           field.cardId,
           field.id,
-          [sf("conservatory")],
+          textEffects(field, [sf("conservatory")]),
           field.id,
         );
     }
@@ -719,7 +750,7 @@ export const spiritforgedModule: ExpansionModule = {
           p,
           cardId,
           u.id,
-          [{ type: "draw", amount: 2 }],
+          textEffects(u, [{ type: "draw", amount: 2 }]),
           u.location,
         );
       for (const g of s.gears.filter(
@@ -730,7 +761,7 @@ export const spiritforgedModule: ExpansionModule = {
           p,
           g.cardId,
           u.id,
-          [{ type: "draw", amount: 1 }],
+          textEffects(u, [{ type: "draw", amount: 1 }]),
           u.location,
         );
     }
@@ -743,26 +774,28 @@ export const spiritforgedModule: ExpansionModule = {
           p,
           g.cardId,
           u.id,
-          [sf("warmog", { cardName: u.id })],
+          textEffects(u, [sf("warmog", { cardName: u.id })]),
           u.location,
         );
     }
     if (event === "conquer" && locationId && !u) {
       if ((s as SpiritState).spiritUncontrolled?.[locationId])
-        for (const winner of own(s, p).filter(
-          (x) => x.location === locationId && x.cardId === "sfd-116-221",
-        ))
+        for (const winner of own(s, p)
+          .flatMap((u) => textSources(s, u))
+          .filter(
+            (x) => x.location === locationId && x.cardId === "sfd-116-221",
+          ))
           ctx.trigger(
             s,
             p,
             winner.cardId,
             winner.id,
-            [
+            textEffects(winner, [
               sf("yone-damage", {
                 amount: ctx.getMight(s, winner),
                 target: "enemyUnitInBase",
               }),
-            ],
+            ]),
             locationId,
           );
       for (const winner of own(s, p).filter((x) => x.location === locationId))
@@ -774,7 +807,7 @@ export const spiritforgedModule: ExpansionModule = {
             p,
             g.cardId,
             winner.id,
-            [sf("warmog", { cardName: winner.id })],
+            textEffects(winner, [sf("warmog", { cardName: winner.id })]),
             locationId,
           );
       const field = s.fields.find((f) => f.id === locationId);
@@ -795,7 +828,7 @@ export const spiritforgedModule: ExpansionModule = {
             p,
             field.cardId,
             field.id,
-            effects[field.cardId],
+            textEffects(field, effects[field.cardId]),
             locationId,
           );
       }
@@ -815,8 +848,8 @@ export const spiritforgedModule: ExpansionModule = {
       (g) => g.owner === p && g.ready && g.cardId === "sfd-019-221",
     ))
       if (ctx.canPay(s, p, 1, 1, ["Fury"]))
-        for (const id of [...new Set(s.players[p].discard)].filter(
-          (id) => getCard(id).type === "Unit",
+        for (const id of [...new Set(s.players[p].discard)].filter((id) =>
+          isCardType(getCard(id), "Unit"),
         ))
           out.push({
             id: `sfd-assembly|${g.id}|${id}`,
@@ -837,13 +870,13 @@ export const spiritforgedModule: ExpansionModule = {
       !g?.ready ||
       g.owner !== a.player ||
       index < 0 ||
-      getCard(a.targetId!).type !== "Unit" ||
+      !isCardType(getCard(a.targetId!), "Unit") ||
       !ctx.canPay(s, a.player, 1, 1, ["Fury"])
     )
       return true;
     ctx.pay(s, a.player, 1, 1, ["Fury"]);
     g.ready = false;
-    s.players[a.player].deck.push(takeTrashAt(s, a.player, index)!);
+    recycleCards(s, a.player, [takeTrashAt(s, a.player, index)!], a.player);
     ctx.pushStack(s, {
       player: a.player,
       cardId: g.cardId,

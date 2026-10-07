@@ -1,3 +1,10 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { ruleFamily } from "./rule-families";
 import { readyForbidden } from "./board-rules";
 import { getCard } from "../data/cards";
 import { getKeywords } from "./engine";
@@ -185,7 +192,7 @@ export const originsWave4Module: ExpansionModule = {
     if (event === "attack" && source) {
       const defender = other(source.owner);
       if (
-        s.players[defender].legendId === "ogn-255-298" &&
+        ruleFamily(s.players[defender].legendId) === "ogn-255-298" &&
         s.fields.find((f) => f.id === locationId)?.controller === defender
       )
         ctx.trigger(
@@ -206,7 +213,7 @@ export const originsWave4Module: ExpansionModule = {
     }
     if (event === "combatStart" && s.combat) {
       const defender = s.combat.defender;
-      for (const u of s.units.filter(
+      for (const u of textUnits(s).filter(
         (u) => u.owner === defender && u.cardId === "sfd-126-221",
       ))
         ctx.trigger(
@@ -214,7 +221,7 @@ export const originsWave4Module: ExpansionModule = {
           defender,
           u.cardId,
           u.id,
-          [fx("pup", { optional: true, cardName: locationId })],
+          textEffects(u, [fx("pup", { optional: true, cardName: locationId })]),
           u.location,
         );
     }
@@ -244,7 +251,7 @@ export const originsWave4Module: ExpansionModule = {
   effect(s, p, e, ctx) {
     if (!e.custom?.startsWith("wave4:")) return false;
     const key = e.custom.slice(6);
-    const source = s.units.find((u) => u.id === ctx.sourceId);
+    const source = abilityUnit(s, ctx.sourceId, ctx.abilityInstance);
     const target = s.units.find((u) => u.id === ctx.targetId);
     switch (key) {
       case "mutation": {

@@ -1,3 +1,11 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { isCardType } from "../data/cards";
+import { getUnitTags } from "./board-rules";
 import { getCard } from "../data/cards";
 import { getMight, getKeywords } from "./engine";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
@@ -29,7 +37,7 @@ const currentXP = (s: GameState, p: PlayerId) => s.players[p].xp ?? 0;
 const tribes = ["Bird", "Cat", "Dog", "Poro"];
 const tribeCount = (s: GameState, p: PlayerId) =>
   tribes.filter((tag) =>
-    s.units.some((u) => u.owner === p && getCard(u.cardId).tags.includes(tag)),
+    s.units.some((u) => u.owner === p && getUnitTags(u).includes(tag)),
   ).length;
 
 export const unleashedWave3Scripts: Record<string, CardScript> = {
@@ -177,7 +185,7 @@ function trigger(
     source.owner,
     source.cardId,
     source.id,
-    effects,
+    textEffects(source, effects),
     source.location,
   );
 }
@@ -212,10 +220,13 @@ export const unleashedWave3Module: ExpansionModule = {
   },
   keywords(s, u) {
     const result: string[] = [];
-    if (u.cardId === id(59) && currentXP(s, u.owner) >= 16)
-      result.push("Untargetable");
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === id(59) && currentXP(s, u.owner) >= 16)
+        result.push("Untargetable");
+    }
     if (
-      s.units.some(
+      textUnits(s).some(
         (source) =>
           source.cardId === id(57) &&
           source.owner === u.owner &&
@@ -225,7 +236,7 @@ export const unleashedWave3Module: ExpansionModule = {
     )
       result.push("Untargetable");
     if (
-      s.units.some(
+      textUnits(s).some(
         (source) =>
           source.cardId === id(60) &&
           source.owner !== u.owner &&
@@ -238,7 +249,7 @@ export const unleashedWave3Module: ExpansionModule = {
   },
   effect(s, p, e, ctx) {
     if (!e.custom?.startsWith("unl-wave3:")) return false;
-    const source = s.units.find((u) => u.id === ctx.sourceId);
+    const source = abilityUnit(s, ctx.sourceId, ctx.abilityInstance);
     switch (e.custom.slice("unl-wave3:".length)) {
       case "palace-win":
         s.winner = p;
@@ -327,13 +338,14 @@ export const unleashedWave3Module: ExpansionModule = {
       case "diana-reveal": {
         const top = s.players[p].deck[0];
         if (top) {
+          ctx.cardEvent(s, "reveal", p, top);
           ctx.log?.(
             s,
             `${s.players[p].name} reveals ${getCard(top).name}.`,
             "info",
             p,
           );
-          if (getCard(top).type === "Spell") ctx.draw(s, p, 1);
+          if (isCardType(getCard(top), "Spell")) ctx.draw(s, p, 1);
         }
         break;
       }
@@ -360,13 +372,13 @@ export const unleashedWave3Module: ExpansionModule = {
           );
     }
     if (event === "hide")
-      for (const u of s.units.filter(
+      for (const u of textUnits(s).filter(
         (u) => u.owner === p && u.cardId === id(23),
       ))
         trigger(s, u, [self("ready")], ctx);
     if (event === "play") {
       if (ctx.fromHidden)
-        for (const u of s.units.filter(
+        for (const u of textUnits(s).filter(
           (u) => u.owner === p && u.cardId === id(23),
         ))
           trigger(
@@ -418,7 +430,7 @@ export const unleashedWave3Module: ExpansionModule = {
           );
     }
     if (event === "showdownStart")
-      for (const u of s.units.filter(
+      for (const u of textUnits(s).filter(
         (u) => u.cardId === id(79) && u.location === locationId,
       ))
         trigger(s, u, [fx("diana-pay", { optional: true })], ctx);
@@ -446,7 +458,7 @@ export const unleashedWave3Module: ExpansionModule = {
       for (const owner of data.goldMarks[source.id] ?? [])
         ctx.trigger(s, owner, id(73), `mark:${source.id}`, [gold]);
       delete data.goldMarks[source.id];
-      for (const pyke of s.units.filter(
+      for (const pyke of textUnits(s).filter(
         (u) =>
           u.cardId === id(145) &&
           u.owner !== source.owner &&

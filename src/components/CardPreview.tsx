@@ -19,6 +19,7 @@ import { useI18n } from "../i18n";
 import { CardStatusTokens, readCardStatuses } from "./CardStatusTokens";
 import { ExhaustedToken } from "./ExhaustedToken";
 import { RulesErrata } from "./RulesErrata";
+import { EquipmentRules } from "./EquipmentRules";
 
 type Preview = { card: CatalogCard; anchor: HTMLElement };
 const triggerSelector = "[data-card-preview]";
@@ -360,6 +361,7 @@ export function PreviewPanel({
           {readableText(card.text) || t("Ova karta nema dodatni tekst efekta.")}
         </p>
         <RulesErrata name={card.name} />
+        <EquipmentRules cardId={card.id} />
         {statuses.length > 0 && (
           <section
             className="card-preview-effects"

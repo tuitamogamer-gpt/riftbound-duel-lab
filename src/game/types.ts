@@ -2,7 +2,8 @@ import type { StarterDeck } from "../data/decks";
 export type PlayerId = 0 | 1;
 export type TurnStep = "awaken" | "beginning" | "channel" | "draw" | "main";
 export type Domain = string;
-export type LocationId = "base:0" | "base:1" | "field:0" | "field:1";
+export type LocationId =
+  "base:0" | "base:1" | "field:0" | "field:1" | "field:2";
 export type Phase =
   "mulligan" | "main" | "showdown" | "move" | "damage" | "choice" | "ended";
 export interface Rune {
@@ -11,6 +12,19 @@ export interface Rune {
   ready: boolean;
 }
 export interface Unit {
+  abilityInstance?: string;
+  spellDamageId?: string;
+  tokenCopiesTurn?: number;
+  damageByPlayer?: [number, number];
+  grantedTags?: { sourceId: string; tag: string }[];
+  conqueredTurn?: number;
+  banishOnDeathTurn?: number;
+  armoryTurn?: number;
+  originalOwner?: PlayerId;
+  originalCardId?: string;
+  copyEffects?: { sourceId: string; cardId: string }[];
+  addedTag?: string;
+  recallOnConquerTurn?: number;
   namedSpell?: string;
   damageTakenTurn?: number;
   deathTrashId?: string;
@@ -47,6 +61,12 @@ export interface Unit {
   usedAbilities?: string[];
 }
 export interface Gear {
+  originalOwner?: PlayerId;
+  originalCardId?: string;
+  copiedText?: string;
+  copiedTokenTurn?: number;
+  namedTag?: string;
+  attachedTurn?: number;
   empowered?: boolean;
   token?: boolean;
   id: string;
@@ -58,6 +78,10 @@ export interface Gear {
   usedAbilities?: string[];
 }
 export interface PlayerState {
+  repeatGrants?: { turn: number }[];
+  banishedCards?: { id: string; cardId: string }[];
+  gearPlayPermissions?: { id: string; turn: number }[];
+  enemyChoices?: { turn: number; count: number };
   gearPower?: number;
   firstGearAbilityTurn?: number;
   equipmentPlayedTurn?: number;
@@ -113,6 +137,7 @@ export interface PlayerState {
   endReadyRunes?: number;
 }
 export interface Battlefield {
+  replacedCardId?: string;
   id: LocationId;
   cardId: string;
   controller: PlayerId | null;
@@ -131,6 +156,12 @@ export interface PendingMove {
   unitIds: string[];
 }
 export interface StackItem {
+  declaration?: Pick<GameAction, "repeated" | "repeatMask">;
+  killedUnits?: number;
+  grenadeHits?: number;
+  replayRequests?: { player: PlayerId; grenade?: boolean }[];
+  originalOwner?: PlayerId;
+  recycleOnLeave?: boolean;
   spellBonusDamage?: number;
   abilityEnergyCost?: number;
   playSource?: "hand" | "champion" | "hidden" | "trash" | "effect";
@@ -162,7 +193,93 @@ export interface Combat {
   assignments: [Record<string, number>, Record<string, number>];
   assigningPlayer: PlayerId;
 }
+export interface CardPlaySpec {
+  orderGroup?: string;
+  grenadeHits?: number;
+  zoneOwner?: PlayerId;
+  controller?: PlayerId;
+  ignoreAllCosts?: boolean;
+  stunAfterPlay?: boolean;
+  hiddenOnly?: boolean;
+  empowerAfterPlay?: boolean;
+  zone: "hand" | "trash" | "top" | "banished" | "blink";
+  optional?: boolean;
+  cardTypes?: string[];
+  cardTags?: string[];
+  maxEnergy?: number;
+  maxPower?: number;
+  maxMight?: number;
+  count?: number;
+  untilUnit?: boolean;
+  ignoreCost?: boolean;
+  ignoreEnergy?: boolean;
+  energyReduction?: number;
+  powerOverride?: number;
+  destination?:
+    "normal" | "base" | "here" | "controlledBattlefield" | "anyBattlefield";
+  alternativeHere?: boolean;
+  recycleOnLeave?: boolean;
+  unplayedToHand?: boolean;
+  attachToSource?: boolean;
+  revealed?: boolean;
+  /** A public physical trash visit or a linked banishment entry. */
+  sourceRef?: string;
+  sourceId?: string;
+  locationId?: LocationId;
+}
+export interface PendingCardPlay {
+  id: string;
+  cardId: string;
+  player: PlayerId;
+  returnZone: "hand" | "trash" | "banished";
+  returnIndex: number;
+  spec: CardPlaySpec;
+}
 export interface GameState {
+  selectedInspections?: {
+    id: string;
+    owner: PlayerId;
+    positions: number[];
+    chosen: number;
+    used: string[];
+    effect: Effect;
+  }[];
+  tokenCopyChoices?: {
+    player: PlayerId;
+    original: string;
+    name: string;
+    location: LocationId;
+    ready: boolean;
+    sources: string[];
+  }[];
+  tokenCopyLinks?: { original: string; copy: string }[];
+  splitXPWatches?: { spellId: string; player: PlayerId; ids: string[] }[];
+  linkedBanishments?: { sourceId: string; owner: PlayerId; ref: string }[];
+  deathBatches?: {
+    delayedSpell?: string;
+    spellId?: string;
+    credited?: string[];
+    id: string;
+    ids: string[];
+    used: string[];
+    declined: string[];
+    actor?: PlayerId;
+    combat: boolean;
+  }[];
+  pendingCombatDamage?: {
+    preview: import("./engine").CombatPreview;
+    hits: import("./engine").CombatHit[];
+  };
+  controlEffects?: {
+    id: string;
+    previous: PlayerId;
+    sourceId?: string;
+    endTurn?: number;
+  }[];
+  heldBanishments?: { id: string; cardId: string; owner: PlayerId }[];
+  extraTurns?: PlayerId[];
+  endDisempowers?: { id: string; player: PlayerId; turn: number }[];
+  pendingPlays?: PendingCardPlay[];
   damageTriggers?: {
     player: PlayerId;
     cardId: string;
@@ -195,7 +312,7 @@ export interface GameState {
   priorityPlayer: PlayerId;
   phase: Phase;
   players: [PlayerState, PlayerState];
-  fields: [Battlefield, Battlefield];
+  fields: Battlefield[];
   units: Unit[];
   gears: Gear[];
   hidden?: {
@@ -229,7 +346,24 @@ export interface GameState {
       | "move"
       | "trashTargets"
       | "boardTargets"
-      | "custom";
+      | "custom"
+      | "effectPlay"
+      | "effectDraft"
+      | "costTargets";
+    effectDraft?: {
+      retargetId?: string;
+      action: GameAction;
+      trigger?: Omit<StackItem, "id" | "kind">;
+      steps: {
+        effects?: Effect[];
+        modes?: { label: string; effects: Effect[] }[];
+      }[];
+      chosen: Effect[][];
+      targets: string[];
+      modes: number[];
+      selected: string[];
+      activeMode?: number;
+    };
     remaining: number;
     sourceId?: string;
     cardId?: string;
@@ -291,6 +425,12 @@ export type ActionCategory =
   | "end"
   | "resource";
 export interface GameAction {
+  draftFinalized?: boolean;
+  repeatMask?: number;
+  flexibleEnergy?: number;
+  optionalEnergy?: number;
+  namedTag?: string;
+  dragonRoost?: LocationId;
   /** A permutation of existing runes, consumed by the shared payment resolver. */
   paymentRuneOrder?: string[];
   id: string;
@@ -307,6 +447,9 @@ export interface GameAction {
   detail?: string;
   effects?: Effect[];
   abilityKey?: string;
+  /** Board object paid as an additional cost; it is not an effect target. */
+  costSourceId?: string;
+  costsFinalized?: boolean;
   additionalCostPaid?: boolean;
   targetsFinalized?: boolean;
   repeated?: boolean;
@@ -314,6 +457,13 @@ export interface GameAction {
   repeatedEffects?: Effect[];
 }
 export type TargetFilter =
+  | "relentlessMove"
+  | "shurikenMove"
+  | "friendlyAndEnemyBattlefield"
+  | "enemyMoveDestination"
+  | "empowerObject"
+  | "enemyAndOptionalFriendly"
+  | "friendlyAndOptionalEnemy"
   | "boardCards"
   | "enemyChainItemChoosingFriendly"
   | "friendlyUnitAndEnemyChainItem"
@@ -376,7 +526,14 @@ export type TargetFilter =
   | "unitOrGear"
   | "battlefield";
 export type Effect = {
+  abilityInstance?: string;
+  lookCount?: number;
+  lookCursor?: number;
+  inspectionComplete?: boolean;
+  inspectionReplacements?: string[];
+  chosenLocations?: Record<string, LocationId>;
   type:
+    | "playCard"
     | "draw"
     | "damage"
     | "heal"
@@ -415,6 +572,7 @@ export type Effect = {
     | "keyword"
     | "buffBonus"
     | "special";
+  play?: CardPlaySpec;
   amount?: number;
   target?: TargetFilter;
   cardTypes?: string[];
@@ -422,12 +580,13 @@ export type Effect = {
   targetCount?: number;
   upTo?: boolean;
   group?: {
+    distinctLocations?: boolean;
     sameLocation?: boolean;
     totalMight?: number;
     tokensOnly?: boolean;
     atBattlefield?: boolean;
     here?: boolean;
-    destination?: "any" | "here" | "base";
+    destination?: "any" | "here" | "base" | "open";
   };
   targetDomain?: string;
   targetLocations?: LocationId[];
@@ -459,6 +618,8 @@ export type Effect = {
   condition?: string;
   /** Leading trigger costs are paid while finalizing, before responses. */
   triggerCost?: {
+    discard?: number;
+    board?: "killUnitHere" | "returnUnitHere" | "disempower" | "killThree";
     energy?: number;
     power?: number;
     domain?: string;
@@ -473,6 +634,9 @@ export type Effect = {
   modes?: { label: string; effects: Effect[] }[];
 };
 export interface ActivatedAbility {
+  instanceKey?: string;
+  banishSelf?: boolean;
+  discard?: number;
   sacrificeSelf?: boolean;
   disempowerSelf?: boolean;
   label: string;
@@ -489,6 +653,8 @@ export interface ActivatedAbility {
   condition?: string;
 }
 export interface CardScript {
+  cardTypes?: string[];
+  asPlayTag?: "any" | "tribe";
   implemented: true;
   uncounterable?: boolean;
   ignoreDeflect?: boolean;
@@ -505,7 +671,26 @@ export interface CardScript {
   shield?: number;
   deflect?: number;
   gearMight?: number;
+  /** Rules in the Equipment panel belong to the attached unit. */
+  equipment?: {
+    onDeath?: Effect[];
+    text: string;
+    keywords?: string[];
+    /** Continuous keyword grants to friendly units at the wielder's location. */
+    nearbyKeywords?: string[];
+    shield?: number;
+    attachedTurnMight?: number;
+    onAttack?: Effect[];
+    onDefend?: Effect[];
+    onConquer?: Effect[];
+    onHold?: Effect[];
+    onMove?: Effect[];
+  };
   equipCost?: number;
+  equipRecycle?: number;
+  equipKillUnit?: boolean;
+  equipXP?: number;
+  equipAnyPower?: boolean;
   action?: boolean;
   reaction?: boolean;
   accelerating?: boolean;
@@ -519,6 +704,12 @@ export interface CardScript {
     condition?: "legion";
     banishAfter?: boolean;
   };
+  repeatCosts?: {
+    energy?: number;
+    power?: number;
+    domain?: string;
+    discard?: number;
+  }[];
   repeat?: {
     energy?: number;
     power?: number;
@@ -526,6 +717,17 @@ export interface CardScript {
     discard?: number;
   };
   additionalCost?: {
+    exhaustLegend?: boolean;
+    required?: boolean;
+    ignoreBaseCost?: boolean;
+    board?: {
+      multiple?: boolean;
+      tags?: string[];
+      discount?: "energyPower" | "powerEach";
+      allowCostLocation?: boolean;
+      kind: "spendBuff" | "killUnit" | "killGear" | "returnGear";
+      minMight?: number;
+    };
     energy?: number;
     power?: number;
     domain?: string;

@@ -1,3 +1,11 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { isCardType } from "../data/cards";
+import { physicalOwner, physicalCard, detach } from "./objects";
 import { disempower } from "./board-rules";
 import { takeTrashAt } from "./trash";
 import { cards, getCard } from "../data/cards";
@@ -268,7 +276,9 @@ function empower(s: GameState, u: VUnit, ctx: PreconContext) {
       u.owner,
       u.cardId,
       u.id,
-      [special("banish", { target: "enemyUnitAtBattlefield", maxMight: 3 })],
+      textEffects(u, [
+        special("banish", { target: "enemyUnitAtBattlefield", maxMight: 3 }),
+      ]),
       u.location,
     );
 }
@@ -278,11 +288,10 @@ function banish(s: GameState, p: PlayerId, id: string, ctx: PreconContext) {
   const obj = u ?? g;
   if (!obj) return;
   if (!(obj as { token?: boolean }).token)
-    s.players[obj.owner].banished.push(obj.cardId);
+    s.players[physicalOwner(obj)].banished.push(physicalCard(obj));
   if (u) {
     s.units = s.units.filter((x) => x.id !== id);
-    for (const gear of s.gears)
-      if (gear.attachedTo === id) gear.attachedTo = undefined;
+    for (const gear of s.gears) if (gear.attachedTo === id) detach(s, gear);
   } else {
     s.gears = s.gears.filter((x) => x.id !== id);
     for (const unit of s.units) unit.gear = unit.gear.filter((x) => x !== id);
@@ -311,24 +320,27 @@ const empoweredCosts: Record<
 
 export const vendettaModule: ExpansionModule = {
   might(s, u, value) {
-    const x = u as VUnit,
-      n = number(u.cardId),
-      friendly = ownHere(s, u);
-    if (x.empowered)
-      value +=
-        ({ 43: 7, 28: 2, 7: 1, 93: 1 } as Record<number, number>)[n] ?? 0;
-    if (
-      n === 135 &&
-      s.units.some(
-        (t) => t.owner !== u.owner && t.location === u.location && t.stunned,
+    const friendly = ownHere(s, u);
+    for (const textSource of textSources(s, u)) {
+      const u = textSource,
+        x = u as VUnit,
+        n = number(u.cardId);
+      if (x.empowered)
+        value +=
+          ({ 43: 7, 28: 2, 7: 1, 93: 1 } as Record<number, number>)[n] ?? 0;
+      if (
+        n === 135 &&
+        s.units.some(
+          (t) => t.owner !== u.owner && t.location === u.location && t.stunned,
+        )
       )
-    )
-      value += 2;
-    if (s.combat?.engaged && s.combat.fieldId === u.location) {
-      if (s.combat.defender === u.owner) {
-        if (n === 117 && friendly.length === 2) value += 3;
-        if (n === 30 && x.empowered) value += 3;
-      } else if (n === 14 && x.empowered) value += 3;
+        value += 2;
+      if (s.combat?.engaged && s.combat.fieldId === u.location) {
+        if (s.combat.defender === u.owner) {
+          if (n === 117 && friendly.length === 2) value += 3;
+          if (n === 30 && x.empowered) value += 3;
+        } else if (n === 14 && x.empowered) value += 3;
+      }
     }
     for (const gear of s.gears.filter(
       (g) => g.attachedTo === u.id && number(g.cardId) === 27,
@@ -343,12 +355,14 @@ export const vendettaModule: ExpansionModule = {
     return value;
   },
   keywords(s, u) {
-    const x = u as VUnit,
-      n = number(u.cardId);
-    return [
-      ...(x.empowered && n === 30 ? ["Deflect", "Shield 3"] : []),
-      ...(x.empowered && n === 93 ? ["Ganking"] : []),
-    ];
+    return textSources(s, u).flatMap((u) => {
+      const x = u as VUnit,
+        n = number(u.cardId);
+      return [
+        ...(x.empowered && n === 30 ? ["Deflect", "Shield 3"] : []),
+        ...(x.empowered && n === 93 ? ["Ganking"] : []),
+      ];
+    });
   },
   cost(s, p, c) {
     const n = number(c.id);
@@ -422,9 +436,9 @@ export const vendettaModule: ExpansionModule = {
           player: p,
           sourceId: `legend:${p}`,
         });
-      for (const u of s.units.filter((u) => u.owner === p && is(u, 112)))
+      for (const u of textUnits(s).filter((u) => u.owner === p && is(u, 112)))
         if (ctx.canPay(s, p, 1, 1, ["Chaos"]))
-          for (const clone of s.units.filter(
+          for (const clone of textUnits(s).filter(
             (x) => x.owner === p && x.cardId === "token-shadow-clone",
           ))
             result.push({
@@ -503,12 +517,12 @@ export const vendettaModule: ExpansionModule = {
           empowered.owner,
           empowered.cardId,
           empowered.id,
-          [
+          textEffects(empowered, [
             special("banish", {
               target: "enemyUnitAtBattlefield",
               maxMight: 3,
             }),
-          ],
+          ]),
           empowered.location,
         );
     }
@@ -530,14 +544,16 @@ export const vendettaModule: ExpansionModule = {
       )
     )
       u.ready = true;
-    if (event === "play" && getCard(cardId).type === "Gear")
-      for (const pref of s.units.filter((x) => x.owner !== p && is(x, 102)))
+    if (event === "play" && isCardType(getCard(cardId), "Gear"))
+      for (const pref of textUnits(s).filter(
+        (x) => x.owner !== p && is(x, 102),
+      ))
         ctx.trigger(
           s,
           pref.owner,
           pref.cardId,
           pref.id,
-          [special("prefect", { cardName: sourceId })],
+          textEffects(pref, [special("prefect", { cardName: sourceId })]),
           pref.location,
         );
     if (event === "combatStart") {
@@ -564,7 +580,7 @@ export const vendettaModule: ExpansionModule = {
             witness.owner,
             witness.cardId,
             witness.id,
-            [special("empower")],
+            textEffects(witness, [special("empower")]),
             witness.location,
           );
       }
@@ -765,8 +781,9 @@ export const vendettaModule: ExpansionModule = {
       case "pakaa": {
         const id = s.players[p].deck[0];
         if (!id) break;
+        ctx.cardEvent(s, "reveal", p, id);
         ctx.log?.(s, `Pakaa Protector reveals ${getCard(id).name}.`, "play", p);
-        if (getCard(id).type === "Unit") ctx.draw(s, p, 1);
+        if (isCardType(getCard(id), "Unit")) ctx.draw(s, p, 1);
         else {
           ctx.runEffects(s, p, [{ type: "mill", amount: 1 }]);
           if (source) source.temporaryMight += 2;
@@ -827,7 +844,7 @@ export const vendettaModule: ExpansionModule = {
           p,
           ctx,
           s.players[p].discard.flatMap((id, i) =>
-            getCard(id).type === "Unit"
+            isCardType(getCard(id), "Unit")
               ? [
                   {
                     label: `Banish ${getCard(id).name}: Assault 4`,

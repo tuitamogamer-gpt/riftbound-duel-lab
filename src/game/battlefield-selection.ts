@@ -1,3 +1,4 @@
+import { isCardType } from "../data/cards";
 import { catalog, findCard } from "../catalog";
 import type { StarterDeck } from "../data/decks";
 import { getRulesCardId, isImplemented } from "./scripts";
@@ -5,7 +6,12 @@ import { getRulesCardId, isImplemented } from "./scripts";
 const seen = new Set<string>();
 export const battlefieldChoices = catalog
   .filter((card) => {
-    if (card.type !== "Battlefield" || card.variant || !isImplemented(card.id))
+    if (
+      !isCardType(card, "Battlefield") ||
+      card.variant ||
+      card.set === "TOKEN" ||
+      !isImplemented(card.id)
+    )
       return false;
     const identity = card.name;
     if (seen.has(identity)) return false;

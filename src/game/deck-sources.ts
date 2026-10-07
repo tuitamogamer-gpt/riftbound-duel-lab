@@ -1,3 +1,4 @@
+import { isCardType } from "../data/cards";
 import { getDeckFromCode } from "@piltoverarchive/riftbound-deck-codes";
 import { cardsById, type Card } from "../data/cards";
 import { gameplayFingerprint } from "../data/card-identity";
@@ -172,7 +173,7 @@ export function importDeckSource(
       const matches = resolveImportCard(value);
       if (
         matches.length === 1 &&
-        matches[0].type === "Unit" &&
+        isCardType(matches[0], "Unit") &&
         matches[0].supertype === "Champion"
       ) {
         const card = cardsById[matches[0].id];

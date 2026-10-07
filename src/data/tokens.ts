@@ -33,6 +33,29 @@ const token = (
   bannedInDuel: false,
 });
 export const rulesTokens: Card[] = [
+  token("token-reflection", "Reflection", 0, []),
+  {
+    ...token(
+      "token-baron-pit",
+      "Baron Pit",
+      0,
+      [],
+      "Units can move here from anywhere.",
+    ),
+    type: "Battlefield",
+    might: null,
+  },
+  {
+    ...token(
+      "token-brush",
+      "Brush",
+      0,
+      [],
+      "Bird, Cat, Dog, Poro, and Ivern units here have +1 Might. When you conquer or hold here, you may replace this with the battlefield it replaced.",
+    ),
+    type: "Battlefield",
+    might: null,
+  },
   token("token-tentacle", "Tentacle", 1, ["Bilgewater"]),
   token("token-mech", "Mech", 3, ["Mech"]),
   token("token-sand-soldier", "Sand Soldier", 2, ["Sand Soldier"]),

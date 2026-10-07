@@ -1,3 +1,10 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { isCardType } from "../data/cards";
 import { cards, getCard } from "../data/cards";
 import { isFace } from "./board-rules";
 import type { ExpansionModule } from "./later-precon-engine";
@@ -150,14 +157,21 @@ export const cardWave6Scripts: Record<string, CardScript> = {
 export const cardWave6Module: ExpansionModule = {
   event(s, event, p, _cardId, _sourceId, _locationId, ctx) {
     if (event === "spendBuff")
-      for (const u of s.units.filter(
+      for (const u of textUnits(s).filter(
         (u) => u.owner === p && isFace(u.cardId, "SFD", 101),
       ))
-        ctx.trigger(s, p, u.cardId, u.id, [fx("gold")], u.location);
+        ctx.trigger(
+          s,
+          p,
+          u.cardId,
+          u.id,
+          textEffects(u, [fx("gold")]),
+          u.location,
+        );
   },
   cost(s, p, c, ctx) {
-    if (c.type !== "Spell") return {};
-    const researchers = s.units.filter(
+    if (!isCardType(c, "Spell")) return {};
+    const researchers = textUnits(s).filter(
       (u) => u.owner === p && u.empowered && isFace(u.cardId, "VEN", 55),
     ).length;
     const fields = s.fields.filter(
@@ -181,7 +195,7 @@ export const cardWave6Module: ExpansionModule = {
       ids = (ctx.targetId ?? "").split("~");
     const a = s.units.find((u) => u.id === ids[0]),
       b = s.units.find((u) => u.id === ids[1]);
-    const source = s.units.find((u) => u.id === ctx.sourceId);
+    const source = abilityUnit(s, ctx.sourceId, ctx.abilityInstance);
     const run = (effects: Effect[], id = ctx.targetId) =>
       ctx.runEffects(s, p, effects, id, ctx.sourceId, ctx.locationId);
     switch (key) {

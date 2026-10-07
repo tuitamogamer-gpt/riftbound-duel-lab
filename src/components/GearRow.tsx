@@ -25,7 +25,10 @@ export function GearRow({
   inspect: (card: CatalogCard, sourceId?: string) => void;
 }) {
   const { t } = useI18n();
-  const gears = game.gears.filter((gear) => gear.owner === player);
+  const gears = game.gears.filter(
+    (gear) =>
+      gear.owner === player && !game.units.some((u) => u.id === gear.id),
+  );
   const slots = useRef<HTMLDivElement>(null);
   const [scroll, setScroll] = useState({ back: false, forward: false });
   useEffect(() => {

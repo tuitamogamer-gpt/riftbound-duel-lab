@@ -1,3 +1,12 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { recycleCards, recycleRunes } from "./zone-events";
+import { getCardTypes } from "../data/cards";
+import { isCardType } from "../data/cards";
 import { cards, getCard } from "../data/cards";
 import { getKeywords } from "./engine";
 import type {
@@ -250,11 +259,16 @@ function predictChoices(
       throw new Error("Inspected cards changed during Predict resolution");
     s.players[p].deck.splice(0, picked.top.length);
     s.players[p].deck.unshift(...picked.kept.map((i) => picked.top[i]));
-    s.players[p].deck.push(
-      ...ctx.shuffle!(
-        s,
-        picked.recycled.map((i) => picked.top[i]),
-      ),
+    recycleCards(
+      s,
+      p,
+      [
+        ...ctx.shuffle!(
+          s,
+          picked.recycled.map((i) => picked.top[i]),
+        ),
+      ],
+      p,
     );
     return;
   }
@@ -293,88 +307,119 @@ const costs: Record<
 };
 export const vendettaWave3Module: ExpansionModule = {
   might(s, u, value) {
-    if (is(u, 172)) value += s.players[u.owner].points;
-    if (u.empowered && is(u, 47)) value++;
-    if (u.empowered && is(u, 84)) value += 3;
-    if (is(u, 109))
-      value += s.units.filter((x) => x.owner === u.owner && x.token).length;
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (is(u, 172)) value += s.players[u.owner].points;
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.empowered && is(u, 47)) value++;
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.empowered && is(u, 84)) value += 3;
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (is(u, 109))
+        value += s.units.filter((x) => x.owner === u.owner && x.token).length;
+    }
     return value;
   },
   keywords(s, u) {
     const keywords: string[] = [];
-    if (
-      is(u, 38) &&
-      !(
-        s.combat?.engaged &&
-        s.combat.fieldId === u.location &&
-        (!s.combat.designatedUnits || s.combat.designatedUnits.includes(u.id))
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (
+        is(u, 38) &&
+        !(
+          s.combat?.engaged &&
+          s.combat.fieldId === u.location &&
+          (!s.combat.designatedUnits || s.combat.designatedUnits.includes(u.id))
+        )
       )
-    )
-      keywords.push("Untargetable");
-    if (is(u, 84) && u.empowered)
-      keywords.push("Prevent damage while not in combat");
+        keywords.push("Untargetable");
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (is(u, 84) && u.empowered)
+        keywords.push("Prevent damage while not in combat");
+    }
     if (s.gears.some((g) => g.attachedTo === u.id && is(g, 73)))
       keywords.push("Cannot be moved by enemies");
     return keywords;
   },
   event(s, event, p, cardId, sourceId, locationId, ctx) {
     const source = s.units.find((u) => u.id === sourceId);
-    if (
-      (event === "target" || event === "ready") &&
-      source &&
-      is(source, 174) &&
-      source.owner === p
-    )
-      ctx.trigger(
-        s,
-        p,
-        source.cardId,
-        source.id,
-        [self("might", 1)],
-        source.location,
-      );
-    if (event === "ready" && source && is(source, 88))
-      ctx.trigger(
-        s,
-        source.owner,
-        source.cardId,
-        source.id,
-        [
-          {
-            type: "special",
-            modes: [
-              { label: "Assault 2", effects: [self("assault", 2)] },
-              {
-                label: "Deflect 2",
-                effects: [
-                  { type: "keyword", condition: "self", keyword: "Deflect 2" },
-                ],
-              },
-              {
-                label: "Ganking",
-                effects: [
-                  { type: "keyword", condition: "self", keyword: "Ganking" },
-                ],
-              },
-            ],
-          },
-        ],
-        source.location,
-      );
-    if (
-      event === "move" &&
-      source &&
-      is(source, 38) &&
-      locationId?.startsWith("field:")
-    )
-      ctx.trigger(
-        s,
-        source.owner,
-        source.cardId,
-        source.id,
-        [self("might", 2)],
-        locationId,
-      );
+    for (const textSource of textSources(s, source)) {
+      const source = textSource;
+      if (
+        (event === "target" || event === "ready") &&
+        source &&
+        is(source, 174) &&
+        source.owner === p
+      )
+        ctx.trigger(
+          s,
+          p,
+          source.cardId,
+          source.id,
+          textEffects(source, [self("might", 1)]),
+          source.location,
+        );
+    }
+    for (const textSource of textSources(s, source)) {
+      const source = textSource;
+      if (event === "ready" && source && is(source, 88))
+        ctx.trigger(
+          s,
+          source.owner,
+          source.cardId,
+          source.id,
+          textEffects(source, [
+            {
+              type: "special",
+              modes: [
+                { label: "Assault 2", effects: [self("assault", 2)] },
+                {
+                  label: "Deflect 2",
+                  effects: [
+                    {
+                      type: "keyword",
+                      condition: "self",
+                      keyword: "Deflect 2",
+                    },
+                  ],
+                },
+                {
+                  label: "Ganking",
+                  effects: [
+                    { type: "keyword", condition: "self", keyword: "Ganking" },
+                  ],
+                },
+              ],
+            },
+          ]),
+          source.location,
+        );
+    }
+    for (const textSource of textSources(s, source)) {
+      const source = textSource;
+      if (
+        event === "move" &&
+        source &&
+        is(source, 38) &&
+        locationId?.startsWith("field:")
+      )
+        ctx.trigger(
+          s,
+          source.owner,
+          source.cardId,
+          source.id,
+          textEffects(source, [self("might", 2)]),
+          locationId,
+        );
+    }
     if (event === "move" && source && locationId?.startsWith("field:"))
       for (const g of s.gears.filter(
         (g) => g.attachedTo === source.id && is(g, 11),
@@ -384,19 +429,22 @@ export const vendettaWave3Module: ExpansionModule = {
           source.owner,
           g.cardId,
           source.id,
-          [self("might", 2)],
+          textEffects(source, [self("might", 2)]),
           locationId,
         );
     if (event === "empower") {
-      if (source && is(source, 47))
-        ctx.trigger(
-          s,
-          source.owner,
-          source.cardId,
-          source.id,
-          [fx("predict", { amount: 2 })],
-          source.location,
-        );
+      for (const textSource of textSources(s, source)) {
+        const source = textSource;
+        if (source && is(source, 47))
+          ctx.trigger(
+            s,
+            source.owner,
+            source.cardId,
+            source.id,
+            textEffects(source, [fx("predict", { amount: 2 })]),
+            source.location,
+          );
+      }
       if (
         sourceId !== "legend" &&
         [151, 153].includes(number(s.players[p].legendId))
@@ -410,8 +458,15 @@ export const vendettaWave3Module: ExpansionModule = {
     if (event === "play") {
       const card = getCard(cardId);
       for (const u of s.units.filter((u) => u.owner === p)) {
-        if (is(u, 183) && card.type === "Spell")
-          ctx.trigger(s, p, u.cardId, u.id, [self("might", 2)], u.location);
+        if (is(u, 183) && isCardType(card, "Spell"))
+          ctx.trigger(
+            s,
+            p,
+            u.cardId,
+            u.id,
+            textEffects(u, [self("might", 2)]),
+            u.location,
+          );
         if (
           is(u, 176) &&
           p !== s.currentPlayer &&
@@ -423,17 +478,20 @@ export const vendettaWave3Module: ExpansionModule = {
             p,
             u.cardId,
             u.id,
-            [{ type: "token", cardName: "Recruit", location: "base" }],
+            textEffects(u, [
+              { type: "token", cardName: "Recruit", location: "base" },
+            ]),
             u.location,
           );
       }
       if (
-        ["Unit", "Gear", "Spell"].includes(card.type) &&
+        ["Unit", "Gear", "Spell"].some((type) => isCardType(card, type)) &&
         card.supertype !== "Token" &&
         !source?.token
       ) {
         const played = data(s).played[p];
-        if (!played.includes(card.type)) played.push(card.type);
+        for (const type of getCardTypes(card))
+          if (!played.includes(type)) played.push(type);
       }
     }
     if (event === "conquer") {
@@ -451,7 +509,7 @@ export const vendettaWave3Module: ExpansionModule = {
             p,
             u.cardId,
             u.id,
-            [{ type: "score", amount: 1 }],
+            textEffects(u, [{ type: "score", amount: 1 }]),
             u.location,
           );
         if (is(u, 80))
@@ -460,13 +518,13 @@ export const vendettaWave3Module: ExpansionModule = {
             p,
             u.cardId,
             u.id,
-            [
+            textEffects(u, [
               fx("demolish", {
                 target: "anyGear",
                 maxEnergy: ctx.getMight(s, u),
                 optional: true,
               }),
-            ],
+            ]),
             u.location,
           );
       }
@@ -510,7 +568,7 @@ export const vendettaWave3Module: ExpansionModule = {
             cardId: o.cardId,
           });
       }
-      for (const u of s.units.filter((u) => u.owner === p && is(u, 125)))
+      for (const u of textUnits(s).filter((u) => u.owner === p && is(u, 125)))
         if (
           data(s, false).targetedEnemy[p] &&
           !data(s, false).wolfUsed.includes(u.id) &&
@@ -612,7 +670,7 @@ export const vendettaWave3Module: ExpansionModule = {
   effect(s, p, e, ctx) {
     if (!e.custom?.startsWith("ven-wave3:")) return false;
     const key = e.custom.slice("ven-wave3:".length),
-      source = s.units.find((u) => u.id === ctx.sourceId),
+      source = abilityUnit(s, ctx.sourceId, ctx.abilityInstance),
       target = s.units.find((u) => u.id === ctx.targetId);
     const run = (effects: Effect[], targetId = ctx.targetId) =>
       ctx.runEffects(
@@ -681,7 +739,7 @@ export const vendettaWave3Module: ExpansionModule = {
         ctx.empower!(s, p, "legend");
         break;
       case "predict": {
-        const top = s.players[p].deck.slice(0, e.amount ?? 1);
+        const top = s.players[p].deck.slice(0, e.lookCount ?? e.amount ?? 1);
         predictChoices(s, p, ctx, {
           top,
           remaining: top.map((_, i) => i),
@@ -741,7 +799,7 @@ export const vendettaWave3Module: ExpansionModule = {
       case "strength-picked": {
         const hand = s.players[other(p)].hand;
         if (hand[e.amount!] === e.cardName)
-          s.players[other(p)].deck.push(hand.splice(e.amount!, 1)[0]);
+          recycleCards(s, other(p), [hand.splice(e.amount!, 1)[0]], p);
         break;
       }
       case "rogue":

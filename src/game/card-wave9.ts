@@ -1,3 +1,10 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { isCardType } from "../data/cards";
 import { cards, getCard } from "../data/cards";
 import { canonicalCardName } from "../data/card-identity";
 import { isFace } from "./board-rules";
@@ -120,19 +127,26 @@ export const cardWave9Module: ExpansionModule = {
         locationId,
       );
     if (event === "play" && ctx.playOrdinal === 1)
-      for (const u of s.units.filter(
+      for (const u of textUnits(s).filter(
         (u) =>
           u.owner === p &&
           isFace(u.cardId, "VEN", 44) &&
           u.location.startsWith("field:"),
       ))
-        ctx.trigger(s, p, u.cardId, u.id, [fx("next-card")], u.location);
+        ctx.trigger(
+          s,
+          p,
+          u.cardId,
+          u.id,
+          textEffects(u, [fx("next-card")]),
+          u.location,
+        );
     if (event === "main" && player.nextMainPower) {
       player.power = (player.power ?? 0) + player.nextMainPower;
       player.nextMainPower = 0;
     }
     if (event === "combatEnd" && s.combat?.engaged)
-      for (const u of s.units.filter(
+      for (const u of textUnits(s).filter(
         (u) =>
           isFace(u.cardId, "VEN", 24) &&
           u.damageTakenTurn !== s.turn &&
@@ -144,7 +158,7 @@ export const cardWave9Module: ExpansionModule = {
           u.owner,
           u.cardId,
           u.id,
-          [{ type: "draw", amount: 1 }],
+          textEffects(u, [{ type: "draw", amount: 1 }]),
           u.location,
         );
   },
@@ -184,7 +198,7 @@ export const cardWave9Module: ExpansionModule = {
         break;
       }
       case "damage-kill":
-        ctx.killUnits(s, [e.cardName!]);
+        ctx.killUnits(s, [e.cardName!], e.keyword);
         break;
       case "name-spell": {
         const seen = new Set<string>();
@@ -192,7 +206,7 @@ export const cardWave9Module: ExpansionModule = {
           sourceId: ctx.sourceId,
           options: cards
             .filter((c) => {
-              if (c.type !== "Spell") return false;
+              if (!isCardType(c, "Spell")) return false;
               const name = canonicalCardName(c.name);
               if (seen.has(name)) return false;
               seen.add(name);
@@ -212,7 +226,7 @@ export const cardWave9Module: ExpansionModule = {
         break;
       }
       case "named-spell": {
-        const source = s.units.find((u) => u.id === ctx.sourceId);
+        const source = abilityUnit(s, ctx.sourceId, ctx.abilityInstance);
         if (source) source.namedSpell = e.cardName;
         break;
       }

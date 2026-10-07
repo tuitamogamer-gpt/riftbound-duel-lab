@@ -1,3 +1,4 @@
+import { isCardType } from "../data/cards";
 import { cards, cardsById, type Card } from "../data/cards";
 import {
   canonicalCardName,
@@ -59,13 +60,13 @@ const compatible = (card: Card, domains: string[]) =>
 const fieldIds = (deck: StarterDeck) =>
   deck.battlefieldIds?.length ? deck.battlefieldIds : [deck.battlefieldId];
 const sectionType = (section: Section | null, card: Card) => {
-  if (section === "legend") return card.type === "Legend";
+  if (section === "legend") return isCardType(card, "Legend");
   if (section === "champion")
-    return card.type === "Unit" && card.supertype === "Champion";
-  if (section === "runes") return card.type === "Rune";
-  if (section === "battlefields") return card.type === "Battlefield";
+    return isCardType(card, "Unit") && card.supertype === "Champion";
+  if (section === "runes") return isCardType(card, "Rune");
+  if (section === "battlefields") return isCardType(card, "Battlefield");
   if (section === "main" || section === "sideboard")
-    return ["Unit", "Gear", "Spell"].includes(card.type);
+    return ["Unit", "Gear", "Spell"].some((type) => isCardType(card, type));
   return true;
 };
 
@@ -283,9 +284,9 @@ export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
     issues.push(
       issue("sideboard-count", "Sideboard može imati najviše 10 karata."),
     );
-  if (legend?.type !== "Legend")
+  if (!isCardType(legend, "Legend"))
     issues.push(issue("legend-type", "Potrebna je tačno jedna Legend karta."));
-  if (champion?.type !== "Unit" || champion.supertype !== "Champion")
+  if (!isCardType(champion, "Unit") || champion.supertype !== "Champion")
     issues.push(
       issue("champion-type", "Odabrani champion mora biti Champion Unit."),
     );
@@ -347,7 +348,7 @@ export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
     );
   for (const id of fields) {
     const card = cardsById[id];
-    if (card && card.type !== "Battlefield")
+    if (card && !isCardType(card, "Battlefield"))
       issues.push(
         issue("battlefield-type", `Karta nije Battlefield: ${card.name}`, {
           cardId: id,
@@ -368,7 +369,7 @@ export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
     const card = cardsById[entry.cardId];
     if (!card) continue;
     if (
-      !["Unit", "Spell", "Gear"].includes(card.type) ||
+      !["Unit", "Spell", "Gear"].some((type) => isCardType(card, type)) ||
       card.supertype === "Token"
     )
       issues.push(
@@ -438,7 +439,9 @@ export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
     const card = cardsById[entry.cardId];
     if (
       card &&
-      (card.type !== "Rune" || !legend || !compatible(card, legend.domains))
+      (!isCardType(card, "Rune") ||
+        !legend ||
+        !compatible(card, legend.domains))
     )
       issues.push(
         issue("invalid-rune", `Nevažeća runa za ovu legendu: ${card.name}`, {
@@ -569,11 +572,11 @@ export function parseDeckText(
     const card = matches[0];
     const destination =
       activeSection ??
-      (card.type === "Legend"
+      (isCardType(card, "Legend")
         ? "legend"
-        : card.type === "Battlefield"
+        : isCardType(card, "Battlefield")
           ? "battlefields"
-          : card.type === "Rune"
+          : isCardType(card, "Rune")
             ? "runes"
             : "main");
     if (!sectionType(destination, card))

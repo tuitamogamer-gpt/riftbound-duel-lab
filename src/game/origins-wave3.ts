@@ -1,3 +1,12 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { recycleCards, recycleRunes } from "./zone-events";
+import { isCardType } from "../data/cards";
+import { ruleFamily } from "./rule-families";
 import { getCard } from "../data/cards";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
 import type {
@@ -144,13 +153,13 @@ function choose(
 }
 export const originsWave3Module: ExpansionModule = {
   keywords(s) {
-    return s.units.some((u) => u.cardId === "sfd-014-221")
+    return textUnits(s).some((u) => u.cardId === "sfd-014-221")
       ? ["Cannot move to base"]
       : [];
   },
   effect(s, p, e, ctx) {
     if (!e.custom?.startsWith("wave3:")) return false;
-    const source = s.units.find((u) => u.id === ctx.sourceId);
+    const source = abilityUnit(s, ctx.sourceId, ctx.abilityInstance);
     switch (e.custom.slice(6)) {
       case "caitlyn": {
         const might = source ? ctx.getMight(s, source) : undefined;
@@ -238,7 +247,7 @@ export const originsWave3Module: ExpansionModule = {
           p,
           ctx,
           s.players[p].deck
-            .slice(0, 2)
+            .slice(0, e.lookCount ?? 2)
             .map((id, i) =>
               opt(p, `called:${i}`, `Draw ${getCard(id).name}`, [
                 special("called-draw", { amount: i }),
@@ -247,13 +256,13 @@ export const originsWave3Module: ExpansionModule = {
         );
         break;
       case "called-draw": {
-        const cards = s.players[p].deck.splice(0, 2),
+        const cards = s.players[p].deck.splice(0, e.lookCount ?? 2),
           i = e.amount!;
         if (cards[i]) {
           s.players[p].deck.unshift(cards.splice(i, 1)[0]);
           ctx.draw(s, p, 1);
         }
-        s.players[p].deck.push(...cards);
+        recycleCards(s, p, [...cards], p);
         break;
       }
       case "altar": {
@@ -286,7 +295,7 @@ export const originsWave3Module: ExpansionModule = {
         if (x.hand[e.amount!] !== e.cardName) break;
         const [id] = x.hand.splice(e.amount!, 1);
         if (e.ready) x.deck.unshift(id);
-        else x.deck.push(id);
+        else recycleCards(s, p, [id], p);
         break;
       }
       default:
@@ -297,18 +306,26 @@ export const originsWave3Module: ExpansionModule = {
   event(s, event, p, cardId, sourceId, locationId, ctx) {
     const u = s.units.find((u) => u.id === sourceId);
     const trig = (unit: Unit, effects: Effect[]) =>
-      ctx.trigger(s, unit.owner, unit.cardId, unit.id, effects, unit.location);
+      ctx.trigger(
+        s,
+        unit.owner,
+        unit.cardId,
+        unit.id,
+        textEffects(unit, effects),
+        unit.location,
+      );
     if (
       event === "unitPlayed" &&
-      u?.cardId === "ogn-035-298" &&
+      u &&
+      ruleFamily(u.cardId) === "ogn-035-298" &&
       s.fields.some((f) => f.controller === other(u.owner))
     )
       u.ready = true;
     if (
       event === "play" &&
       u &&
-      getCard(cardId).type === "Unit" &&
-      s.players[p].legendId === "ogn-249-298" &&
+      isCardType(getCard(cardId), "Unit") &&
+      ruleFamily(s.players[p].legendId) === "ogn-249-298" &&
       ctx.getMight(s, u) >= 5
     )
       ctx.trigger(
@@ -321,7 +338,7 @@ export const originsWave3Module: ExpansionModule = {
       );
     if (
       event === "play" &&
-      getCard(cardId).type === "Spell" &&
+      isCardType(getCard(cardId), "Spell") &&
       s.currentPlayer !== p
     )
       for (const g of s.gears.filter(
@@ -332,7 +349,7 @@ export const originsWave3Module: ExpansionModule = {
           p,
           g.cardId,
           g.id,
-          paid([special("gold")], { exhaust: true }),
+          textEffects(g, paid([special("gold")], { exhaust: true })),
           `base:${p}`,
         );
     if (
@@ -353,7 +370,10 @@ export const originsWave3Module: ExpansionModule = {
           p,
           g.cardId,
           g.id,
-          paid([{ type: "draw", amount: 1 }], { energy: 1, exhaust: true }),
+          textEffects(
+            g,
+            paid([{ type: "draw", amount: 1 }], { energy: 1, exhaust: true }),
+          ),
           `base:${p}`,
         );
       if (s.players[p].legendId === "sfd-195-221")
@@ -442,7 +462,7 @@ export const originsWave3Module: ExpansionModule = {
           u.owner,
           gear.cardId,
           gear.id,
-          paid([special("altar")], { exhaust: true }),
+          textEffects(gear, paid([special("altar")], { exhaust: true })),
           `base:${u.owner}`,
         );
     }

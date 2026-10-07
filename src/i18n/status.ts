@@ -1,5 +1,76 @@
 /** Status labels and rules explanations; printed keyword names stay in English. */
 export const statusMessages: Record<string, [string, string, string]> = {
+  "The equipped unit has +2 Might.": [
+    "The equipped unit has +2 Might.",
+    "Opremljena jedinica ima +2 snage.",
+    "L'unità equipaggiata ha +2 Forza.",
+  ],
+  "When I attack or defend, deal 2 to all enemy units here.": [
+    "When I attack or defend, deal 2 to all enemy units here.",
+    "Kada napadam ili branim, nanesi 2 štete svim neprijateljskim jedinicama ovdje.",
+    "Quando attacco o difendo, infliggi 2 danni a tutte le unità nemiche qui.",
+  ],
+  "Your units here have Ganking.": [
+    "Your units here have Ganking.",
+    "Tvoje jedinice ovdje imaju Ganking.",
+    "Le tue unità qui hanno Ganking.",
+  ],
+  "Hunt (When I conquer or hold, gain 1 XP.)": [
+    "Hunt (When I conquer or hold, gain 1 XP.)",
+    "Hunt (Kada osvojim ili zadržim bojište, dobijaš 1 XP.)",
+    "Hunt (Quando conquisto o mantengo il controllo, ottieni 1 XP.)",
+  ],
+  "Equipped unit": [
+    "Equipped unit",
+    "Opremljena jedinica",
+    "Unità equipaggiata",
+  ],
+  "Official card": ["Official card", "Zvanična karta", "Carta ufficiale"],
+  "When I attack or defend, deal 2 to an enemy unit here.": [
+    "When I attack or defend, deal 2 to an enemy unit here.",
+    "Kada napadam ili branim, nanesi 2 štete neprijateljskoj jedinici ovdje.",
+    "Quando attacco o difendo, infliggi 2 danni a un'unità nemica qui.",
+  ],
+  "If this was attached to me this turn, I have an additional +2 Might.": [
+    "If this was attached to me this turn, I have an additional +2 Might.",
+    "Ako je ova oprema pričvršćena na mene ovog poteza, imam dodatnih +2 snage.",
+    "Se questo equipaggiamento mi è stato assegnato in questo turno, ho +2 Forza aggiuntiva.",
+  ],
+  "When I hold, play two Gold gear tokens exhausted.": [
+    "When I hold, play two Gold gear tokens exhausted.",
+    "Kada zadržim bojište, odigraj dva iscrpljena Gold žetona opreme.",
+    "Quando mantengo il controllo, gioca due pedine Gold esaurite.",
+  ],
+  "When I hold, score 1 point.": [
+    "When I hold, score 1 point.",
+    "Kada zadržim bojište, osvoji 1 poen.",
+    "Quando mantengo il controllo, ottieni 1 punto.",
+  ],
+  "When I conquer, channel 1 rune exhausted.": [
+    "When I conquer, channel 1 rune exhausted.",
+    "Kada osvojim bojište, uvedi 1 iscrpljenu runu.",
+    "Quando conquisto, canalizza 1 runa esaurita.",
+  ],
+  "When I conquer, discard 1, then draw 1.": [
+    "When I conquer, discard 1, then draw 1.",
+    "Kada osvojim bojište, odbaci 1 kartu, pa izvuci 1 kartu.",
+    "Quando conquisto, scarta 1 carta, poi pesca 1 carta.",
+  ],
+  "When I conquer, play a Gold gear token exhausted.": [
+    "When I conquer, play a Gold gear token exhausted.",
+    "Kada osvojim bojište, odigraj iscrpljen Gold žeton opreme.",
+    "Quando conquisto, gioca una pedina Gold esaurita.",
+  ],
+  "When I move, play a 1 Might Recruit unit token here.": [
+    "When I move, play a 1 Might Recruit unit token here.",
+    "Kada se pomjerim, odigraj ovdje Recruit žeton jedinice sa 1 snage.",
+    "Quando mi muovo, gioca qui una pedina unità Recruit con 1 Forza.",
+  ],
+  "The equipped unit has +3 Might.": [
+    "The equipped unit has +3 Might.",
+    "Opremljena jedinica ima +3 snage.",
+    "L'unità equipaggiata ha +3 Forza.",
+  ],
   "Named spell: {card}": [
     "Named spell: {card}",
     "Imenovana čarolija: {card}",

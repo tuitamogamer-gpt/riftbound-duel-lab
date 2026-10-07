@@ -1,3 +1,9 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
 import { getCard } from "../data/cards";
 import { getKeywords } from "./engine";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
@@ -144,7 +150,7 @@ export const unleashedWave4Module: ExpansionModule = {
     )
       return [];
     if (!ctx.canPay(s, p, 0, 1, ["Chaos"])) return [];
-    return s.units
+    return textUnits(s)
       .filter((u) => u.owner === p && u.cardId === id(144))
       .flatMap((source) =>
         s.fields
@@ -315,7 +321,7 @@ export const unleashedWave4Module: ExpansionModule = {
         break;
       }
       case "gate": {
-        const source = s.units.find((u) => u.id === ctx.sourceId);
+        const source = abilityUnit(s, ctx.sourceId, ctx.abilityInstance);
         if (
           source &&
           gateDestination(s, source, ctx.targetId as LocationId, ctx)

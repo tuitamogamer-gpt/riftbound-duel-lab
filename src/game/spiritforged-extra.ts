@@ -1,3 +1,12 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { recycleCards, recycleRunes } from "./zone-events";
+import { isCardType } from "../data/cards";
+import { getUnitTags } from "./board-rules";
 import { getCard } from "../data/cards";
 import { getScript } from "./scripts";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
@@ -225,29 +234,38 @@ function bounceGear(s: GameState, id: string, ctx: PreconContext) {
 }
 export const spiritforgedExtraModule: ExpansionModule = {
   might(s, u, value) {
-    if (u.cardId === "sfd-068-221")
-      for (const id of u.gear) {
-        const g = s.gears.find((g) => g.id === id);
-        if (g) value += getScript(g.cardId)?.gearMight ?? 0;
-      }
-    if (
-      u.cardId === "sfd-159-221" &&
-      s.units.some(
-        (v) =>
-          v.id !== u.id && v.owner === u.owner && v.location === u.location,
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === "sfd-068-221")
+        for (const id of u.gear) {
+          const g = s.gears.find((g) => g.id === id);
+          if (g) value += getScript(g.cardId)?.gearMight ?? 0;
+        }
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (
+        u.cardId === "sfd-159-221" &&
+        s.units.some(
+          (v) =>
+            v.id !== u.id && v.owner === u.owner && v.location === u.location,
+        )
       )
-    )
-      value++;
+        value++;
+    }
     if (
       s.combat &&
       (s.combat.engaged ?? true) &&
       s.combat.fieldId === u.location &&
       s.combat.attacker === u.owner
     ) {
-      if (u.cardId === "sfd-131-221")
-        value += s.units.filter(
-          (v) => v.owner !== u.owner && v.location === u.location,
-        ).length;
+      for (const textSource of textSources(s, u)) {
+        const u = textSource;
+        if (u.cardId === "sfd-131-221")
+          value += s.units.filter(
+            (v) => v.owner !== u.owner && v.location === u.location,
+          ).length;
+      }
       if (s.players[u.owner].legendId === "sfd-183-221")
         value += u.gear.filter((id) => {
           const g = s.gears.find((g) => g.id === id);
@@ -258,11 +276,14 @@ export const spiritforgedExtraModule: ExpansionModule = {
   },
   keywords(s, u) {
     const result: string[] = [];
-    if (u.cardId === "sfd-131-221") {
-      const n = s.units.filter(
-        (v) => v.owner !== u.owner && v.location === u.location,
-      ).length;
-      if (n) result.push(`Assault ${n}`);
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === "sfd-131-221") {
+        const n = s.units.filter(
+          (v) => v.owner !== u.owner && v.location === u.location,
+        ).length;
+        if (n) result.push(`Assault ${n}`);
+      }
     }
     if (s.players[u.owner].legendId === "sfd-183-221" && u.gear.length)
       result.push(`Assault ${u.gear.length}`);
@@ -286,7 +307,8 @@ export const spiritforgedExtraModule: ExpansionModule = {
   effect(s, p, e, ctx) {
     if (!e.custom?.startsWith("sfd-extra:")) return false;
     const key = e.custom.slice("sfd-extra:".length),
-      source = s.units.find((u) => u.id === ctx.sourceId) ?? ctx.lastUnit;
+      source =
+        abilityUnit(s, ctx.sourceId, ctx.abilityInstance) ?? ctx.lastUnit;
     const target = s.units.find((u) => u.id === ctx.targetId);
     const run = (effects: Effect[], targetId = ctx.targetId) =>
       ctx.runEffects(s, p, effects, targetId, ctx.sourceId, ctx.locationId);
@@ -349,21 +371,22 @@ export const spiritforgedExtraModule: ExpansionModule = {
       case "smith": {
         const top = s.players[p].deck[0];
         if (top) {
+          ctx.cardEvent(s, "reveal", p, top);
           ctx.log?.(
             s,
             `Apprentice Smith reveals ${getCard(top).name}.`,
             "info",
             p,
           );
-          if (getCard(top).type === "Gear") ctx.draw(s, p, 1);
-          else s.players[p].deck.push(s.players[p].deck.shift()!);
+          if (isCardType(getCard(top), "Gear")) ctx.draw(s, p, 1);
+          else recycleCards(s, p, [s.players[p].deck.shift()!], p);
         }
         break;
       }
       case "ornn-select": {
-        const top = s.players[p].deck.slice(0, 4);
+        const top = s.players[p].deck.slice(0, e.lookCount ?? 4);
         const opts = top.flatMap((cardId, index) =>
-          getCard(cardId).type === "Gear"
+          isCardType(getCard(cardId), "Gear")
             ? [
                 option(p, `ornn:${index}`, `Draw ${getCard(cardId).name}`, [
                   sf("ornn-finish", { amount: index }),
@@ -380,9 +403,10 @@ export const spiritforgedExtraModule: ExpansionModule = {
         break;
       }
       case "ornn-finish": {
-        const top = s.players[p].deck.splice(0, 4);
+        const top = s.players[p].deck.splice(0, e.lookCount ?? 4);
         const i = e.amount ?? -1;
         if (i >= 0 && top[i]) {
+          ctx.cardEvent(s, "reveal", p, top[i]);
           ctx.log?.(
             s,
             `Ornn - Blacksmith reveals ${getCard(top[i]).name}.`,
@@ -392,7 +416,7 @@ export const spiritforgedExtraModule: ExpansionModule = {
           s.players[p].deck.unshift(top.splice(i, 1)[0]);
           ctx.draw(s, p, 1);
         }
-        s.players[p].deck.push(...ctx.shuffle!(s, top));
+        recycleCards(s, p, [...ctx.shuffle!(s, top)], p);
         break;
       }
       case "dropboarder":
@@ -487,7 +511,7 @@ export const spiritforgedExtraModule: ExpansionModule = {
       if (
         cardId === "sfd-094-221" &&
         own(s, p).some(
-          (x) => x.id !== u.id && getCard(x.cardId).tags.includes("Dragon"),
+          (x) => x.id !== u.id && getUnitTags(x).includes("Dragon"),
         )
       )
         u.ready = true;
@@ -497,32 +521,57 @@ export const spiritforgedExtraModule: ExpansionModule = {
           .length >= 2
       )
         u.ready = true;
-      if (u.token && own(s, p).some((x) => x.cardId === "sfd-171-221"))
+      if (
+        u.token &&
+        own(s, p)
+          .flatMap((u) => textSources(s, u))
+          .some((x) => x.cardId === "sfd-171-221")
+      )
         u.ready = true;
       const rally = (s as ExtraState).sfdExtraRally?.[p];
       if (rally?.turn === s.turn)
         for (let i = 0; i < rally.count; i++)
-          ctx.trigger(s, p, cardId, u.id, [self("buff")], u.location);
+          ctx.trigger(
+            s,
+            p,
+            cardId,
+            u.id,
+            textEffects(u, [self("buff")]),
+            u.location,
+          );
     }
     if (event === "play") {
       const gear = s.gears.find((g) => g.id === sourceId);
-      if (gear?.token && own(s, p).some((u) => u.cardId === "sfd-171-221"))
+      if (
+        gear?.token &&
+        own(s, p)
+          .flatMap((u) => textSources(s, u))
+          .some((u) => u.cardId === "sfd-171-221")
+      )
         gear.ready = true;
       if ((getCard(cardId).power ?? 0) >= 2)
-        for (const explorer of own(s, p).filter(
-          (u) => u.cardId === "sfd-100-221",
-        ))
+        for (const explorer of own(s, p)
+          .flatMap((u) => textSources(s, u))
+          .filter((u) => u.cardId === "sfd-100-221"))
           ctx.trigger(
             s,
             p,
             explorer.cardId,
             explorer.id,
-            [{ type: "draw", amount: 1 }],
+            textEffects(explorer, [{ type: "draw", amount: 1 }]),
             explorer.location,
           );
     }
-    if (event === "buff" && u?.cardId === "sfd-047-221")
-      ctx.trigger(s, p, u.cardId, u.id, [self("ready")], u.location);
+    for (const source of textSources(s, u))
+      if (event === "buff" && source.cardId === "sfd-047-221")
+        ctx.trigger(
+          s,
+          p,
+          source.cardId,
+          source.id,
+          textEffects(source, [self("ready")]),
+          source.location,
+        );
     if (event === "hold") {
       const map = ((s as ExtraState).sfdExtraHold ??= {}),
         prev = map[p];
@@ -531,7 +580,11 @@ export const spiritforgedExtraModule: ExpansionModule = {
         count: (prev?.turn === s.turn ? prev.count : 0) + 1,
       };
     }
-    if (event === "death" && u?.cardId === "sfd-036-221")
+    if (
+      event === "death" &&
+      u &&
+      textSources(s, u).some((source) => source.cardId === "sfd-036-221")
+    )
       ((s as ExtraState).sfdExtraAlone ??= {})[u.id] = !s.units.some(
         (v) =>
           v.id !== u.id && v.owner === u.owner && v.location === u.location,
@@ -558,7 +611,9 @@ export const spiritforgedExtraModule: ExpansionModule = {
       event === "beginning" ||
       event === "stateChanged"
     )
-      for (const runner of s.units.filter((u) => u.cardId === "sfd-105-221"))
+      for (const runner of textUnits(s).filter(
+        (u) => u.cardId === "sfd-105-221",
+      ))
         runner.untargetableByEnemy = true;
   },
 };

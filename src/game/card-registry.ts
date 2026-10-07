@@ -10,11 +10,19 @@ export interface CardRegistration {
   reason?: string;
 }
 
-function unsupportedRulesReason(card: Card): string | undefined {
+function unsupportedRulesReason(
+  card: Card,
+  script?: CardScript,
+): string | undefined {
   // The Vendetta FAQ makes this both Unit and Gear, despite the provider's
   // single-type record. A keyword-only script cannot implement that rules face.
   // https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications/
-  if (canonicalCardName(card.name) === "patched porobot")
+  if (
+    canonicalCardName(card.name) === "patched porobot" &&
+    !(
+      script?.cardTypes?.includes("Unit") && script?.cardTypes?.includes("Gear")
+    )
+  )
     return "Patched Porobot is both Unit and Gear; its hybrid card type requires full engine support.";
   return undefined;
 }
@@ -31,7 +39,10 @@ export function buildCardRegistry(
   for (const card of catalog) {
     const key = gameplayFingerprint(card);
     groups.set(key, [...(groups.get(key) ?? []), card]);
-    if (!unsupportedRulesReason(card) && !explicit[card.id]) {
+    if (
+      !unsupportedRulesReason(card, explicit[card.id]) &&
+      !explicit[card.id]
+    ) {
       const script = compile(card);
       if (script) compiled.set(card.id, script);
     }
@@ -49,7 +60,8 @@ export function buildCardRegistry(
       // Explicit scripts can contain exact-ID engine hooks. Preserve their identity.
       const rulesCard = explicit[card.id] ? card : source;
       const blockedReason =
-        unsupportedRulesReason(card) ?? unsupportedRulesReason(rulesCard);
+        unsupportedRulesReason(card, explicit[rulesCard.id]) ??
+        unsupportedRulesReason(rulesCard, explicit[rulesCard.id]);
       const script = blockedReason
         ? undefined
         : (explicit[rulesCard.id] ?? compiled.get(rulesCard.id));
@@ -83,7 +95,7 @@ export function buildCardRegistry(
       !entry?.script &&
       source?.script &&
       card &&
-      !unsupportedRulesReason(card)
+      !unsupportedRulesReason(card, source.script)
     )
       registry[cardId] = {
         cardId,

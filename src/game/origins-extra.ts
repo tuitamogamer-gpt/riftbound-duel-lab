@@ -1,3 +1,12 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { isCardType } from "../data/cards";
+import { getUnitTags } from "./board-rules";
+import { ruleFamily } from "./rule-families";
 import { getCard } from "../data/cards";
 import type { CardScript, Effect, GameState, PlayerId, Unit } from "./types";
 import type { ExpansionModule } from "./later-precon-engine";
@@ -241,23 +250,29 @@ type OriginsState = GameState & {
 const allies = (s: GameState, p: PlayerId) =>
   s.units.filter((u) => u.owner === p);
 const sameSideHere = (s: GameState, u: Unit, cardId: string) =>
-  s.units.filter(
+  textUnits(s).filter(
     (v) =>
       v.id !== u.id &&
       v.owner === u.owner &&
       v.location === u.location &&
-      v.cardId === cardId,
+      ruleFamily(v.cardId) === cardId,
   );
 const nearVictory = (s: GameState, p: PlayerId) =>
   s.players[p === 0 ? 1 : 0].points >= 5;
 
 export const originsExtraModule: ExpansionModule = {
   might(s, u, value) {
-    if (u.cardId === "ogn-028-298") value += s.players[u.owner].points;
-    if (u.cardId === "ogn-240-298" && u.location.startsWith("field:"))
-      value += allies(s, u.owner).filter(
-        (v) => v.location === u.location && v.buff > 0,
-      ).length;
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === "ogn-028-298") value += s.players[u.owner].points;
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (u.cardId === "ogn-240-298" && u.location.startsWith("field:"))
+        value += allies(s, u.owner).filter(
+          (v) => v.location === u.location && v.buff > 0,
+        ).length;
+    }
     value += sameSideHere(s, u, "ogn-243-298").length;
     if (
       s.combat &&
@@ -291,16 +306,20 @@ export const originsExtraModule: ExpansionModule = {
       (s as OriginsState).originsEnemyDeaths?.[p] === s.turn
     )
       energy -= 2;
-    if (card.type === "Unit" && card.tags.includes("Dragon")) {
+    if (isCardType(card, "Unit") && card.tags.includes("Dragon")) {
       const reduction =
-        2 * allies(s, p).filter((u) => u.cardId === "ogn-140-298").length;
+        2 *
+        allies(s, p)
+          .flatMap((u) => textSources(s, u))
+          .filter((u) => u.cardId === "ogn-140-298").length;
       energy -= Math.min(Math.max(0, (card.energy ?? 0) - 1), reduction);
     }
     return { energy };
   },
   effect(s, p, e, ctx) {
     if (!e.custom?.startsWith("ogn-extra:")) return false;
-    const source = s.units.find((u) => u.id === ctx.sourceId) ?? ctx.lastUnit;
+    const source =
+      abilityUnit(s, ctx.sourceId, ctx.abilityInstance) ?? ctx.lastUnit;
     const target = s.units.find((u) => u.id === ctx.targetId);
     const run = (effects: Effect[], targetId = ctx.targetId) =>
       ctx.runEffects(s, p, effects, targetId, ctx.sourceId, ctx.locationId);
@@ -332,10 +351,7 @@ export const originsExtraModule: ExpansionModule = {
           (target.temporaryKeywords ??= []).push("Tank", "OGN Block Shield 3");
         break;
       case "poro-herder":
-        if (
-          source &&
-          allies(s, p).some((u) => getCard(u.cardId).tags.includes("Poro"))
-        )
+        if (source && allies(s, p).some((u) => getUnitTags(u).includes("Poro")))
           run([self("buff"), { type: "draw", amount: 1 }]);
         break;
       case "last-stand":
@@ -459,21 +475,34 @@ export const originsExtraModule: ExpansionModule = {
   event(s, event, p, cardId, sourceId, locationId, ctx) {
     const affected = s.units.find((u) => u.id === sourceId);
     const triggerSelf = (u: Unit, effects: Effect[]) =>
-      ctx.trigger(s, u.owner, u.cardId, u.id, effects, u.location);
+      ctx.trigger(
+        s,
+        u.owner,
+        u.cardId,
+        u.id,
+        textEffects(u, effects),
+        u.location,
+      );
     if (event === "play") {
       if (cardId === "ogn-017-298") {
         const gear = s.gears.find((g) => g.id === sourceId);
         if (gear) gear.ready = false;
       }
-      if (getCard(cardId).type === "Gear")
-        for (const u of allies(s, p).filter((u) => u.cardId === "ogn-091-298"))
+      if (isCardType(getCard(cardId), "Gear"))
+        for (const u of allies(s, p)
+          .flatMap((u) => textSources(s, u))
+          .filter((u) => u.cardId === "ogn-091-298"))
           triggerSelf(u, [self("ready")]);
     }
     if (event === "play" && ctx.playOrdinal === 2)
-      for (const u of allies(s, p).filter((u) => u.cardId === "ogn-027-298"))
+      for (const u of allies(s, p)
+        .flatMap((u) => textSources(s, u))
+        .filter((u) => u.cardId === "ogn-027-298"))
         triggerSelf(u, [self("might", 2), self("ready")]);
     if (event === "stun" && affected && affected.owner !== p)
-      for (const u of allies(s, p).filter((u) => u.cardId === "ogn-059-298"))
+      for (const u of allies(s, p)
+        .flatMap((u) => textSources(s, u))
+        .filter((u) => u.cardId === "ogn-059-298"))
         triggerSelf(u, [self("ready"), self("might", 1)]);
     if (event === "ready" && affected)
       for (const g of s.gears.filter(
@@ -484,18 +513,22 @@ export const originsExtraModule: ExpansionModule = {
           affected.owner,
           g.cardId,
           g.id,
-          [{ type: "might", amount: 1, chosenTargetId: affected.id }],
+          textEffects(g, [
+            { type: "might", amount: 1, chosenTargetId: affected.id },
+          ]),
           affected.location,
         );
     if (event === "death" && affected) {
       ((s as OriginsState).originsEnemyDeaths ??= {})[p === 0 ? 1 : 0] = s.turn;
       if (!getCard(cardId).name.startsWith("Recruit"))
-        for (const u of allies(s, p).filter(
-          (u) =>
-            u.id !== affected.id &&
-            u.cardId === "ogn-246-298" &&
-            !ctx.dyingUnitIds?.includes(u.id),
-        ))
+        for (const u of allies(s, p)
+          .flatMap((u) => textSources(s, u))
+          .filter(
+            (u) =>
+              u.id !== affected.id &&
+              u.cardId === "ogn-246-298" &&
+              !ctx.dyingUnitIds?.includes(u.id),
+          ))
           triggerSelf(u, [special("viktor-recruit")]);
     }
   },

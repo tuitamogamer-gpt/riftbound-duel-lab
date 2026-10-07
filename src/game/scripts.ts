@@ -1,7 +1,25 @@
+import { cardWave26Scripts } from "./card-wave26";
+import { cardWave25Scripts } from "./card-wave25";
+import { cardWave24Scripts } from "./card-wave24";
+import { cardWave23Scripts } from "./card-wave23";
+import { cardWave22Scripts } from "./card-wave22";
+import { cardWave21Scripts } from "./card-wave21";
+import { cardWave20Scripts } from "./card-wave20";
+import { cardWave19Scripts } from "./card-wave19";
+import { cardWave18Scripts } from "./card-wave18";
+import { cardWave17Scripts } from "./card-wave17";
+import { cardWave16Scripts } from "./card-wave16";
+import { cardWave15Scripts } from "./card-wave15";
+import { cardWave14Scripts } from "./card-wave14";
+import { cardWave13Scripts } from "./card-wave13";
+import { reviewedRuleFamilies } from "./rule-families";
 import { cardWave6Scripts } from "./card-wave6";
 import { cardWave7Scripts } from "./card-wave7";
 import { cardWave8Scripts } from "./card-wave8";
 import { cardWave9Scripts } from "./card-wave9";
+import { cardWave10Scripts } from "./card-wave10";
+import { cardWave11Scripts } from "./card-wave11";
+import { cardWave12Scripts } from "./card-wave12";
 import { originsWave4Scripts } from "./origins-wave4";
 import { cardWave5Scripts } from "./card-wave5";
 import { vendettaWave4Scripts } from "./vendetta-wave4";
@@ -216,11 +234,32 @@ Object.assign(
   cardWave7Scripts,
   cardWave8Scripts,
   cardWave9Scripts,
+  cardWave10Scripts,
+  cardWave11Scripts,
+  cardWave12Scripts,
+  cardWave13Scripts,
+  cardWave14Scripts,
+  cardWave15Scripts,
+  cardWave16Scripts,
+  cardWave17Scripts,
+  cardWave18Scripts,
+  cardWave19Scripts,
+  cardWave20Scripts,
+  cardWave21Scripts,
+  cardWave22Scripts,
+  cardWave23Scripts,
+  cardWave24Scripts,
+  cardWave25Scripts,
+  cardWave26Scripts,
 );
 map["token-tentacle"] = plain;
 map["token-mech"] = plain;
 map["token-sand-soldier"] = plain;
 map["token-bird"] = { ...plain, deflect: 1, keywords: ["Deflect"] };
+for (const [printing, source] of Object.entries(reviewedRuleFamilies)) {
+  if (!map[source]) throw new Error(`Missing reviewed rules source: ${source}`);
+  map[printing] = { ...map[source] };
+}
 export const cardRegistry = buildCardRegistry(
   cards,
   map,

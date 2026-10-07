@@ -66,7 +66,13 @@ export function sourceActions(
     (action) => !["pass", "end"].includes(action.category),
   );
   if (["choice", "damage", "move"].includes(game.phase)) return choices;
-  if (selected) return choices.filter((action) => action.sourceId === selected);
+  if (selected)
+    return choices.filter(
+      (action) =>
+        action.sourceId === selected ||
+        (selected.startsWith("hand:") &&
+          action.sourceId?.startsWith(`${selected}:jayce:`)),
+    );
   // Hand, board, Legend and Champion actions are reached by selecting their source.
   // Triggered, graveyard and battlefield actions still need an entry point.
   return choices.filter(

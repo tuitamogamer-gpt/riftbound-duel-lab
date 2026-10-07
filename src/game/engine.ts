@@ -1,5 +1,52 @@
 import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+  copiedScripts,
+} from "./text-sources";
+import { inspectDeck, shiftInspectedPositions } from "./deck-inspection";
+import { queueTokenReplacements, drainTokenReplacements } from "./card-wave25";
+import {
+  repeatPrices,
+  optionalDiscounts,
+  ireliaDiscounts,
+} from "./card-wave23";
+import {
+  makeDraft,
+  retargetDraft,
+  draftAction,
+  draftChoose,
+  draftChoices,
+} from "./effect-drafts";
+import { recycleCards, recycleRunes } from "./zone-events";
+import { banishCard } from "./banishment";
+import {
+  syncHybridObjects,
+  uncounterable,
+  gangplank,
+  changeMight,
+  lethal,
+} from "./card-wave19";
+import { getCardTypes } from "../data/cards";
+import { isCardType } from "../data/cards";
+import { advanceDeaths } from "./death-replacements";
+import { physicalOwner, physicalCard, detach } from "./objects";
+import { getUnitTags } from "./board-rules";
+import {
+  allCardTags,
+  triggerBoardSources,
+  payTriggerBoard,
+} from "./card-wave15";
+import {
+  grantedLegendAbilities,
+  markWave14Mode,
+  wave14ModeAvailable,
+} from "./card-wave14";
+import { runCardPlay } from "./card-play";
+import {
   addToTrash,
+  burnToTrash,
   emptyTrash,
   takeTrashAt,
   takeTrash,
@@ -8,6 +55,12 @@ import {
 } from "./trash";
 import { discountedOutsideHand } from "./card-wave8";
 import { gearAbilityDiscount } from "./card-wave9";
+import {
+  attachedEquipment,
+  nearbyEquipmentKeywords,
+  equipDomains,
+  unitTriggerEffects,
+} from "./equipment";
 import {
   canPlayCard,
   getVictoryScore,
@@ -36,6 +89,7 @@ import {
 } from "./later-precon-engine";
 import type {
   GameState,
+  PendingCardPlay,
   GameOptions,
   PlayerId,
   LocationId,
@@ -118,6 +172,8 @@ export interface CombatStep {
 }
 let stepFrames: StepFrame[] | null = null;
 const executingEffects = new WeakSet<GameState>();
+// Costs can cause triggers, but their choices wait until the play is finalized.
+const finalizingBoardCostPlay = new WeakMap<GameState, Array<() => void>>();
 const effectActors = new WeakMap<GameState, PlayerId>();
 const scoreTriggerRepeats = new WeakMap<
   GameState,
@@ -181,6 +237,7 @@ function shuffle<T>(s: GameState, items: T[]) {
   return result;
 }
 export function getMight(s: GameState, u: Unit, clamp = true): number {
+  if (u.abilityInstance) u = s.units.find((v) => v.id === u.id) ?? u;
   const c = getCard(u.cardId),
     sc = getScript(c.id);
   let value =
@@ -189,7 +246,7 @@ export function getMight(s: GameState, u: Unit, clamp = true): number {
     u.temporaryMight;
   if (u.cardId === "ogs-004-024" && s.players[u.owner].runes.length >= 8)
     value += 4;
-  value += s.units.filter(
+  value += textUnits(s).filter(
     (x) =>
       x.cardId === "ogs-013-024" &&
       x.owner === u.owner &&
@@ -200,7 +257,7 @@ export function getMight(s: GameState, u: Unit, clamp = true): number {
   if (u.buff && u.location.startsWith("field:"))
     value +=
       2 *
-      s.units.filter(
+      textUnits(s).filter(
         (x) =>
           x.owner === u.owner &&
           x.id !== u.id &&
@@ -210,6 +267,16 @@ export function getMight(s: GameState, u: Unit, clamp = true): number {
   for (const id of u.gear) {
     const g = s.gears.find((g) => g.id === id);
     if (g) value += getScript(g.cardId)?.gearMight ?? 0;
+  }
+  for (const gear of attachedEquipment(s, u)) {
+    const panel = getScript(gear.cardId)?.equipment;
+    if (gear.attachedTurn === s.turn) value += panel?.attachedTurnMight ?? 0;
+    if (
+      s.combat?.fieldId === u.location &&
+      (s.combat.engaged ?? true) &&
+      s.combat.defender === u.owner
+    )
+      value += panel?.shield ?? 0;
   }
   if (s.combat?.fieldId === u.location && (s.combat.engaged ?? true)) {
     value +=
@@ -238,13 +305,46 @@ export function getMight(s: GameState, u: Unit, clamp = true): number {
     value += 2;
   if (s.fields.find((f) => f.id === u.location)?.cardId === "ogn-294-298")
     value++;
+  if (s.combat?.engaged && s.combat.fieldId === u.location) {
+    const keyword = s.combat.attacker === u.owner ? "Assault" : "Shield";
+    value += (u.temporaryKeywords ?? [])
+      .filter((k) => k === keyword || k.startsWith(`${keyword} `))
+      .reduce((n, k) => n + (Number(k.split(" ")[1]) || 1), 0);
+  }
+  for (const { unit: t, script } of copiedScripts(s, u)) {
+    if (t.cardId === "ogs-004-024" && s.players[u.owner].runes.length >= 8)
+      value += 4;
+    if (t.cardId === "ogn-065-298" && u.buff) value++;
+    if (s.combat?.engaged && s.combat.fieldId === u.location) {
+      value +=
+        s.combat.attacker === u.owner
+          ? (script.assault ?? 0)
+          : (script.shield ?? 0);
+      if (
+        t.cardId === "ogn-019-298" &&
+        s.combat.attacker === u.owner &&
+        s.players[u.owner].discardedThisTurn
+      )
+        value++;
+      if (
+        t.cardId === "ogn-055-298" &&
+        s.units.filter((x) => x.owner === u.owner && x.location === u.location)
+          .length === 1
+      )
+        value += 2;
+    }
+  }
   const result = laterMight(s, u, value);
   return clamp ? Math.max(0, result) : result;
 }
 export function getKeywords(s: GameState, u: Unit) {
   const result = [
-    ...(getScript(u.cardId)?.keywords ?? []),
+    ...textSources(s, u).flatMap((t) => getScript(t.cardId)?.keywords ?? []),
     ...(u.temporaryKeywords ?? []),
+    ...attachedEquipment(s, u).flatMap(
+      (gear) => getScript(gear.cardId)?.equipment?.keywords ?? [],
+    ),
+    ...nearbyEquipmentKeywords(s, u),
   ];
   if (u.cardId === "ogn-019-298" && s.players[u.owner].discardedThisTurn)
     result.push("Ganking", "Assault");
@@ -264,6 +364,20 @@ export function getKeywords(s: GameState, u: Unit) {
     filtered.push("Deflect");
   return filtered;
 }
+/** Keyword values copied by Kato include intrinsic numeric keyword instances. */
+export function getScriptKeywords(s: GameState, u: Unit) {
+  const keywords = [...getKeywords(s, u)];
+  const script = getScript(u.cardId);
+  for (const [name, value] of [
+    ["Assault", script?.assault],
+    ["Shield", script?.shield],
+    ["Deflect", script?.deflect],
+  ] as const)
+    if (value && !keywords.some((k) => k === name || k.startsWith(`${name} `)))
+      keywords.push(value === 1 ? name : `${name} ${value}`);
+  if (u.temporaryAssault) keywords.push(`Assault ${u.temporaryAssault}`);
+  return keywords;
+}
 /** The actual damage contribution used by combat, including zero-power units. */
 function damageToKill(s: GameState, u: Unit) {
   if (
@@ -271,12 +385,16 @@ function damageToKill(s: GameState, u: Unit) {
     getKeywords(s, u).includes("Prevent all damage")
   )
     return Number.MAX_SAFE_INTEGER;
+  const elder = textUnits(s).some(
+    (dragon) => dragon.owner !== u.owner && isFace(dragon.cardId, "UNL", 118),
+  );
   const multiplier =
     u.doubleDamageTurn === s.turn ? 2 ** (u.damageDoublings ?? 1) : 1;
   return Math.max(
     1,
     Math.ceil(
-      (getMight(s, u) - u.damage + (u.preventDamage ?? 0)) / multiplier,
+      ((elder ? 1 : getMight(s, u)) - u.damage + (u.preventDamage ?? 0)) /
+        multiplier,
     ),
   );
 }
@@ -343,6 +461,11 @@ export function getResources(s: GameState, p: PlayerId) {
   };
 }
 interface PlayCostOptions {
+  repeatMask?: number;
+  flexibleEnergy?: number;
+  optionalEnergy?: number;
+  costSourceId?: string;
+  dragonRoost?: LocationId;
   additionalCostPaid?: boolean;
   repeated?: boolean;
   repeatedTargetId?: string;
@@ -356,6 +479,15 @@ function flowCost(
   sourceId?: string,
 ): (NonNullable<CardScript["flow"]> & { domains?: string[] }) | undefined {
   if (!sourceId?.startsWith("trash:")) return undefined;
+  if (sourceId.endsWith(":riches")) {
+    const c = getCard(cardId);
+    return {
+      energy: c.energy ?? 0,
+      power: c.power ?? 0,
+      domains: c.domains,
+      banishAfter: false,
+    };
+  }
   if (!sourceId.endsWith(":granted")) return getScript(cardId)?.flow;
   const card = trashCards(s, p)[Number(sourceId.split(":")[1])];
   if (
@@ -378,8 +510,14 @@ function playPowerDomains(
   card: Card,
   sourceId?: string,
 ) {
+  if (
+    s.pendingPlays?.find((item) => item.id === sourceId)?.spec.powerOverride !==
+    undefined
+  )
+    return [];
   if (!sourceId?.startsWith("trash:")) return card.domains;
   const flow = flowCost(s, p, card.id, sourceId);
+  const jayce = sourceId?.includes(":jayce:");
   return flow?.domains ?? (flow?.domain ? [flow.domain] : []);
 }
 /** Choose a payable allocation when a universal discount can remove colored costs. */
@@ -425,6 +563,8 @@ function costFor(
     energy?: number;
     power?: number;
     anyPower?: number;
+    flexibleCount?: number;
+    flexibleEnergy?: number;
     additionalPower?: PowerGroup[];
     floorDiscount?: number;
     energyReduction?: number;
@@ -434,15 +574,14 @@ function costFor(
 ) {
   let energy = (c.energy ?? 0) + (extras.energy ?? 0);
   const power = (c.power ?? 0) + (extras.power ?? 0);
-  const helmets =
-    c.type === "Spell"
-      ? s.gears.filter((g) => g.owner !== p && isFace(g.cardId, "VEN", 45))
-      : [];
+  const helmets = isCardType(c, "Spell")
+    ? s.gears.filter((g) => g.owner !== p && isFace(g.cardId, "VEN", 45))
+    : [];
   energy += helmets.length;
-  if (c.type === "Spell") {
+  if (isCardType(c, "Spell")) {
     const limited =
       (extras.floorDiscount ?? 0) +
-      s.units.filter(
+      textUnits(s).filter(
         (u) =>
           u.owner === p &&
           ((isFace(u.cardId, "OGN", 84) && u.location.startsWith("field:")) ||
@@ -476,25 +615,29 @@ function costFor(
     ],
     Math.max(0, -adjustment.power),
   );
-  const spellEnergy =
-    c.type === "Spell" ? Math.min(s.players[p].spellEnergy ?? 0, energy) : 0;
-  const unitEnergy =
-    c.type === "Unit" ? Math.min(s.players[p].unitEnergy ?? 0, energy) : 0;
-  const spellPower =
-    c.type === "Spell"
-      ? Math.min(
-          s.players[p].spellPower ?? 0,
-          groups.reduce((n, group) => n + group.power, 0),
-        )
-      : 0;
+  const flex = extras.flexibleCount ?? 0,
+    flexEnergy = Math.min(energy, extras.flexibleEnergy ?? flex);
+  energy = Math.max(0, energy - flexEnergy);
+  groups = discountPower(s, p, groups, Math.max(0, flex - flexEnergy));
+  const spellEnergy = isCardType(c, "Spell")
+    ? Math.min(s.players[p].spellEnergy ?? 0, energy)
+    : 0;
+  const unitEnergy = isCardType(c, "Unit")
+    ? Math.min(s.players[p].unitEnergy ?? 0, energy)
+    : 0;
+  const spellPower = isCardType(c, "Spell")
+    ? Math.min(
+        s.players[p].spellPower ?? 0,
+        groups.reduce((n, group) => n + group.power, 0),
+      )
+    : 0;
   if (spellPower) groups = discountPower(s, p, groups, spellPower);
-  const gearPower =
-    c.type === "Gear"
-      ? Math.min(
-          s.players[p].gearPower ?? 0,
-          groups.reduce((n, group) => n + group.power, 0),
-        )
-      : 0;
+  const gearPower = isCardType(c, "Gear")
+    ? Math.min(
+        s.players[p].gearPower ?? 0,
+        groups.reduce((n, group) => n + group.power, 0),
+      )
+    : 0;
   if (gearPower) groups = discountPower(s, p, groups, gearPower);
   return {
     gearPower,
@@ -515,17 +658,151 @@ function playCost(
   targetId?: string,
   sourceId?: string,
   options: PlayCostOptions = {},
-) {
+): ReturnType<typeof costFor> {
   const script = getScript(card.id)!;
+  const allTargets = options.repeated
+    ? [targetId, options.repeatedTargetId].filter(Boolean).join("~")
+    : targetId;
+  const flex = isCardType(card, "Spell")
+    ? ireliaDiscounts(s, p, allTargets)
+    : 0;
+  const allRepeats = repeatPrices(s, p, card.id, script);
+  const repeats =
+    options.repeatMask !== undefined
+      ? allRepeats.filter((_, i) => !!(options.repeatMask! & (1 << i)))
+      : options.repeated
+        ? allRepeats.slice(0, 1)
+        : [];
+  const parts = [
+    ...repeats.map((c) => ({ ...c, domains: c.domain ? [c.domain] : [] })),
+    ...(options.additionalCostPaid && script.additionalCost
+      ? [
+          {
+            ...script.additionalCost,
+            domains: script.additionalCost.domain
+              ? [script.additionalCost.domain]
+              : card.domains,
+            required: script.additionalCost.required,
+          },
+        ]
+      : []),
+    ...(options.accelerated
+      ? [{ energy: 1, power: 1, domains: card.domains }]
+      : []),
+  ];
+  const ez = optionalDiscounts(s, p);
+  const optionalCount = parts.reduce(
+    (n, c) => n + ("required" in c && c.required ? 0 : ez),
+    0,
+  );
+  if (
+    (flex && options.flexibleEnergy === undefined) ||
+    (optionalCount && options.optionalEnergy === undefined)
+  ) {
+    let fallback: ReturnType<typeof costFor> | undefined;
+    for (
+      let oe = options.optionalEnergy ?? optionalCount;
+      oe >= (options.optionalEnergy ?? 0);
+      oe--
+    )
+      for (
+        let fe = options.flexibleEnergy ?? flex;
+        fe >= (options.flexibleEnergy ?? 0);
+        fe--
+      ) {
+        const result = playCost(s, p, card, targetId, sourceId, {
+          ...options,
+          flexibleEnergy: fe,
+          optionalEnergy: oe,
+        });
+        fallback ??= result;
+        if (
+          canPay(
+            s,
+            p,
+            result.energy,
+            result.power,
+            playPowerDomains(s, p, card, sourceId),
+            result.extraPower,
+            result.additionalPower,
+          )
+        )
+          return result;
+      }
+    return fallback!;
+  }
+  let remainingEnergy = options.optionalEnergy ?? 0;
+  const reduced = parts.map((c) => {
+    const discount = "required" in c && c.required ? 0 : ez;
+    const e = Math.min(c.energy ?? 0, remainingEnergy, discount);
+    remainingEnergy -= e;
+    return {
+      ...c,
+      energy: Math.max(0, (c.energy ?? 0) - e),
+      power: Math.max(0, (c.power ?? 0) - (discount - e)),
+    };
+  });
+  const board = options.additionalCostPaid && script.additionalCost?.board;
+  const costSources = (options.costSourceId ?? "")
+    .split("~")
+    .map((id) => s.units.find((u) => u.id === id))
+    .filter((u): u is Unit => Boolean(u));
+  if (board && board.discount)
+    card = {
+      ...card,
+      energy: Math.max(
+        0,
+        (card.energy ?? 0) -
+          (board.discount === "energyPower"
+            ? costSources.reduce(
+                (n, u) => n + (getCard(u.cardId).energy ?? 0),
+                0,
+              )
+            : 0),
+      ),
+      power: Math.max(
+        0,
+        (card.power ?? 0) -
+          (board.discount === "powerEach"
+            ? costSources.length
+            : costSources.reduce(
+                (n, u) => n + (getCard(u.cardId).power ?? 0),
+                0,
+              )),
+      ),
+    };
+  const instructed = s.pendingPlays?.find((item) => item.id === sourceId);
+  const permission = instructed?.spec;
+  if (permission?.ignoreAllCosts)
+    return {
+      energy: 0,
+      power: 0,
+      extraPower: 0,
+      additionalPower: [],
+      spellEnergy: 0,
+      spellPower: 0,
+      unitEnergy: 0,
+      gearPower: 0,
+    };
   const flow = flowCost(s, p, card.id, sourceId);
-  const alternative = sourceId?.startsWith("hidden:")
-    ? { energy: 0, power: 0 }
-    : flow;
-  const extra = options.repeated
-    ? repeatCost(s, p, script)
-    : options.additionalCostPaid
-      ? script.additionalCost
-      : undefined;
+  const jayce = sourceId?.includes(":jayce:");
+  const alternative =
+    sourceId?.startsWith("hidden:") ||
+    (options.additionalCostPaid && script.additionalCost?.ignoreBaseCost)
+      ? { energy: 0, power: 0 }
+      : permission
+        ? {
+            energy:
+              permission.ignoreCost || permission.ignoreEnergy
+                ? 0
+                : (card.energy ?? 0),
+            power:
+              permission.powerOverride ??
+              (permission.ignoreCost ? 0 : (card.power ?? 0)),
+          }
+        : jayce
+          ? { energy: 0, power: card.power ?? 0 }
+          : flow;
   const vortex =
     !!s.combat &&
     s.fields.some(
@@ -543,38 +820,40 @@ function playCost(
       : card,
     targetId,
     {
-      energy: (extra?.energy ?? 0) + Number(!!options.accelerated),
-      power:
-        (options.additionalCostPaid ? (extra?.power ?? 0) : 0) +
-        Number(!!options.accelerated),
-      anyPower:
-        Number(!!vortex) +
-        (options.repeated && !extra?.domain ? (extra?.power ?? 0) : 0),
-      additionalPower:
-        options.repeated && extra?.domain
-          ? [{ power: extra.power ?? 0, domains: [extra.domain] }]
-          : [],
+      flexibleCount: flex,
+      flexibleEnergy: options.flexibleEnergy,
+      energy: reduced.reduce((n, c) => n + (c.energy ?? 0), 0),
+      anyPower: Number(!!vortex) + 2 * Number(!!options.dragonRoost),
+      additionalPower: reduced.map((c) => ({
+        power: c.power ?? 0,
+        domains: c.domains,
+      })),
       energyReduction:
+        (permission?.energyReduction ?? 0) +
         (options.additionalCostPaid
           ? (script.additionalCost?.energyReduction ?? 0)
           : 0) +
         (sourceId &&
         !sourceId.startsWith("hand:") &&
+        instructed?.returnZone !== "hand" &&
         discountedOutsideHand(card.id)
           ? 2
           : 0),
       floorDiscount:
-        flow && card.type === "Spell"
+        flow && isCardType(card, "Spell")
           ? 2 *
-            s.units.filter((u) => u.owner === p && isFace(u.cardId, "VEN", 98))
-              .length
+            textUnits(s).filter(
+              (u) => u.owner === p && isFace(u.cardId, "VEN", 98),
+            ).length
           : 0,
       allTargets: options.repeated
         ? [targetId, options.repeatedTargetId].filter(Boolean).join("~")
         : targetId,
       domains: flow
         ? (flow.domains ?? (flow.domain ? [flow.domain] : []))
-        : card.domains,
+        : permission?.powerOverride !== undefined
+          ? []
+          : card.domains,
     },
   );
 }
@@ -588,7 +867,46 @@ function abilityCost(
   power: number,
   domains: string[] = [],
   anyPower = 0,
-) {
+  flexibleEnergy?: number,
+  empower = false,
+): {
+  energy: number;
+  actualEnergy: number;
+  unitEnergy: number;
+  gearPower: number;
+  power: number;
+  anyPower: number;
+  domains: string[];
+} {
+  const source = s.units.find((u) => u.id === sourceId);
+  const flex =
+    empower && source
+      ? s.fields.filter(
+          (f) => f.id === source.location && isFace(f.cardId, "VEN", 163),
+        ).length
+      : 0;
+  if (flex && flexibleEnergy === undefined) {
+    let fallback;
+    for (let n = flex; n >= 0; n--) {
+      const cost = abilityCost(
+        s,
+        p,
+        sourceId,
+        energy,
+        power,
+        domains,
+        anyPower,
+        n,
+        empower,
+      );
+      fallback ??= cost;
+      if (canPay(s, p, cost.energy, cost.power, domains, cost.anyPower))
+        return cost;
+    }
+    return fallback!;
+  }
+  const energyPart = Math.min(energy, flexibleEnergy ?? 0);
+  energy -= energyPart;
   const unit = s.units.some((u) => u.id === sourceId);
   const gear = s.gears.some((g) => g.id === sourceId);
   const actualEnergy = Math.max(
@@ -608,7 +926,7 @@ function abilityCost(
       { power, domains },
       { power: anyPower, domains: [] },
     ],
-    gearPower,
+    gearPower + Math.max(0, flex - energyPart),
   );
   return {
     energy: actualEnergy - unitEnergy,
@@ -628,8 +946,20 @@ function payAbility(
   power: number,
   domains: string[] = [],
   anyPower = 0,
+  flexibleEnergy?: number,
+  empower = false,
 ) {
-  const cost = abilityCost(s, p, sourceId, energy, power, domains, anyPower);
+  const cost = abilityCost(
+    s,
+    p,
+    sourceId,
+    energy,
+    power,
+    domains,
+    anyPower,
+    flexibleEnergy,
+    empower,
+  );
   pay(s, p, cost.energy, cost.power, domains, cost.anyPower);
   s.players[p].unitEnergy = (s.players[p].unitEnergy ?? 0) - cost.unitEnergy;
   s.players[p].gearPower = (s.players[p].gearPower ?? 0) - cost.gearPower;
@@ -742,7 +1072,11 @@ function pay(
     anyPower +
     additionalPower.reduce((sum, group) => sum + group.power, 0);
   const ids = new Set(selected.map((r) => r.id).filter(Boolean));
-  x.runeDeck.push(...x.runes.filter((r) => ids.has(r.id)).map((r) => r.domain));
+  recycleRunes(
+    s,
+    p,
+    x.runes.filter((r) => ids.has(r.id)).map((r) => r.domain),
+  );
   x.runes = x.runes.filter((r) => !ids.has(r.id));
   for (const resource of selected.filter((r) => !r.id)) {
     if (resource.domain) x.typedPower![resource.domain]--;
@@ -780,7 +1114,7 @@ function point(
   if (
     scoring &&
     playerTurnNumber(s, p) <= 2 &&
-    s.units.some((u) => isFace(u.cardId, "VEN", 53))
+    textUnits(s).some((u) => isFace(u.cardId, "VEN", 53))
   ) {
     draw(s, p, 1);
     log(
@@ -983,7 +1317,8 @@ export function createGame(options: GameOptions = {}): GameState {
       i === 0 ? options.playerBattlefieldId : options.botBattlefieldId;
     if (
       selected &&
-      (getCard(selected).type !== "Battlefield" || !isImplemented(selected))
+      (!isCardType(getCard(selected), "Battlefield") ||
+        !isImplemented(selected))
     )
       throw new Error("Choose a supported battlefield.");
     // Preserve the shuffle sequence when a field is explicitly chosen.
@@ -1049,7 +1384,7 @@ function scoreField(
   // Additional triggers are additive, and never repeat the normal score action.
   const scoreRepeats =
     1 +
-    s.units.filter(
+    textUnits(s).filter(
       (u) =>
         u.owner === p &&
         u.location === field &&
@@ -1071,10 +1406,12 @@ function scoreField(
     for (const u of [...s.units].filter(
       (u) => u.owner === p && u.location === field,
     )) {
-      const effects = hold
-        ? getScript(u.cardId)?.onHold
-        : getScript(u.cardId)?.onConquer;
-      if (effects) trigger(s, p, u.cardId, u.id, effects, field);
+      for (const effects of unitTriggerEffects(
+        s,
+        u,
+        hold ? "onHold" : "onConquer",
+      ))
+        trigger(s, p, u.cardId, u.id, textEffects(u, effects), field);
     }
     event(
       s,
@@ -1084,6 +1421,41 @@ function scoreField(
       field,
       field,
     );
+    const crossIds = new Set(
+      s.gears
+        .filter(
+          (g) =>
+            g.attachedTo &&
+            isFace(g.cardId, "SFD", 30) &&
+            s.units.some(
+              (u) =>
+                u.id === g.attachedTo && u.owner === p && u.location === field,
+            ),
+        )
+        .map((g) => g.attachedTo!),
+    );
+    if (crossIds.size) {
+      const shadow = structuredClone(s);
+      laterCardEvent(
+        shadow,
+        hold ? "conquer" : "hold",
+        p,
+        s.fields.find((f) => f.id === field)!.cardId,
+        field,
+        field,
+        {
+          ...context(undefined, field, field),
+          trigger: (_state, player, card, source, effects, location) => {
+            if (crossIds.has(source))
+              trigger(s, player, card, source, effects, location);
+          },
+          pushStack: (_state, item) => {
+            if (item.sourceId && crossIds.has(item.sourceId))
+              pushStack(s, item);
+          },
+        },
+      );
+    }
     const fieldCard = s.fields.find((f) => f.id === field)!;
     const fieldEffects = hold
       ? getScript(fieldCard.cardId)?.onHold
@@ -1201,12 +1573,14 @@ function startBeginning(s: GameState, p: PlayerId) {
       )
       .map((u) => u.id),
   );
-  for (const g of [...s.gears].filter((g) => g.owner === p && g.temporary))
+  for (const g of [...s.gears].filter(
+    (g) => g.owner === p && g.temporary && !g.attachedTo,
+  ))
     killGear(s, g.id);
   for (const source of [
     { cardId: x.legendId, id: "legend" },
     ...s.gears.filter((g) => g.owner === p),
-    ...s.units.filter((u) => u.owner === p),
+    ...textUnits(s).filter((u) => u.owner === p),
   ]) {
     const effects = getScript(source.cardId)?.onBegin;
     if (effects)
@@ -1215,7 +1589,7 @@ function startBeginning(s: GameState, p: PlayerId) {
         p,
         source.cardId,
         source.id,
-        effects,
+        textEffects(source, effects),
         s.units.find((u) => u.id === source.id)?.location ?? base(p),
       );
   }
@@ -1247,7 +1621,7 @@ function finishTurnStart(s: GameState, p: PlayerId) {
   channel(
     s,
     p,
-    s.units.some(
+    textUnits(s).some(
       (u) => isFace(u.cardId, "VEN", 36) && u.location.startsWith("field:"),
     )
       ? 1
@@ -1259,12 +1633,15 @@ function finishTurnStart(s: GameState, p: PlayerId) {
   if (!hadRunes) recordStep(s, "Channel: no runes left in the rune deck.");
   x.hasBegun = true;
   s.turnStep = "draw";
-  draw(s, p, 1);
+  if (!s.gears.some((g) => g.owner === p && isFace(g.cardId, "VEN", 22)))
+    draw(s, p, 1);
   for (const player of s.players) {
     player.energy = 0;
     player.spellEnergy = 0;
     player.spellPower = 0;
     player.gearPower = 0;
+    player.gearPlayPermissions = [];
+    delete player.enemyChoices;
     player.unitEnergy = 0;
     player.showdownEnergy = 0;
     player.typedPower = {};
@@ -1390,6 +1767,11 @@ function effectTargetMatches(
     (!e.targetDifferentLocationFromSource ||
       (source && location !== source.location)) &&
     (!e.excludeTag || !c.tags.includes(e.excludeTag)) &&
+    (e.custom !== "wave15:dragons-duel" || object.id !== e.cardName) &&
+    (e.condition !== "namedTag" ||
+      getUnitTags(object).includes(
+        s.gears.find((g) => g.id === sourceId)?.namedTag ?? "",
+      )) &&
     (!e.lessMightThanSource ||
       (source &&
         "location" in object &&
@@ -1409,6 +1791,12 @@ function* iterateTargets(
     return;
   }
   if (e.target === "boardCards") {
+    if (
+      !e.upTo &&
+      e.targetCount &&
+      boardCandidates(s, p, e, sourceId, location).length < e.targetCount
+    )
+      return;
     // The draft enumerates individual objects, never the board's power set.
     yield undefined;
     return;
@@ -1445,13 +1833,94 @@ function* iterateTargets(
       return;
     }
     yield* [
-      ...trashTargets(s, p, e).map((card) => card.id),
+      ...trashTargets(s, p, e)
+        .filter(
+          (card) =>
+            e.condition !== "costBelowPoints" ||
+            (getCard(card.cardId).energy ?? 0) < s.players[p].points,
+        )
+        .map((card) => card.id),
       ...(e.upTo ? [undefined] : []),
     ];
     return;
   }
+  if (e.custom === "wave15:call-battle") {
+    for (const u of s.units.filter((u) => u.owner === p))
+      for (const f of s.fields.filter((f) => f.controller === p))
+        if (u.location !== f.id) yield `${u.id}~${f.id}`;
+    return;
+  }
+  if (["relentlessMove", "shurikenMove"].includes(e.target!)) {
+    for (const u of s.units.filter((u) => u.owner === p))
+      for (const to of [base(p), ...s.fields.map((f) => f.id)].filter(
+        (to) => to !== u.location,
+      )) {
+        yield `${u.id}~${to}`;
+        if (e.target === "relentlessMove")
+          for (const gear of s.gears.filter(
+            (g) => g.owner === p && getUnitTags(g).includes("Equipment"),
+          ))
+            yield `${u.id}~${to}~${gear.id}`;
+        else
+          for (const enemy of s.units.filter(
+            (x) =>
+              x.owner !== p &&
+              x.location.startsWith("field:") &&
+              !protectedFrom(s, x, p),
+          ))
+            yield `${u.id}~${to}~${enemy.id}`;
+      }
+    return;
+  }
+  if (e.target === "friendlyAndEnemyBattlefield") {
+    for (const u of s.units.filter((u) => u.owner === p))
+      for (const enemy of s.units.filter(
+        (u) =>
+          u.owner !== p &&
+          u.location.startsWith("field:") &&
+          !protectedFrom(s, u, p),
+      ))
+        yield `${u.id}~${enemy.id}`;
+    return;
+  }
   const units = s.units.filter((u) => effectTargetMatches(s, u, e, sourceId));
   const gears = s.gears.filter((g) => effectTargetMatches(s, g, e, sourceId));
+  if (e.target === "empowerObject") {
+    yield* [
+      ...units.filter((u) => !protectedFrom(s, u, p)).map((u) => u.id),
+      ...gears.map((g) => g.id),
+      "legend:0",
+      "legend:1",
+    ];
+    return;
+  }
+  if (e.target === "enemyMoveDestination") {
+    for (const u of units.filter(
+      (u) => u.owner !== p && !protectedFrom(s, u, p),
+    ))
+      for (const to of [base(u.owner), ...s.fields.map((f) => f.id)])
+        if (to !== u.location) yield `${u.id}~${to}`;
+    return;
+  }
+  if (
+    e.target === "enemyAndOptionalFriendly" ||
+    e.target === "friendlyAndOptionalEnemy"
+  ) {
+    const friendly = units.filter((u) => u.owner === p),
+      enemy = units.filter(
+        (u) =>
+          u.owner !== p &&
+          u.location.startsWith("field:") &&
+          !protectedFrom(s, u, p),
+      );
+    const first = e.target === "enemyAndOptionalFriendly" ? enemy : friendly;
+    const second = e.target === "enemyAndOptionalFriendly" ? friendly : enemy;
+    for (const a of first) {
+      yield a.id;
+      for (const b of second) yield `${a.id}~${b.id}`;
+    }
+    return;
+  }
   if (e.target === "ownTeemo") {
     yield* [
       ...(s.players[p].championAvailable &&
@@ -1459,9 +1928,7 @@ function* iterateTargets(
         ? [`champion:${p}`]
         : []),
       ...units
-        .filter(
-          (u) => u.owner === p && getCard(u.cardId).tags.includes("Teemo"),
-        )
+        .filter((u) => u.owner === p && getUnitTags(u).includes("Teemo"))
         .map((u) => u.id),
     ];
     return;
@@ -1483,21 +1950,28 @@ function* iterateTargets(
   }
   if (e.target === "unitAndEquipment") {
     yield* units
-      .filter((u) => !protectedFrom(s, u, p))
-      .flatMap((u) =>
-        gears
+      .filter(
+        (u) =>
+          !protectedFrom(s, u, p) &&
+          (e.condition !== "azirSwap" || u.owner === p),
+      )
+      .flatMap((u) => [
+        ...(e.condition === "azirSwap" ? [u.id] : []),
+        ...gears
           .filter(
             (g) =>
               g.owner === u.owner &&
-              getCard(g.cardId).tags.includes("Equipment") &&
+              (e.condition !== "friendlyPair" || g.owner === p) &&
+              getUnitTags(g).includes("Equipment") &&
               (e.condition !== "detachedFriendly" ||
                 (g.owner === p && !g.attachedTo)) &&
               (e.condition !== "attachedFriendly" ||
                 (g.owner === p && !!g.attachedTo)) &&
+              (e.condition !== "azirSwap" || g.attachedTo === u.id) &&
               (e.condition !== "attachedToChosen" || g.attachedTo === u.id),
           )
           .map((g) => `${u.id}~${g.id}`),
-      );
+      ]);
     return;
   }
   if (e.target === "spell") {
@@ -1815,7 +2289,7 @@ function* iterateTargets(
         .filter(
           (g) =>
             (e.target === "friendlyEquipment"
-              ? g.owner === p && getCard(g.cardId).tags.includes("Equipment")
+              ? g.owner === p && getUnitTags(g).includes("Equipment")
               : e.target === "anyGear" || g.owner !== p) &&
             (e.maxEnergy === undefined ||
               (getCard(g.cardId).energy ?? 0) <= e.maxEnergy),
@@ -1886,14 +2360,126 @@ function canMove(s: GameState, u: Unit, to: LocationId) {
       !getKeywords(s, u).includes("Cannot move to base")
     );
   if (u.location === base(u.owner)) return true;
-  return getKeywords(s, u).includes("Ganking");
+  return (
+    getKeywords(s, u).includes("Ganking") ||
+    s.fields.some((f) => f.id === to && f.cardId === "token-baron-pit")
+  );
 }
 function extendedAdditionalCost(sc: CardScript | undefined) {
   const extra = sc?.additionalCost;
   return Boolean(
     extra &&
-    (extra.xp || extra.energyReduction || extra.condition || extra.enterReady),
+    (extra.xp ||
+      extra.energyReduction ||
+      extra.condition ||
+      extra.enterReady ||
+      extra.board ||
+      extra.exhaustLegend),
   );
+}
+function boardCostSources(
+  s: GameState,
+  p: PlayerId,
+  script: CardScript,
+  checkMight = true,
+) {
+  const cost = script.additionalCost?.board;
+  if (!cost) return [];
+  if (cost.kind === "killGear" || cost.kind === "returnGear")
+    return s.gears.filter((g) => g.owner === p);
+  return s.units.filter(
+    (u) =>
+      u.owner === p &&
+      (!cost.tags || getUnitTags(u).some((tag) => cost.tags!.includes(tag))) &&
+      (cost.kind !== "spendBuff" || u.buff > 0) &&
+      (!checkMight ||
+        cost.minMight === undefined ||
+        getMight(s, u) >= cost.minMight),
+  );
+}
+function boardCostPayable(
+  s: GameState,
+  p: PlayerId,
+  script: CardScript,
+  sourceId: string | undefined,
+  cost: ReturnType<typeof playCost>,
+  domains: string[],
+) {
+  if (!sourceId || script.additionalCost?.board?.minMight === undefined)
+    return true;
+  // Core rule 357 pays Energy/Power before nonstandard costs. Recycling runes
+  // or spending Power can change Might before the unit is sacrificed.
+  const projected: GameState = structuredClone(s);
+  pay(
+    projected,
+    p,
+    cost.energy,
+    cost.power,
+    domains,
+    cost.extraPower,
+    cost.additionalPower,
+  );
+  projected.players[p].powerSpentThisTurn =
+    (projected.players[p].powerSpentThisTurn ?? 0) +
+    cost.spellPower +
+    cost.gearPower;
+  return boardCostSources(projected, p, script).some((u) => u.id === sourceId);
+}
+function boardCostLabel(s: GameState, script: CardScript, sourceId?: string) {
+  if (!sourceId) return "";
+  const object =
+    s.units.find((u) => u.id === sourceId?.split("~")[0]) ??
+    s.gears.find((g) => g.id === sourceId);
+  if (!object) return "";
+  if (sourceId.includes("~"))
+    return ` · pay ${sourceId.split("~").length} board costs`;
+  const verb =
+    script.additionalCost?.board?.kind === "spendBuff"
+      ? "spend a buff from"
+      : script.additionalCost?.board?.kind === "returnGear"
+        ? "return to hand"
+        : "kill";
+  return ` · ${verb} ${cardName(object!.cardId)}`;
+}
+function payBoardCost(
+  s: GameState,
+  p: PlayerId,
+  script: CardScript,
+  sourceId: string,
+) {
+  const cost = script.additionalCost!.board!;
+  if (cost.multiple) {
+    const ids = sourceId.split("~").filter(Boolean);
+    if (cost.kind === "killUnit") killUnits(s, ids);
+    else
+      for (const id of ids) {
+        const u = s.units.find((u) => u.id === id);
+        if (u?.buff) {
+          u.buff--;
+          event(s, "spendBuff", p, u.cardId, u.id, u.location);
+        }
+      }
+    return;
+  }
+  // Legality is regenerated immediately before apply; never substitute a copy.
+  const object = boardCostSources(s, p, script).find((o) => o.id === sourceId);
+  if (!object) throw new Error("Additional cost source is no longer legal");
+  const label = boardCostLabel(s, script, sourceId).slice(3);
+  if (cost.kind === "spendBuff") {
+    const unit = s.units.find((u) => u.id === sourceId)!;
+    unit.buff--;
+    event(s, "spendBuff", p, unit.cardId, unit.id, unit.location);
+  } else if (cost.kind === "killUnit") killUnits(s, [sourceId]);
+  else if (cost.kind === "killGear") killGear(s, sourceId);
+  else {
+    const gear = s.gears.find((g) => g.id === sourceId)!;
+    event(s, "bounce", p, gear.cardId, gear.id, base(p));
+    s.gears = s.gears.filter((g) => g.id !== sourceId);
+    for (const unit of s.units)
+      unit.gear = unit.gear.filter((id) => id !== sourceId);
+    if (!gear.token) s.players[gear.owner].hand.push(gear.cardId);
+  }
+  log(s, `Additional cost: ${label}.`, "play", p);
 }
 function addPlayVariants(s: GameState, p: PlayerId, actions: GameAction[]) {
   const out: GameAction[] = [];
@@ -1906,8 +2492,42 @@ function addPlayVariants(s: GameState, p: PlayerId, actions: GameAction[]) {
     const c = getCard(a.cardId!),
       sc = getScript(c.id)!;
     for (const mode of ["additionalCost", "repeat"] as const) {
+      const repeats = repeatPrices(s, p, c.id, sc);
+      if (mode === "repeat" && repeats.length > 1) {
+        for (let mask = 1; mask < 2 ** Math.min(repeats.length, 12); mask++) {
+          if (
+            isFace(c.id, "UNL", 182) &&
+            mask.toString(2).replace(/0/g, "").length > 3
+          )
+            continue;
+          const cost = playCost(s, p, c, a.targetId, a.sourceId, {
+            ...a,
+            repeated: true,
+            repeatMask: mask,
+          });
+          if (
+            canPay(
+              s,
+              p,
+              cost.energy,
+              cost.power,
+              playPowerDomains(s, p, c, a.sourceId),
+              cost.extraPower,
+              cost.additionalPower,
+            )
+          )
+            out.push({
+              ...a,
+              id: `${a.id}|repeat-mask:${mask}`,
+              label: `${a.label} · Repeat (${mask.toString(2).replace(/0/g, "").length})`,
+              repeated: true,
+              repeatMask: mask,
+            });
+        }
+        continue;
+      }
       const extra =
-        mode === "repeat" ? repeatCost(s, p, sc) : sc.additionalCost;
+        mode === "repeat" ? repeatCost(s, p, sc, c.id) : sc.additionalCost;
       if (!extra) continue;
       if (mode === "additionalCost" && extendedAdditionalCost(sc)) continue;
       const accelerated = a.id.includes("|accelerate");
@@ -1994,7 +2614,7 @@ function groupMoveTax(
 ) {
   return (
     Math.max(0, count - 1) *
-    s.units.filter(
+    textUnits(s).filter(
       (u) => u.owner !== p && u.location === to && u.cardId === "unl-163-219",
     ).length
   );
@@ -2017,6 +2637,9 @@ function annotateEffects(
     ...e,
     fromHidden,
     additionalCostPaid,
+    ...(e.custom === "wave16:conscription" && additionalCostPaid
+      ? { maxMight: undefined }
+      : {}),
     // CR 811.1.d.2: play-effect targets remain local through resolution.
     // Explicit other-location text overrides this restriction; compound
     // choices have their own per-target restrictions in their scripts.
@@ -2115,6 +2738,8 @@ function boardCandidates(
         !owns(u.owner) ||
         protectedFrom(s, u, p) ||
         !effectTargetMatches(s, u, e, sourceId) ||
+        (e.chosenLocations?.[u.id] !== undefined &&
+          e.chosenLocations[u.id] !== u.location) ||
         (e.excludeSource && u.id === sourceId) ||
         (e.maxMight !== undefined && getMight(s, u) > e.maxMight) ||
         (e.group?.tokensOnly && !u.token) ||
@@ -2126,14 +2751,23 @@ function boardCandidates(
     }
   if (e.cardTypes?.includes("Gear"))
     for (const g of s.gears)
-      if (owns(g.owner) && effectTargetMatches(s, g, e, sourceId))
+      if (
+        owns(g.owner) &&
+        (!e.excludeSource || g.id !== sourceId) &&
+        effectTargetMatches(s, g, e, sourceId)
+      )
         result.push({ ...g, location: base(g.owner), might: 0 });
+  if (e.cardTypes?.includes("Hidden"))
+    for (const h of s.hidden ?? [])
+      if (owns(h.owner) && (!e.excludeSource || h.id !== sourceId))
+        result.push({ ...h, might: 0 });
   if (e.cardTypes?.includes("Rune"))
     for (const owner of s.players)
       if (owns(owner.id))
         for (const r of owner.runes) {
           const card = cards.find(
-            (c) => c.type === "Rune" && c.domains.some((d) => d === r.domain),
+            (c) =>
+              isCardType(c, "Rune") && c.domains.some((d) => d === r.domain),
           );
           if (card)
             result.push({
@@ -2144,11 +2778,13 @@ function boardCandidates(
               might: 0,
             });
         }
-  return result;
+  return [...new Map(result.map((o) => [o.id, o])).values()];
 }
 function validBoardGroup(e: Effect, group: BoardObject[]) {
   return (
     group.length <= (e.targetCount ?? Infinity) &&
+    (!e.group?.distinctLocations ||
+      new Set(group.map((o) => o.location)).size === group.length) &&
     (!e.group?.sameLocation ||
       new Set(group.map((o) => o.location)).size <= 1) &&
     (e.group?.totalMight === undefined ||
@@ -2191,7 +2827,9 @@ function selectionPayable(
       cost.additionalPower,
     );
   }
-  const ability = getAbilities(s, p, a.cardId!)[Number(a.id.split("|")[2])];
+  const ability = getAbilities(s, p, a.cardId!, a.sourceId)[
+    Number(a.id.split("|")[2])
+  ];
   const cost = abilityCost(
     s,
     p,
@@ -2214,6 +2852,114 @@ function stagedTarget(e: Effect) {
 export function* iterateLegalActions(
   s: GameState,
   p: PlayerId,
+  instructed?: PendingCardPlay,
+): Generator<GameAction> {
+  for (const a of iterateBaseLegalActions(s, p, instructed)) {
+    if (a.category !== "play") {
+      const u = s.units.find((u) => u.id === a.sourceId),
+        ability = a.id.startsWith("ability|")
+          ? getAbilities(s, p, a.cardId!, a.sourceId)[
+              Number(a.id.split("|")[2])
+            ]
+          : undefined;
+      if (
+        ability?.label === "Empower" &&
+        u &&
+        s.fields.some(
+          (f) => f.id === u.location && isFace(f.cardId, "VEN", 163),
+        )
+      ) {
+        for (const n of [1, 0]) {
+          const cost = abilityCost(
+            s,
+            p,
+            u.id,
+            ability.energy ?? 0,
+            ability.power ?? 0,
+            ability.domain ? [ability.domain] : [],
+            targetTax(s, p, a.targetId),
+            n,
+            true,
+          );
+          if (
+            canPay(s, p, cost.energy, cost.power, cost.domains, cost.anyPower)
+          )
+            yield {
+              ...a,
+              id: `${a.id}|discount:${n}`,
+              flexibleEnergy: n,
+              label: `${a.label} · ${cost.energy} Energy / ${cost.power + cost.anyPower} Power`,
+            };
+        }
+      } else yield a;
+      continue;
+    }
+    const c = getCard(a.cardId!),
+      script = getScript(c.id)!;
+    const flex = isCardType(c, "Spell")
+      ? ireliaDiscounts(
+          s,
+          p,
+          [a.targetId, a.repeatedTargetId].filter(Boolean).join("~"),
+        )
+      : 0;
+    const repeats =
+      a.repeatMask !== undefined
+        ? a.repeatMask.toString(2).replace(/0/g, "").length
+        : Number(!!a.repeated);
+    const count =
+      optionalDiscounts(s, p) *
+      (repeats +
+        Number(!!a.additionalCostPaid && !script.additionalCost?.required) +
+        Number(a.id.includes("|accelerate")));
+    if (!flex && !count) {
+      yield a;
+      continue;
+    }
+    const seen = new Set<string>();
+    for (let oe = count; oe >= 0; oe--)
+      for (let fe = flex; fe >= 0; fe--) {
+        const cost = playCost(s, p, c, a.targetId, a.sourceId, {
+          ...a,
+          flexibleEnergy: fe,
+          optionalEnergy: oe,
+          accelerated: a.id.includes("|accelerate"),
+        });
+        const key = JSON.stringify([
+          cost.energy,
+          cost.power,
+          cost.extraPower,
+          cost.additionalPower,
+        ]);
+        if (
+          seen.has(key) ||
+          !canPay(
+            s,
+            p,
+            cost.energy,
+            cost.power,
+            playPowerDomains(s, p, c, a.sourceId),
+            cost.extraPower,
+            cost.additionalPower,
+          )
+        )
+          continue;
+        seen.add(key);
+        yield {
+          ...a,
+          id: `${a.id}|discount:${fe}:${oe}`,
+          flexibleEnergy: fe,
+          optionalEnergy: oe,
+          label: `${a.label} · ${cost.energy} Energy / ${cost.power + cost.extraPower + cost.additionalPower.reduce((n, g) => n + g.power, 0)} Power`,
+        };
+      }
+  }
+}
+
+function* iterateBaseLegalActions(
+  s: GameState,
+  p: PlayerId,
+  instructed?: PendingCardPlay,
 ): Generator<GameAction> {
   const out: GameAction[] = [];
   const repeatCandidates: GameAction[] = [];
@@ -2259,6 +3005,109 @@ export function* iterateLegalActions(
   if (s.priorityPlayer !== p) return;
   if (s.phase === "choice") {
     const choice = s.pendingChoice!;
+    if (choice.kind === "effectPlay") {
+      const pending = s.pendingPlays?.find(
+        (item) => item.id === choice.sourceId,
+      );
+      if (!pending) return;
+      const view = { ...s, phase: choice.returnPhase, pendingChoice: null };
+      let playable = false;
+      for (const action of iterateLegalActions(view, p, pending)) {
+        if (action.category === "play" && action.sourceId === pending.id) {
+          playable = true;
+          yield action;
+        } else if (action.category === "resource") yield action;
+      }
+      if (!playable || pending.spec.optional)
+        yield add({
+          id: "cancel-effect-play",
+          label: "Cancel this play",
+          category: "ability",
+          cardId: pending.cardId,
+        });
+      return;
+    }
+    if (choice.kind === "effectDraft") {
+      for (const a of draftChoices(
+        s,
+        (effects, location, source) => targets(s, p, effects, location, source),
+        (e, source, location) => boardCandidates(s, p, e, source, location),
+      )) {
+        const d = choice.effectDraft!;
+        if (
+          a.id === "draft:done" &&
+          !d.retargetId &&
+          !selectionPayable(
+            s,
+            p,
+            {
+              ...choice,
+              boardSelection: {
+                selected: [],
+                action: draftAction(d),
+                trigger: d.trigger,
+              },
+            },
+            draftAction(d).targetId,
+          )
+        )
+          continue;
+        yield add(a);
+      }
+      return;
+    }
+    if (choice.kind === "costTargets") {
+      const draft = choice.boardSelection!,
+        script = getScript(draft.action!.cardId!)!;
+      for (const u of boardCostSources(s, p, script)) {
+        const selected = draft.selected.filter((id) => id === u.id).length;
+        const max =
+          script.additionalCost!.board!.kind === "spendBuff" && "buff" in u
+            ? u.buff
+            : 1;
+        if (selected < max)
+          yield add({
+            id: `choose-cost:add:${u.id}`,
+            label: `Pay with ${cardName(u.cardId)}`,
+            category: "ability",
+            targetId: u.id,
+          });
+        if (selected)
+          yield add({
+            id: `choose-cost:remove:${u.id}`,
+            label: `Remove ${cardName(u.cardId)}`,
+            category: "ability",
+            targetId: u.id,
+          });
+      }
+      const action = {
+        ...draft.action!,
+        costSourceId: draft.selected.join("~"),
+        costsFinalized: true,
+      };
+      const c = getCard(action.cardId!),
+        cost = playCost(s, p, c, action.targetId, action.sourceId, {
+          ...action,
+          accelerated: action.id.includes("|accelerate"),
+        });
+      if (
+        canPay(
+          s,
+          p,
+          cost.energy,
+          cost.power,
+          playPowerDomains(s, p, c, action.sourceId),
+          cost.extraPower,
+          cost.additionalPower,
+        )
+      )
+        yield add({
+          id: "choose-cost:done",
+          label: "Confirm additional costs",
+          category: "ability",
+        });
+      return;
+    }
     if (choice.kind === "boardTargets") {
       const draft = choice.boardSelection!,
         e = choice.effect!;
@@ -2293,10 +3142,16 @@ export function* iterateLegalActions(
           category: "ability",
         });
       }
-      if (e.group?.destination === "any" && draft.action)
+      if (["any", "open"].includes(e.group?.destination ?? "") && draft.action)
         for (const destination of [
-          base(otherPlayer(p)),
-          ...s.fields.map((f) => f.id),
+          ...(e.group?.destination === "any" ? [base(otherPlayer(p))] : []),
+          ...s.fields
+            .filter(
+              (f) =>
+                e.group?.destination !== "open" ||
+                !s.units.some((u) => u.owner !== p && u.location === f.id),
+            )
+            .map((f) => f.id),
         ])
           yield add({
             id: `choose-board:destination:${destination}`,
@@ -2306,8 +3161,12 @@ export function* iterateLegalActions(
           });
       if (
         validBoardGroup(e, selected) &&
+        (e.upTo || !e.targetCount || selected.length === e.targetCount) &&
         selectionPayable(s, p, choice, draft.selected.join("~") || undefined) &&
-        (e.group?.destination !== "any" || !draft.action || draft.destination)
+        (!["any", "open"].includes(e.group?.destination ?? "") ||
+          !draft.action ||
+          draft.destination ||
+          (e.group?.destination === "open" && e.upTo && !selected.length))
       )
         yield add({
           id: "choose-board:done",
@@ -2401,9 +3260,9 @@ export function* iterateLegalActions(
         if (
           choice.kind === "retrieve" &&
           ((choice.effect?.condition === "unit" &&
-            getCard(cardId).type !== "Unit") ||
+            !isCardType(getCard(cardId), "Unit")) ||
             (choice.effect?.condition === "spell" &&
-              getCard(cardId).type !== "Spell"))
+              !isCardType(getCard(cardId), "Spell")))
         )
           continue;
         yield add({
@@ -2425,15 +3284,19 @@ export function* iterateLegalActions(
     if (choice.kind === "predict") {
       yield add({
         id: "choose-predict:keep",
-        label: x.deck.length
-          ? `Keep ${cardName(x.deck[0])} on top`
+        label: s.players[choice.effect?.who === "opponent" ? otherPlayer(p) : p]
+          .deck.length
+          ? `Keep ${cardName(s.players[choice.effect?.who === "opponent" ? otherPlayer(p) : p].deck[0])} on top`
           : "Deck empty: continue",
         category: "ability",
       });
-      if (x.deck.length)
+      if (
+        s.players[choice.effect?.who === "opponent" ? otherPlayer(p) : p].deck
+          .length
+      )
         yield add({
           id: "choose-predict:recycle",
-          label: `Recycle ${cardName(x.deck[0])}`,
+          label: `Recycle ${cardName(s.players[choice.effect?.who === "opponent" ? otherPlayer(p) : p].deck[0])}`,
           category: "ability",
         });
       return;
@@ -2612,9 +3475,10 @@ export function* iterateLegalActions(
       });
     return;
   }
-  const inChain = s.stack.length > 0;
-  const inShowdown = s.phase === "showdown";
-  const canMain = !inChain && !inShowdown && p === s.currentPlayer;
+  const inChain = !instructed && s.stack.length > 0;
+  const inShowdown = !instructed && s.phase === "showdown";
+  const canMain =
+    Boolean(instructed) || (!inChain && !inShowdown && p === s.currentPlayer);
   if (!inChain && p === s.currentPlayer) {
     const hideable = [
       ...x.hand.map((id, i) => ({ id, source: `hand:${i}`, key: String(i) })),
@@ -2645,32 +3509,53 @@ export function* iterateLegalActions(
               locationId: f.id,
             });
   }
-  const playable = [
-    ...x.hand.map((id, index) => ({ id, source: `hand:${index}` })),
-    ...(x.championAvailable ? [{ id: x.championId, source: "champion" }] : []),
-    ...(s.hidden ?? [])
-      .filter((h) => h.owner === p && h.hiddenTurn < s.turn)
-      .map((h) => ({ id: h.cardId, source: `hidden:${h.id}` })),
-    ...x.discard.flatMap((id, i) => {
-      const flow = getScript(id)?.flow;
-      const native =
-        flow && (flow.condition !== "legion" || x.cardsPlayedThisTurn > 0)
-          ? [{ id, source: `trash:${i}` }]
-          : [];
-      return [
-        ...native,
-        ...(flowCost(s, p, id, `trash:${i}:granted`)
-          ? [{ id, source: `trash:${i}:granted` }]
-          : []),
-      ];
-    }),
-  ]
+  const playable = (
+    instructed
+      ? [{ id: instructed.cardId, source: instructed.id }]
+      : [
+          ...x.hand.map((id, index) => ({ id, source: `hand:${index}` })),
+          ...x.hand.flatMap((id, index) =>
+            isCardType(getCard(id), "Gear") && (getCard(id).energy ?? 0) <= 7
+              ? (x.gearPlayPermissions ?? [])
+                  .filter((g) => g.turn === s.turn)
+                  .map((g) => ({ id, source: `hand:${index}:jayce:${g.id}` }))
+              : [],
+          ),
+          ...(x.championAvailable
+            ? [{ id: x.championId, source: "champion" }]
+            : []),
+          ...(s.hidden ?? [])
+            .filter((h) => h.owner === p && h.hiddenTurn < s.turn)
+            .map((h) => ({ id: h.cardId, source: `hidden:${h.id}` })),
+          ...x.discard.flatMap((id, i) => {
+            const flow = getScript(id)?.flow;
+            const native =
+              flow && (flow.condition !== "legion" || x.cardsPlayedThisTurn > 0)
+                ? [{ id, source: `trash:${i}` }]
+                : [];
+            return [
+              ...(s.gears.some(
+                (g) => g.owner === p && isFace(g.cardId, "VEN", 22),
+              )
+                ? [{ id, source: `trash:${i}:riches` }]
+                : []),
+              ...native,
+              ...(flowCost(s, p, id, `trash:${i}:granted`)
+                ? [{ id, source: `trash:${i}:granted` }]
+                : []),
+            ];
+          }),
+        ]
+  )
     .flatMap<{
       id: string;
       source: string;
       mode?: { label: string; effects: Effect[] };
       modeIndex?: number;
       paidAdditional?: boolean;
+      costSourceId?: string;
+      namedTag?: string;
+      dragonRoost?: LocationId;
     }>((entry) => {
       const modes = getScript(entry.id)?.spellModes;
       return modes?.length
@@ -2681,6 +3566,42 @@ export function* iterateLegalActions(
       extendedAdditionalCost(getScript(entry.id)!)
         ? [entry, { ...entry, paidAdditional: true }]
         : [entry],
+    )
+    .flatMap((entry) => {
+      const script = getScript(entry.id);
+      if (
+        script?.additionalCost?.required &&
+        !entry.paidAdditional &&
+        !instructed?.spec.ignoreAllCosts
+      )
+        return [];
+      return script?.additionalCost?.board &&
+        entry.paidAdditional &&
+        !script.additionalCost.board.multiple
+        ? boardCostSources(s, p, script, false).map((source) => ({
+            ...entry,
+            costSourceId: source.id,
+          }))
+        : [entry];
+    })
+    .flatMap((entry) => {
+      const tags = getScript(entry.id)?.asPlayTag;
+      return tags
+        ? (tags === "tribe" ? ["Bird", "Cat", "Dog", "Poro"] : allCardTags).map(
+            (namedTag) => ({ ...entry, namedTag }),
+          )
+        : [entry];
+    })
+    .flatMap((entry) =>
+      isCardType(getCard(entry.id), "Unit") &&
+      getCard(entry.id).tags.includes("Dragon")
+        ? [
+            entry,
+            ...s.fields
+              .filter((f) => isFace(f.cardId, "VEN", 157))
+              .map((f) => ({ ...entry, dragonRoost: f.id })),
+          ]
+        : [entry],
     );
   for (const entry of playable) {
     const c = getCard(entry.id),
@@ -2688,18 +3609,19 @@ export function* iterateLegalActions(
     if (!script || !canPlayCard(s, p, c)) continue;
     if (
       entry.paidAdditional &&
-      ((x.xp ?? 0) < (script.additionalCost?.xp ?? 0) ||
+      ((script.additionalCost?.exhaustLegend && x.legendUsedTurn >= 0) ||
+        (x.xp ?? 0) < (script.additionalCost?.xp ?? 0) ||
         (script.additionalCost?.condition === "playedSpell" &&
           !(x.spellsPlayedThisTurn ?? 0)))
     )
       continue;
-    if (c.type === "Spell" && x.cannotPlaySpellsTurn === s.turn) continue;
+    if (isCardType(c, "Spell") && x.cannotPlaySpellsTurn === s.turn) continue;
     const hidden = (s.hidden ?? []).find(
       (h) => entry.source === `hidden:${h.id}`,
     );
     if (
       hidden &&
-      s.units.some(
+      textUnits(s).some(
         (u) =>
           u.owner !== p &&
           u.cardId === "ogn-018-298" &&
@@ -2727,13 +3649,35 @@ export function* iterateLegalActions(
     )
       continue;
     if (!canMain && !inShowdown && !inChain) continue;
-    const effects: Effect[] =
-      c.type === "Spell"
-        ? (entry.mode?.effects ?? script.spell ?? [])
-        : c.id === "ogn-208-298"
-          ? [{ type: "sacrifice", target: "friendlyUnit" }]
-          : [];
-    for (const targetId of iterateTargets(s, p, effects)) {
+    const effects: Effect[] = isCardType(c, "Spell")
+      ? (entry.mode?.effects ?? script.spell ?? []).map((e) => {
+          const cost = s.units.find((u) => u.id === entry.costSourceId);
+          return isFace(c.id, "UNL", 142) && cost
+            ? {
+                ...e,
+                maxEnergy: getCard(cost.cardId).energy ?? 0,
+                maxPower: getCard(cost.cardId).power ?? 0,
+                play: {
+                  ...e.play!,
+                  maxEnergy: getCard(cost.cardId).energy ?? 0,
+                  maxPower: getCard(cost.cardId).power ?? 0,
+                },
+              }
+            : e;
+        })
+      : c.id === "ogn-208-298"
+        ? [{ type: "sacrifice", target: "friendlyUnit" }]
+        : [];
+    for (const targetId of iterateTargets(
+      s,
+      p,
+      annotateEffects(
+        effects,
+        Boolean(hidden),
+        Boolean(entry.paidAdditional),
+        isFace(c.id, "VEN", 34) ? undefined : hidden?.location,
+      ),
+    )) {
       if (
         c.id === "sfd-107-221" &&
         !s.units.find((u) => u.id === targetId?.split("~")[0])?.gear.length
@@ -2760,80 +3704,132 @@ export function* iterateLegalActions(
         })
       )
         continue;
-      const locations: Array<LocationId | undefined> =
-        c.type === "Unit"
-          ? [
-              ...(hidden || (ambush && !canMain) ? [] : [base(p)]),
-              ...s.fields
-                .filter(
-                  (f) =>
-                    f.controller === p ||
-                    ((script.keywords?.includes("Play to open battlefields") ||
+      let locations: Array<LocationId | undefined> = isCardType(c, "Unit")
+        ? [
+            ...(hidden || (ambush && !canMain) ? [] : [base(p)]),
+            ...s.fields
+              .filter(
+                (f) =>
+                  f.controller === p ||
+                  ((script.keywords?.includes("Play to open battlefields") ||
+                    textUnits(s).some(
+                      (u) => u.owner === p && u.cardId === "ogn-193-298",
+                    )) &&
+                    f.controller === null &&
+                    !s.units.some((u) => u.location === f.id)) ||
+                  (script.keywords?.includes("Play to attacking battlefield") &&
+                    s.combat?.attacker === p &&
+                    s.combat.fieldId === f.id) ||
+                  (script.keywords?.includes("Play to enemy battlefields") &&
+                    s.units.some(
+                      (u) => u.owner !== p && u.location === f.id,
+                    )) ||
+                  (s.units.filter((u) => u.location === f.id).length === 1 &&
+                    s.units.some((u) => u.owner !== p && u.location === f.id) &&
+                    (script.keywords?.includes("Play against lone enemy") ||
                       s.units.some(
-                        (u) => u.owner === p && u.cardId === "ogn-193-298",
-                      )) &&
-                      f.controller === null &&
-                      !s.units.some((u) => u.location === f.id)) ||
-                    (script.keywords?.includes(
-                      "Play to attacking battlefield",
-                    ) &&
-                      s.combat?.attacker === p &&
-                      s.combat.fieldId === f.id) ||
-                    (script.keywords?.includes("Play to enemy battlefields") &&
-                      s.units.some(
-                        (u) => u.owner !== p && u.location === f.id,
-                      )) ||
-                    (s.units.filter((u) => u.location === f.id).length === 1 &&
-                      s.units.some(
-                        (u) => u.owner !== p && u.location === f.id,
-                      ) &&
-                      (script.keywords?.includes("Play against lone enemy") ||
-                        s.units.some(
-                          (u) =>
-                            u.owner === p &&
-                            getKeywords(s, u).includes(
-                              "Friendly units play against lone enemy",
-                            ),
-                        ))) ||
-                    (["ogn-176-298", "ogn-174-298"].includes(c.id) &&
-                      f.controller === null) ||
-                    (c.id === "sfd-093-221" &&
-                      s.units.some(
-                        (u) => u.owner !== p && u.location === f.id,
-                      )) ||
-                    (ambush &&
-                      s.units.some((u) => ambushAt(u) && u.location === f.id)),
-                )
-                .map((f) => f.id),
-            ]
-          : choosesDestination
-            ? s.fields
-                .filter(
-                  (f) =>
-                    f.id !== s.units.find((u) => u.id === targetId)?.location &&
-                    (c.collectorNumber === 34
-                      ? f.controller === p &&
-                        (!hidden || f.id === hidden.location)
-                      : s.units.some(
-                          (u) => u.owner === p && u.location === f.id,
-                        )),
-                )
-                .map((f) => f.id)
-            : [undefined];
+                        (u) =>
+                          u.owner === p &&
+                          getKeywords(s, u).includes(
+                            "Friendly units play against lone enemy",
+                          ),
+                      ))) ||
+                  (["ogn-176-298", "ogn-174-298"].includes(c.id) &&
+                    f.controller === null) ||
+                  (c.id === "sfd-093-221" &&
+                    s.units.some(
+                      (u) => u.owner !== p && u.location === f.id,
+                    )) ||
+                  (ambush &&
+                    s.units.some((u) => ambushAt(u) && u.location === f.id)),
+              )
+              .map((f) => f.id),
+          ]
+        : choosesDestination
+          ? s.fields
+              .filter(
+                (f) =>
+                  f.id !== s.units.find((u) => u.id === targetId)?.location &&
+                  (c.collectorNumber === 34
+                    ? f.controller === p &&
+                      (!hidden || f.id === hidden.location)
+                    : s.units.some(
+                        (u) => u.owner === p && u.location === f.id,
+                      )),
+              )
+              .map((f) => f.id)
+          : [undefined];
+      if (instructed && isCardType(c, "Unit")) {
+        const permission = instructed.spec;
+        if (permission.destination === "base") locations = [base(p)];
+        if (permission.destination === "here")
+          locations =
+            permission.locationId &&
+            permission.locationId !== base(otherPlayer(p))
+              ? [permission.locationId]
+              : [];
+        if (permission.destination === "controlledBattlefield")
+          locations = s.fields
+            .filter((f) => f.controller === p)
+            .map((f) => f.id);
+        if (permission.destination === "anyBattlefield")
+          locations = s.fields.map((f) => f.id);
+        if (
+          permission.alternativeHere &&
+          permission.locationId?.startsWith("field:") &&
+          !locations.includes(permission.locationId)
+        )
+          locations.push(permission.locationId);
+      }
+      if (
+        isFace(c.id, "UNL", 147) &&
+        !s.fields.some((f) => f.cardId === "token-baron-pit")
+      )
+        locations = ["field:2"];
+      if (
+        script.additionalCost?.board?.allowCostLocation &&
+        entry.costSourceId
+      ) {
+        const cost = s.units.find((u) => u.id === entry.costSourceId);
+        if (
+          cost?.location.startsWith("field:") &&
+          !locations.includes(cost.location)
+        )
+          locations.push(cost.location);
+      }
+      if (entry.dragonRoost) locations = [entry.dragonRoost];
       for (const locationId of locations) {
         const cost = playCost(s, p, c, targetId, entry.source, {
           additionalCostPaid: entry.paidAdditional,
+          costSourceId:
+            entry.costSourceId ??
+            (entry.paidAdditional && script.additionalCost?.board?.multiple
+              ? boardCostSources(s, p, script)
+                  .flatMap((u) =>
+                    Array(
+                      script.additionalCost?.board?.kind === "spendBuff" &&
+                        "buff" in u
+                        ? u.buff
+                        : 1,
+                    ).fill(u.id),
+                  )
+                  .join("~")
+              : undefined),
+          dragonRoost: entry.dragonRoost,
           locationId,
         });
-        const payable = canPay(
-          s,
-          p,
-          cost.energy,
-          cost.power,
-          playPowerDomains(s, p, c, entry.source),
-          cost.extraPower,
-          cost.additionalPower,
-        );
+        const domains = playPowerDomains(s, p, c, entry.source);
+        const payable =
+          canPay(
+            s,
+            p,
+            cost.energy,
+            cost.power,
+            domains,
+            cost.extraPower,
+            cost.additionalPower,
+          ) &&
+          boardCostPayable(s, p, script, entry.costSourceId, cost, domains);
         if (
           !payable &&
           !script.repeat &&
@@ -2858,15 +3854,15 @@ export function* iterateLegalActions(
             !x.conqueredThisTurn.includes(Number(locationId.split(":")[1])))
         )
           continue;
-        if (hidden && c.type === "Unit" && locationId !== hidden.location)
+        if (hidden && isCardType(c, "Unit") && locationId !== hidden.location)
           continue;
         if (c.id === "ogn-208-298" && !s.units.some((u) => u.owner === p))
           continue;
 
         if (payable)
           yield add({
-            id: `play|${entry.source}|${locationId ?? ""}|${targetId ?? ""}${entry.mode ? `|mode:${entry.modeIndex}` : ""}${entry.paidAdditional ? "|additional" : ""}`,
-            label: `Play ${cardName(c.id)}${entry.mode ? ` · ${entry.mode.label}` : ""}${entry.paidAdditional ? (script.additionalCost?.xp ? ` · spend ${script.additionalCost.xp} XP` : " · pay additional cost") : ""}${locationId ? ` at ${locationName(locationId)}` : ""}${targetLabel(s, targetId)}`,
+            id: `play|${entry.source}|${locationId ?? ""}|${targetId ?? ""}${entry.mode ? `|mode:${entry.modeIndex}` : ""}${entry.paidAdditional ? "|additional" : ""}${entry.costSourceId ? `|cost:${entry.costSourceId}` : ""}${entry.namedTag ? `|tag:${entry.namedTag}` : ""}${entry.dragonRoost ? `|roost:${entry.dragonRoost}` : ""}`,
+            label: `Play ${cardName(c.id)}${entry.mode ? ` · ${entry.mode.label}` : ""}${!entry.costSourceId && entry.paidAdditional ? (script.additionalCost?.xp ? ` · spend ${script.additionalCost.xp} XP` : " · pay additional cost") : ""}${locationId ? ` at ${locationName(locationId)}` : ""}${targetLabel(s, targetId)}${boardCostLabel(s, script, entry.costSourceId)}${entry.namedTag ? ` · ${entry.namedTag}` : ""}${entry.dragonRoost ? " · Dragon Roost (+2 Power)" : ""}`,
             category: "play",
             sourceId: entry.source,
             cardId: c.id,
@@ -2874,12 +3870,15 @@ export function* iterateLegalActions(
             locationId,
             detail: `${cost.energy} energy · ${cost.power + cost.extraPower} power`,
             ...(entry.paidAdditional ? { additionalCostPaid: true } : {}),
-            ...(entry.mode ? { effects: entry.mode.effects } : {}),
+            ...(entry.namedTag ? { namedTag: entry.namedTag } : {}),
+            ...(entry.dragonRoost ? { dragonRoost: entry.dragonRoost } : {}),
+            ...(entry.costSourceId ? { costSourceId: entry.costSourceId } : {}),
+            ...(entry.mode || isFace(c.id, "UNL", 142) ? { effects } : {}),
             ...(c.id === "ogn-208-298"
               ? { effects: [{ type: "sacrifice" }] }
               : {}),
           });
-        else if (script.repeat)
+        else if (repeatPrices(s, p, c.id, script).length)
           repeatCandidates.push({
             ...{
               id: `play|${entry.source}|${locationId ?? ""}|${targetId ?? ""}${entry.mode ? `|mode:${entry.modeIndex}` : ""}${entry.paidAdditional ? "|additional" : ""}`,
@@ -2891,7 +3890,7 @@ export function* iterateLegalActions(
               locationId,
               detail: `${cost.energy} energy · ${cost.power + cost.extraPower} power`,
               ...(entry.paidAdditional ? { additionalCostPaid: true } : {}),
-              ...(entry.mode ? { effects: entry.mode.effects } : {}),
+              ...(entry.mode || isFace(c.id, "UNL", 142) ? { effects } : {}),
               ...(c.id === "ogn-208-298"
                 ? { effects: [{ type: "sacrifice" }] }
                 : {}),
@@ -2934,11 +3933,21 @@ export function* iterateLegalActions(
             });
           }
         const acceleratedCost = playCost(s, p, c, targetId, entry.source, {
+          costSourceId: entry.costSourceId,
+          additionalCostPaid: entry.paidAdditional,
           accelerated: true,
+          dragonRoost: entry.dragonRoost,
           locationId,
         });
         if (
-          script.accelerating &&
+          (script.accelerating ||
+            ((instructed
+              ? instructed.returnZone !== "hand"
+              : !entry.source.startsWith("hand:")) &&
+              isCardType(c, "Unit") &&
+              textUnits(s).some(
+                (u) => u.owner === p && isFace(u.cardId, "SFD", 29),
+              ))) &&
           canPay(
             s,
             p,
@@ -2950,14 +3959,18 @@ export function* iterateLegalActions(
           )
         )
           yield add({
-            id: `play|${entry.source}|${locationId ?? ""}|${targetId ?? ""}|accelerate`,
-            label: `Accelerate ${cardName(c.id)}${locationId ? ` at ${locationName(locationId)}` : ""}${targetLabel(s, targetId)}`,
+            id: `play|${entry.source}|${locationId ?? ""}|${targetId ?? ""}|accelerate${entry.paidAdditional ? "|additional" : ""}${entry.costSourceId ? `|cost:${entry.costSourceId}` : ""}${entry.namedTag ? `|tag:${entry.namedTag}` : ""}${entry.dragonRoost ? `|roost:${entry.dragonRoost}` : ""}`,
+            label: `Accelerate ${cardName(c.id)}${locationId ? ` at ${locationName(locationId)}` : ""}${targetLabel(s, targetId)}${boardCostLabel(s, script, entry.costSourceId)}${entry.namedTag ? ` · ${entry.namedTag}` : ""}${entry.dragonRoost ? " · Dragon Roost (+2 Power)" : ""}`,
             category: "play",
             sourceId: entry.source,
             cardId: c.id,
             targetId,
             locationId,
             detail: `${acceleratedCost.energy} energy · ${acceleratedCost.power + acceleratedCost.extraPower} power · enters ready`,
+            ...(entry.paidAdditional ? { additionalCostPaid: true } : {}),
+            ...(entry.namedTag ? { namedTag: entry.namedTag } : {}),
+            ...(entry.dragonRoost ? { dragonRoost: entry.dragonRoost } : {}),
+            ...(entry.costSourceId ? { costSourceId: entry.costSourceId } : {}),
           });
       }
     }
@@ -2983,11 +3996,16 @@ export function* iterateLegalActions(
       .filter((g) => g.owner === p)
       .map((g) => ({ id: g.id, cardId: g.cardId, ready: g.ready })),
   ];
-  for (const source of sources) {
-    const abilityList = getAbilities(s, p, source.cardId);
+  for (const source of [...new Map(sources.map((o) => [o.id, o])).values()]) {
+    const abilityList = getAbilities(s, p, source.cardId, source.id);
     for (const [index, a] of abilityList.entries()) {
       const sourceUnit = s.units.find((u) => u.id === source.id);
       const object = sourceUnit ?? s.gears.find((g) => g.id === source.id);
+      if (
+        a.condition === "choseEnemiesTwice" &&
+        !(x.enemyChoices?.turn === s.turn && x.enemyChoices.count >= 2)
+      )
+        continue;
       if (
         a.disempowerSelf &&
         !(source.id === "legend" ? x.legendEmpowered : object?.empowered)
@@ -3002,6 +4020,9 @@ export function* iterateLegalActions(
         a.energy ?? 0,
         a.power ?? 0,
         a.domain ? [a.domain] : [],
+        0,
+        undefined,
+        a.label === "Empower",
       );
       if (
         a.condition === "sourceEmpowered" &&
@@ -3013,15 +4034,27 @@ export function* iterateLegalActions(
         (source.id === "legend" ? x.legendEmpowered : object?.empowered)
       )
         continue;
+      if (
+        a.condition === "unattached" &&
+        s.gears.find((g) => g.id === source.id)?.attachedTo
+      )
+        continue;
       if (a.spendBuff && !sourceUnit?.buff) continue;
       if (
         a.condition === "sourceAtBattlefield" &&
         !sourceUnit?.location.startsWith("field:")
       )
         continue;
-      if (a.oncePerTurn && object?.usedAbilities?.includes(String(index)))
+      if (
+        a.oncePerTurn &&
+        object?.usedAbilities?.includes(a.instanceKey ?? String(index))
+      )
         continue;
-      if ((a.recycleCost ?? 0) > x.discard.length) continue;
+      if (
+        (a.recycleCost ?? 0) > x.discard.length ||
+        (a.discard ?? 0) > x.hand.length
+      )
+        continue;
       if (a.exhaust && !source.ready) continue;
       if (inChain && a.timing !== "reaction") continue;
       if (
@@ -3054,6 +4087,8 @@ export function* iterateLegalActions(
           a.power ?? 0,
           a.domain ? [a.domain] : [],
           targetTax(s, p, targetId),
+          undefined,
+          a.label === "Empower",
         );
         if (
           !canPay(
@@ -3066,11 +4101,14 @@ export function* iterateLegalActions(
           )
         )
           continue;
-        const recycleOptions = recycleSelections(x.discard, a.recycleCost ?? 0);
+        const recycleOptions = recycleSelections(
+          a.discard ? x.hand : x.discard,
+          a.discard ?? a.recycleCost ?? 0,
+        );
         for (const recycleIndices of recycleOptions)
           yield add({
             id: `ability|${source.id}|${index}|${targetId ?? ""}|${recycleIndices.join(",")}`,
-            label: `${cardName(source.cardId)}: ${a.label}${targetLabel(s, targetId)}${recycleIndices.length ? ` · recycle ${recycleIndices.map((i) => cardName(x.discard[i])).join(" + ")}` : ""}`,
+            label: `${cardName(source.cardId)}: ${a.label}${targetLabel(s, targetId)}${recycleIndices.length ? ` · ${a.discard ? "discard" : "recycle"} ${recycleIndices.map((i) => cardName((a.discard ? x.hand : x.discard)[i])).join(" + ")}` : ""}`,
             amount: recycleIndices[0],
             ...(recycleIndices.length ? { cardIndices: recycleIndices } : {}),
             category: "ability",
@@ -3156,7 +4194,7 @@ export function* iterateLegalActions(
   if (canMain)
     for (const g of s.gears.filter((g) => g.owner === p)) {
       const sc = getScript(g.cardId);
-      if (sc?.equipCost !== undefined)
+      if (sc?.equipCost !== undefined && (x.xp ?? 0) >= (sc.equipXP ?? 0))
         for (const u of s.units.filter(
           (u) => u.owner === p && u.id !== g.attachedTo,
         )) {
@@ -3166,20 +4204,30 @@ export function* iterateLegalActions(
             g.id,
             equipEnergy(s, g.cardId, u.id),
             sc.equipCost,
-            g.cardId === "unl-188-219" ? [] : getCard(g.cardId).domains,
+            equipDomains(g.cardId),
           );
           if (
             !canPay(s, p, cost.energy, cost.power, cost.domains, cost.anyPower)
           )
             continue;
-          yield add({
-            id: `equip:${g.id}:${u.id}`,
-            label: `Equip ${cardName(g.cardId)} to ${cardName(u.cardId)}`,
-            category: "ability",
-            sourceId: g.id,
-            targetId: u.id,
-            cardId: g.cardId,
-          });
+          const sacrifices = sc.equipKillUnit
+            ? s.units.filter((v) => v.owner === p).map((v) => v.id)
+            : [undefined];
+          for (const costSourceId of sacrifices)
+            for (const cardIndices of recycleSelections(
+              x.discard,
+              sc.equipRecycle ?? 0,
+            ))
+              yield add({
+                id: `equip:${g.id}:${u.id}${costSourceId ? `:kill:${costSourceId}` : ""}${cardIndices.length ? `:recycle:${cardIndices.join(",")}` : ""}`,
+                costSourceId,
+                cardIndices,
+                label: `Equip ${cardName(g.cardId)} to ${cardName(u.cardId)}${sc.equipXP ? ` · spend ${sc.equipXP} XP` : ""}`,
+                category: "ability",
+                sourceId: g.id,
+                targetId: u.id,
+                cardId: g.cardId,
+              });
         }
     }
   if (inChain || inShowdown)
@@ -3240,8 +4288,26 @@ export function getGroupMoveAction(
   };
 }
 
-function getAbilities(s: GameState, p: PlayerId, cardId: string) {
-  const own = getScript(cardId)?.abilities ?? [];
+function getAbilities(
+  s: GameState,
+  p: PlayerId,
+  cardId: string,
+  sourceId?: string,
+) {
+  const own = [
+    ...(getScript(cardId)?.abilities ?? []),
+    ...copiedScripts(
+      s,
+      s.units.find((u) => u.id === sourceId)!,
+    ).flatMap(({ unit, script }) =>
+      (script.abilities ?? []).map((a, i) => ({
+        ...a,
+        instanceKey: `${unit.abilityInstance}:${i}`,
+        effects: textEffects(unit, a.effects),
+      })),
+    ),
+    ...(cardId === s.players[p].legendId ? grantedLegendAbilities(s, p) : []),
+  ];
   if (cardId !== "ogn-111-298") return own;
   const ids = new Set([
     s.players[p].legendId,
@@ -3262,9 +4328,7 @@ export function locationName(id: LocationId) {
     ? id === "base:0"
       ? "your base"
       : "enemy base"
-    : id === "field:0"
-      ? "battlefield 1"
-      : "battlefield 2";
+    : `battlefield ${Number(id.split(":")[1]) + 1}`;
 }
 function tokenCard(name: string) {
   return name === "Sprite"
@@ -3274,7 +4338,7 @@ function tokenCard(name: string) {
       : cards.find(
           (c) =>
             (c.name === name || c.name.startsWith(name + " //")) &&
-            ["Unit", "Gear"].includes(c.type) &&
+            ["Unit", "Gear"].some((type) => isCardType(c, type)) &&
             !c.variant,
         );
 }
@@ -3289,7 +4353,7 @@ function spawnToken(
   if (!c) throw new Error(`Missing token ${name}`);
   if (!canPlayCard(s, p, c, location, c.supertype === "Token"))
     return undefined;
-  if (c.type === "Gear") {
+  if (isCardType(c, "Gear")) {
     const gear = {
       id: uid(s, "g"),
       cardId: c.id,
@@ -3310,7 +4374,7 @@ function spawnToken(
     ready:
       ready ||
       s.players[p].unitsEnterReadyTurn === s.turn ||
-      s.units.some((u) => u.owner === p && u.cardId === "ogn-011-298"),
+      textUnits(s).some((u) => u.owner === p && u.cardId === "ogn-011-298"),
     damage: 0,
     buff: 0,
     temporaryMight: 0,
@@ -3329,11 +4393,12 @@ function spawnToken(
     p,
   );
   unitPlayed(s, p, u);
+  queueTokenReplacements(s, p, u, name, ready);
   return u;
 }
 function unitPlayed(s: GameState, p: PlayerId, unit: Unit) {
   event(s, "unitPlayed", p, unit.cardId, unit.id, unit.location);
-  for (const u of s.units)
+  for (const u of textUnits(s))
     if (u.owner === p && u.id !== unit.id && u.cardId === "ogn-139-298")
       pushStack(s, {
         player: p,
@@ -3346,31 +4411,92 @@ function unitPlayed(s: GameState, p: PlayerId, unit: Unit) {
 }
 function bonusDamage(s: GameState, p: PlayerId) {
   return (
-    s.units.filter((u) => u.owner === p && u.cardId === "ogs-001-024").length +
+    textUnits(s).filter((u) => u.owner === p && u.cardId === "ogs-001-024")
+      .length +
+    3 *
+      s.gears.filter(
+        (g) =>
+          isFace(g.cardId, "SFD", 191) &&
+          s.units.some((u) => u.owner === p && u.id === g.attachedTo),
+      ).length +
     (s.resolving?.filter((item) => item.player === p).at(-1)
       ?.spellBonusDamage ?? 0)
   );
 }
-function killUnits(s: GameState, ids: string[]) {
-  for (const u of s.units.filter(
-    (u) => ids.includes(u.id) && u.deathReplacementTurn === s.turn,
-  )) {
-    u.deathReplacementTurn = undefined;
-    u.damage = 0;
-    u.ready = false;
-    u.location = base(u.owner);
-    ids = ids.filter((id) => id !== u.id);
-  }
+function killUnits(
+  s: GameState,
+  ids: string[],
+  cleanup = false,
+  delayedSpell?: string,
+) {
+  const waiting = new Set(s.deathBatches?.flatMap((b) => b.ids) ?? []);
+  ids = ids.filter(
+    (id) => !waiting.has(id) && s.units.some((u) => u.id === id),
+  );
+  if (!ids.length) return;
+  const spell = delayedSpell ? undefined : s.resolving?.at(-1);
+  const credited =
+    spell && spell.player === effectActors.get(s)
+      ? ids.filter(
+          (id) =>
+            !cleanup ||
+            s.units.find((u) => u.id === id)?.spellDamageId === spell.id,
+        )
+      : [];
+  (s.deathBatches ??= []).push({
+    id: uid(s, "death"),
+    ids,
+    used: [],
+    declined: [],
+    actor: effectActors.get(s),
+    combat: s.phase === "damage",
+    spellId: spell?.id,
+    credited,
+    delayedSpell,
+  });
+  advanceDeaths(s, context());
+}
+function commitDeaths(
+  s: GameState,
+  ids: string[],
+  actor?: PlayerId,
+  spellId?: string,
+  credited: string[] = [],
+  delayedSpell?: string,
+) {
+  const spell = s.resolving?.find((i) => i.id === spellId);
   const dead = s.units.filter((u) => ids.includes(u.id));
+  const inherited = new Map(
+    dead.map((u) => [
+      u.id,
+      [
+        ...textSources(s, u).flatMap((t) => {
+          const e = getScript(t.cardId)?.onDeath;
+          return e ? [textEffects(t, e)] : [];
+        }),
+        ...attachedEquipment(s, u).map((g) =>
+          getScript(g.cardId)?.equipment?.onDeath?.map((e) => ({
+            ...e,
+            cardName: g.id,
+          })),
+        ),
+      ].filter((e): e is Effect[] => Boolean(e)),
+    ]),
+  );
+  const faces = new Map(dead.map((u) => [u.id, u.cardId]));
   const deathMultipliers = [0, 1].map(
     (p) =>
       1 +
-      s.units.filter((u) => u.owner === p && isFace(u.cardId, "OGN", 236))
+      textUnits(s).filter((u) => u.owner === p && isFace(u.cardId, "OGN", 236))
         .length,
   );
   for (const u of dead)
     event(s, "death", u.owner, u.cardId, u.id, u.location, {
       dyingUnitIds: dead.map((unit) => unit.id),
+      killer:
+        actor ??
+        effectActors.get(s) ??
+        (s.phase === "damage" ? otherPlayer(u.owner) : undefined),
     });
   if (dead.length) s.unitDiedTurn = s.turn;
   for (const p of [0, 1] as const)
@@ -3379,7 +4505,7 @@ function killUnits(s: GameState, ids: string[]) {
       s.players[p].firstDeathTurn !== s.turn
     ) {
       s.players[p].firstDeathTurn = s.turn;
-      for (const wraith of s.units.filter(
+      for (const wraith of textUnits(s).filter(
         (u) => u.owner === p && u.cardId === "ogn-118-298",
       ))
         pushStack(s, {
@@ -3391,15 +4517,24 @@ function killUnits(s: GameState, ids: string[]) {
         });
     }
   s.units = s.units.filter((u) => !ids.includes(u.id));
+  s.gears = s.gears.filter((g) => !ids.includes(g.id));
   for (const u of dead) {
     if (!u.token) {
-      addToTrash(s, u.owner, u.cardId);
-      u.deathTrashId = trashCards(s, u.owner).at(-1)!.id;
+      const previous = trashCards(s, physicalOwner(u)).at(-1)?.id;
+      addToTrash(s, physicalOwner(u), physicalCard(u));
+      const visit = trashCards(s, physicalOwner(u)).at(-1);
+      u.deathTrashId =
+        visit?.id !== previous && visit?.cardId === physicalCard(u)
+          ? visit.id
+          : undefined;
     }
+    if (spell && credited.includes(u.id))
+      spell.killedUnits = (spell.killedUnits ?? 0) + 1;
     for (const gid of u.gear) {
       const gear = s.gears.find((g) => g.id === gid);
-      if (gear) gear.attachedTo = undefined;
+      if (gear) detach(s, gear);
     }
+    u.cardId = faces.get(u.id)!;
     log(s, `${cardName(u.cardId)} is defeated.`, "combat", u.owner);
   }
   // Simultaneous triggers enter active-player batch first, then nonactive.
@@ -3407,47 +4542,61 @@ function killUnits(s: GameState, ids: string[]) {
     (a, b) =>
       Number(a.owner !== s.currentPlayer) - Number(b.owner !== s.currentPlayer),
   )) {
-    const effects = getScript(u.cardId)?.onDeath;
-    if (effects)
+    for (const effects of inherited.get(u.id) ?? [])
       for (let repeat = 0; repeat < deathMultipliers[u.owner]; repeat++)
         trigger(
           s,
           u.owner,
           u.cardId,
           u.id,
-          effects,
+          textEffects(u, effects),
           u.location,
           structuredClone(u),
         );
   }
+  if (delayedSpell && actor !== undefined && dead.length)
+    event(s, "spellKill", actor, delayedSpell, undefined, undefined, {
+      amount: dead.length,
+    });
   refreshControl(s);
 }
 function killGear(s: GameState, id: string) {
+  if (s.units.some((u) => u.id === id)) {
+    killUnits(s, [id]);
+    return;
+  }
   const gear = s.gears.find((g) => g.id === id);
   if (!gear) return;
   event(s, "death", gear.owner, gear.cardId, gear.id, base(gear.owner));
   s.gears = s.gears.filter((g) => g.id !== id);
   for (const u of s.units) u.gear = u.gear.filter((g) => g !== id);
-  if (!gear.token) addToTrash(s, gear.owner, gear.cardId);
+  detach(s, gear);
+  if (!gear.token) addToTrash(s, physicalOwner(gear), physicalCard(gear));
   const effects = getScript(gear.cardId)?.onDeath;
   if (effects)
     for (
       let repeat = 0;
       repeat <
       1 +
-        s.units.filter(
+        textUnits(s).filter(
           (u) => u.owner === gear.owner && isFace(u.cardId, "OGN", 236),
         ).length;
       repeat++
     )
-      trigger(s, gear.owner, gear.cardId, gear.id, effects, base(gear.owner));
+      trigger(
+        s,
+        gear.owner,
+        gear.cardId,
+        gear.id,
+        textEffects(gear, effects),
+        base(gear.owner),
+      );
 }
 function checkDeaths(s: GameState) {
   killUnits(
     s,
-    s.units
-      .filter((u) => u.damage > 0 && u.damage >= getMight(s, u))
-      .map((u) => u.id),
+    s.units.filter((u) => lethal(s, u, getMight(s, u))).map((u) => u.id),
+    true,
   );
 }
 function refreshControl(s: GameState) {
@@ -3491,11 +4640,25 @@ function effectDescription(e: Effect): string {
 function deflect(s: GameState, u: Unit) {
   if (s.fields.some((f) => f.id === u.location && isFace(f.cardId, "VEN", 158)))
     return 0;
-  return Math.max(
-    getScript(u.cardId)?.deflect ?? 0,
-    getKeywords(s, u)
+  const keywordTax = (keywords: string[]) =>
+    keywords
       .filter((k) => /^Deflect(?: \d+)?$/.test(k))
-      .reduce((sum, k) => sum + (Number(k.split(" ")[1]) || 1), 0),
+      .reduce((sum, k) => sum + (Number(k.split(" ")[1]) || 1), 0);
+  const equipmentTax = keywordTax(
+    attachedEquipment(s, u).flatMap(
+      (gear) => getScript(gear.cardId)?.equipment?.keywords ?? [],
+    ),
+  );
+  // Some older scripts store intrinsic Deflect only as a numeric field. Keep
+  // that fallback separate so it cannot swallow an Equipment's added instance.
+  return (
+    Math.max(
+      textSources(s, u).reduce(
+        (n, t) => n + (getScript(t.cardId)?.deflect ?? 0),
+        0,
+      ),
+      keywordTax(getKeywords(s, u)) - equipmentTax,
+    ) + equipmentTax
   );
 }
 function targetTax(s: GameState, p: PlayerId, id?: string) {
@@ -3516,6 +4679,7 @@ function* iterateTriggerActions(
   if (modalIndex >= 0) {
     const wrapper = effects[modalIndex];
     for (const [index, mode] of wrapper.modes!.entries()) {
+      if (!wave14ModeAvailable(s, sourceId, mode.effects)) continue;
       const selected = mode.effects.map((e, i) => ({
         ...e,
         ...(i === 0 && wrapper.triggerCost
@@ -3599,25 +4763,47 @@ function* iterateTriggerActions(
       )
     )
       continue;
-    for (const cardIndices of recycleSelections(
-      player.discard,
-      cost.recycleCost,
-    )) {
-      yield {
-        id: `choose-trigger:${targetId ?? ""}${cardIndices.length ? `:recycle:${cardIndices.join(",")}` : ""}`,
-        label: `${targetId ? "Choose target" : "Use triggered ability"}${targetLabel(s, targetId)}${cardIndices.length ? ` · recycle ${cardIndices.map((i) => cardName(player.discard[i])).join(" + ")}` : ""}`,
-        player: p,
-        category: "ability",
-        targetId,
-        effects,
-        ...(cardIndices.length ? { cardIndices } : {}),
-      };
-    }
+    for (const costSourceId of cost.board
+      ? triggerBoardSources(s, p, cost.board, locationId, sourceId)
+      : [undefined])
+      for (const cardIndices of recycleSelections(
+        cost.discard ? player.hand : player.discard,
+        cost.discard || cost.recycleCost,
+      )) {
+        yield {
+          id: `choose-trigger:${targetId ?? ""}${costSourceId ? `:cost:${costSourceId}` : ""}${cardIndices.length ? `:${cost.discard ? "discard" : "recycle"}:${cardIndices.join(",")}` : ""}`,
+          label: `${
+            costSourceId
+              ? `${cost.board === "disempower" ? "Disempower" : cost.board === "returnUnitHere" ? "Return to hand" : "Kill"} ${
+                  costSourceId === "legend"
+                    ? cardName(player.legendId)
+                    : costSourceId
+                        .split("~")
+                        .map((id) =>
+                          cardName(
+                            [...s.units, ...s.gears].find((o) => o.id === id)!
+                              .cardId,
+                          ),
+                        )
+                        .join(" + ")
+                } · `
+              : ""
+          }${targetId ? "Choose target" : "Use triggered ability"}${targetLabel(s, targetId)}${cardIndices.length ? ` · ${cost.discard ? "discard" : "recycle"} ${cardIndices.map((i) => cardName((cost.discard ? player.hand : player.discard)[i])).join(" + ")}` : ""}`,
+          player: p,
+          category: "ability",
+          targetId,
+          effects,
+          ...(cardIndices.length ? { cardIndices } : {}),
+          ...(costSourceId ? { costSourceId } : {}),
+        };
+      }
   }
 }
 function triggerPrice(effects: Effect[]) {
   const costs = effects.flatMap((e) => (e.triggerCost ? [e.triggerCost] : []));
   return {
+    discard: costs.reduce((n, c) => n + (c.discard ?? 0), 0),
+    board: costs.find((c) => c.board)?.board,
     energy: costs.reduce((n, c) => n + (c.energy ?? 0), 0),
     power: costs.reduce((n, c) => n + (c.power ?? 0), 0),
     domains: [...new Set(costs.flatMap((c) => (c.domain ? [c.domain] : [])))],
@@ -3635,6 +4821,19 @@ function finalizeTrigger(
   action: GameAction,
 ) {
   const effects = action.effects ?? item.effects;
+  const draft =
+    !action.draftFinalized &&
+    makeDraft(s, { ...action, cardId: item.cardId, effects }, item);
+  if (draft) {
+    openChoice(s, item.player, {
+      kind: "effectDraft",
+      cardId: item.cardId,
+      sourceId: item.sourceId,
+      locationId: item.locationId,
+      effectDraft: draft,
+    });
+    return;
+  }
   const selection = effects.find(stagedTarget);
   if (selection && !action.targetsFinalized) {
     openChoice(s, item.player, {
@@ -3692,18 +4891,35 @@ function finalizeTrigger(
       if (source) source.ready = false;
     }
   }
+  const boardDeferrals: Array<() => void> = [];
+  if (cost.board || cost.discard)
+    finalizingBoardCostPlay.set(s, boardDeferrals);
+  if (cost.discard) {
+    const selected = new Set(action.cardIndices ?? []);
+    const discarded = player.hand.filter((_, i) => selected.has(i));
+    player.hand = player.hand.filter((_, i) => !selected.has(i));
+    discardCards(s, item.player, discarded);
+  }
+  if (cost.board)
+    payTriggerBoard(
+      s,
+      item.player,
+      cost.board,
+      action.costSourceId!,
+      context(undefined, item.sourceId, item.locationId),
+    );
   if (cost.recycleCost) {
     const selected = new Set(action.cardIndices ?? []);
     const recycled = player.discard.filter((_, i) => selected.has(i));
     for (const i of [...selected].sort((a, b) => b - a))
       takeTrashAt(s, item.player, i);
-    player.deck.push(...shuffle(s, recycled));
+    recycleCards(s, item.player, shuffle(s, recycled));
   }
   if (cost.recycleSelf) {
     const recycled = takeTrash(s, item.player, cost.trashId!);
     if (!recycled)
       throw new Error("The source's trash visit is no longer available");
-    player.deck.push(recycled);
+    recycleCards(s, item.player, [recycled]);
   }
   if (cost.sacrificeSelf) {
     const nested = executingEffects.has(s);
@@ -3716,12 +4932,18 @@ function finalizeTrigger(
       if (!nested) executingEffects.delete(s);
     }
   }
+  markWave14Mode(s, item.sourceId, effects);
   pushStack(s, {
     ...item,
     kind: "trigger",
+    locationId: action.locationId ?? item.locationId,
     targetId: action.targetId,
     effects: effects.map(({ triggerCost: _cost, ...effect }) => effect),
   });
+  if (cost.board || cost.discard) {
+    finalizingBoardCostPlay.delete(s);
+    for (const finalize of boardDeferrals) finalize();
+  }
   if (effects.some((e) => e.triggerCost))
     event(
       s,
@@ -3779,7 +5001,10 @@ function context(
     trigger,
     pushStack,
     spawnToken,
-    killUnits,
+    takeSpell,
+    killUnits: (state, ids, delayedSpell) =>
+      killUnits(state, ids, false, delayedSpell),
+    commitDeaths,
     getMight,
     canTargetUnit: (state, player, unit) => !protectedFrom(state, unit, player),
     readyForbidden,
@@ -3791,13 +5016,15 @@ function context(
     discardCards,
     spellPlayed,
     dealDamage,
+    bonusDamage,
     costFor,
     targetTax,
     cardEvent: event,
     killGear,
   };
 }
-function event(
+const event = emitGameEvent;
+export function emitGameEvent(
   s: GameState,
   name: PreconEvent,
   p: PlayerId,
@@ -3806,6 +5033,7 @@ function event(
   locationId?: LocationId,
   details?: Pick<
     PreconContext,
+    | "killer"
     | "dyingUnitIds"
     | "amount"
     | "choosingKind"
@@ -3816,12 +5044,24 @@ function event(
     | "playOrdinal"
     | "playSource"
     | "abilityEnergyCost"
+    | "resolvedSpell"
+    | "spellTrashId"
   >,
 ) {
+  if (name === "attach") {
+    const gear = s.gears.find((g) => g.id === sourceId);
+    if (gear) gear.attachedTurn = s.turn;
+  }
   laterCardEvent(s, name, p, cardId, sourceId, locationId, {
     ...context(undefined, sourceId, locationId),
     ...details,
   });
+  if (name === "attach") {
+    const g = s.gears.find((g) => g.id === sourceId),
+      u = s.units.find((u) => u.id === g?.attachedTo);
+    if (g && u && (isFace(g.cardId, "JDG", 59) || isFace(g.cardId, "SFD", 59)))
+      g.copiedText = u.cardId;
+  }
 }
 function playUnit(
   s: GameState,
@@ -3841,7 +5081,7 @@ function playUnit(
       ready ||
       !!sc?.keywords?.includes("Enters ready") ||
       s.players[p].unitsEnterReadyTurn === s.turn ||
-      s.units.some((u) => u.owner === p && u.cardId === "ogn-011-298"),
+      textUnits(s).some((u) => u.owner === p && u.cardId === "ogn-011-298"),
     damage: 0,
     buff: 0,
     temporaryMight: 0,
@@ -3865,7 +5105,8 @@ function playUnit(
     energySpent: 0,
     playSource: "effect",
   });
-  if (sc?.onPlay) trigger(s, p, cardId, unit.id, sc.onPlay, location);
+  if (sc?.onPlay)
+    trigger(s, p, cardId, unit.id, textEffects(unit, sc.onPlay), location);
   return unit;
 }
 function dealDamage(s: GameState, u: Unit, n: number, unitDamage = false) {
@@ -3898,7 +5139,12 @@ function dealDamage(s: GameState, u: Unit, n: number, unitDamage = false) {
   u.preventDamage = (u.preventDamage ?? 0) - prevented;
   const dealt = Math.max(0, n - prevented);
   u.damage += dealt;
+  const damageOwner = effectActors.get(s);
+  if (damageOwner !== undefined && dealt > 0) {
+    (u.damageByPlayer ??= [0, 0])[damageOwner] += dealt;
+  }
   if (dealt > 0) {
+    u.spellDamageId = !unitDamage ? s.resolving?.at(-1)?.id : undefined;
     u.damageTakenTurn = s.turn;
     const watches = (s.damageTriggers ?? []).filter(
       (w) => w.turn === s.turn && (!w.targetId || w.targetId === u.id),
@@ -3908,7 +5154,12 @@ function dealDamage(s: GameState, u: Unit, n: number, unitDamage = false) {
     );
     for (const watch of watches)
       trigger(s, watch.player, watch.cardId, `delayed:${watch.cardId}`, [
-        { type: "special", custom: "wave9:damage-kill", cardName: u.id },
+        {
+          type: "special",
+          custom: "wave9:damage-kill",
+          cardName: u.id,
+          keyword: watch.cardId,
+        },
       ]);
   }
 }
@@ -3966,7 +5217,75 @@ function resumeChoice(s: GameState, selected = true) {
   drainTriggers(s);
   continuePending(s);
 }
+function takeSpell(s: GameState, p: PlayerId, id: string) {
+  const item = s.stack.find((i) => i.id === id && i.kind === "spell");
+  if (!item) return;
+  item.originalOwner ??= item.player;
+  item.player = p;
+  const modes = getScript(item.cardId)?.spellModes ?? [
+    { label: "New targets", effects: item.effects },
+  ];
+  const options: GameAction[] = [
+    {
+      id: "choose-custom:retarget:keep",
+      player: p,
+      category: "ability",
+      label: "Keep existing choices",
+      effects: [],
+    },
+  ];
+  const complex =
+    item.effects.some(
+      (e) =>
+        e.chosenTargetId !== undefined ||
+        e.target === "boardCards" ||
+        e.custom?.startsWith("wave24:"),
+    ) ||
+    item.declaration?.repeated ||
+    item.declaration?.repeatMask !== undefined;
+  if (complex)
+    options.push({
+      id: "choose-custom:retarget:change",
+      player: p,
+      category: "ability",
+      label: "Choose all modes and targets again",
+      effects: [{ type: "special", custom: "retarget-draft", cardName: id }],
+    });
+  for (const [index, mode] of (complex ? [] : modes).entries()) {
+    const effects = annotateEffects(
+      mode.effects,
+      Boolean(item.fromHidden),
+      Boolean(item.additionalCostPaid),
+      item.fromHidden ? item.locationId : undefined,
+    ).map((e) => ({ ...e, chosenTargetId: undefined }));
+    for (const targetId of targets(
+      s,
+      p,
+      effects,
+      item.locationId,
+      item.sourceId,
+    ))
+      options.push({
+        id: `choose-custom:retarget:${index}:${targetId ?? ""}`,
+        player: p,
+        category: "ability",
+        label: `${mode.label}${targetLabel(s, targetId)}`,
+        effects: [
+          {
+            type: "special",
+            custom: "retarget-spell",
+            cardName: id,
+            chosenTargetId: targetId ?? null,
+            effects,
+          },
+        ],
+      });
+  }
+  openChoice(s, p, { options });
+}
 function finishResolvedCards(s: GameState) {
+  drainTokenReplacements(s, context());
+  if (s.pendingChoice) return;
   const resolved = [...(s.resolving ?? []), ...(s.resolvingAbilities ?? [])];
   s.resolving = [];
   s.resolvingAbilities = [];
@@ -3991,17 +5310,59 @@ function finishResolvedCards(s: GameState) {
       paidAdditionalCost: item.additionalCostPaid,
       playSource: item.playSource,
     });
-    if (
+    const previousTrashId = trashCards(s, item.originalOwner ?? item.player).at(
+      -1,
+    )?.id;
+    if (item.recycleOnLeave) {
+      recycleCards(
+        s,
+        item.originalOwner ?? item.player,
+        [item.cardId],
+        item.player,
+      );
+    } else if (
+      isFace(item.cardId, "OGN", 122) ||
+      isFace(item.cardId, "SFD", 200)
+    ) {
+      s.players[item.originalOwner ?? item.player].banished.push(item.cardId);
+      event(s, "banish", item.player, item.cardId);
+    } else if (
       item.flowed &&
       (item.grantedFlow || getScript(item.cardId)?.flow?.banishAfter !== false)
     ) {
-      s.players[item.player].banished.push(item.cardId);
+      s.players[item.originalOwner ?? item.player].banished.push(item.cardId);
       event(s, "banish", item.player, item.cardId);
-    } else addToTrash(s, item.player, item.cardId);
+    } else addToTrash(s, item.originalOwner ?? item.player, item.cardId);
+    const last = trashCards(s, item.originalOwner ?? item.player).at(-1);
+    event(
+      s,
+      "spellResolved",
+      item.player,
+      item.cardId,
+      item.id,
+      item.locationId,
+      {
+        resolvedSpell: item,
+        spellTrashId:
+          last?.id !== previousTrashId && last?.cardId === item.cardId
+            ? last.id
+            : undefined,
+      },
+    );
   }
   if (s.resolving) s.resolving = [];
 }
 function continuePending(s: GameState) {
+  drainTokenReplacements(s, context());
+  if (s.pendingChoice) return;
+  advanceDeaths(s, context());
+  if (s.pendingChoice || s.deathBatches?.length) return;
+  if (s.pendingCombatDamage) {
+    const damage = s.pendingCombatDamage;
+    delete s.pendingCombatDamage;
+    finishCombatDamage(s, damage.preview, damage.hits);
+  }
+  advancePendingPlays(s);
   if (s.pendingChoice || s.stack.length || s.winner !== null) return;
   if (s.pendingAwaken !== undefined) {
     const p = s.pendingAwaken;
@@ -4058,8 +5419,8 @@ function moveUnit(
   u.movesTurn = s.turn;
   u.location = destination;
   event(s, "move", actor, u.cardId, u.id, destination, { previousLocation });
-  const effects = getScript(u.cardId)?.onMove;
-  if (effects) trigger(s, u.owner, u.cardId, u.id, effects, destination);
+  for (const effects of unitTriggerEffects(s, u, "onMove"))
+    trigger(s, u.owner, u.cardId, u.id, textEffects(u, effects), destination);
 }
 function buffUnit(s: GameState, u: Unit) {
   if (u.buff && u.cardId !== "ogn-078-298") return;
@@ -4144,6 +5505,23 @@ function executeEffects(
         ? originalTargetId
         : (e.chosenTargetId ?? undefined);
     const rest = effects.slice(effectIndex + 1);
+    const inspection = inspectDeck(
+      s,
+      p,
+      e,
+      context(targetId, sourceId, locationId, sourceSnapshot),
+    );
+    if (inspection === "skip") continue;
+    if (inspection === "pause") {
+      if (s.pendingChoice) {
+        s.pendingChoice.afterEffects = [
+          ...(s.pendingChoice.afterEffects ?? []),
+          ...rest,
+        ];
+        return;
+      }
+      continue;
+    }
     if (stepFrames)
       stepEffects.set(s, {
         ...stepEffects.get(s),
@@ -4198,8 +5576,23 @@ function executeEffects(
         return;
       }
       const ids = remaining.map((o) => o.id);
-      if (e.type === "kill") killUnits(s, ids);
-      else
+      if (e.type === "special") {
+        runLaterEffect(s, p, e, {
+          ...context(ids.join("~"), sourceId, locationId, sourceSnapshot),
+          abilityInstance: e.abilityInstance,
+        });
+        if (s.pendingChoice) {
+          s.pendingChoice.afterEffects = [
+            ...(s.pendingChoice.afterEffects ?? []),
+            ...rest,
+          ];
+          return;
+        }
+      } else if (e.type === "kill") {
+        killUnits(s, ids);
+        for (const id of ids)
+          if (s.gears.some((g) => g.id === id)) killGear(s, id);
+      } else
         for (const object of remaining) {
           const unit = s.units.find((u) => u.id === object.id);
           const gear = s.gears.find((g) => g.id === object.id);
@@ -4221,6 +5614,15 @@ function executeEffects(
               s,
               p,
               [{ type: "bounce", target: "anyUnit" }],
+              unit.id,
+              sourceId,
+              locationId,
+            );
+          } else if (e.type === "damage" && unit) {
+            runEffects(
+              s,
+              p,
+              [{ type: "damage", amount: e.amount, target: "anyUnit" }],
               unit.id,
               sourceId,
               locationId,
@@ -4274,7 +5676,11 @@ function executeEffects(
       : sourceId.startsWith("field:")
         ? (sourceId as LocationId)
         : (relativeSource?.location ??
-          (relativeGear ? base(relativeGear.owner) : undefined));
+          (relativeGear
+            ? base(relativeGear.owner)
+            : sourceId === "legend"
+              ? locationId
+              : undefined));
     const u =
       candidate &&
       effectTargetMatches(s, candidate, e, sourceId) &&
@@ -4339,6 +5745,13 @@ function executeEffects(
         "twoFriendlyUnits",
         "unitOrGear",
         "anyGear",
+        "relentlessMove",
+        "shurikenMove",
+        "friendlyAndEnemyBattlefield",
+        "empowerObject",
+        "enemyMoveDestination",
+        "enemyAndOptionalFriendly",
+        "friendlyAndOptionalEnemy",
         "friendlyEquipment",
         "upToThreeUnitsSameLocation",
         "upToFourFriendlyUnits",
@@ -4359,7 +5772,8 @@ function executeEffects(
         "unitAndSpell",
       ].includes(e.target) &&
       !u &&
-      e.custom !== "wave8:teemo"
+      e.custom !== "wave8:teemo" &&
+      e.custom !== "wave15:baited-hook"
     ) {
       log(
         s,
@@ -4374,6 +5788,7 @@ function executeEffects(
         draw(s, targetPlayer, n);
         break;
       case "damage":
+        if (n <= 0) break;
         if (
           e.target === "upToTwoUnits" ||
           e.target === "upToThreeUnitsSameLocation"
@@ -4435,8 +5850,11 @@ function executeEffects(
         ) {
           const a = getMight(s, first),
             b = getMight(s, second);
+          effectActors.set(s, second.owner);
           dealDamage(s, first, b, true);
+          effectActors.set(s, first.owner);
           dealDamage(s, second, a, true);
+          effectActors.set(s, p);
         }
         break;
       }
@@ -4485,19 +5903,19 @@ function executeEffects(
           }
           break;
         }
-        if (u && e.minMight !== undefined)
-          u.temporaryMight += Math.min(
-            0,
-            Math.max(n, e.minMight - getMight(s, u)),
-          );
-        else if (u)
-          u.temporaryMight +=
-            n +
-            (e.condition === "aloneBonus" &&
-            s.units.filter((x) => x.owner === p && x.location === u.location)
-              .length === 1
-              ? 1
-              : 0);
+        if (u) {
+          const amount =
+            e.minMight !== undefined
+              ? Math.min(0, Math.max(n, e.minMight - getMight(s, u)))
+              : n +
+                (e.condition === "aloneBonus" &&
+                s.units.filter(
+                  (x) => x.owner === p && x.location === u.location,
+                ).length === 1
+                  ? 1
+                  : 0);
+          changeMight(s, p, u, amount, Boolean(e.target));
+        }
         break;
       case "assault":
         if (u) u.temporaryAssault += n;
@@ -4547,6 +5965,10 @@ function executeEffects(
         if (u) u.ready = false;
         break;
       case "stun":
+        if (u && !u.stunned && gangplank(s, u, Boolean(e.target))) {
+          u.temporaryMight += 3;
+          break;
+        }
         if (u) {
           u.stunned = true;
           event(s, "stun", p, u.cardId, u.id, u.location);
@@ -4576,12 +5998,19 @@ function executeEffects(
         break;
       case "token":
         if (e.location === "here" || e.location === "base") {
+          const tokenLocation =
+            e.condition === "liveSourceLocation"
+              ? relativeLocation
+              : e.location === "base"
+                ? base(p)
+                : (locationId ?? base(p));
+          if (!tokenLocation) break;
           for (let i = 0; i < n; i++) {
             const token = spawnToken(
               s,
               p,
               e.cardName ?? "Recruit",
-              e.location === "base" ? base(p) : (locationId ?? base(p)),
+              tokenLocation,
             );
             if (e.ready && token) token.ready = true;
           }
@@ -4627,14 +6056,19 @@ function executeEffects(
         else s.players[p].energy += n;
         break;
       case "damageAll":
-        for (const unit of s.units) {
+        if (n <= 0) break;
+        for (const unit of textUnits(s)) {
           if (
             (e.who === "all" || unit.owner === targetPlayer) &&
-            (e.condition === "allBattlefields"
-              ? unit.location.startsWith("field:")
-              : e.condition === "combat"
-                ? !!s.combat?.engaged && unit.location === s.combat.fieldId
-                : unit.location === targetId)
+            (e.condition === "allLocations"
+              ? true
+              : e.condition === "allBattlefields"
+                ? unit.location.startsWith("field:")
+                : e.condition === "combat"
+                  ? !!s.combat?.engaged && unit.location === s.combat.fieldId
+                  : e.condition === "liveSourceLocation"
+                    ? unit.location === relativeLocation
+                    : unit.location === targetId)
           ) {
             dealDamage(
               s,
@@ -4660,8 +6094,8 @@ function executeEffects(
           zone.some(
             (id) =>
               e.type !== "retrieve" ||
-              ((e.condition !== "unit" || getCard(id).type === "Unit") &&
-                (e.condition !== "spell" || getCard(id).type === "Spell")),
+              ((e.condition !== "unit" || isCardType(getCard(id), "Unit")) &&
+                (e.condition !== "spell" || isCardType(getCard(id), "Spell"))),
           )
         )
           openChoice(s, targetPlayer, {
@@ -4753,19 +6187,22 @@ function executeEffects(
         break;
       }
       case "bounce":
+        if (u && gangplank(s, u, Boolean(e.target))) {
+          u.temporaryMight += 3;
+          break;
+        }
         if (u) {
           event(s, "bounce", u.owner, u.cardId, u.id, u.location);
           s.units = s.units.filter((v) => v.id !== u.id);
-          if (!u.token) s.players[u.owner].hand.push(u.cardId);
+          if (!u.token) s.players[physicalOwner(u)].hand.push(physicalCard(u));
           for (const gear of s.gears.filter((g) => g.attachedTo === u.id))
-            gear.attachedTo = undefined;
+            detach(s, gear);
         }
         break;
       case "equip": {
         const gear = s.gears.find((g) => g.id === sourceId);
-        if (gear && u && gear.owner === u.owner) {
-          const old = s.units.find((v) => v.id === gear.attachedTo);
-          if (old) old.gear = old.gear.filter((id) => id !== gear.id);
+        if (gear && u && gear.owner === u.owner && gear.attachedTo !== u.id) {
+          detach(s, gear);
           gear.attachedTo = u.id;
           if (!u.gear.includes(gear.id)) u.gear.push(gear.id);
           event(s, "attach", p, gear.cardId, gear.id, u.location);
@@ -4785,11 +6222,37 @@ function executeEffects(
             player.deck = shuffle(s, emptyTrash(s, targetPlayer));
           }
           if (player.deck.length)
-            addToTrash(s, targetPlayer, player.deck.shift()!);
+            burnToTrash(s, targetPlayer, player.deck.shift()!);
         }
         break;
       case "special":
-        if (e.custom === "confront") s.players[p].unitsEnterReadyTurn = s.turn;
+        if (e.custom === "pending-order") {
+          const index =
+            s.pendingPlays?.findIndex((i) => i.id === e.cardName) ?? -1;
+          if (index >= 0) {
+            const item = s.pendingPlays!.splice(index, 1)[0];
+            delete item.spec.orderGroup;
+            s.pendingPlays!.push(item);
+          }
+        } else if (e.custom === "death-replacement") {
+          advanceDeaths(s, context(), e.cardName);
+        } else if (e.custom === "retarget-draft") {
+          const item = s.stack.find((i) => i.id === e.cardName);
+          if (item)
+            openChoice(s, p, {
+              kind: "effectDraft",
+              cardId: item.cardId,
+              locationId: item.locationId,
+              effectDraft: retargetDraft(item),
+            });
+        } else if (e.custom === "retarget-spell") {
+          const item = s.stack.find((i) => i.id === e.cardName);
+          if (item) {
+            item.effects = e.effects!;
+            item.targetId = e.chosenTargetId ?? undefined;
+          }
+        } else if (e.custom === "confront")
+          s.players[p].unitsEnterReadyTurn = s.turn;
         else if (e.custom === "optionalChannel")
           openChoice(s, p, {
             kind: "optional",
@@ -4881,13 +6344,26 @@ function executeEffects(
             });
           }
         } else if (
-          !runLaterEffect(s, p, e, {
+          !runCardPlay(s, p, e, {
             ...context(targetId, sourceId, locationId, sourceSnapshot),
+            abilityInstance: e.abilityInstance,
+          }) &&
+          !runLaterEffect(s, p, e, {
+            ...{
+              ...context(targetId, sourceId, locationId, sourceSnapshot),
+              abilityInstance: e.abilityInstance,
+            },
             fromHidden: e.fromHidden,
             paidAdditionalCost: e.additionalCostPaid,
           })
         )
           throw new Error(`Unsupported special: ${e.custom}`);
+        break;
+      case "playCard":
+        runCardPlay(s, e.who === "opponent" ? otherPlayer(p) : p, e, {
+          ...context(targetId, sourceId, locationId, sourceSnapshot),
+          abilityInstance: e.abilityInstance,
+        });
         break;
       case "counter": {
         const chainTarget =
@@ -4906,22 +6382,35 @@ function executeEffects(
           !targets(s, p, [e], locationId, sourceId).includes(targetId)
         )
           break;
-        if (getScript(s.stack[index].cardId)?.uncounterable) break;
+        if (
+          getScript(s.stack[index].cardId)?.uncounterable ||
+          uncounterable(s, s.stack[index].player)
+        )
+          break;
         const item = s.stack.splice(index, 1)[0];
         if (item.kind !== "spell") {
           log(s, `${cardName(item.cardId)} ability is countered.`, "play", p);
           break;
         }
-        if (
+        if (item.recycleOnLeave) {
+          recycleCards(
+            s,
+            item.originalOwner ?? item.player,
+            [item.cardId],
+            item.player,
+          );
+        } else if (
           item.flowed &&
           (item.grantedFlow ||
             getScript(item.cardId)?.flow?.banishAfter !== false)
         ) {
-          s.players[item.player].banished.push(item.cardId);
+          s.players[item.originalOwner ?? item.player].banished.push(
+            item.cardId,
+          );
           event(s, "banish", item.player, item.cardId);
         } else if (e.condition === "returnCounteredToHand")
-          s.players[item.player].hand.push(item.cardId);
-        else addToTrash(s, item.player, item.cardId);
+          s.players[item.originalOwner ?? item.player].hand.push(item.cardId);
+        else addToTrash(s, item.originalOwner ?? item.player, item.cardId);
         log(s, `${cardName(item.cardId)} is countered.`, "play", p);
         break;
       }
@@ -4939,6 +6428,18 @@ function executeEffects(
       locationId,
     );
     if (s.pendingChoice) {
+      if (e.lookCount !== undefined && s.pendingChoice.options)
+        s.pendingChoice.options = s.pendingChoice.options.map((a) => ({
+          ...a,
+          effects: a.effects?.map((f) =>
+            f.custom &&
+            /:(stacked-selected|candle-selected|ornn-finish|lightning-finish|herald-selected)$/.test(
+              f.custom,
+            )
+              ? { ...f, lookCount: e.lookCount }
+              : f,
+          ),
+        }));
       s.pendingChoice.afterEffects ??= rest;
       s.pendingChoice.sourceSnapshot ??= sourceSnapshot;
       return;
@@ -4970,7 +6471,7 @@ function cardPlayed(
 ) {
   event(s, "play", p, cardId, sourceId, locationId, details);
   if (p !== s.currentPlayer)
-    for (const u of s.units.filter(
+    for (const u of textUnits(s).filter(
       (u) => u.owner === p && u.cardId === "ogn-117-298",
     ))
       pushStack(s, {
@@ -5017,6 +6518,11 @@ function pushStack(
   item: Omit<StackItem, "id">,
   selectedTargets?: string[],
 ) {
+  const deferred = finalizingBoardCostPlay.get(s);
+  if (deferred && item.kind === "trigger") {
+    deferred.push(() => pushStack(s, item, selectedTargets));
+    return;
+  }
   const repeat = scoreTriggerRepeats.get(s);
   if (
     item.kind === "trigger" &&
@@ -5063,6 +6569,20 @@ function pushStack(
   const announced = selectedTargets
     ? ids.flatMap((target) => [...new Set(target.split("~"))])
     : [...new Set(ids.flatMap((target) => target.split("~")))];
+  if (item.kind === "spell" || isCardType(getCard(item.cardId), "Unit")) {
+    const count = announced.filter((id) =>
+      [...s.units, ...s.gears].some(
+        (o) => o.id === id && o.owner !== item.player,
+      ),
+    ).length;
+    if (count) {
+      const old = s.players[item.player].enemyChoices;
+      s.players[item.player].enemyChoices = {
+        turn: s.turn,
+        count: (old?.turn === s.turn ? old.count : 0) + count,
+      };
+    }
+  }
   for (const id of announced) {
     const unit = s.units.find((u) => u.id === id);
     if (unit)
@@ -5137,8 +6657,7 @@ function trigger(
         effect.condition !== "allFourTribes" ||
         ["Bird", "Cat", "Dog", "Poro"].every((tag) =>
           s.units.some(
-            (unit) =>
-              unit.owner === p && getCard(unit.cardId).tags.includes(tag),
+            (unit) => unit.owner === p && getUnitTags(unit).includes(tag),
           ),
         ),
     )
@@ -5203,7 +6722,17 @@ function trigger(
         ? { ...effect, condition: undefined }
         : effect,
     );
+  effects = effects.map((e) =>
+    e.custom === "draft:volibear" ? { ...e, amount: 5 + bonusDamage(s, p) } : e,
+  );
   if (!effects.length) return;
+  const deferred = finalizingBoardCostPlay.get(s);
+  if (deferred) {
+    deferred.push(() =>
+      trigger(s, p, cardId, sourceId, effects, locationId, sourceSnapshot),
+    );
+    return;
+  }
   if (s.pendingChoice || executingEffects.has(s)) {
     (s.pendingTriggers ??= []).push({
       player: p,
@@ -5284,11 +6813,11 @@ function syncCombatParticipants(s: GameState) {
   for (const u of arriving) {
     if (u.owner === combat.attacker)
       event(s, "attack", u.owner, u.cardId, u.id, field);
-    const effects =
-      u.owner === combat.attacker
-        ? getScript(u.cardId)?.onAttack
-        : getScript(u.cardId)?.onDefend;
-    if (effects) {
+    for (const effects of unitTriggerEffects(
+      s,
+      u,
+      u.owner === combat.attacker ? "onAttack" : "onDefend",
+    )) {
       s.pendingTriggers ??= [];
       s.pendingTriggers.push({
         player: u.owner,
@@ -5367,7 +6896,44 @@ function openShowdown(s: GameState, p: PlayerId, field: LocationId) {
   );
   syncCombatParticipants(s);
 }
+function advancePendingPlays(s: GameState) {
+  if (
+    s.pendingChoice ||
+    executingEffects.has(s) ||
+    s.resolving?.length ||
+    s.resolvingAbilities?.length
+  )
+    return;
+  const pending = s.pendingPlays?.at(-1);
+  const group = pending?.spec.orderGroup
+    ? s.pendingPlays!.filter(
+        (i) =>
+          i.player === pending.player &&
+          i.spec.orderGroup === pending.spec.orderGroup,
+      )
+    : [];
+  if (pending && group.length > 1) {
+    openChoice(s, pending.player, {
+      options: group.map((i) => ({
+        id: `choose-custom:pending-order:${i.id}`,
+        player: i.player,
+        category: "ability",
+        label: `Play ${cardName(i.cardId)} next`,
+        cardId: i.cardId,
+        effects: [{ type: "special", custom: "pending-order", cardName: i.id }],
+      })),
+    });
+    return;
+  }
+  if (pending)
+    openChoice(s, pending.player, {
+      kind: "effectPlay",
+      cardId: pending.cardId,
+      sourceId: pending.id,
+    });
+}
 function drainTriggers(s: GameState) {
+  advancePendingPlays(s);
   if (s.pendingChoice || executingEffects.has(s) || !s.pendingTriggers?.length)
     return;
   const next = s.pendingTriggers.shift()!;
@@ -5446,7 +7012,9 @@ function resolveCombatDamage(s: GameState) {
       if (u) {
         const damageBefore = u.damage;
         const might = getMight(s, u);
+        effectActors.set(s, p);
         dealDamage(s, u, n, true);
+        effectActors.delete(s);
         hits.push({
           unitId: u.id,
           cardId: u.cardId,
@@ -5467,6 +7035,18 @@ function resolveCombatDamage(s: GameState) {
     { stage: "impact", preview, hits },
   );
   checkDeaths(s);
+  if (s.deathBatches?.length) {
+    s.pendingCombatDamage = { preview, hits };
+    return;
+  }
+  finishCombatDamage(s, preview, hits);
+}
+function finishCombatDamage(
+  s: GameState,
+  preview: CombatPreview,
+  hits: CombatHit[],
+) {
+  const c = s.combat!;
   const defeatedIds = preview.units
     .filter(({ unit }) => !s.units.some((u) => u.id === unit.id))
     .map(({ unit }) => unit.id);
@@ -5475,13 +7055,23 @@ function resolveCombatDamage(s: GameState) {
       s.units.some((u) => u.id === unit.id && u.location === base(u.owner)),
     )
     .map(({ unit }) => unit.id);
-  for (const u of s.units) u.damage = 0;
+  for (const u of s.units) {
+    u.damage = 0;
+    u.damageByPlayer = [0, 0];
+  }
   const defenders = s.units.some(
     (u) => u.owner === c.defender && u.location === c.fieldId,
   );
+  const solariTie =
+    defenders &&
+    s.units.some((u) => u.owner === c.attacker && u.location === c.fieldId) &&
+    s.gears.some(
+      (g) =>
+        g.owner === c.attacker && !g.attachedTo && isFace(g.cardId, "OGN", 227),
+    );
   if (defenders) {
     for (const u of s.units.filter(
-      (u) => u.owner === c.attacker && u.location === c.fieldId,
+      (u) => (solariTie || u.owner === c.attacker) && u.location === c.fieldId,
     )) {
       u.location = base(u.owner);
       recalledIds.push(u.id);
@@ -5642,6 +7232,7 @@ function finishEndTurn(s: GameState, p: PlayerId) {
   s.damageTriggers = [];
   for (const u of s.units) {
     u.damage = 0;
+    u.damageByPlayer = [0, 0];
     u.temporaryMight = 0;
     u.temporaryAssault = 0;
     u.stunned = false;
@@ -5656,6 +7247,8 @@ function finishEndTurn(s: GameState, p: PlayerId) {
     player.spellEnergy = 0;
     player.spellPower = 0;
     player.gearPower = 0;
+    player.gearPlayPermissions = [];
+    delete player.enemyChoices;
     player.nextSpellBonus = 0;
     player.nextCardEnergyDiscount = 0;
     player.nextCardPowerDiscount = 0;
@@ -5671,7 +7264,7 @@ function finishEndTurn(s: GameState, p: PlayerId) {
     "turn",
     p,
   );
-  beginTurn(s, otherPlayer(p));
+  beginTurn(s, s.extraTurns?.pop() ?? otherPlayer(p));
 }
 function applyActionInternal(
   state: GameState,
@@ -5700,6 +7293,7 @@ function applyActionInternal(
     }
   if (!legal) throw new Error(`Illegal action: ${id}`);
   const s: GameState = structuredClone(state);
+  syncHybridObjects(s);
   const p = legal.player,
     x = s.players[p];
   if (typeof action !== "string" && action.paymentRuneOrder) {
@@ -5712,6 +7306,29 @@ function applyActionInternal(
       throw new Error("Invalid payment preference");
     x.runes.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
   }
+  if (id === "cancel-effect-play") {
+    const choice = s.pendingChoice!;
+    const pending = s.pendingPlays!.find(
+      (item) => item.id === choice.sourceId,
+    )!;
+    s.pendingPlays = s.pendingPlays!.filter((item) => item.id !== pending.id);
+    if (pending.returnZone === "trash")
+      addToTrash(s, pending.spec.zoneOwner ?? pending.player, pending.cardId);
+    else
+      s.players[pending.spec.zoneOwner ?? pending.player][
+        pending.returnZone
+      ].splice(pending.returnIndex, 0, pending.cardId);
+    s.pendingChoice = null;
+    s.phase = choice.returnPhase;
+    s.priorityPlayer = choice.returnPriority;
+    drainTriggers(s);
+    continuePending(s);
+    return s;
+  }
+  if (s.pendingChoice?.kind === "effectPlay" && legal.category === "play") {
+    s.phase = s.pendingChoice.returnPhase;
+    s.pendingChoice = null;
+  }
   if (id.startsWith("move-group:")) {
     s.pendingMove = {
       player: p,
@@ -5721,6 +7338,92 @@ function applyActionInternal(
     };
     s.phase = "move";
     return applyActionInternal(s, "move-confirm");
+  }
+  if (id.startsWith("draft:")) {
+    const choice = s.pendingChoice!,
+      d = choice.effectDraft!;
+    if (id === "draft:done" || id === "draft:cancel") {
+      s.pendingChoice = null;
+      s.phase = choice.returnPhase;
+      s.priorityPlayer = choice.returnPriority;
+      if (id === "draft:cancel") {
+        if (d.retargetId) {
+          s.pendingChoice = choice;
+          resumeChoice(s);
+        } else {
+          drainTriggers(s);
+          continuePending(s);
+        }
+        return s;
+      }
+      const declared = draftAction(d);
+      if (d.retargetId) {
+        const item = s.stack.find((i) => i.id === d.retargetId);
+        if (item) {
+          item.effects = declared.effects!;
+          item.targetId = declared.targetId;
+        }
+        s.pendingChoice = choice;
+        resumeChoice(s);
+        return s;
+      }
+      if (d.trigger) {
+        finalizeTrigger(s, d.trigger, declared);
+        drainTriggers(s);
+        return s;
+      }
+      return applyActionInternal(s, declared, declared);
+    }
+    draftChoose(s, legal);
+    return s;
+  }
+  if (legal.category === "play" && !legal.draftFinalized) {
+    const draft = makeDraft(s, legal);
+    if (draft) {
+      openChoice(s, p, {
+        kind: "effectDraft",
+        cardId: legal.cardId,
+        sourceId: legal.sourceId,
+        locationId: legal.locationId,
+        effectDraft: draft,
+      });
+      return s;
+    }
+  }
+  if (id.startsWith("choose-cost:")) {
+    const choice = s.pendingChoice!,
+      draft = choice.boardSelection!;
+    if (id.startsWith("choose-cost:add:")) {
+      draft.selected.push(legal.targetId!);
+      return s;
+    }
+    if (id.startsWith("choose-cost:remove:")) {
+      draft.selected.splice(draft.selected.indexOf(legal.targetId!), 1);
+      return s;
+    }
+    s.pendingChoice = null;
+    s.phase = choice.returnPhase;
+    s.priorityPlayer = choice.returnPriority;
+    const declared = {
+      ...draft.action!,
+      costSourceId: draft.selected.join("~"),
+      costsFinalized: true,
+    };
+    return applyActionInternal(s, declared, declared);
+  }
+  if (
+    legal.category === "play" &&
+    legal.additionalCostPaid &&
+    !legal.costsFinalized &&
+    getScript(legal.cardId!)?.additionalCost?.board?.multiple
+  ) {
+    openChoice(s, p, {
+      kind: "costTargets",
+      cardId: legal.cardId,
+      sourceId: legal.sourceId,
+      boardSelection: { selected: [], action: legal },
+    });
+    return s;
   }
   if (id.startsWith("choose-board:")) {
     const choice = s.pendingChoice!,
@@ -5749,6 +7452,23 @@ function applyActionInternal(
       ...draft.action,
       targetId: draft.selected.join("~") || undefined,
       locationId: draft.destination ?? draft.action.locationId,
+      effects: (
+        draft.action.effects ??
+        draft.trigger?.effects ??
+        getScript(draft.action.cardId!)?.spell
+      )?.map((e) =>
+        e.group?.distinctLocations
+          ? {
+              ...e,
+              chosenLocations: Object.fromEntries(
+                draft.selected.flatMap((id) => {
+                  const u = s.units.find((u) => u.id === id);
+                  return u ? [[id, u.location]] : [];
+                }),
+              ),
+            }
+          : e,
+      ),
       targetsFinalized: true,
     };
     if (draft.trigger) {
@@ -5791,7 +7511,9 @@ function applyActionInternal(
       legal.effects ??
       (legal.category === "play"
         ? getScript(legal.cardId!)?.spell
-        : getAbilities(s, p, legal.cardId!)[Number(id.split("|")[2])]?.effects);
+        : getAbilities(s, p, legal.cardId!, legal.sourceId)[
+            Number(id.split("|")[2])
+          ]?.effects);
     const hiddenSource = s.hidden?.find(
       (h) => `hidden:${h.id}` === legal.sourceId,
     );
@@ -6007,9 +7729,9 @@ function applyActionInternal(
         choice.discardBatchCount = (choice.discardBatchCount ?? 0) + 1;
         choice.discardBatchCardId ??= cardId;
         choice.lastDiscardEnergy = getCard(cardId).energy ?? 0;
-        choice.lastDiscardType = getCard(cardId).type;
+        choice.lastDiscardType = getCardTypes(getCard(cardId)).join("|");
       } else if (choice.kind === "retrieve") x.hand.push(cardId);
-      else x.deck.push(cardId);
+      else recycleCards(s, p, [cardId]);
       choice.remaining--;
     } else choice.remaining = 0;
     const zone = choice.kind === "discard" ? x.hand : x.discard;
@@ -6036,7 +7758,13 @@ function applyActionInternal(
     return s;
   }
   if (id.startsWith("choose-predict:")) {
-    if (id.endsWith("recycle") && x.deck.length) x.deck.push(x.deck.shift()!);
+    const owner =
+        s.pendingChoice?.effect?.who === "opponent" ? otherPlayer(p) : p,
+      deck = s.players[owner].deck;
+    if (id.endsWith("recycle") && deck.length) {
+      shiftInspectedPositions(s, owner, 0, true);
+      recycleCards(s, owner, [deck.shift()!], p);
+    }
     resumeChoice(s);
     return s;
   }
@@ -6098,15 +7826,24 @@ function applyActionInternal(
   }
   if (id.startsWith("equip:")) {
     const sc = getScript(legal.cardId!)!;
+    x.xp = (x.xp ?? 0) - (sc.equipXP ?? 0);
     const energyCost = payAbility(
       s,
       p,
       legal.sourceId,
       equipEnergy(s, legal.cardId!, legal.targetId!),
       sc.equipCost ?? 0,
-      legal.cardId === "unl-188-219" ? [] : getCard(legal.cardId!).domains,
+      equipDomains(legal.cardId!),
     );
     x.firstGearAbilityTurn = s.turn;
+    if (sc.equipRecycle) {
+      const recycled = (legal.cardIndices ?? []).map((i) => x.discard[i]);
+      for (const i of [...(legal.cardIndices ?? [])].sort((a, b) => b - a))
+        takeTrashAt(s, p, i);
+      recycleCards(s, p, shuffle(s, recycled));
+    }
+    if (sc.equipKillUnit && legal.costSourceId)
+      killUnits(s, [legal.costSourceId]);
     pushStack(s, {
       player: p,
       cardId: legal.cardId!,
@@ -6257,14 +7994,21 @@ function applyActionInternal(
     event(s, "end", p, x.legendId, "legend");
     for (const source of [
       { id: "legend", cardId: x.legendId, location: base(p) },
-      ...s.units.filter((u) => u.owner === p),
+      ...textUnits(s).filter((u) => u.owner === p),
       ...s.gears
         .filter((g) => g.owner === p)
         .map((g) => ({ ...g, location: base(p) })),
     ]) {
       const effects = getScript(source.cardId)?.onEnd;
       if (effects)
-        trigger(s, p, source.cardId, source.id, effects, source.location);
+        trigger(
+          s,
+          p,
+          source.cardId,
+          source.id,
+          textEffects(source, effects),
+          source.location,
+        );
     }
     if (x.legendId === "ogs-017-024" || x.endReadyRunes) {
       s.pendingEndTurn = p;
@@ -6288,6 +8032,9 @@ function applyActionInternal(
     return s;
   }
   if (legal.category === "play") {
+    const instructed = s.pendingPlays?.find(
+      (item) => item.id === legal.sourceId,
+    );
     const c = getCard(legal.cardId!),
       script = getScript(c.id)!;
     const accelerated = id.includes("|accelerate");
@@ -6298,11 +8045,20 @@ function applyActionInternal(
     const hidden = (s.hidden ?? []).find(
       (h) => legal.sourceId === `hidden:${h.id}`,
     );
-    const flowed = legal.sourceId?.startsWith("trash:");
+    const fromTrash = legal.sourceId?.startsWith("trash:");
+    const flowed = fromTrash && !legal.sourceId?.endsWith(":riches");
     if (legal.cardIndices?.length && c.id === "ogn-002-298")
       cost.energy = Math.max(0, cost.energy - 2);
+    if (legal.sourceId?.includes(":jayce:"))
+      x.gearPlayPermissions = x.gearPlayPermissions?.filter(
+        (g) => g.id !== legal.sourceId!.split(":jayce:")[1],
+      );
+    if (legal.additionalCostPaid && script.additionalCost?.exhaustLegend)
+      x.legendUsedTurn = s.turn;
     if (legal.additionalCostPaid)
       x.xp = (x.xp ?? 0) - (script.additionalCost?.xp ?? 0);
+    const costTriggers: Array<() => void> = [];
+    finalizingBoardCostPlay.set(s, costTriggers);
     pay(
       s,
       p,
@@ -6329,8 +8085,11 @@ function applyActionInternal(
     const discarded = legal.cardIndices?.map((i) => x.hand[i]) ?? [];
     if (legal.sourceId === "champion") x.championAvailable = false;
     else if (hidden) s.hidden = s.hidden?.filter((h) => h.id !== hidden.id);
-    else if (flowed) takeTrashAt(s, p, Number(legal.sourceId!.split(":")[1]));
-    else {
+    else if (fromTrash)
+      takeTrashAt(s, p, Number(legal.sourceId!.split(":")[1]));
+    else if (instructed) {
+      /* Already moved to the pending chain during the parent effect. */
+    } else {
       const playedIndex = Number(legal.sourceId!.split(":")[1]);
       x.hand = x.hand.filter(
         (_, i) => i !== playedIndex && !legal.cardIndices?.includes(i),
@@ -6339,9 +8098,12 @@ function applyActionInternal(
     if (legal.cardIndices?.length && !legal.sourceId?.startsWith("hand:"))
       x.hand = x.hand.filter((_, i) => !legal.cardIndices?.includes(i));
     if (discarded.length) discardCards(s, p, discarded);
+    if (legal.additionalCostPaid && script.additionalCost?.board) {
+      payBoardCost(s, p, script, legal.costSourceId!);
+    }
     x.cardsPlayedThisTurn++;
     const playOrdinal = x.cardsPlayedThisTurn;
-    if (c.type === "Spell")
+    if (isCardType(c, "Spell"))
       x.spellsPlayedThisTurn = (x.spellsPlayedThisTurn ?? 0) + 1;
     log(
       s,
@@ -6350,10 +8112,23 @@ function applyActionInternal(
       p,
     );
     s.consecutivePasses = 0;
-    if (c.type === "Unit") {
+    if (isCardType(c, "Unit")) {
+      if (
+        isFace(c.id, "UNL", 147) &&
+        !s.fields.some((f) => f.cardId === "token-baron-pit")
+      ) {
+        s.fields.push({
+          id: "field:2",
+          cardId: "token-baron-pit",
+          controller: null,
+        });
+        legal.locationId = "field:2";
+      }
       const u: Unit = {
         id: uid(s, "u"),
         cardId: c.id,
+        originalOwner: instructed?.spec.zoneOwner,
+        addedTag: legal.namedTag,
         owner: p,
         location: legal.locationId!,
         ready:
@@ -6364,7 +8139,7 @@ function applyActionInternal(
           ) ||
           !!script.keywords?.includes("Enters ready") ||
           s.players[p].unitsEnterReadyTurn === s.turn ||
-          s.units.some((u) => u.owner === p && u.cardId === "ogn-011-298"),
+          textUnits(s).some((u) => u.owner === p && u.cardId === "ogn-011-298"),
         damage: 0,
         buff: 0,
         temporaryMight: 0,
@@ -6384,6 +8159,7 @@ function applyActionInternal(
         p,
       );
       unitPlayed(s, p, u);
+      checkDeaths(s);
       if (
         u.location.startsWith("field:") &&
         s.fields.find((f) => f.id === u.location)?.controller !== p
@@ -6395,24 +8171,45 @@ function applyActionInternal(
           p,
           c.id,
           u.id,
-          annotateEffects(
-            script.onPlay,
-            Boolean(hidden),
-            Boolean(legal.additionalCostPaid),
-            hidden?.location,
+          textEffects(
+            u,
+            annotateEffects(
+              script.onPlay,
+              Boolean(hidden),
+              Boolean(legal.additionalCostPaid),
+              hidden?.location,
+            ),
           ),
           u.location,
         );
-    } else if (c.type === "Gear") {
+    } else if (isCardType(c, "Gear")) {
       const gear = {
         id: uid(s, "g"),
         cardId: c.id,
+        originalOwner: instructed?.spec.zoneOwner,
+        namedTag: legal.namedTag,
         owner: p,
         ready: true,
         temporary: script.keywords?.includes("Temporary") || undefined,
       };
       s.gears.push(gear);
-      if (script.onPlay) trigger(s, p, c.id, gear.id, script.onPlay, base(p));
+      if (script.onPlay)
+        trigger(
+          s,
+          p,
+          c.id,
+          gear.id,
+          textEffects(
+            gear,
+            annotateEffects(
+              script.onPlay,
+              Boolean(hidden),
+              Boolean(legal.additionalCostPaid),
+              hidden?.location,
+            ),
+          ),
+          hidden?.location ?? base(p),
+        );
       if (
         hasQuickDraw(s, p, c, legal.sourceId) &&
         !/\[Quick-Draw\]/.test(c.text)
@@ -6422,22 +8219,28 @@ function applyActionInternal(
           p,
           c.id,
           gear.id,
-          [{ type: "equip", target: "friendlyUnit" }],
+          textEffects(gear, [{ type: "equip", target: "friendlyUnit" }]),
           base(p),
         );
-    } else if (c.type === "Spell") {
-      const spellBonusDamage = x.nextSpellBonus ?? 0;
+    } else if (isCardType(c, "Spell")) {
+      const spellBonusDamage =
+        (x.nextSpellBonus ?? 0) + (instructed?.spec.grenadeHits ?? 0);
       x.nextSpellBonus = 0;
       pushStack(
         s,
         {
           player: p,
           cardId: c.id,
+          originalOwner: instructed?.spec.zoneOwner,
+          declaration: {
+            repeated: legal.repeated,
+            repeatMask: legal.repeatMask,
+          },
           targetId: legal.targetId,
           effects: annotateEffects(
             c.id === "ogn-048-298" && id.includes("|exhaust:")
               ? [{ type: "draw", amount: 2 }]
-              : legal.repeated
+              : legal.repeated && !legal.draftFinalized
                 ? [
                     ...(legal.effects ?? script.spell ?? []).map((e) => ({
                       ...e,
@@ -6460,78 +8263,140 @@ function applyActionInternal(
           ),
           locationId: legal.locationId ?? hidden?.location,
           kind: "spell",
+          grenadeHits: instructed?.spec.grenadeHits,
           ...(spellBonusDamage ? { spellBonusDamage } : {}),
           ...(flowed ? { flowed: true } : {}),
           ...(legal.sourceId?.endsWith(":granted")
             ? { grantedFlow: true }
             : {}),
           fromHidden: Boolean(hidden),
+          recycleOnLeave: instructed?.spec.recycleOnLeave,
           additionalCostPaid: legal.additionalCostPaid,
           playOrdinal,
           energySpent: cost.energy + cost.spellEnergy + (accelerated ? 1 : 0),
-          playSource: hidden ? "hidden" : flowed ? "trash" : "hand",
+          playSource: hidden
+            ? "hidden"
+            : flowed
+              ? "trash"
+              : instructed
+                ? instructed.returnZone === "hand"
+                  ? "hand"
+                  : "effect"
+                : "hand",
         },
-        legal.repeated
-          ? [legal.targetId, legal.repeatedTargetId].flatMap((target) =>
-              target ? [target] : [],
-            )
-          : undefined,
+        legal.draftFinalized
+          ? (legal.targetId ?? "").split("~").filter(Boolean)
+          : legal.repeated
+            ? [legal.targetId, legal.repeatedTargetId].flatMap((target) =>
+                target ? [target] : [],
+              )
+            : undefined,
       );
     }
-    const entered =
-      c.type === "Unit"
-        ? s.units.filter((u) => u.owner === p && u.cardId === c.id).at(-1)
-        : c.type === "Gear"
-          ? s.gears.filter((g) => g.owner === p && g.cardId === c.id).at(-1)
-          : undefined;
+    const entered = isCardType(c, "Unit")
+      ? s.units.filter((u) => u.owner === p && u.cardId === c.id).at(-1)
+      : isCardType(c, "Gear")
+        ? s.gears.filter((g) => g.owner === p && g.cardId === c.id).at(-1)
+        : undefined;
     event(
       s,
       "cardFinalized",
       p,
       c.id,
       entered?.id,
-      c.type === "Unit" ? legal.locationId : base(p),
+      isCardType(c, "Unit") ? legal.locationId : base(p),
       {
         playOrdinal,
         fromHidden: Boolean(hidden),
         paidAdditionalCost: Boolean(legal.additionalCostPaid),
         energySpent: cost.energy + cost.spellEnergy + (accelerated ? 1 : 0),
-        playSource: hidden
-          ? "hidden"
-          : flowed
-            ? "trash"
-            : legal.sourceId === "champion"
-              ? "champion"
-              : "hand",
-      },
-    );
-    if (c.type !== "Spell")
-      cardPlayed(
-        s,
-        p,
-        c.id,
-        entered?.id,
-        c.type === "Unit" ? legal.locationId : base(p),
-        {
-          playOrdinal,
-          fromHidden: Boolean(hidden),
-          paidAdditionalCost: Boolean(legal.additionalCostPaid),
-          energySpent: cost.energy + cost.spellEnergy + (accelerated ? 1 : 0),
-          playSource: hidden
+        playSource: instructed
+          ? instructed.returnZone === "hand"
+            ? "hand"
+            : "effect"
+          : hidden
             ? "hidden"
             : flowed
               ? "trash"
               : legal.sourceId === "champion"
                 ? "champion"
                 : "hand",
+      },
+    );
+    if (!isCardType(c, "Spell"))
+      cardPlayed(
+        s,
+        p,
+        c.id,
+        entered?.id,
+        isCardType(c, "Unit") ? legal.locationId : base(p),
+        {
+          playOrdinal,
+          fromHidden: Boolean(hidden),
+          paidAdditionalCost: Boolean(legal.additionalCostPaid),
+          energySpent: cost.energy + cost.spellEnergy + (accelerated ? 1 : 0),
+          playSource: instructed
+            ? instructed.returnZone === "hand"
+              ? "hand"
+              : "effect"
+            : hidden
+              ? "hidden"
+              : flowed
+                ? "trash"
+                : legal.sourceId === "champion"
+                  ? "champion"
+                  : "hand",
         },
       );
+    if (costTriggers) {
+      checkDeaths(s);
+      finalizingBoardCostPlay.delete(s);
+      for (const finalize of costTriggers) finalize();
+    }
+    if (instructed) {
+      if (entered && instructed.spec.stunAfterPlay)
+        trigger(
+          s,
+          p,
+          c.id,
+          entered.id,
+          textEffects(entered, [{ type: "stun", chosenTargetId: entered.id }]),
+          legal.locationId,
+        );
+      if (entered && instructed.spec.empowerAfterPlay)
+        trigger(
+          s,
+          p,
+          c.id,
+          entered.id,
+          textEffects(entered, [
+            {
+              type: "special",
+              custom: "wave14:empower-played",
+              cardName: entered.id,
+              optional: true,
+            },
+          ]),
+          isCardType(c, "Unit") ? legal.locationId : base(p),
+        );
+      s.pendingPlays = s.pendingPlays!.filter(
+        (item) => item.id !== instructed.id,
+      );
+      if (isCardType(c, "Gear") && entered && instructed.spec.attachToSource) {
+        const unit = s.units.find(
+          (u) => u.id === instructed.spec.sourceId && u.owner === p,
+        );
+        if (unit) runEffects(s, p, [{ type: "equip" }], unit.id, entered.id);
+      }
+      drainTriggers(s);
+      continuePending(s);
+    }
     return s;
   }
   if (legal.category === "ability") {
     const source = legal.sourceId!;
     const index = Number(id.split("|")[2]);
-    const ability = getAbilities(s, p, legal.cardId!)[index];
+    const ability = getAbilities(s, p, legal.cardId!, legal.sourceId)[index];
     const unit = s.units.find((u) => u.id === source);
     const object = unit ?? s.gears.find((g) => g.id === source);
     const energyCost = payAbility(
@@ -6542,6 +8407,8 @@ function applyActionInternal(
       ability.power ?? 0,
       ability.domain ? [ability.domain] : [],
       targetTax(s, p, legal.targetId),
+      legal.flexibleEnergy,
+      ability.label === "Empower",
     );
     if (object && !unit) x.firstGearAbilityTurn = s.turn;
     if (ability.disempowerSelf) {
@@ -6554,12 +8421,17 @@ function applyActionInternal(
       event(s, "spendBuff", p, unit.cardId, unit.id, unit.location);
     }
     if (ability.oncePerTurn && object)
-      (object.usedAbilities ??= []).push(String(index));
+      (object.usedAbilities ??= []).push(ability.instanceKey ?? String(index));
+    if (ability.discard) {
+      const ids = (legal.cardIndices ?? []).map((i) => x.hand[i]);
+      x.hand = x.hand.filter((_, i) => !legal.cardIndices?.includes(i));
+      discardCards(s, p, ids);
+    }
     if (ability.recycleCost) {
       const selected = new Set(legal.cardIndices ?? []);
       const recycled = x.discard.filter((_, i) => selected.has(i));
       for (const i of [...selected].sort((a, b) => b - a)) takeTrashAt(s, p, i);
-      x.deck.push(...shuffle(s, recycled));
+      recycleCards(s, p, shuffle(s, recycled));
     }
     if (ability.exhaust) {
       if (source === "legend") x.legendUsedTurn = s.turn;
@@ -6569,6 +8441,16 @@ function applyActionInternal(
           s.gears.find((g) => g.id === source);
         if (target) target.ready = false;
       }
+    }
+    if (ability.banishSelf && object) {
+      if (!object.token)
+        banishCard(s, physicalOwner(object), physicalCard(object));
+      if (unit) s.units = s.units.filter((u) => u.id !== source);
+      else {
+        detach(s, object as Gear);
+        s.gears = s.gears.filter((g) => g.id !== source);
+      }
+      event(s, "banish", p, object.cardId, source);
     }
     if (ability.sacrificeSelf) {
       if (unit) killUnits(s, [source]);
@@ -6602,6 +8484,8 @@ export function applyAction(
   action: string | GameAction,
 ): GameState {
   const next = applyActionInternal(state, action);
+  syncHybridObjects(next);
+  if (!next.pendingChoice) checkDeaths(next);
   next.revision = (state.revision ?? 0) + 1;
   checkVictory(next);
   if (next.winner !== null) {
@@ -6716,6 +8600,7 @@ export function deserializeGame(raw: string): GameState {
     state.players.length !== 2
   )
     throw new Error("Invalid game save");
+  syncHybridObjects(state);
   return state;
 }
 

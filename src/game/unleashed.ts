@@ -1,3 +1,10 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { isCardType } from "../data/cards";
 import { getCard } from "../data/cards";
 import type {
   CardScript,
@@ -374,19 +381,25 @@ function excess(s: GameState) {
 
 export const unleashedModule: ExpansionModule = {
   might(s, unit, value) {
-    if (
-      unit.cardId === unl(154) &&
-      s.combat?.attacker === unit.owner &&
-      s.combat.fieldId === unit.location &&
-      s.units.some(
-        (u) =>
-          u.id !== unit.id &&
-          u.owner === unit.owner &&
-          u.location === unit.location,
+    for (const textSource of textSources(s, unit)) {
+      const unit = textSource;
+      if (
+        unit.cardId === unl(154) &&
+        s.combat?.attacker === unit.owner &&
+        s.combat.fieldId === unit.location &&
+        s.units.some(
+          (u) =>
+            u.id !== unit.id &&
+            u.owner === unit.owner &&
+            u.location === unit.location,
+        )
       )
-    )
-      value += 2;
-    if (unit.cardId === unl(47) && xp(s, unit.owner) >= 3) value++;
+        value += 2;
+    }
+    for (const textSource of textSources(s, unit)) {
+      const unit = textSource;
+      if (unit.cardId === unl(47) && xp(s, unit.owner) >= 3) value++;
+    }
     if (xp(s, unit.owner) >= 3) value += attached(s, unit, unl(39));
     if (s.combat?.attacker === unit.owner && s.combat.fieldId === unit.location)
       value += attached(s, unit, "sfd-009-221") * 2;
@@ -394,10 +407,13 @@ export const unleashedModule: ExpansionModule = {
   },
   keywords(s, unit) {
     const result: string[] = [];
-    if (unit.cardId === unl(47) && xp(s, unit.owner) >= 3)
-      result.push("Deflect");
+    for (const textSource of textSources(s, unit)) {
+      const unit = textSource;
+      if (unit.cardId === unl(47) && xp(s, unit.owner) >= 3)
+        result.push("Deflect");
+    }
     if (unit.location.startsWith("field:")) {
-      const auras = s.units.filter(
+      const auras = textUnits(s).filter(
         (u) =>
           u.id !== unit.id &&
           u.owner === unit.owner &&
@@ -412,8 +428,8 @@ export const unleashedModule: ExpansionModule = {
   cost(s, p, card) {
     if (card.id === unl(35) && s.units.some((u) => u.owner !== p && u.stunned))
       return { energy: -2 };
-    if (card.type === "Spell" && s.combat) {
-      const vexes = s.units.filter(
+    if (isCardType(card, "Spell") && s.combat) {
+      const vexes = textUnits(s).filter(
         (u) => u.cardId === "sfd-146-221" && u.location === s.combat!.fieldId,
       );
       const delta = vexes.reduce(
@@ -437,7 +453,7 @@ export const unleashedModule: ExpansionModule = {
     if (!e.custom?.startsWith("unl:")) return false;
     const key = e.custom.slice(4);
     const unit = s.units.find((u) => u.id === (ctx.targetId ?? e.cardName));
-    const source = s.units.find((u) => u.id === ctx.sourceId);
+    const source = abilityUnit(s, ctx.sourceId, ctx.abilityInstance);
     const data = state(s);
     switch (key) {
       case "scryer-enter": {
@@ -446,7 +462,7 @@ export const unleashedModule: ExpansionModule = {
         break;
       }
       case "predict-two": {
-        const viewed = s.players[p].deck.slice(0, 2);
+        const viewed = s.players[p].deck.slice(0, e.lookCount ?? 2);
         const orders =
           viewed.length === 2
             ? [[0, 1], [1, 0], [0], [1], []]
@@ -871,13 +887,16 @@ export const unleashedModule: ExpansionModule = {
       );
     }
     if (event === "unitPlayed" && unit) {
-      if (
-        (unit.cardId === unl(35) &&
-          s.units.some((u) => u.owner !== p && u.stunned)) ||
-        (unit.cardId === unl(8) && data.diedTurn === s.turn) ||
-        (unit.cardId === unl(194) && unit.location.startsWith("field:"))
-      )
-        unit.ready = true;
+      for (const textSource of textSources(s, unit)) {
+        const unit = textSource;
+        if (
+          (unit.cardId === unl(35) &&
+            s.units.some((u) => u.owner !== p && u.stunned)) ||
+          (unit.cardId === unl(8) && data.diedTurn === s.turn) ||
+          (unit.cardId === unl(194) && unit.location.startsWith("field:"))
+        )
+          unit.ready = true;
+      }
       if (data.nami[p] === s.turn) {
         delete data.nami[p];
         unit.ready = true;
@@ -888,7 +907,7 @@ export const unleashedModule: ExpansionModule = {
           unit.id,
         );
       }
-      for (const vex of s.units.filter(
+      for (const vex of textUnits(s).filter(
         (u) =>
           u.owner !== p &&
           u.cardId === unl(150) &&
@@ -899,7 +918,7 @@ export const unleashedModule: ExpansionModule = {
           vex.owner,
           vex.cardId,
           vex.id,
-          [special("apathetic", { cardName: unit.id })],
+          textEffects(vex, [special("apathetic", { cardName: unit.id })]),
           unit.location,
         );
       const field = s.fields.find((f) => f.id === unit.location);
@@ -931,7 +950,7 @@ export const unleashedModule: ExpansionModule = {
       if (s.fields.find((f) => f.id === locationId)?.cardId === unl(207))
         trigger(s, p, unl(207), locationId!, "amateur", ctx, locationId);
       if (
-        s.units.some(
+        textUnits(s).some(
           (u) =>
             u.owner === p && u.cardId === unl(52) && u.location === locationId,
         )
@@ -959,7 +978,7 @@ export const unleashedModule: ExpansionModule = {
       unit.owner !== p &&
       unit.location.startsWith("field:")
     )
-      for (const vex of s.units.filter(
+      for (const vex of textUnits(s).filter(
         (u) =>
           u.owner === p && u.cardId === unl(55) && u.location !== unit.location,
       ))
@@ -973,7 +992,7 @@ export const unleashedModule: ExpansionModule = {
           p,
           gear.cardId,
           gear.id,
-          [special("blast-cone", { cardName: unit.id })],
+          textEffects(gear, [special("blast-cone", { cardName: unit.id })]),
           unit.location,
         );
     if (

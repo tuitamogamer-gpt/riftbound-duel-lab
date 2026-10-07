@@ -1,3 +1,17 @@
+import { textEffects } from "./text-sources";
+import { cardWave25Module } from "./card-wave25";
+import { cardWave24Module } from "./card-wave24";
+import { cardWave23Module } from "./card-wave23";
+import { cardWave22Module } from "./card-wave22";
+import { cardWave21Module } from "./card-wave21";
+import { cardWave20Module } from "./card-wave20";
+import { cardWave19Module } from "./card-wave19";
+import { cardWave18Module } from "./card-wave18";
+import { cardWave17Module } from "./card-wave17";
+import { cardWave16Module } from "./card-wave16";
+import { cardWave15Module } from "./card-wave15";
+import { cardWave14Module } from "./card-wave14";
+import { cardWave13Module } from "./card-wave13";
 import { cardWave6Module } from "./card-wave6";
 import { cardWave7Module } from "./card-wave7";
 import { cardWave8Module } from "./card-wave8";
@@ -29,6 +43,20 @@ import type {
   Unit,
 } from "./types";
 export interface PreconContext {
+  abilityInstance?: string;
+  bonusDamage?: (s: GameState, p: PlayerId) => number;
+  resolvedSpell?: StackItem;
+  spellTrashId?: string;
+  commitDeaths?: (
+    s: GameState,
+    ids: string[],
+    actor?: PlayerId,
+    spellId?: string,
+    credited?: string[],
+    delayedSpell?: string,
+  ) => void;
+  takeSpell?: (s: GameState, p: PlayerId, id: string) => void;
+  killer?: PlayerId;
   playSource?: "hand" | "champion" | "hidden" | "trash" | "effect";
   abilityEnergyCost?: number;
   readyForbidden?: (s: GameState, owner: PlayerId) => boolean;
@@ -87,8 +115,8 @@ export interface PreconContext {
     name: string,
     location: LocationId,
     ready?: boolean,
-  ) => void;
-  killUnits: (s: GameState, ids: string[]) => void;
+  ) => Unit | undefined;
+  killUnits: (s: GameState, ids: string[], delayedSpell?: string) => void;
   getMight: (s: GameState, u: Unit, clamp?: boolean) => number;
   canTargetUnit?: (s: GameState, p: PlayerId, u: Unit) => boolean;
   channel: (s: GameState, p: PlayerId, count: number, ready?: boolean) => void;
@@ -114,7 +142,12 @@ export interface PreconContext {
     card: Card,
     targetId?: string,
   ) => { energy: number; power: number; extraPower: number };
-  dealDamage: (s: GameState, u: Unit, amount: number) => void;
+  dealDamage: (
+    s: GameState,
+    u: Unit,
+    amount: number,
+    unitDamage?: boolean,
+  ) => void;
   playUnit: (
     s: GameState,
     p: PlayerId,
@@ -143,6 +176,10 @@ export interface PreconContext {
   ) => void;
 }
 export type PreconEvent =
+  | "recycleCards"
+  | "recycleRunes"
+  | "spellResolved"
+  | "reveal"
   | "abilityActivated"
   | "discardBatch"
   | "attack"
@@ -172,7 +209,8 @@ export type PreconEvent =
   | "buff"
   | "main"
   | "bounce"
-  | "stateChanged";
+  | "stateChanged"
+  | "spellKill";
 export interface ExpansionModule {
   might?: (s: GameState, u: Unit, value: number) => number;
   keywords?: (s: GameState, u: Unit) => string[];
@@ -222,6 +260,19 @@ function modules(): ExpansionModule[] {
     cardWave7Module,
     cardWave8Module,
     cardWave9Module,
+    cardWave13Module,
+    cardWave14Module,
+    cardWave15Module,
+    cardWave16Module,
+    cardWave17Module,
+    cardWave18Module,
+    cardWave19Module,
+    cardWave20Module,
+    cardWave21Module,
+    cardWave22Module,
+    cardWave23Module,
+    cardWave24Module,
+    cardWave25Module,
   ];
 }
 export function laterMight(s: GameState, u: Unit, value: number) {
@@ -254,6 +305,24 @@ export function runLaterEffect(
   e: Effect,
   ctx: PreconContext,
 ) {
+  if (e.abilityInstance) {
+    const base = ctx,
+      instance = { id: ctx.sourceId ?? "", abilityInstance: e.abilityInstance };
+    ctx = {
+      ...ctx,
+      abilityInstance: e.abilityInstance,
+      runEffects: (state, player, effects, ...rest) =>
+        base.runEffects(state, player, textEffects(instance, effects), ...rest),
+      openChoice: (state, player, choice) =>
+        base.openChoice(state, player, {
+          ...choice,
+          options: choice.options?.map((a) => ({
+            ...a,
+            effects: a.effects ? textEffects(instance, a.effects) : a.effects,
+          })),
+        }),
+    };
+  }
   return modules().some((m) => m.effect?.(s, p, e, ctx));
 }
 export function laterCardEvent(

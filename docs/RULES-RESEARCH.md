@@ -1,5 +1,21 @@
 # Riftbound rules research
 
+## Next 100 catalog entries — 7 October 2026
+
+The [100-entry source ledger](IMPORT-100-SOURCES.md) records the exact imported IDs and current official references. The shared effect-directed play pipeline separates parent resolution from child finalization, preserves mandatory taxes and additional costs, and retains physical trash-card identities. Wave-specific checks cover private choices, revealed cards, extra turns, delayed effects, tag selection, upfront targets, leading costs, unit damage and leave-chain replacements. Explicitly reviewed print variants retain their original metadata; automatic matching still requires full gameplay identity. Unsupported hybrid cards and unimplemented death replacements remain blocked.
+
+## Twelfth-wave additional-cost checks — 7 October 2026
+
+The [Rules Hub](https://playriftbound.com/en-us/rules-hub/) still lists the 16 July 2026 Core Rules. The current PDF was downloaded and extracted locally for paragraphs 203 and 355–359; the [source ledger](CARD-WAVE12-SOURCES.md) records their application to five cards. Tests separate cost objects from spell targets, optional from mandatory costs, base-cost waivers from taxes, and paid costs from later effects. They also cover replacement deaths, token cleanup, exact physical copies, deferred cost triggers, Power-dependent Might, counters and persistence. Provider text remains unchanged.
+
+## Eleventh-wave Equipment checks — 7 October 2026
+
+The [eleventh-wave source ledger](EQUIPMENT-WAVE11-SOURCES.md) records six inspected official attachment panels and the Spiritforged FAQ correction for Edge of Night. Tests distinguish Quick-Draw from Hidden-only attachment, chosen targets from area effects, printed costs from universal Equip Power, continuous nearby keywords from permanent grants, and XP costs from Weaponmaster's Power reduction. The source catalog is unchanged.
+
+## Tenth-wave Equipment checks — 7 October 2026
+
+The [Equipment source ledger](EQUIPMENT-WAVE10-SOURCES.md) links all 13 inspected official card images and records their missing attachment panels. Tests cover inherited trigger ownership, independent instances, live-source location, declared targets, Deflect, conditional Might, domain-specific versus universal Equip costs, attached Temporary lifetime and persistence. Original provider text is preserved and unsupported Equipment is still rejected.
+
 Verified on 2026-10-02. This is an implementation brief, not a reproduction of the rulebook. The current official core rules are dated **2026-07-16**; the later **2026-08-14 Vendetta FAQ** prevails where it explicitly corrects them. The Rules Hub lists constructed bans updated **2026-09-18**. A complete implementation must treat card text, official errata, and current FAQ rulings as authoritative over ordinary rules.
 
 ## Ninth-wave implementation checks — 6 October 2026
@@ -213,3 +229,7 @@ Rules Hub, updated 2026-09-18, bans these cards in sanctioned constructed: Calle
 This research establishes rules, not implemented coverage. The app must report its actual scripted card/keyword support. A card catalog containing every card is different from every card being playable with its complete effects. Especially significant remaining engineering work for broad coverage includes: triggered-ability choices/ordering; replacement-effect layering; temporary control; equipment attachment; hidden cards; counters; modal choices; split targets; copy/transform; XP/Level/Hunt; empower and flow; current card errata; battlefield-specific abilities; and interaction with newly released sets.
 
 Avoid generic text parsing that silently treats unknown effects as blank cards. If a fixed scripted pool is used, validate every selected card against that pool, present that scope clearly, and keep unsupported catalog cards out of playable decks until implemented.
+
+## Final 107 catalog printings — 7 October 2026
+
+The [final source ledger](IMPORT-107-SOURCES.md) records waves sixteen through twenty-six, covering the remaining 107 provider printings, including hybrid Patched Porobot, copied equipment text, multi-target spells, replacement effects and selected-card reveal triggers. Registry coverage now reports zero unsupported entries; see [validation evidence](VALIDATION.md) for the completed targeted checks and the intentionally interrupted full-suite run.

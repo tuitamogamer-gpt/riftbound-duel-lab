@@ -1,9 +1,18 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { repeatPrices } from "./card-wave23";
+import { isCardType } from "../data/cards";
+import { ruleFamily } from "./rule-families";
 import { getCard, type Card } from "../data/cards";
 import { canonicalCardName } from "../data/card-identity";
 import type { CardScript, GameState, LocationId, PlayerId } from "./types";
 
 export const isFace = (id: string, set: string, number: number) => {
-  const card = getCard(id);
+  const card = getCard(ruleFamily(id));
   return card.set === set && card.collectorNumber === number;
 };
 export function playerTurnNumber(s: GameState, p: PlayerId) {
@@ -22,10 +31,10 @@ export function canPlayCard(
 ) {
   if (!token && s.players[p].cannotPlayCardsTurn === s.turn) return false;
   if (
-    card.type === "Unit" &&
+    isCardType(card, "Unit") &&
     location &&
     location !== `base:${p}` &&
-    s.units.some(
+    textUnits(s).some(
       (u) =>
         u.owner !== p &&
         isFace(u.cardId, "OGN", 70) &&
@@ -33,11 +42,11 @@ export function canPlayCard(
     )
   )
     return false;
-  if (card.type === "Spell" && s.players[p].cannotPlaySpellsTurn === s.turn)
+  if (isCardType(card, "Spell") && s.players[p].cannotPlaySpellsTurn === s.turn)
     return false;
   if (
-    card.type === "Spell" &&
-    s.units.some(
+    isCardType(card, "Spell") &&
+    textUnits(s).some(
       (u) =>
         u.owner !== p &&
         isFace(u.cardId, "VEN", 132) &&
@@ -48,7 +57,7 @@ export function canPlayCard(
     return false;
   if (isFace(card.id, "VEN", 29) && playerTurnNumber(s, p) <= 3) return false;
   if (
-    card.type === "Unit" &&
+    isCardType(card, "Unit") &&
     location &&
     s.fields.some((f) => f.id === location && isFace(f.cardId, "SFD", 216))
   )
@@ -56,7 +65,7 @@ export function canPlayCard(
   return true;
 }
 export function readyForbidden(s: GameState, owner: PlayerId) {
-  return s.units.some(
+  return textUnits(s).some(
     (u) =>
       u.owner !== owner &&
       isFace(u.cardId, "OGN", 70) &&
@@ -83,13 +92,22 @@ export function hasQuickDraw(
   source?: string,
 ) {
   return (
-    card.type === "Gear" &&
+    isCardType(card, "Gear") &&
     card.tags.includes("Equipment") &&
-    !!source?.startsWith("hand:") &&
-    s.units.some((u) => u.owner === p && isFace(u.cardId, "SFD", 54))
+    (!!source?.startsWith("hand:") ||
+      s.pendingPlays?.some(
+        (play) => play.id === source && play.returnZone === "hand",
+      )) &&
+    textUnits(s).some((u) => u.owner === p && isFace(u.cardId, "SFD", 54))
   );
 }
-export function repeatCost(s: GameState, p: PlayerId, script: CardScript) {
+export function repeatCost(
+  s: GameState,
+  p: PlayerId,
+  script: CardScript,
+  cardId?: string,
+) {
+  if (cardId) return repeatPrices(s, p, cardId, script)[0];
   const cost = script.repeat;
   if (!cost) return undefined;
   return {
@@ -103,3 +121,13 @@ export function repeatCost(s: GameState, p: PlayerId, script: CardScript) {
     ),
   };
 }
+
+export const getUnitTags = (u: {
+  cardId: string;
+  addedTag?: string;
+  grantedTags?: { tag: string }[];
+}) => [
+  ...getCard(u.cardId).tags,
+  ...(u.addedTag ? [u.addedTag] : []),
+  ...(u.grantedTags?.map((t) => t.tag) ?? []),
+];

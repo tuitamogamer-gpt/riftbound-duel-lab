@@ -1,3 +1,4 @@
+import { isCardType, getCard } from "./data/cards";
 import type { GameState } from "./game/types";
 import type { Review } from "./components/StepFlow";
 import { cardsById } from "./data/cards";
@@ -34,11 +35,52 @@ const phase = (x: unknown) =>
     "ended",
   ].includes(x as string);
 const location = (x: unknown) =>
-  ["base:0", "base:1", "field:0", "field:1"].includes(x as string);
-const field = (x: unknown) => x === "field:0" || x === "field:1";
+  ["base:0", "base:1", "field:0", "field:1", "field:2"].includes(x as string);
+const field = (x: unknown) =>
+  x === "field:0" || x === "field:1" || x === "field:2";
 const domain = (x: unknown) =>
   ["Fury", "Calm", "Mind", "Body", "Chaos", "Order"].includes(x as string);
+const cardPlaySpec = (x: unknown): boolean =>
+  isObject(x) &&
+  ["hand", "trash", "top", "banished", "blink"].includes(x.zone) &&
+  [
+    "optional",
+    "hiddenOnly",
+    "empowerAfterPlay",
+    "untilUnit",
+    "ignoreCost",
+    "ignoreEnergy",
+    "alternativeHere",
+    "recycleOnLeave",
+    "unplayedToHand",
+    "attachToSource",
+    "revealed",
+  ].every((k) => optionalBoolean(x[k])) &&
+  [
+    "maxEnergy",
+    "maxPower",
+    "maxMight",
+    "count",
+    "energyReduction",
+    "powerOverride",
+  ].every((k) => optionalCount(x[k])) &&
+  (x.cardTypes === undefined ||
+    (stringArray(x.cardTypes) &&
+      x.cardTypes.every((t) => ["Unit", "Gear", "Spell"].includes(t)))) &&
+  (x.cardTags === undefined || stringArray(x.cardTags)) &&
+  (x.destination === undefined ||
+    [
+      "normal",
+      "base",
+      "here",
+      "controlledBattlefield",
+      "anyBattlefield",
+    ].includes(x.destination)) &&
+  optionalString(x.sourceRef) &&
+  optionalString(x.sourceId) &&
+  (x.locationId === undefined || location(x.locationId));
 const effectTypes = new Set([
+  "playCard",
   "draw",
   "damage",
   "heal",
@@ -79,6 +121,13 @@ const effectTypes = new Set([
   "special",
 ]);
 const targetFilters = new Set([
+  "relentlessMove",
+  "shurikenMove",
+  "friendlyAndEnemyBattlefield",
+  "empowerObject",
+  "enemyAndOptionalFriendly",
+  "friendlyAndOptionalEnemy",
+  "enemyMoveDestination",
   "boardCards",
   "enemyChainItemChoosingFriendly",
   "friendlyUnitAndEnemyChainItem",
@@ -149,6 +198,8 @@ const effects = (x: unknown, depth = 0): boolean =>
     (e) =>
       isObject(e) &&
       effectTypes.has(e.type) &&
+      (e.play === undefined || cardPlaySpec(e.play)) &&
+      (e.type !== "playCard" || cardPlaySpec(e.play)) &&
       (e.target === undefined || targetFilters.has(e.target)) &&
       ["amount", "minMight", "maxMight", "maxEnergy", "maxPower"].every(
         (k) => e[k] === undefined || finite(e[k]),
@@ -162,7 +213,7 @@ const effects = (x: unknown, depth = 0): boolean =>
           ) &&
           optionalCount(e.group.totalMight) &&
           (e.group.destination === undefined ||
-            ["any", "here", "base"].includes(e.group.destination)))) &&
+            ["any", "here", "base", "open"].includes(e.group.destination)))) &&
       (e.cardTypes === undefined ||
         (stringArray(e.cardTypes) &&
           e.cardTypes.every((type) =>
@@ -204,9 +255,13 @@ const effects = (x: unknown, depth = 0): boolean =>
         ["base", "target", "here"].includes(e.location)) &&
       (e.triggerCost === undefined ||
         (isObject(e.triggerCost) &&
-          ["energy", "power", "xp", "recycleCost"].every((key) =>
+          ["energy", "power", "xp", "recycleCost", "discard"].every((key) =>
             optionalCount(e.triggerCost[key]),
           ) &&
+          (e.triggerCost.board === undefined ||
+            ["killUnitHere", "returnUnitHere", "disempower"].includes(
+              e.triggerCost.board,
+            )) &&
           optionalString(e.triggerCost.domain) &&
           optionalBoolean(e.triggerCost.exhaust) &&
           optionalBoolean(e.triggerCost.recycleSelf) &&
@@ -251,6 +306,7 @@ const validUnit = (u: unknown): boolean =>
     "combatShield",
     "empowerCount",
     "damageTakenTurn",
+    "recallOnConquerTurn",
   ].every((k) => optionalCount(u[k])) &&
   [
     "empowered",
@@ -261,6 +317,7 @@ const validUnit = (u: unknown): boolean =>
     "temporary",
     "token",
   ].every((k) => optionalBoolean(u[k])) &&
+  optionalString(u.addedTag) &&
   (u.temporaryKeywords === undefined || stringArray(u.temporaryKeywords)) &&
   (u.usedAbilities === undefined || stringArray(u.usedAbilities));
 const validStackItem = (s: unknown): boolean =>
@@ -282,6 +339,7 @@ const validStackItem = (s: unknown): boolean =>
   ["flowed", "grantedFlow", "fromHidden", "additionalCostPaid"].every((k) =>
     optionalBoolean(s[k]),
   ) &&
+  optionalBoolean(s.recycleOnLeave) &&
   (s.sourceSnapshot === undefined || validUnit(s.sourceSnapshot));
 const combat = (x: unknown): boolean =>
   isObject(x) &&
@@ -384,6 +442,9 @@ const choice = (x: unknown): boolean =>
     "custom",
     "trashTargets",
     "boardTargets",
+    "effectPlay",
+    "effectDraft",
+    "costTargets",
   ].includes(x.kind) &&
   count(x.remaining) &&
   phase(x.returnPhase) &&
@@ -395,8 +456,9 @@ const choice = (x: unknown): boolean =>
   (x.boardSelection === undefined ||
     (isObject(x.boardSelection) &&
       stringArray(x.boardSelection.selected) &&
-      new Set(x.boardSelection.selected).size ===
-        x.boardSelection.selected.length &&
+      (x.kind === "costTargets" ||
+        new Set(x.boardSelection.selected).size ===
+          x.boardSelection.selected.length) &&
       (x.boardSelection.action === undefined ||
         validAction(x.boardSelection.action)) &&
       (x.boardSelection.allowedIds === undefined ||
@@ -416,6 +478,35 @@ const choice = (x: unknown): boolean =>
         x.boardSelection.allowedIds !== undefined))) &&
   (x.kind !== "boardTargets" ||
     (isObject(x.boardSelection) && x.effect?.target === "boardCards")) &&
+  (x.kind !== "costTargets" ||
+    (isObject(x.boardSelection) && validAction(x.boardSelection.action))) &&
+  (x.kind !== "effectDraft" ||
+    (isObject(x.effectDraft) &&
+      validAction(x.effectDraft.action) &&
+      Array.isArray(x.effectDraft.steps) &&
+      x.effectDraft.steps.every(
+        (step: any) =>
+          isObject(step) &&
+          ((step.effects !== undefined && effects(step.effects)) ||
+            (Array.isArray(step.modes) &&
+              step.modes.every(
+                (m: any) =>
+                  isObject(m) &&
+                  typeof m.label === "string" &&
+                  effects(m.effects),
+              ))),
+      ) &&
+      Array.isArray(x.effectDraft.chosen) &&
+      x.effectDraft.chosen.every(effects) &&
+      x.effectDraft.chosen.length <= x.effectDraft.steps.length &&
+      stringArray(x.effectDraft.targets) &&
+      x.effectDraft.targets.length === x.effectDraft.chosen.length &&
+      Array.isArray(x.effectDraft.modes) &&
+      x.effectDraft.modes.every((n: any) => Number.isInteger(n) && n >= -1) &&
+      x.effectDraft.modes.length === x.effectDraft.chosen.length &&
+      stringArray(x.effectDraft.selected) &&
+      new Set(x.effectDraft.selected).size === x.effectDraft.selected.length &&
+      optionalCount(x.effectDraft.activeMode))) &&
   optionalCount(x.discardBatchCount) &&
   (x.discardBatchCardId === undefined || cardId(x.discardBatchCardId)) &&
   (x.trashSelection === undefined ||
@@ -485,7 +576,7 @@ export function validState(x: unknown, actionable = true): x is GameState {
     !Array.isArray(x.players) ||
     x.players.length !== 2 ||
     !Array.isArray(x.fields) ||
-    x.fields.length !== 2 ||
+    (x.fields.length !== 2 && x.fields.length !== 3) ||
     !Array.isArray(x.units) ||
     !Array.isArray(x.gears) ||
     !Array.isArray(x.stack) ||
@@ -540,7 +631,7 @@ export function validState(x: unknown, actionable = true): x is GameState {
         ["scoredFieldsThisTurn", "conqueredThisTurn"].every(
           (k) =>
             Array.isArray(p[k]) &&
-            p[k].every((n: unknown) => n === 0 || n === 1),
+            p[k].every((n: unknown) => n === 0 || n === 1 || n === 2),
         ) &&
         Array.isArray(p.runeDeck) &&
         p.runeDeck.every(domain) &&
@@ -583,6 +674,17 @@ export function validState(x: unknown, actionable = true): x is GameState {
           "firstGearPlayedTurn",
           "freeHideTurn",
         ].every((k) => optionalCount(p[k])) &&
+        (p.gearPlayPermissions === undefined ||
+          (Array.isArray(p.gearPlayPermissions) &&
+            p.gearPlayPermissions.length <= 1000 &&
+            p.gearPlayPermissions.every(
+              (v: unknown) =>
+                isObject(v) && typeof v.id === "string" && count(v.turn),
+            ))) &&
+        (p.enemyChoices === undefined ||
+          (isObject(p.enemyChoices) &&
+            count(p.enemyChoices.turn) &&
+            count(p.enemyChoices.count))) &&
         (p.grantedFlow === undefined ||
           (Array.isArray(p.grantedFlow) &&
             p.grantedFlow.every(
@@ -619,8 +721,10 @@ export function validState(x: unknown, actionable = true): x is GameState {
         typeof g.id === "string" &&
         playerId(g.owner) &&
         typeof g.ready === "boolean" &&
+        optionalString(g.namedTag) &&
         optionalString(g.attachedTo) &&
-        cardsById[g.cardId].type === "Gear" &&
+        optionalCount(g.attachedTurn) &&
+        isCardType(cardsById[g.cardId], "Gear") &&
         ["token", "temporary", "empowered"].every((k) =>
           optionalBoolean(g[k]),
         ) &&
@@ -677,6 +781,40 @@ export function validState(x: unknown, actionable = true): x is GameState {
     (x.combat !== null && !combat(x.combat)) ||
     (x.pendingMove !== null && !move(x.pendingMove)) ||
     (x.pendingChoice !== null && !choice(x.pendingChoice)) ||
+    (x.extraTurns !== undefined &&
+      (!Array.isArray(x.extraTurns) ||
+        x.extraTurns.length > 1000 ||
+        !x.extraTurns.every(playerId))) ||
+    (x.endDisempowers !== undefined &&
+      (!Array.isArray(x.endDisempowers) ||
+        x.endDisempowers.length > 1000 ||
+        !x.endDisempowers.every(
+          (d: unknown) =>
+            isObject(d) &&
+            typeof d.id === "string" &&
+            playerId(d.player) &&
+            count(d.turn),
+        ))) ||
+    (x.pendingPlays !== undefined &&
+      (!Array.isArray(x.pendingPlays) ||
+        x.pendingPlays.length > 1000 ||
+        !x.pendingPlays.every(
+          (item: unknown) =>
+            isObject(item) &&
+            typeof item.id === "string" &&
+            item.id.startsWith("pending:") &&
+            cardId(item.cardId) &&
+            playerId(item.player) &&
+            ["hand", "trash", "banished"].includes(item.returnZone) &&
+            count(item.returnIndex) &&
+            cardPlaySpec(item.spec),
+        ))) ||
+    (x.pendingChoice?.kind === "effectPlay" &&
+      !x.pendingPlays?.some(
+        (item: any) =>
+          item.id === x.pendingChoice.sourceId &&
+          item.player === x.pendingChoice.player,
+      )) ||
     (x.pendingTriggers !== undefined &&
       (!Array.isArray(x.pendingTriggers) ||
         !x.pendingTriggers.every(
@@ -708,9 +846,19 @@ export function validState(x: unknown, actionable = true): x is GameState {
       ...(x.resolving ?? []),
       ...(x.resolvingAbilities ?? []),
     ].map((item: { id: string }) => item.id);
-    const boardIds = [...x.units, ...x.gears, ...(x.hidden ?? [])].map(
-      (item: { id: string }) => item.id,
-    );
+    const boardIds = [
+      ...x.units,
+      ...x.gears.filter(
+        (g: any) =>
+          !x.units.some(
+            (u: any) =>
+              u.id === g.id &&
+              u.cardId === g.cardId &&
+              isCardType(getCard(u.cardId), "Gear"),
+          ),
+      ),
+      ...(x.hidden ?? []),
+    ].map((item: { id: string }) => item.id);
     if (
       new Set(stackIds).size !== stackIds.length ||
       new Set(boardIds).size !== boardIds.length
@@ -774,6 +922,9 @@ function validAction(x: unknown): boolean {
     optionalString(x.targetId) &&
     optionalString(x.repeatedTargetId) &&
     optionalString(x.abilityKey) &&
+    optionalString(x.costSourceId) &&
+    optionalString(x.namedTag) &&
+    (x.dragonRoost === undefined || field(x.dragonRoost)) &&
     optionalString(x.detail) &&
     optionalBoolean(x.repeated) &&
     optionalBoolean(x.additionalCostPaid) &&

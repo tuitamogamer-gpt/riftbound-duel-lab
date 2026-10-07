@@ -1,3 +1,4 @@
+import { isCardType } from "../data/cards";
 import { findCard } from "../catalog";
 import type { CatalogCard } from "../catalog";
 import type { Review } from "../components/StepFlow";
@@ -170,7 +171,7 @@ export function getActionStackView(game: GameState, review: Review | null) {
       player: review!.action.player,
       kind: "play",
       status: "playing",
-      response: playedCard.type === "Spell" && !!visible.stack.length,
+      response: isCardType(playedCard, "Spell") && !!visible.stack.length,
       entering: review!.index === 0,
     });
 

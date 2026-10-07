@@ -254,6 +254,33 @@ const englishMessages: [string, string, string][] = [
   ],
   // Specific extensions keep composited actions recursively translatable.
   [
+    "{action} · spend a buff from {card}",
+    "{action} · potroši buff sa {card}",
+    "{action} · spendi un buff da {card}",
+  ],
+  [
+    "{action} · return to hand {card}",
+    "{action} · vrati u ruku {card}",
+    "{action} · riprendi in mano {card}",
+  ],
+  [
+    "{action} · kill {card}",
+    "{action} · ubij {card}",
+    "{action} · uccidi {card}",
+  ],
+  [
+    "Additional cost: {cost}.",
+    "Dodatni trošak: {cost}.",
+    "Costo aggiuntivo: {cost}.",
+  ],
+  [
+    "spend a buff from {card}",
+    "potroši buff sa {card}",
+    "spendi un buff da {card}",
+  ],
+  ["return to hand {card}", "vrati u ruku {card}", "riprendi in mano {card}"],
+  ["kill {card}", "ubij {card}", "uccidi {card}"],
+  [
     "{action} · additional cost (discard {card})",
     "{action} · dodatni trošak (odbaci {card})",
     "{action} · costo aggiuntivo (scarta {card})",

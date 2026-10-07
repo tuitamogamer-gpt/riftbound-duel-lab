@@ -1,3 +1,11 @@
+import {
+  textSources,
+  textUnits,
+  textEffects,
+  abilityUnit,
+} from "./text-sources";
+import { recycleCards, recycleRunes } from "./zone-events";
+import { isCardType } from "../data/cards";
 import { cards, getCard } from "../data/cards";
 import { isFace } from "./board-rules";
 import type { ExpansionModule } from "./later-precon-engine";
@@ -219,26 +227,41 @@ export const cardWave7Scripts: Record<string, CardScript> = {
 
 export const cardWave7Module: ExpansionModule = {
   might(s, u, value) {
-    if (isFace(u.cardId, "OGN", 109))
-      value += s.players[u.owner].discard.length;
-    if (
-      isFace(u.cardId, "SFD", 143) &&
-      (s.players[u.owner].powerSpentThisTurn ?? 0) >= 2
-    )
-      value += 2;
-    if (isFace(u.cardId, "VEN", 134))
-      value += 2 * (u.empowerCount ?? Number(!!u.empowered));
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (isFace(u.cardId, "OGN", 109))
+        value += s.players[u.owner].discard.length;
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (
+        isFace(u.cardId, "SFD", 143) &&
+        (s.players[u.owner].powerSpentThisTurn ?? 0) >= 2
+      )
+        value += 2;
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (isFace(u.cardId, "VEN", 134))
+        value += 2 * (u.empowerCount ?? Number(!!u.empowered));
+    }
     return value;
   },
   keywords(s, u) {
     const result: string[] = [];
-    if (
-      isFace(u.cardId, "SFD", 143) &&
-      (s.players[u.owner].powerSpentThisTurn ?? 0) >= 2
-    )
-      result.push("Ganking");
-    if (isFace(u.cardId, "VEN", 134) && u.empowerCount === 3)
-      result.push("Deflect 3", "Ganking");
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (
+        isFace(u.cardId, "SFD", 143) &&
+        (s.players[u.owner].powerSpentThisTurn ?? 0) >= 2
+      )
+        result.push("Ganking");
+    }
+    for (const textSource of textSources(s, u)) {
+      const u = textSource;
+      if (isFace(u.cardId, "VEN", 134) && u.empowerCount === 3)
+        result.push("Deflect 3", "Ganking");
+    }
     return result;
   },
   event(s, event, p, cardId, sourceId, locationId, ctx) {
@@ -253,7 +276,7 @@ export const cardWave7Module: ExpansionModule = {
     if (
       isFace(legend, "VEN", 145) &&
       ((event === "cardFinalized" &&
-        ["Unit", "Gear"].includes(getCard(cardId).type) &&
+        ["Unit", "Gear"].some((type) => isCardType(getCard(cardId), type)) &&
         (getCard(cardId).energy ?? 0) >= 7) ||
         (event === "abilityActivated" && (ctx.abilityEnergyCost ?? 0) >= 7))
     )
@@ -267,7 +290,7 @@ export const cardWave7Module: ExpansionModule = {
         },
       ]);
     if (event === "discardBatch") {
-      for (const u of s.units.filter(
+      for (const u of textUnits(s).filter(
         (u) => u.owner === p && isFace(u.cardId, "OGN", 202),
       ))
         ctx.trigger(
@@ -275,31 +298,34 @@ export const cardWave7Module: ExpansionModule = {
           p,
           u.cardId,
           u.id,
-          [
+          textEffects(u, [
             { type: "ready", condition: "self" },
             { type: "might", amount: 1, condition: "self" },
-          ],
+          ]),
           u.location,
         );
     }
     if (event === "move") {
       const source = s.units.find((u) => u.id === sourceId);
-      if (
-        source &&
-        isFace(source.cardId, "OGN", 162) &&
-        source.movesThisTurn === 1
-      )
-        ctx.trigger(
-          s,
-          source.owner,
-          cardId,
-          source.id,
-          [readyOther()],
-          locationId,
-        );
+      for (const textSource of textSources(s, source)) {
+        const source = textSource;
+        if (
+          source &&
+          isFace(source.cardId, "OGN", 162) &&
+          source.movesThisTurn === 1
+        )
+          ctx.trigger(
+            s,
+            source.owner,
+            cardId,
+            source.id,
+            textEffects(source, [readyOther()]),
+            locationId,
+          );
+      }
     }
-    if (event === "abilityActivated" && getCard(cardId).type === "Gear")
-      for (const u of s.units.filter(
+    if (event === "abilityActivated" && isCardType(getCard(cardId), "Gear"))
+      for (const u of textUnits(s).filter(
         (u) => u.owner === p && isFace(u.cardId, "SFD", 75),
       ))
         ctx.trigger(
@@ -307,21 +333,28 @@ export const cardWave7Module: ExpansionModule = {
           p,
           u.cardId,
           u.id,
-          [{ type: "might", amount: 1, condition: "self" }],
+          textEffects(u, [{ type: "might", amount: 1, condition: "self" }]),
           u.location,
         );
     if (
       event === "cardFinalized" &&
-      getCard(cardId).type === "Gear" &&
+      isCardType(getCard(cardId), "Gear") &&
       sourceId
     ) {
       const player = s.players[p];
       if (player.firstGearPlayedTurn === s.turn) return;
       player.firstGearPlayedTurn = s.turn;
-      for (const u of s.units.filter(
+      for (const u of textUnits(s).filter(
         (u) => u.owner === p && isFace(u.cardId, "VEN", 68),
       ))
-        ctx.trigger(s, p, u.cardId, u.id, [readyOther()], u.location);
+        ctx.trigger(
+          s,
+          p,
+          u.cardId,
+          u.id,
+          textEffects(u, [readyOther()]),
+          u.location,
+        );
     }
   },
   effect(s, p, e, ctx) {
@@ -347,7 +380,7 @@ export const cardWave7Module: ExpansionModule = {
     if (!e.custom?.startsWith("wave7:")) return false;
     const key = e.custom.slice(6);
     const ids = (ctx.targetId ?? "").split("~");
-    const source = s.units.find((u) => u.id === ctx.sourceId);
+    const source = abilityUnit(s, ctx.sourceId, ctx.abilityInstance);
     switch (key) {
       case "return-trash":
       case "recycle-trash": {
@@ -361,7 +394,7 @@ export const cardWave7Module: ExpansionModule = {
             });
           if (key === "return-trash") s.players[owner].hand.push(...moved);
           else
-            s.players[owner].deck.push(...(ctx.shuffle?.(s, moved) ?? moved));
+            recycleCards(s, owner, [...(ctx.shuffle?.(s, moved) ?? moved)], p);
           if (moved.length)
             ctx.log?.(
               s,
@@ -393,25 +426,26 @@ export const cardWave7Module: ExpansionModule = {
         break;
       case "hwei":
         if (e.cardName)
-          ctx.trigger(
-            s,
-            p,
-            "unl-080-219",
-            ctx.sourceId!,
-            e.cardName === "Spell"
-              ? [{ type: "draw" }]
-              : e.cardName === "Gear"
-                ? [
-                    {
-                      type: "readyRunes",
-                      amount: 2,
-                      chooseRunes: true,
-                      optional: true,
-                    },
-                  ]
-                : [{ type: "might", amount: 3, condition: "self" }],
-            ctx.locationId,
-          );
+          for (const discardedType of e.cardName.split("|"))
+            ctx.trigger(
+              s,
+              p,
+              "unl-080-219",
+              ctx.sourceId!,
+              discardedType === "Spell"
+                ? [{ type: "draw" }]
+                : discardedType === "Gear"
+                  ? [
+                      {
+                        type: "readyRunes",
+                        amount: 2,
+                        chooseRunes: true,
+                        optional: true,
+                      },
+                    ]
+                  : [{ type: "might", amount: 3, condition: "self" }],
+              ctx.locationId,
+            );
         break;
       case "kayle":
         if (source) ctx.empower!(s, p, source.id);

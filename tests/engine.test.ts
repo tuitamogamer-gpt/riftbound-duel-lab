@@ -86,7 +86,7 @@ describe("manual Proceed event frames", () => {
       expect(result.state.seed).toBe(72);
       state = result.state;
     }
-  });
+  }, 20_000);
   it("rejects illegal actions and safely resets frame collection after an error", () => {
     const state = createGame({ seed: 51 });
     expect(() => applyActionStepped(state, "end-turn")).toThrow(

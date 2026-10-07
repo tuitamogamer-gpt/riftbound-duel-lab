@@ -1048,7 +1048,10 @@ describe("hero and shared rules", () => {
   it("reviewed reminder-only printings retain canonical engine hooks without changing tags", () => {
     expect(getRulesCardId("unl-022a-219")).toBe("unl-022-219");
     expect(getRulesCardId("unl-221-219")).toBe("sfd-036-221");
-    expect(getScript("sfd-232-221")).toBeUndefined();
-    expect(getScript("ven-058-166--6a517607ad64d2d80a4f03b5")).toBeUndefined();
+    expect(getRulesCardId("sfd-232-221")).toBe("sfd-232-221");
+    expect(getScript("sfd-232-221")).toEqual(getScript("ogn-164-298"));
+    expect(
+      getScript("ven-058-166--6a517607ad64d2d80a4f03b5")?.cardTypes,
+    ).toEqual(["Unit", "Gear"]);
   });
 });

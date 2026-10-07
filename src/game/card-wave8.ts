@@ -1,3 +1,4 @@
+import { recycleCards, recycleRunes } from "./zone-events";
 import { cards, getCard } from "../data/cards";
 import { isFace } from "./board-rules";
 import type { ExpansionModule } from "./later-precon-engine";
@@ -127,7 +128,7 @@ for (const card of cards.filter((c) => c.set === "VEN" && !c.variant)) {
 export const cardWave8Module: ExpansionModule = {
   effect(s, p, e, ctx) {
     if (e.custom !== "wave8:teemo") return false;
-    const revealed = s.players[p].deck.splice(0, 5);
+    const revealed = s.players[p].deck.splice(0, e.lookCount ?? 5);
     // Reveal is public; it neither draws nor discards the inspected cards.
     ctx.log?.(
       s,
@@ -135,6 +136,7 @@ export const cardWave8Module: ExpansionModule = {
       "play",
       p,
     );
+    for (const id of revealed) ctx.cardEvent(s, "reveal", p, id);
     const amount = revealed.filter((id) =>
       /\[Hidden\]/.test(getCard(id).text),
     ).length;
@@ -153,7 +155,7 @@ export const cardWave8Module: ExpansionModule = {
       ctx.sourceId,
       ctx.locationId,
     );
-    s.players[p].deck.push(...(ctx.shuffle?.(s, revealed) ?? revealed));
+    recycleCards(s, p, [...(ctx.shuffle?.(s, revealed) ?? revealed)], p);
     return true;
   },
 };

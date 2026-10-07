@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Next 100 card imports QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      // Synthetic fixture on an isolated origin. Reloads preserve UI choices.
+      const scenario =
+        new URLSearchParams(location.search).get("scenario") ?? "jayce";
+      const seedKey = `import100-${scenario}`;
+      if (!sessionStorage.getItem(seedKey)) {
+        const match = createCombatFixture();
+        match.turn = 7;
+        match.phase = "main";
+        match.combat = null;
+        match.currentPlayer = match.priorityPlayer = match.focusPlayer = 0;
+        match.fields.forEach((f) => {
+          f.cardId = "ogn-278-298";
+          f.controller = null;
+        });
+        for (const p of match.players) {
+          p.legendId = "ogn-259-298";
+          p.energy = p.power = 20;
+          p.runes = [];
+          p.hand = [];
+          p.legendUsedTurn = -1;
+          p.championAvailable = false;
+          p.discard = [];
+        }
+        match.players[0].hand = ["sfd-084-221", "sfd-033-221", "ogn-198-298"];
+        match.players[0].energy = 6;
+        match.players[0].discard = ["ogn-052-298"];
+        match.players[0].xp = 0;
+        match.units = [
+          {
+            ...combatUnit("ally", 0, 4, "ogn-052-298"),
+            buff: 1,
+            location: "base:0",
+            ready: true,
+          },
+          {
+            ...combatUnit("other", 0, 5, "ogn-049-298"),
+            location: "field:0",
+            ready: true,
+          },
+          {
+            ...combatUnit("enemy", 1, 9, "ogn-049-298"),
+            location: "field:1",
+            ready: true,
+          },
+        ];
+        match.fields[0].controller = 0;
+        match.fields[1].controller = 1;
+        match.gears = [
+          { id: "old-gear", cardId: "sfd-033-221", owner: 0, ready: true },
+        ];
+        match.stack = [];
+        match.pendingChoice = null;
+        match.pendingTriggers = [];
+        if (scenario === "revive") {
+          match.players[0].hand = ["ogn-198-298"];
+          match.players[0].energy = 10;
+          match.players[0].power = 2;
+        }
+        localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review: null }));
+        sessionStorage.setItem(seedKey, "1");
+      }
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

@@ -1,3 +1,4 @@
+import { isCardType } from "../data/cards";
 import { findCard } from "../catalog";
 import { getMight } from "./engine";
 import type { Review } from "../components/StepFlow";
@@ -107,7 +108,7 @@ export function getEffectView(review: Review | null) {
     (source ? review.action.player : runeChanges[0]?.player) ??
     review.action.player;
   const field =
-    source?.type === "Battlefield"
+    source && isCardType(source, "Battlefield")
       ? (game.fields.find(
           (f) =>
             f.cardId === source.id &&

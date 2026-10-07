@@ -1,0 +1,22 @@
+# Eleventh-wave Equipment sources
+
+Verified against official Riot card images on 7 October 2026. The original provider text and gameplay-fingerprint alias policy are unchanged. The missing attachment panels are recorded separately in `card-wave11.ts` and displayed by the existing Equipment rules panel.
+
+| Card                                                                                                                                                           | Might bonus | Implemented behavior                                                                                          |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------: | ------------------------------------------------------------------------------------------------------------- |
+| [Sterak's Gage](https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/df16e6b668fc6771ff657512deba1bf48363e23a-744x1039.png?accountingTag=RB)       |          +3 | Quick-Draw attaches to a declared friendly unit.                                                              |
+| [Edge of Night](https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/b3e385162bf3566618bb58b7a866eef846beefba-744x1039.png?accountingTag=RB)       |          +2 | Hidden play attaches to a friendly unit at the original battlefield; ordinary hand play does not auto-attach. |
+| [Forgefire Cape](https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/9bc49433a6ec5a8f4f1b44351094523d51b6bc11-744x1039.png?accountingTag=RB)      |          +3 | Attack and defense each deal 2 damage to every enemy at the wielder location.                                 |
+| [Shurelya's Requiem](https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/6f2f7175e61486859d7f5da804e41733d66b2254-744x1039.png?accountingTag=RB)  |          +2 | Friendly units at the wielder location gain Ganking. Its play trigger readies friendly units everywhere.      |
+| [Hunter's Machete](https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/374fd9220c204810c2b1abd48217b4d233362753-744x1039.png?accountingTag=RB)    |          +2 | Hunt grants one XP on conquer and hold, independently of other Hunt instances.                                |
+| [Shepherd's Heirloom](https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/fadd95487f164f60c9ad08a457f11170c6afa420-744x1039.png?accountingTag=RB) |          +2 | Playing grants one XP. Equip spends one XP instead of Power.                                                  |
+
+The [Spiritforged FAQ](https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq/) corrects Edge of Night's attachment wording: its gear returning to base must not invalidate the original friendly target at the Hidden battlefield. The engine now carries Hidden play metadata and battlefield restrictions into gear play triggers, as it already does for other card types. Targets are declared before responses and revalidated at resolution. Hand play creates no attachment trigger.
+
+Forgefire Cape uses a separate inherited ability for every equipped copy. It affects all enemies at the source unit's live location without choosing them, so Deflect is not charged. An already-created trigger survives destruction of its gear; a missing source cannot supply a location. Ordinary ability Bonus Damage still applies. Both signature items use universal Equip Power, while their printed play costs and Unique deck limits remain intact.
+
+Shurelya's Ganking aura changes immediately when its wielder moves, when it attaches to a different unit, or when the item leaves play. Its play trigger uses the existing ready-effect pipeline, including ready prohibitions; Equip does not repeat that play trigger.
+
+Shepherd's Heirloom spends its Equip XP before the response window. A failed attachment does not refund it, and save/load retains the paid cost. Weaponmaster reduces Power only and must still spend the XP during its resolution. Forced free attachment through another effect does not activate Equip. Hunter's Machete uses the shared XP and inherited scoring-trigger paths, so native Hunt and additional hold occurrences remain independent.
+
+Guardian Angel, Last Rites, Blade of the Ruined King, Rabadon's Deathcrown and the other incomplete Equipment faces remain unsupported. No partial script was used to mark them playable.

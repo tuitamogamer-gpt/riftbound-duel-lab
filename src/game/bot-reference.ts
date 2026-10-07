@@ -1,3 +1,4 @@
+import { isCardType } from "../data/cards";
 import { getCard } from "../data/cards";
 import {
   applyAction,
@@ -30,12 +31,14 @@ export function getReferenceAction(
     const resources = s.players[player].energy + s.players[player].runes.length;
     const unreachable = Math.max(0, (c.energy ?? 0) - resources - 2) * 2;
     return (
-      (c.type === "Unit"
+      (isCardType(c, "Unit")
         ? 12 + (c.might ?? 0) * 2
-        : c.type === "Gear"
+        : isCardType(c, "Gear")
           ? 9
           : 7) +
-      (sc?.spell?.some((e) => ["draw", "channel", "token"].includes(e.type))
+      (sc?.spell?.some((e) =>
+        ["draw", "channel", "token"].some((type) => isCardType(e, type)),
+      )
         ? 6
         : 0) -
       unreachable
@@ -60,12 +63,14 @@ export function getReferenceAction(
         ? 18 + value(target)
         : -25;
     if (
-      ["damage", "kill", "bounce"].includes(effect.type) ||
+      ["damage", "kill", "bounce"].some((type) => isCardType(effect, type)) ||
       /(?:banish|wind-ghosts|lacerate|morgana)/.test(custom)
     )
       return target?.owner === opponent ? 15 + value(target) : -35;
     if (
-      ["might", "assault", "keyword"].includes(effect.type) ||
+      ["might", "assault", "keyword"].some((type) =>
+        isCardType(effect, type),
+      ) ||
       /(?:combat-experience|barrier|shroud|retreat)/.test(custom)
     )
       return target?.owner === player
@@ -82,7 +87,9 @@ export function getReferenceAction(
           ? 8
           : -10;
     if (
-      ["draw", "channel", "token", "score"].includes(effect.type) ||
+      ["draw", "channel", "token", "score"].some((type) =>
+        isCardType(effect, type),
+      ) ||
       /(?:vex-draw|ripper-pay|treasure|pay-mighty|play-mech|draw)/.test(custom)
     )
       return 15;
@@ -179,7 +186,7 @@ export function getReferenceAction(
         const c = getCard(revealed);
         const tooExpensive =
           (c.energy ?? 0) > s.players[player].runes.length + 3;
-        const lacksUnits = own.length < 2 && c.type === "Unit";
+        const lacksUnits = own.length < 2 && isCardType(c, "Unit");
         return a.id.endsWith(":recycle")
           ? tooExpensive && !lacksUnits
             ? 10
@@ -287,7 +294,9 @@ export function getReferenceAction(
             score +
             (effect.type === "draw"
               ? 7 * (effect.amount ?? 1) * (effect.who === "opponent" ? -1 : 1)
-              : ["channel", "token", "score"].includes(effect.type)
+              : ["channel", "token", "score"].some((type) =>
+                    isCardType(effect, type),
+                  )
                 ? 9 * (effect.amount ?? 1)
                 : 1),
           1,
@@ -345,7 +354,7 @@ export function getReferenceAction(
     }
     if (a.category === "play") {
       const c = getCard(a.cardId!);
-      if (c.type === "Unit") {
+      if (isCardType(c, "Unit")) {
         const here = own.filter((u) => u.location === a.locationId).length;
         const f = s.fields.find((f) => f.id === a.locationId);
         return (

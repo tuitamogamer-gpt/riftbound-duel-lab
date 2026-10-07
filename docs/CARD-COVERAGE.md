@@ -2,7 +2,31 @@
 
 The catalog was fetched again on 6 October 2026. It contains every printing returned by the paginated Riftcodex API: 1,451 printings in eight sets, plus five local rules tokens. Provider completeness is checked against both pagination totals and each set's card count. It is not independent evidence that Riftcodex has every Riot publication or preview; its latest reported record update was 21 July 2026. No Radiance set is returned in this snapshot.
 
-Current checked snapshot: **1,219 executable entries and 237 unsupported entries**, including the five local rules tokens. These counts refer to printings, not unique gameplay cards. The [validation log](VALIDATION.md) records the current checks.
+Current checked snapshot: **1,249 executable entries and 207 unsupported entries**, including the five local rules tokens. These counts refer to printings, not unique gameplay cards. The [validation log](VALIDATION.md) records the current checks.
+
+## Twelfth implementation wave — 7 October 2026
+
+This continuation implements **five card faces / five previously unsupported printings**: Wallop, Call to Glory, Legion Quartermaster, Zaun Punk and Sacrifice. Their scripts use explicit physical objects to pay additional costs: spend a buff, return friendly gear, kill friendly gear or kill a Mighty friendly unit. See the [source ledger](CARD-WAVE12-SOURCES.md) for card references and current Core Rules. Catalog records and original text are preserved.
+
+Costs are selected independently from effect targets and paid before responses. Optional buff payments ignore the base cost while retaining taxes. Mandatory costs also apply to Hidden and champion-zone plays. Mighty eligibility is checked after Energy and Power payment, since recycling runes or spending Power can change it. Triggers produced by payment wait until the played card is finalized; paid costs and subsequent choices survive save/load. Payment labels are translated in all three supported languages.
+
+**207 printings remain unsupported.** This wave does not add effect-directed plays, copying, control changes, extra turns or the remaining incomplete Equipment.
+
+## Eleventh implementation wave — 7 October 2026
+
+This continuation implements **six card faces / six previously unsupported printings**: Sterak's Gage, Edge of Night, Forgefire Cape, Shurelya's Requiem, Hunter's Machete and Shepherd's Heirloom. Their missing attachment panels were checked against [official Riot images](EQUIPMENT-WAVE11-SOURCES.md). Catalog records and original card text are preserved.
+
+The engine now carries Hidden battlefield restrictions into gear play triggers, grants continuous nearby Equipment keywords and pays XP-based Equip costs before responses. Weaponmaster retains non-Power costs. Tests cover Quick-Draw, Hidden attachment, area damage without target taxes, live-source locations, universal Equip Power, Unique limits, ready prohibitions, mobile Ganking auras, independent Hunt triggers and saved paid abilities.
+
+**212 printings remain unsupported.** This package does not implement copying, ownership changes, effect-directed plays, extra turns or the remaining incomplete Equipment.
+
+## Tenth implementation wave — 7 October 2026
+
+This continuation implements **13 card faces / 19 previously unsupported printings**: Recurve Bow, Doran's Shield, Brutalizer, Cloth Armor, World Atlas, Hexdrinker, Trinity Force, Boneshiver, Doran's Ring, Boots of Swiftness, Cull, Eye of the Herald and Spinning Axe. Their missing attachment panels were checked against [official Riot card images](EQUIPMENT-WAVE10-SOURCES.md). Provider text remains intact; the complete attachment effect now appears in card details and hover previews.
+
+The shared engine grants Equipment keywords, conditional Might and independent attack/defend, move, conquer and hold triggers to the attached unit. Trigger targets and costs precede responses, and previously created abilities survive Equipment removal. Re-equipping transfers future benefits; Brutalizer retains its attachment turn through save/load. Spinning Axe supports universal Equip Power and survives its Beginning Phase while attached. Rockfall Path and additional hold/conquer occurrences include inherited Equipment abilities.
+
+**218 printings remain unsupported.** The catalog itself is unchanged from the 6 October provider refresh. Effect-directed plays, control changes, copying, extra turns, multiple Repeat and the remaining incomplete Equipment faces still require implementation.
 
 ## Ninth implementation wave — 6 October 2026
 

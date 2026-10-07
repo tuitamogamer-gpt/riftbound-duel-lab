@@ -61,10 +61,16 @@ function inspectedCards(s: GameState, viewer: PlayerId): string[] {
     "origins-more:candle-selected": 2,
     "sfd-extra:ornn-finish": 4,
     "ven-extra:lightning-finish": 3,
+    "wave14:herald-selected": 3,
   };
   for (const effect of choice.options?.flatMap((o) => o.effects ?? []) ?? []) {
+    if (effect.custom === "card-play:select" && effect.play?.zone === "top")
+      return s.players[viewer].deck.slice(0, effect.play.count ?? 1);
     if (effect.custom && counts[effect.custom])
-      return s.players[viewer].deck.slice(0, counts[effect.custom]);
+      return s.players[viewer].deck.slice(
+        0,
+        effect.lookCount ?? counts[effect.custom],
+      );
     if (
       [
         "ven-wave3:predict-step",
@@ -113,6 +119,17 @@ export function getObservation(s: GameState, viewer: PlayerId): Observation {
     "pendingEndTurn",
     "pendingCombatFinish",
     "pendingTriggers",
+    "pendingPlays",
+    "extraTurns",
+    "controlEffects",
+    "heldBanishments",
+    "deathBatches",
+    "pendingCombatDamage",
+    "linkedBanishments",
+    "tokenCopyChoices",
+    "tokenCopyLinks",
+    "splitXPWatches",
+    "endDisempowers",
     "winner",
   ] as const;
   const state = Object.fromEntries(
@@ -167,6 +184,9 @@ export function getObservation(s: GameState, viewer: PlayerId): Observation {
         : {}),
     };
   }) as [ObservedPlayer, ObservedPlayer];
+  state.selectedInspections = s.selectedInspections
+    ?.filter((b) => b.owner === viewer)
+    .map((b) => structuredClone(b));
   state.hidden = (s.hidden ?? []).map((h, i) =>
     h.owner === viewer
       ? { ...h }
