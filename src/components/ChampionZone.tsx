@@ -1,4 +1,5 @@
 import { findCard, type CatalogCard } from "../catalog";
+import { Info, Sparkles } from "lucide-react";
 import { readableText } from "../data/cards";
 import type { GameAction, GameState, PlayerId } from "../game/types";
 import { useI18n } from "../i18n";
@@ -20,7 +21,7 @@ export function ChampionZone({
   legal: GameAction[];
   selected: string | null;
   select: (source: string) => void;
-  inspect: (card: CatalogCard) => void;
+  inspect: (card: CatalogCard, sourceId?: string) => void;
 }) {
   const { t } = useI18n();
   const highlights = useHighlights();
@@ -49,8 +50,28 @@ export function ChampionZone({
             ready={legendReady}
             playable={hasAction("legend")}
             selected={own && selected === "legend"}
-            onClick={() => (own ? select("legend") : inspect(legend))}
+            onClick={() =>
+              own ? select("legend") : inspect(legend, `legend:${player}`)
+            }
           />
+          <button
+            className="setup-mobile-inspect"
+            aria-label={t("Inspect {card}", { card: legend.name })}
+            data-card-preview={legend.id}
+            data-card-ready={legendReady}
+            onClick={() => inspect(legend, `legend:${player}`)}
+          >
+            <Info size={20} aria-hidden="true" />
+          </button>
+          {p.legendEmpowered && (
+            <span
+              className="setup-mobile-empowered"
+              aria-label={t("Empowered")}
+              title={t("Empowered")}
+            >
+              <Sparkles size={14} aria-hidden="true" />
+            </span>
+          )}
           <div className="setup-card-copy">
             <div className="setup-card-heading">
               <span>{t("Legend zone")}</span>
@@ -62,7 +83,7 @@ export function ChampionZone({
               className="setup-card-name"
               data-card-preview={legend.id}
               data-card-ready={legendReady}
-              onClick={() => inspect(legend)}
+              onClick={() => inspect(legend, `legend:${player}`)}
             >
               {legend.name}
             </button>
@@ -103,6 +124,14 @@ export function ChampionZone({
               <span aria-hidden="true">◇</span>
             </button>
           )}
+          <button
+            className="setup-mobile-inspect"
+            aria-label={t("Inspect {card}", { card: champion.name })}
+            data-card-preview={champion.id}
+            onClick={() => inspect(champion)}
+          >
+            <Info size={20} aria-hidden="true" />
+          </button>
           <div className="setup-card-copy">
             <div className="setup-card-heading">
               <span>{t("Champion zone")}</span>

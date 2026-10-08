@@ -1,0 +1,46 @@
+.hidden-card-wrap {
+  display: contents;
+}
+
+.hidden-card-inspect {
+  display: none;
+}
+
+@media (max-width: 800px),
+  (max-width: 1000px) and (max-height: 500px),
+  (pointer: coarse) {
+  .hidden-card-wrap {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 2px;
+    min-width: 0;
+    max-width: min(280px, calc(100vw - 32px));
+  }
+
+  .hidden-card-wrap > .hidden-card {
+    flex: 1 1 auto;
+    min-width: 44px;
+    overflow: hidden;
+  }
+
+  .hidden-card-inspect {
+    display: inline-flex;
+    flex: 0 0 44px;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid #a78ce080;
+    border-radius: 7px;
+    background: #201d3a;
+    color: #e2d4ff;
+    touch-action: manipulation;
+  }
+
+  .hidden-card-inspect:focus-visible {
+    outline: 2px solid #edc885;
+    outline-offset: 2px;
+  }
+}

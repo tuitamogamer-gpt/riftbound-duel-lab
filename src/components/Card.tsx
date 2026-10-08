@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Zap, Shield, Search } from "lucide-react";
+import { Zap, Shield, Search, X } from "lucide-react";
 import type { CatalogCard } from "../catalog";
 import { cardArtUrl } from "../data/art";
 import { readableText } from "../data/cards";
@@ -73,6 +73,7 @@ export function Card({
           src={cardArtUrl(card)}
           alt={card.name}
           loading="lazy"
+          draggable={false}
           onError={() => setFailed(true)}
         />
       ) : (
@@ -118,83 +119,97 @@ export function CardDetail({
   const { t } = useI18n();
   const dialog = useDialogFocus(onClose);
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop card-detail-backdrop" onClick={onClose}>
       <section
         className="modal card-detail"
         ref={dialog}
         role="dialog"
         aria-modal="true"
         aria-label={card.name}
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          className="close-button"
-          onClick={onClose}
-          aria-label={t("Zatvori")}
-        >
-          ×
-        </button>
-        <Card
-          card={card}
-          preview={false}
-          ready={ready}
-          damage={damage}
-          might={might}
-          statuses={statuses}
-        />
-        <div>
-          <div className="eyebrow">
-            {card.setName} / {card.id}
+        <header className="card-detail-header">
+          <strong>{card.name}</strong>
+          <button
+            type="button"
+            className="close-button"
+            onClick={onClose}
+            aria-label={t("Zatvori")}
+          >
+            <X size={24} />
+          </button>
+        </header>
+        <div className="card-detail-body">
+          <div className="card-detail-art">
+            <Card
+              card={card}
+              preview={false}
+              ready={ready}
+              damage={damage}
+              might={might}
+              statuses={statuses}
+            />
           </div>
-          <h2>{card.name}</h2>
-          <div className="detail-tags">
-            <span>
-              {card.supertype ? t(card.supertype) : ""} {t(card.type)}
-            </span>
-            {card.domains.map((d) => (
-              <span key={d} style={{ color: domainColors[d] }}>
-                {t(d)}
+          <div className="card-detail-copy">
+            <div className="eyebrow">
+              {card.setName} / {card.id}
+            </div>
+            {ready !== undefined && (
+              <p className="card-detail-state">
+                {t(ready ? "Ready" : "Exhausted")}
+              </p>
+            )}
+            <h2>{card.name}</h2>
+            <div className="detail-tags">
+              <span>
+                {card.supertype ? t(card.supertype) : ""} {t(card.type)}
               </span>
-            ))}
+              {card.domains.map((d) => (
+                <span key={d} style={{ color: domainColors[d] }}>
+                  {t(d)}
+                </span>
+              ))}
+            </div>
+            <p className="rules-text">
+              {readableText(card.text) ||
+                t("Ova karta nema dodatni tekst efekta.")}
+            </p>
+            <RulesErrata name={card.name} />
+            <EquipmentRules cardId={card.id} />
+            {statuses && statuses.length > 0 && (
+              <section aria-label={t("Active effects")}>
+                <CardStatusTokens statuses={statuses} expanded />
+              </section>
+            )}
+            <div className="stat-row">
+              {card.energy !== null && (
+                <span>
+                  <Zap size={16} />
+                  {card.energy} {t("energije")}
+                </span>
+              )}
+              {card.power !== null && (
+                <span>
+                  ◈ {card.power} {t("power")}
+                </span>
+              )}
+              {(might !== undefined || card.might !== null) && (
+                <span>
+                  <Shield size={16} />
+                  {might ?? card.might} {t("might")}
+                </span>
+              )}
+            </div>
+            <p className={`support-status ${scripted ? "supported" : ""}`}>
+              {scripted
+                ? t("● Podržana za igranje u Duel Labu")
+                : t("○ Katalog — još nije podržana u meču")}
+            </p>
+            <small>
+              {t("Tekst i podaci: Riftcodex. Originalni engleski tekst karte.")}
+            </small>
           </div>
-          <p className="rules-text">
-            {readableText(card.text) ||
-              t("Ova karta nema dodatni tekst efekta.")}
-          </p>
-          <RulesErrata name={card.name} />
-          <EquipmentRules cardId={card.id} />
-          {statuses && statuses.length > 0 && (
-            <section aria-label={t("Active effects")}>
-              <CardStatusTokens statuses={statuses} expanded />
-            </section>
-          )}
-          <div className="stat-row">
-            {card.energy !== null && (
-              <span>
-                <Zap size={16} />
-                {card.energy} {t("energije")}
-              </span>
-            )}
-            {card.power !== null && (
-              <span>
-                ◈ {card.power} {t("power")}
-              </span>
-            )}
-            {(might !== undefined || card.might !== null) && (
-              <span>
-                <Shield size={16} />
-                {might ?? card.might} {t("might")}
-              </span>
-            )}
-          </div>
-          <p className={`support-status ${scripted ? "supported" : ""}`}>
-            {scripted
-              ? t("● Podržana za igranje u Duel Labu")
-              : t("○ Katalog — još nije podržana u meču")}
-          </p>
-          <small>
-            {t("Tekst i podaci: Riftcodex. Originalni engleski tekst karte.")}
-          </small>
         </div>
       </section>
     </div>

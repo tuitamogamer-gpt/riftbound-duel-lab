@@ -20,6 +20,8 @@ import { CardStatusTokens, readCardStatuses } from "./CardStatusTokens";
 import { ExhaustedToken } from "./ExhaustedToken";
 import { RulesErrata } from "./RulesErrata";
 import { EquipmentRules } from "./EquipmentRules";
+import { CardDetail } from "./Card";
+import { scripts } from "../game/scripts";
 
 type Preview = { card: CatalogCard; anchor: HTMLElement };
 const triggerSelector = "[data-card-preview]";
@@ -40,6 +42,7 @@ function isAvailable(anchor: HTMLElement) {
 /** Only explicitly marked, visible cards can open a preview. Hidden hands never opt in. */
 export function CardPreviewProvider({ children }: { children: ReactNode }) {
   const [preview, setPreview] = useState<Preview | null>(null);
+  const [touchPreview, setTouchPreview] = useState<Preview | null>(null);
   const active = useRef<Preview | null>(null);
   const tooltipId = useId();
 
@@ -47,8 +50,23 @@ export function CardPreviewProvider({ children }: { children: ReactNode }) {
     let showTimer: ReturnType<typeof setTimeout> | undefined;
     let hideTimer: ReturnType<typeof setTimeout> | undefined;
     let touched = false;
+    let keyboardFocus = false;
+    const canHover = () => window.matchMedia("(any-hover: hover)").matches;
     let suppressed: HTMLElement | null = null;
     let hovered: HTMLElement | null = null;
+    let holdTimer: ReturnType<typeof setTimeout> | undefined;
+    let hold: {
+      anchor: HTMLElement;
+      pointer: number;
+      x: number;
+      y: number;
+    } | null = null;
+    let consumedUntil = 0;
+    let consumedPointer: number | null = null;
+    const cancelHold = () => {
+      clearTimeout(holdTimer);
+      hold = null;
+    };
     const trigger = (target: EventTarget | null) =>
       target instanceof Element
         ? target.closest<HTMLElement>(triggerSelector)
@@ -83,7 +101,7 @@ export function CardPreviewProvider({ children }: { children: ReactNode }) {
       hideTimer = setTimeout(close, 150);
     };
     const onPointerOver = (event: PointerEvent) => {
-      if (event.pointerType === "touch") return;
+      if (event.pointerType === "touch" || !canHover()) return;
       touched = false;
       if (inPreview(event.target)) {
         clearTimeout(hideTimer);
@@ -96,6 +114,7 @@ export function CardPreviewProvider({ children }: { children: ReactNode }) {
       open(anchor, false);
     };
     const onPointerOut = (event: PointerEvent) => {
+      if (event.pointerType === "touch" || !canHover()) return;
       const from = trigger(event.target);
       const to = trigger(event.relatedTarget);
       if (from && from === to) return;
@@ -109,20 +128,77 @@ export function CardPreviewProvider({ children }: { children: ReactNode }) {
     };
     const onFocus = (event: FocusEvent) => {
       const anchor = trigger(event.target);
-      if (anchor && !touched) open(anchor, true);
+      if (anchor && !touched && (canHover() || keyboardFocus))
+        open(anchor, true);
     };
     const onBlur = (event: FocusEvent) => {
       if (trigger(event.target) && hovered !== active.current?.anchor)
         scheduleClose();
     };
     const onPointerDown = (event: PointerEvent) => {
+      keyboardFocus = false;
+      cancelHold();
+      if (event.isPrimary && consumedPointer === null) consumedUntil = 0;
       touched = event.pointerType === "touch";
       if (!inPreview(event.target)) {
         suppressed = trigger(event.target);
         close();
       }
+      const anchor = trigger(event.target);
+      if (
+        !touched ||
+        !event.isPrimary ||
+        !anchor ||
+        !isAvailable(anchor) ||
+        anchor.matches(":disabled")
+      )
+        return;
+      hold = {
+        anchor,
+        pointer: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+      };
+      holdTimer = setTimeout(() => {
+        const card = findCard(anchor.dataset.cardPreview);
+        if (!hold || !card || !isAvailable(anchor)) return;
+        consumedPointer = event.pointerId;
+        consumedUntil = Infinity;
+        anchor.focus({ preventScroll: true });
+        setTouchPreview({ card, anchor });
+      }, 450);
+    };
+    const onPointerMove = (event: PointerEvent) => {
+      if (
+        hold &&
+        event.pointerId === hold.pointer &&
+        Math.hypot(event.clientX - hold.x, event.clientY - hold.y) > 10
+      )
+        cancelHold();
+    };
+    const onPointerEnd = (event: PointerEvent) => {
+      cancelHold();
+      if (consumedPointer === event.pointerId) {
+        consumedPointer = null;
+        consumedUntil = Date.now() + 800;
+      }
+    };
+    const onContextMenu = (event: MouseEvent) => {
+      if (
+        hold ||
+        (touched && trigger(event.target)) ||
+        consumedUntil > Date.now()
+      )
+        event.preventDefault();
     };
     const onClick = (event: MouseEvent) => {
+      // A long press reads the card; its release must never select or play it.
+      if (consumedUntil > Date.now()) {
+        event.preventDefault();
+        event.stopPropagation();
+        consumedUntil = 0;
+        return;
+      }
       if (!inPreview(event.target)) {
         suppressed = trigger(event.target);
         close();
@@ -133,6 +209,7 @@ export function CardPreviewProvider({ children }: { children: ReactNode }) {
         suppressed = active.current?.anchor || null;
         close();
       } else if (event.key === "Tab") {
+        keyboardFocus = true;
         touched = false;
         suppressed = null;
       }
@@ -166,6 +243,12 @@ export function CardPreviewProvider({ children }: { children: ReactNode }) {
     document.addEventListener("pointerover", onPointerOver);
     document.addEventListener("pointerout", onPointerOut);
     document.addEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("pointermove", onPointerMove, true);
+    document.addEventListener("pointerup", onPointerEnd, true);
+    document.addEventListener("pointercancel", onPointerEnd, true);
+    document.addEventListener("contextmenu", onContextMenu, true);
+    window.addEventListener("scroll", cancelHold, true);
+    window.addEventListener("blur", cancelHold);
     document.addEventListener("click", onClick, true);
     document.addEventListener("focusin", onFocus);
     document.addEventListener("focusout", onBlur);
@@ -173,10 +256,17 @@ export function CardPreviewProvider({ children }: { children: ReactNode }) {
     window.addEventListener("blur", close);
     return () => {
       cancelTimers();
+      cancelHold();
       observer.disconnect();
       document.removeEventListener("pointerover", onPointerOver);
       document.removeEventListener("pointerout", onPointerOut);
       document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("pointermove", onPointerMove, true);
+      document.removeEventListener("pointerup", onPointerEnd, true);
+      document.removeEventListener("pointercancel", onPointerEnd, true);
+      document.removeEventListener("contextmenu", onContextMenu, true);
+      window.removeEventListener("scroll", cancelHold, true);
+      window.removeEventListener("blur", cancelHold);
       document.removeEventListener("click", onClick, true);
       document.removeEventListener("focusin", onFocus);
       document.removeEventListener("focusout", onBlur);
@@ -212,8 +302,34 @@ export function CardPreviewProvider({ children }: { children: ReactNode }) {
   }, [preview?.anchor]);
 
   return (
-    <CardPreviewActive.Provider value={Boolean(preview)}>
+    <CardPreviewActive.Provider value={Boolean(preview || touchPreview)}>
       {children}
+      {touchPreview &&
+        createPortal(
+          <CardDetail
+            card={touchPreview.card}
+            scripted={
+              Boolean(scripts[touchPreview.card.id]) ||
+              touchPreview.card.type === "Rune"
+            }
+            ready={
+              touchPreview.anchor.dataset.cardReady === undefined
+                ? undefined
+                : touchPreview.anchor.dataset.cardReady === "true"
+            }
+            damage={Number(touchPreview.anchor.dataset.cardDamage || 0)}
+            might={
+              touchPreview.anchor.dataset.cardMight === undefined
+                ? undefined
+                : Number(touchPreview.anchor.dataset.cardMight)
+            }
+            statuses={readCardStatuses(
+              touchPreview.anchor.dataset.cardStatuses,
+            )}
+            onClose={() => setTouchPreview(null)}
+          />,
+          document.body,
+        )}
       {preview &&
         createPortal(
           <PreviewPanel

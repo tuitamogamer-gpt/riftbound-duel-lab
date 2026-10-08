@@ -2,7 +2,9 @@ import { findCard, type CatalogCard } from "../catalog";
 import type { GameAction, GameState } from "../game/types";
 import { hiddenCardStatus } from "../game/hidden-presentation";
 import { useI18n } from "../i18n";
+import { Search } from "lucide-react";
 import { CardSleeve } from "./CardSleeve";
+import "./HiddenCard.css";
 
 export function HiddenCard({
   game,
@@ -29,7 +31,7 @@ export function HiddenCard({
         card: card.name,
       })
     : t("AI · Hidden karta");
-  return (
+  const hiddenButton = (
     <button
       className={`hidden-card${status?.ready ? " is-playable" : ""}${selected ? " is-selected" : ""}`}
       aria-pressed={own ? selected : undefined}
@@ -47,5 +49,20 @@ export function HiddenCard({
       <span>{own && card ? card.name : label}</span>
       {status && <small>{t(status.label)}</small>}
     </button>
+  );
+  if (!own || !card) return hiddenButton;
+  return (
+    <div className="hidden-card-wrap">
+      {hiddenButton}
+      <button
+        type="button"
+        className="hidden-card-inspect"
+        aria-label={t("Detalji {card}", { card: card.name })}
+        aria-haspopup="dialog"
+        onClick={() => inspect(card)}
+      >
+        <Search size={18} aria-hidden="true" />
+      </button>
+    </div>
   );
 }

@@ -138,6 +138,11 @@
   border-style: dashed;
 }
 
+.setup-mobile-inspect,
+.setup-mobile-empowered {
+  display: none;
+}
+
 /* The hand and its runes occupy the left column; setup cards stay beside it. */
 .app.is-game .player-cards {
   display: grid;
@@ -306,5 +311,87 @@
 
   .app.is-game .player-cards .setup-action {
     font-size: 7px;
+  }
+}
+
+/* The artwork already identifies these cards. Keep touch controls separate
+   from the card's play/ability selection, without a second block of labels. */
+@media (max-width: 800px), (max-width: 1000px) and (max-height: 500px) {
+  .app.is-game .mobile-base-panel section.champion-zone {
+    grid-template-columns: repeat(2, 94px);
+    justify-content: start;
+  }
+
+  .app.is-game .mobile-base-panel .champion-zone .setup-card {
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 1px;
+    min-height: 46px;
+    max-height: 58px;
+  }
+
+  .app.is-game .mobile-base-panel .champion-zone .setup-card-copy {
+    display: none;
+  }
+
+  .app.is-game .mobile-base-panel .champion-zone .setup-card .game-card.small,
+  .app.is-game .mobile-base-panel .champion-zone .setup-empty-art {
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    max-width: none;
+    height: 100%;
+    min-height: 44px;
+    max-height: 50px;
+    margin: 0;
+  }
+
+  .app.is-game .mobile-base-panel .champion-zone .game-card > img {
+    object-fit: contain;
+  }
+
+  .app.is-game .mobile-base-panel .setup-mobile-inspect {
+    display: grid;
+    place-items: center;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border: 1px solid #729caa44;
+    border-radius: 6px;
+    background: #152f3d;
+    color: #c2dfeb;
+    touch-action: manipulation;
+  }
+
+  .app.is-game .mobile-base-panel .setup-mobile-inspect:focus-visible {
+    outline: 2px solid #8fe8d1;
+    outline-offset: 1px;
+  }
+
+  .app.is-game .mobile-base-panel .setup-mobile-empowered {
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    color: #f8df93;
+    background: #302c16;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 1000px) and (max-height: 500px) and (min-aspect-ratio: 3/2) {
+  .app.is-game .mobile-base-panel section.champion-zone {
+    grid-template-columns: 94px;
+    justify-content: center;
   }
 }

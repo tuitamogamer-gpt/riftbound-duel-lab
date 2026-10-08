@@ -406,6 +406,9 @@ export default function App() {
   const inspectedGear = game?.gears.find(
     (gear) => gear.id === inspection?.sourceId,
   );
+  const inspectedLegend = game?.players.find(
+    (player) => inspection?.sourceId === `legend:${player.id}`,
+  );
   const [pileView, setPileView] = useState<PileView | null>(null);
   const [help, setHelp] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
@@ -1830,7 +1833,11 @@ export default function App() {
           <CardDetail
             card={inspected}
             scripted={supported(inspected)}
-            ready={inspectedUnit?.ready ?? inspectedGear?.ready}
+            ready={
+              inspectedUnit?.ready ??
+              inspectedGear?.ready ??
+              (inspectedLegend ? inspectedLegend.legendUsedTurn < 0 : undefined)
+            }
             damage={inspectedUnit?.damage}
             might={
               game && inspectedUnit ? getMight(game, inspectedUnit) : undefined
@@ -1911,7 +1918,7 @@ function PlayerBar({
 }: {
   game: GameState;
   player: 0 | 1;
-  inspect: (c: CatalogCard) => void;
+  inspect: (c: CatalogCard, sourceId?: string) => void;
 }) {
   const { t } = useI18n();
   const highlights = useHighlights();
@@ -1923,7 +1930,7 @@ function PlayerBar({
         className="legend-portrait"
         data-card-preview={legend?.id}
         data-card-ready={p.legendUsedTurn < 0}
-        onClick={() => legend && inspect(legend)}
+        onClick={() => legend && inspect(legend, `legend:${player}`)}
         title={legend?.name}
       >
         {legend && <img src={cardArtUrl(legend)} alt={legend.name} />}
@@ -2089,6 +2096,9 @@ function UnitRow({
     <>
       {units.map((u) => {
         const c = findCard(u.cardId);
+        const might = interaction.game
+          ? getMight(interaction.game, u)
+          : (c?.might || 0) + u.buff + u.temporaryMight;
         return c ? (
           <div
             className={`unit-wrap ${h.units.has(u.id) ? "event-highlight" : ""}`}
@@ -2109,11 +2119,7 @@ function UnitRow({
               statuses={
                 interaction.game ? unitStatuses(interaction.game, u) : undefined
               }
-              might={
-                interaction.game
-                  ? getMight(interaction.game, u)
-                  : (c.might || 0) + u.buff + u.temporaryMight
-              }
+              might={might}
               selected={
                 selected === u.id ||
                 interaction.actions.some((a) => a.targetId === u.id) ||
@@ -2138,11 +2144,13 @@ function UnitRow({
                   ✓
                 </span>
               )}
-            <div className="unit-power">
+            <div
+              className="unit-power"
+              data-modified={might !== c.might}
+              aria-label={`${t("MIGHT")} ${might}`}
+            >
               <Shield size={10} />
-              {interaction.game
-                ? getMight(interaction.game, u)
-                : (c.might || 0) + u.buff + u.temporaryMight}
+              {might}
               {u.buff > 0 && <span> +</span>}
               {u.empowered && <span title={t("Empowered")}> ✦</span>}
             </div>
