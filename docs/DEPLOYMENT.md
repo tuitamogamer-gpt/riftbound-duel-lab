@@ -1,5 +1,16 @@
 # Production deployment
 
+## Command placement and stack pacing — 8 October 2026
+
+The [control-flow polish](CONTROL-FLOW-POLISH.md) centres desktop commands,
+keeps mobile target paging clear and shortens automatic waits when no response
+is available. The [focused validation record](control-flow-qa-2026-10-08.json)
+preserves source hashes and actual results: 156 tests in 16 files, production
+build and catalog consistency. Game rules, AI and catalog files remain unchanged;
+the presentation pacing file is the only game/data source change. Exact-commit
+CI, both READY production aliases and fresh controls/worker/offline checks are
+verified after push.
+
 ## Significant-event animations — 8 October 2026
 
 The [important game animations](SIGNIFICANT-MOTION.md) use Remotion, native

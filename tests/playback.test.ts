@@ -56,7 +56,7 @@ describe("player-controlled effect playback", () => {
     ).toBe(1);
   });
 
-  it("scales recorded effects and bot pacing without shortening the human response window", () => {
+  it("scales effects and automatic pacing while real human decisions stay untimed", () => {
     const review = opening();
     for (let index = 0; index < review.frames.length; index++) {
       const frame = { ...review, index };
@@ -64,9 +64,8 @@ describe("player-controlled effect playback", () => {
       expect(reviewDelay(frame, 0.5)).toBe(reviewDelay(frame) * 2);
     }
     expect(automaticDelay(review.final, 1, 2)).toBe(525);
-    expect(automaticDelay(review.final, 0, 2)).toBe(
-      automaticDelay(review.final, 0),
-    );
+    expect(automaticDelay(review.final, 0, 2)).toBe(140);
+    expect(automaticDelay(review.final, 0, 0.5)).toBe(560);
   });
 
   it("browses snapshots without changing the committed match, decisions or frames", () => {

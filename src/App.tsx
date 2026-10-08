@@ -561,7 +561,7 @@ export default function App() {
         }
         doAction(next);
       },
-      automaticDelay(match, next.player, playbackSpeed),
+      automaticDelay(match, next.player, playbackSpeed, next),
     );
     return () => window.clearTimeout(timer);
   }, [

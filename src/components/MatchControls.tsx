@@ -204,106 +204,110 @@ export function MatchControls({
       className={`match-controls visual-controls window-${window} ${sourceCard ? "has-source" : ""} ${review || busy ? "is-busy" : ""}`}
       aria-label={t("Game controls")}
     >
-      {sourceCard && (
-        <div className="decision-source" data-decision-card={sourceCard.id}>
-          <Card card={sourceCard} onClick={() => inspect(sourceCard)} />
-        </div>
-      )}
-      <div className="decision-copy" role="status" aria-live="polite">
-        <span className="decision-kicker">
-          {t(
-            paused
-              ? "Game paused"
-              : busy || review
-                ? "Resolving effects"
-                : opening
-                  ? "Opening hand"
-                  : game.pendingChoice
-                    ? "Choose an effect"
-                    : window === "reaction"
-                      ? "Your reaction"
-                      : "Your next move",
-          )}
-          {review && (
-            <span className="review-progress">
-              {" · "}
-              {t("Effect {count} of {total}", {
-                count: review.index + 1,
-                total: review.frames.length,
-              })}
-            </span>
-          )}
-        </span>
-        <strong>
-          {sourceCard && !paused ? sourceCard.name : t(title)}
-          {!sourceCard &&
-            !review &&
-            ending?.category === "pass" &&
-            effectCard &&
-            ` · ${effectCard.name}`}
-          {card && !busy && !review && !paused && (
-            <span className="card-cost-note">
-              {hidden ? (
-                t("Hidden · base cost ignored")
-              ) : (
-                <>
-                  {t("Printed cost")} · {card.energy ?? 0} {t("ENERGY")} ·{" "}
-                  {card.power ?? 0} {t("power")}
-                </>
-              )}
-            </span>
-          )}
-        </strong>
-        <p>
-          {damageSummary &&
-            `${t("Damage remaining: {count}", { count: damageSummary.remaining })} · ${t("{count} lethal assignments", { count: damageSummary.lethal })} · `}
-          {movement && !review && !paused && !busy
-            ? t("{count} selected → {destination}. {instruction}", {
-                count: movement.unitIds.length,
-                destination: destination ?? "",
-                instruction: t(
-                  !movement.unitIds.length
-                    ? "Click a ready unit to add it."
-                    : !confirm
-                      ? "Cannot pay for this group. Remove a unit or cancel."
-                      : "Click units to change the group, then confirm.",
-                ),
-              })
-            : boardSelection && !review && !paused && !busy
-              ? t(
-                  "{count} selected · Choose cards on the board, then confirm.",
-                  { count: boardSelection.selected.length },
-                )
-              : trashSelection && !review && !paused && !busy
-                ? t(
-                    "{count} selected · Choose cards from the trash, then confirm.",
-                    { count: trashSelection.trashSelection!.selected.length },
-                  )
-                : t(hint)}
-        </p>
-        {namingSpell && !review && !paused && !busy && (
-          <input
-            className="spell-name-search"
-            type="search"
-            aria-label={t("Search spell names")}
-            placeholder={t("Search spell names")}
-            value={search}
-            onChange={(event) =>
-              setSearch({ key: searchKey, value: event.target.value })
-            }
-          />
+      <div className="decision-context">
+        {sourceCard && (
+          <div className="decision-source" data-decision-card={sourceCard.id}>
+            <Card card={sourceCard} onClick={() => inspect(sourceCard)} />
+          </div>
         )}
+        <div className="decision-copy" role="status" aria-live="polite">
+          <span className="decision-kicker">
+            {t(
+              paused
+                ? "Game paused"
+                : busy || review
+                  ? "Resolving effects"
+                  : opening
+                    ? "Opening hand"
+                    : game.pendingChoice
+                      ? "Choose an effect"
+                      : window === "reaction"
+                        ? "Your reaction"
+                        : "Your next move",
+            )}
+            {review && (
+              <span className="review-progress">
+                {" · "}
+                {t("Effect {count} of {total}", {
+                  count: review.index + 1,
+                  total: review.frames.length,
+                })}
+              </span>
+            )}
+          </span>
+          <strong>
+            <span className="decision-title">
+              {sourceCard && !paused ? sourceCard.name : t(title)}
+              {!sourceCard &&
+                !review &&
+                ending?.category === "pass" &&
+                effectCard &&
+                ` · ${effectCard.name}`}
+            </span>
+            {card && !busy && !review && !paused && (
+              <span className="card-cost-note">
+                {hidden ? (
+                  t("Hidden · base cost ignored")
+                ) : (
+                  <>
+                    {t("Printed cost")} · {card.energy ?? 0} {t("ENERGY")} ·{" "}
+                    {card.power ?? 0} {t("power")}
+                  </>
+                )}
+              </span>
+            )}
+          </strong>
+          <p>
+            {damageSummary &&
+              `${t("Damage remaining: {count}", { count: damageSummary.remaining })} · ${t("{count} lethal assignments", { count: damageSummary.lethal })} · `}
+            {movement && !review && !paused && !busy
+              ? t("{count} selected → {destination}. {instruction}", {
+                  count: movement.unitIds.length,
+                  destination: destination ?? "",
+                  instruction: t(
+                    !movement.unitIds.length
+                      ? "Click a ready unit to add it."
+                      : !confirm
+                        ? "Cannot pay for this group. Remove a unit or cancel."
+                        : "Click units to change the group, then confirm.",
+                  ),
+                })
+              : boardSelection && !review && !paused && !busy
+                ? t(
+                    "{count} selected · Choose cards on the board, then confirm.",
+                    { count: boardSelection.selected.length },
+                  )
+                : trashSelection && !review && !paused && !busy
+                  ? t(
+                      "{count} selected · Choose cards from the trash, then confirm.",
+                      { count: trashSelection.trashSelection!.selected.length },
+                    )
+                  : t(hint)}
+          </p>
+          {namingSpell && !review && !paused && !busy && (
+            <input
+              className="spell-name-search"
+              type="search"
+              aria-label={t("Search spell names")}
+              placeholder={t("Search spell names")}
+              value={search}
+              onChange={(event) =>
+                setSearch({ key: searchKey, value: event.target.value })
+              }
+            />
+          )}
+        </div>
       </div>
-      {selected && !paused && !busy && !review && !opening && (
-        <button
-          className="cancel-selection"
-          onClick={clear}
-          aria-label={t("Poništi odabir")}
-        >
-          <X size={18} />
-        </button>
-      )}
       <div className="decision-actions">
+        {selected && !paused && !busy && !review && !opening && (
+          <button
+            className="cancel-selection"
+            onClick={clear}
+            aria-label={t("Poništi odabir")}
+          >
+            <X size={18} />
+          </button>
+        )}
         {paused ? (
           <>
             {review && step && (
@@ -376,7 +380,10 @@ export function MatchControls({
                     key={action.id}
                     className="context-action"
                     onClick={() => dispatch(action)}
-                    title={t(action.detail)}
+                    title={
+                      t(action.label) +
+                      (action.detail ? ` · ${t(action.detail)}` : "")
+                    }
                   >
                     {optionCard?.image && (
                       <img

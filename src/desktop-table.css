@@ -1049,3 +1049,114 @@
     line-height: 12px;
   }
 }
+
+/* Keep the command dock on the table's centre line. Its two empty side tracks
+   balance the nearby source/help copy, so a lone confirm, pass or resume button
+   never drifts toward the score rail as options appear and disappear. */
+@media (min-width: 801px) and (min-height: 501px) {
+  .app.is-game .playmat > .visual-controls,
+  .app.is-game .playmat > .visual-controls.has-source {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr) minmax(0, 1fr);
+    gap: 10px;
+    padding: 8px 12px;
+  }
+  .app.is-game .visual-controls > .decision-context {
+    display: grid;
+    grid-area: 1 / 1;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    min-height: 0;
+  }
+  .app.is-game .visual-controls.has-source > .decision-context {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+  .app.is-game .visual-controls .decision-context > .decision-copy {
+    grid-area: 1 / 1;
+    padding: 0;
+  }
+  .app.is-game .visual-controls.has-source .decision-context > .decision-copy {
+    grid-area: 1 / 2;
+  }
+  .app.is-game .visual-controls .decision-context > .decision-source {
+    grid-area: 1 / 1;
+  }
+  .app.is-game .visual-controls .decision-source .game-card {
+    max-height: min(66px, 100%);
+  }
+  .app.is-game .visual-controls .decision-kicker,
+  .app.is-game .visual-controls .decision-title,
+  .app.is-game .visual-controls .card-cost-note {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .app.is-game .visual-controls .decision-copy > strong {
+    font-size: clamp(13px, 1vw, 17px);
+    line-height: 1.15;
+  }
+  .app.is-game .visual-controls .decision-copy p {
+    font-size: 10px;
+    margin-top: 3px;
+    -webkit-line-clamp: 2;
+  }
+  .app.is-game .visual-controls .card-cost-note {
+    font-size: 9px;
+    margin-top: 3px;
+  }
+  .app.is-game .visual-controls > .decision-actions,
+  .app.is-game .visual-controls.has-source > .decision-actions {
+    grid-area: 1 / 2;
+    justify-content: center;
+    gap: 7px;
+    padding: 0;
+  }
+  .app.is-game .visual-controls .context-actions {
+    flex: 0 1 auto;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--you-line) transparent;
+  }
+  .app.is-game .visual-controls .context-actions:empty {
+    display: none;
+  }
+  .app.is-game .visual-controls .context-action {
+    flex: 1 0 140px;
+    min-width: 140px;
+    max-width: 180px;
+    height: 64px;
+  }
+  .app.is-game .visual-controls .context-action strong {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+  .app.is-game .visual-controls .context-action small {
+    -webkit-line-clamp: 1;
+  }
+  .app.is-game .visual-controls .gold-button,
+  .app.is-game .visual-controls .secondary-decision,
+  .app.is-game .visual-controls .review-navigation button {
+    min-height: 44px;
+  }
+  .app.is-game .visual-controls .cancel-selection {
+    position: static;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    padding: 10px;
+  }
+  .app.is-game .visual-controls .action-pages button {
+    width: 44px;
+    height: 44px;
+  }
+  .app.is-game .visual-controls .playing-indicator {
+    padding: 0;
+  }
+}

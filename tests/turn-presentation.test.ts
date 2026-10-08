@@ -71,7 +71,7 @@ describe("readable turn presentation", () => {
     expect(human.action.player).toBe(1);
     expect(reviewDelay(human)).toBeGreaterThanOrEqual(2400);
     expect(reviewDelay(bot)).toBe(reviewDelay(human));
-    expect(automaticDelay(human.final, 0)).toBeGreaterThan(
+    expect(automaticDelay(human.final, 0)).toBeLessThan(
       automaticDelay(bot.final, 1),
     );
   });

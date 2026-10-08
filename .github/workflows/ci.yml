@@ -76,6 +76,7 @@ jobs:
           tests/table-moments.test.ts
           tests/effect-feedback.test.ts
           tests/playback.test.ts
+          tests/stack-pacing.test.ts
           tests/predict-decision-art.test.ts
           tests/trash-play-presentation.test.ts
           tests/card-wave13.test.ts

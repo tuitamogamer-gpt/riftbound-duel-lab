@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Decision ergonomics QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import {
+        createErgonomicsSession,
+        ergonomicsModes,
+      } from "./fixtures/ergonomics.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      if (!["localhost", "127.0.0.1", "[::1]"].includes(location.hostname))
+        throw new Error(
+          "Ergonomics fixtures are restricted to loopback origins",
+        );
+      const params = new URLSearchParams(location.search);
+      const mode = params.get("mode") || "move-confirm";
+      if (!ergonomicsModes.includes(mode))
+        throw new Error(`Unknown ergonomics fixture: ${mode}`);
+      const session = createErgonomicsSession(mode);
+      if (params.has("paused"))
+        session.paused = params.get("paused") !== "false";
+      localStorage.setItem("riftbound-duel-language", "en");
+      localStorage.setItem(SAVE_KEY, JSON.stringify(session));
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

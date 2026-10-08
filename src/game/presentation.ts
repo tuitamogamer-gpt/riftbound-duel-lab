@@ -1,7 +1,8 @@
 import type { Review } from "../components/StepFlow";
-import type { GameState, TurnStep } from "./types";
+import type { GameAction, GameState, TurnStep } from "./types";
 import { getRuneChanges } from "./rune-presentation";
 import { scoreMoment, phaseMoment, championMoment } from "./table-presentation";
+import { publicTableEvents } from "./event-presentation";
 import type { PlaybackSpeed } from "./playback";
 
 export function visibleTurnStep(game: GameState): TurnStep {
@@ -67,16 +68,27 @@ function baseReviewDelay(review: Review): number {
       ? 4400 + Math.min(2, frame.draw.count - 1) * 500
       : 2800;
   if (phaseMoment(review)) return 2600;
+  const events = publicTableEvents(review);
+  if (events.some((event) => event.kind === "victory")) return 3000;
+  const publicPlay =
+    review.action.category === "play" && !review.action.id.startsWith("hide:");
+  // Read a public card once, then move promptly through priority/log cleanup.
+  // Event selection compares only this frame with its displayed predecessor.
+  if (!events.length && !(publicPlay && review.index === 0)) return 240;
   if (frame.combat?.stage === "start" || frame.combat?.stage === "impact")
     return 2200;
   if (frame.combat) return 1700;
+  if (
+    publicPlay &&
+    review.index > 0 &&
+    frame.effect?.stage === "announced" &&
+    frame.effect.cardId === review.action.cardId &&
+    events.every((event) => event.kind === "play")
+  )
+    return 450;
   if (frame.effect) return 1900;
   // Public cards cross the table before settling; leave enough time to read them.
-  if (
-    review.action.category === "play" &&
-    !review.action.id.startsWith("hide:")
-  )
-    return 1900;
+  if (publicPlay) return 1900;
   if (getRuneChanges(review).length) return 1800;
   if (visibleTurnStep(frame.state) !== "main") return 1500;
   if (frame.state.stack.length || frame.state.phase === "showdown") return 1200;
@@ -87,9 +99,15 @@ export function automaticDelay(
   game: GameState,
   player: 0 | 1,
   speed: PlaybackSpeed = 1,
+  action?: GameAction,
 ) {
-  // Even a forced human pass leaves time to read the window before it closes.
-  return player === 0
-    ? 1700
-    : Math.round((game.phase === "move" ? 500 : 1050) / speed);
+  // The caller schedules a human action only when Pass is the sole legal action.
+  // Real human responses have no timer; neither speed nor pacing chooses them.
+  const base =
+    player === 0 || action?.category === "pass"
+      ? 280
+      : game.phase === "move"
+        ? 500
+        : 1050;
+  return Math.round(base / speed);
 }

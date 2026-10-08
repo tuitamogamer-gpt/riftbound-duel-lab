@@ -1,0 +1,392 @@
+{
+  "date": "2026-10-08",
+  "scope": "Central desktop commands, mobile target pagination and faster automatic stack presentation. This record covers local pre-push checks; exact release CI, alias and production receipts are recorded separately after push.",
+  "baselineCommit": "f938ac84c3d0e497e107ad2c728668bdbf963eb0",
+  "finalSource": {
+    "sha256": "40e973982f26befc34195eb7c20631d5795dfc4614af741ee25dc9d9d4a96212",
+    "files": 446,
+    "encoding": "SHA-256 of compact UTF-8 JSON path-sorted [{path,sha256}] covering application/API/test/config/CI and motion authoring sources; documentation and screenshots excluded.",
+    "changedGameDataFiles": ["src/game/presentation.ts"],
+    "unchangedOtherGameDataFiles": 111,
+    "unchangedOtherGameDataSha256": "e58876bea798c5628f5608b8e60fef91600a3b000b38867131db57cd1b70865a",
+    "runtimeTestCheckpointSha256": "d316f2df95b91400277cb72bd650b8695bda46f84e92a1a93b4046a3e60b8257",
+    "identicalRuntimeTestFiles": 361,
+    "changedSinceRuntimeTests": ["src/mobile-table.css"]
+  },
+  "build": {
+    "buildId": "66c3b0914cb1",
+    "assets": 84,
+    "index": "/assets/index-5isINj92.js",
+    "indexSha256": "1413e227f3c919d11a04e1668be06b777fb9a6a0e9af0f500f6108dc7a62818b",
+    "worker": "/assets/worker-BcVPqZ85.js",
+    "workerSha256": "e8ed7fb237696712f1c94a247711b01c93c32053d5c37b9c9984a946f03e49a6",
+    "manifestSha256": "b25394a173c7967be30196568c15e52d0bc7c2cc4fa895b8fda815034fed1a32",
+    "sourceSha256": "40e973982f26befc34195eb7c20631d5795dfc4614af741ee25dc9d9d4a96212",
+    "process": {
+      "command": ["npm", "run", "build"],
+      "startedAt": "2026-10-08T11:53:33.324401+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "sourceSha256": "40e973982f26befc34195eb7c20631d5795dfc4614af741ee25dc9d9d4a96212",
+      "completedAt": "2026-10-08T11:54:14.989608+00:00",
+      "signal": null,
+      "changedSourceFiles": []
+    }
+  },
+  "focusedTests": {
+    "passed": 156,
+    "files": 16,
+    "newStackPacingCases": 13,
+    "fileNames": [
+      "body-scroll-lock.test.ts",
+      "decision-presentation.test.ts",
+      "effect-feedback.test.ts",
+      "event-highlights.test.ts",
+      "hidden-flow.test.ts",
+      "mobile-duel-fixtures.test.ts",
+      "mobile-presentation.test.ts",
+      "movement-flow.test.ts",
+      "native-flow.test.ts",
+      "playback.test.ts",
+      "significant-motion.test.ts",
+      "stack-pacing.test.ts",
+      "stack-presentation.test.ts",
+      "status-presentation.test.ts",
+      "table-moments.test.ts",
+      "turn-presentation.test.ts"
+    ],
+    "process": {
+      "command": [
+        "npm",
+        "test",
+        "--",
+        "tests/stack-pacing.test.ts",
+        "tests/significant-motion.test.ts",
+        "tests/event-highlights.test.ts",
+        "tests/table-moments.test.ts",
+        "tests/effect-feedback.test.ts",
+        "tests/playback.test.ts",
+        "tests/mobile-presentation.test.ts",
+        "tests/mobile-duel-fixtures.test.ts",
+        "tests/decision-presentation.test.ts",
+        "tests/stack-presentation.test.ts",
+        "tests/status-presentation.test.ts",
+        "tests/turn-presentation.test.ts",
+        "tests/body-scroll-lock.test.ts",
+        "tests/movement-flow.test.ts",
+        "tests/native-flow.test.ts",
+        "tests/hidden-flow.test.ts",
+        "--maxWorkers=2",
+        "--testTimeout=30000",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/control-flow-2026-10-08/targeted-tests.json"
+      ],
+      "startedAt": "2026-10-08T11:31:35.633234+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "sourceSha256": "d316f2df95b91400277cb72bd650b8695bda46f84e92a1a93b4046a3e60b8257",
+      "completedAt": "2026-10-08T11:33:30.690635+00:00",
+      "signal": null,
+      "changedSourceFiles": []
+    },
+    "scope": "Real resolver, manual reactions and choices, frame privacy, significant-event timing, mobile presentation and movement. The final follow-up changes only mobile CSS; all 361 runtime/test/config/fixture bytes remain identical to this passing checkpoint."
+  },
+  "catalog": {
+    "process": {
+      "command": ["npm", "run", "cards:check"],
+      "startedAt": "2026-10-08T11:31:35.610833+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "sourceSha256": "d316f2df95b91400277cb72bd650b8695bda46f84e92a1a93b4046a3e60b8257",
+      "completedAt": "2026-10-08T11:31:41.700740+00:00",
+      "signal": null,
+      "changedSourceFiles": []
+    },
+    "scope": "Consistency check passed at the runtime checkpoint. Catalog and reporting source bytes are unchanged by the later mobile CSS follow-up."
+  },
+  "runtimeCheckpointBrowsers": {
+    "chromiumGeometry": {
+      "engine": "Chromium",
+      "engineVersion": "143.0.7499.4",
+      "scope": "Fresh isolated loopback contexts; actual legal-engine fixture actions; API mutations blocked; visible command geometry and actual desktop clicks/mobile taps.",
+      "physicalDevice": false,
+      "passedCases": 20,
+      "sourceBefore": {
+        "sourceSha256": "d316f2df95b91400277cb72bd650b8695bda46f84e92a1a93b4046a3e60b8257",
+        "files": 446
+      },
+      "sourceAfter": {
+        "sourceSha256": "d316f2df95b91400277cb72bd650b8695bda46f84e92a1a93b4046a3e60b8257",
+        "files": 446
+      },
+      "process": {
+        "startedAt": "2026-10-08T11:31:40.392Z",
+        "state": "passed",
+        "sourceFreeze": "d316f2df95b91400277cb72bd650b8695bda46f84e92a1a93b4046a3e60b8257",
+        "actualProcessExitCode": 0,
+        "actualProcessSignal": null,
+        "pid": 140402,
+        "completedAt": "2026-10-08T11:34:37.201Z"
+      },
+      "viewports": [
+        "1024x768",
+        "1280x900",
+        "1440x900",
+        "1920x900",
+        "320x568",
+        "390x844",
+        "844x390"
+      ],
+      "scenarios": [
+        "choice",
+        "choice / choice",
+        "damage / damage",
+        "move-confirm",
+        "move-confirm / move",
+        "paused-review / review",
+        "reaction / reaction"
+      ],
+      "verifiedActions": [
+        "Actual cancel preserves units; select destination, add/remove unit, confirm commits only selected unit",
+        "Actual damage target click/tap reduces assigned player remaining damage",
+        "Actual playable reaction selectable; cancel clears choice without action; chosen reaction enters real chain",
+        "Mandatory real Hidden Edge target waits; actual target tap creates legal choice review",
+        "Paused real resolver review remains fixed; Next and Previous operate from central group",
+        "Visible commands ≥44px; in viewport; no horizontal overflow/pile/hand collision; desktop cluster near center"
+      ],
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "failedResponses": 0
+    },
+    "nativeWebKitGeometry": {
+      "engine": "Linux WPE WebKit26",
+      "engineVersion": "26.0",
+      "scope": "Fresh isolated loopback contexts; actual legal-engine fixture actions; API mutations blocked; visible command geometry and actual desktop clicks/mobile taps.",
+      "physicalDevice": false,
+      "passedCases": 8,
+      "sourceBefore": {
+        "sourceSha256": "d316f2df95b91400277cb72bd650b8695bda46f84e92a1a93b4046a3e60b8257",
+        "files": 446
+      },
+      "sourceAfter": {
+        "sourceSha256": "d316f2df95b91400277cb72bd650b8695bda46f84e92a1a93b4046a3e60b8257",
+        "files": 446
+      },
+      "process": {
+        "startedAt": "2026-10-08T11:31:40.382Z",
+        "state": "passed",
+        "sourceFreeze": "d316f2df95b91400277cb72bd650b8695bda46f84e92a1a93b4046a3e60b8257",
+        "actualProcessExitCode": 0,
+        "actualProcessSignal": null,
+        "pid": 140401,
+        "completedAt": "2026-10-08T11:34:22.528Z"
+      },
+      "viewports": ["320x568", "390x844", "844x390"],
+      "scenarios": [
+        "choice / choice",
+        "damage / damage",
+        "move-confirm / move",
+        "reaction / reaction"
+      ],
+      "verifiedActions": [
+        "Actual cancel preserves units; select destination, add/remove unit, confirm commits only selected unit",
+        "Actual damage target click/tap reduces assigned player remaining damage",
+        "Actual playable reaction selectable; cancel clears choice without action; chosen reaction enters real chain",
+        "Mandatory real Hidden Edge target waits; actual target tap creates legal choice review",
+        "Visible commands ≥44px; in viewport; no horizontal overflow/pile/hand collision; desktop cluster near center"
+      ],
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "failedResponses": 0
+    },
+    "chromiumTimers": {
+      "engine": "Chromium",
+      "engineVersion": "143.0.7499.4",
+      "scope": "Isolated synthetic loopback saves only; API mutations blocked; actual App timer and actionable response protections.",
+      "physicalDevice": false,
+      "passedCases": 9,
+      "sourceBefore": {
+        "sourceSha256": "d316f2df95b91400277cb72bd650b8695bda46f84e92a1a93b4046a3e60b8257",
+        "files": 446
+      },
+      "sourceAfter": {
+        "sourceSha256": "d316f2df95b91400277cb72bd650b8695bda46f84e92a1a93b4046a3e60b8257",
+        "files": 446
+      },
+      "process": {
+        "startedAt": "2026-10-08T11:35:14.295Z",
+        "state": "passed",
+        "sourceFreeze": "d316f2df95b91400277cb72bd650b8695bda46f84e92a1a93b4046a3e60b8257",
+        "actualProcessExitCode": 0,
+        "actualProcessSignal": null,
+        "pid": 141911,
+        "completedAt": "2026-10-08T11:35:54.393Z"
+      },
+      "viewports": [],
+      "scenarios": [
+        "choice / speed 2",
+        "end-turn / speed 2",
+        "forced-pass / speed 0.5",
+        "forced-pass / speed 1",
+        "forced-pass / speed 2",
+        "forced-pass-menu / speed 1",
+        "forced-pass-pause / speed 1",
+        "hidden / speed 2",
+        "reaction / speed 2"
+      ],
+      "verifiedActions": [
+        "Actual decision remains waiting at 2× for longer than previous forced-pass delay",
+        "Forced pass remains unchanged while menu active",
+        "Forced pass remains unchanged while pause active"
+      ],
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "failedResponses": 0
+    },
+    "scope": "These checks ran at the d316 runtime checkpoint. They are not claimed as full geometry matrices rerun after the mobile CSS follow-up."
+  },
+  "finalCssBrowsers": {
+    "chromium": {
+      "engine": "Chromium",
+      "engineVersion": "143.0.7499.4",
+      "scope": "CSS-only short portrait paginated-target delta from d316 source; fresh synthetic loopback sessions; real scroll input and touches/clicks; source bytes guarded.",
+      "physicalDevice": false,
+      "passedCases": 5,
+      "sourceBefore": {
+        "sourceSha256": "40e973982f26befc34195eb7c20631d5795dfc4614af741ee25dc9d9d4a96212",
+        "files": 446
+      },
+      "sourceAfter": {
+        "sourceSha256": "40e973982f26befc34195eb7c20631d5795dfc4614af741ee25dc9d9d4a96212",
+        "files": 446
+      },
+      "process": {
+        "startedAt": "2026-10-08T11:53:33.926Z",
+        "state": "passed",
+        "sourceFreeze": "40e973982f26befc34195eb7c20631d5795dfc4614af741ee25dc9d9d4a96212",
+        "actualProcessExitCode": 0,
+        "actualProcessSignal": null,
+        "pid": 143596,
+        "completedAt": "2026-10-08T11:54:28.658Z"
+      },
+      "viewports": ["1440x900", "320x568", "390x650", "390x844", "844x390"],
+      "scenarios": ["reaction containment"],
+      "verifiedActions": [],
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "failedResponses": 0
+    },
+    "nativeWebKit": {
+      "engine": "Linux WPE WebKit26",
+      "engineVersion": "26.0",
+      "scope": "CSS-only final short-portrait containment; fresh small-viewport WebKit hasTouch=true/isMobile=false companion with native wheel input and actual touch taps, because mobile WebKit Playwright rejects wheel. No physical-device or swipe claim; source guarded.",
+      "physicalDevice": false,
+      "passedCases": 3,
+      "sourceBefore": {
+        "sourceSha256": "40e973982f26befc34195eb7c20631d5795dfc4614af741ee25dc9d9d4a96212",
+        "files": 446
+      },
+      "sourceAfter": {
+        "sourceSha256": "40e973982f26befc34195eb7c20631d5795dfc4614af741ee25dc9d9d4a96212",
+        "files": 446
+      },
+      "process": {
+        "startedAt": "2026-10-08T12:00:23.545Z",
+        "state": "passed",
+        "sourceFreeze": "40e973982f26befc34195eb7c20631d5795dfc4614af741ee25dc9d9d4a96212",
+        "actualProcessExitCode": 0,
+        "actualProcessSignal": null,
+        "pid": 144230,
+        "completedAt": "2026-10-08T12:01:12.170Z"
+      },
+      "viewports": ["320x568", "390x650", "844x390"],
+      "scenarios": ["reaction containment"],
+      "verifiedActions": [],
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "failedResponses": 0
+    },
+    "checks": [
+      "Short portrait battlefield clips within its zone and scrolls to both units and Might",
+      "Actual inspect/close, More/Previous, legal target cast and selection clearing",
+      "44px hand-card target in the changed short portrait scope",
+      "Clearing selection restores the ordinary hand",
+      "Normal portrait, landscape and desktop remain outside the containment rule"
+    ],
+    "nativeInputLimit": "Playwright mobile WebKit does not support wheel input or a swipe API. The final native scrolling check uses a fresh small-viewport hasTouch=true, isMobile=false companion with actual native wheel input and touch taps. It does not establish physical iOS swipe behavior."
+  },
+  "timing": {
+    "programmedFullRaySequenceAt1x": {
+      "beforeMs": 15650,
+      "afterMs": 7670,
+      "scope": "Actual resolver play and two forced passes, all frames retained. Presentation budget excludes rendering and worker startup."
+    },
+    "forcedPassAt1xMs": {
+      "before": 1700,
+      "after": 280
+    },
+    "localBrowserObservedAt1x": {
+      "baseline": {
+        "engine": "Chromium",
+        "engineVersion": "143.0.7499.4",
+        "scope": "Isolated synthetic loopback saves only; API mutations blocked; actual App timer and actionable response protections.",
+        "physicalDevice": false,
+        "passedCases": 1,
+        "sourceBefore": {
+          "baselineCommit": "f938ac84c3d0e497e107ad2c728668bdbf963eb0",
+          "sourceSha256": "2755d6f234fa5b736d06f67f8fc50f646ebee9e2274f5f27aad725cb440802d7",
+          "files": 399
+        },
+        "sourceAfter": {
+          "baselineCommit": "f938ac84c3d0e497e107ad2c728668bdbf963eb0",
+          "sourceSha256": "2755d6f234fa5b736d06f67f8fc50f646ebee9e2274f5f27aad725cb440802d7",
+          "files": 399
+        },
+        "process": {
+          "startedAt": "2026-10-08T11:30:51.359Z",
+          "state": "passed",
+          "sourceFreeze": null,
+          "actualProcessExitCode": 0,
+          "actualProcessSignal": null,
+          "pid": 140143,
+          "completedAt": "2026-10-08T11:31:01.174Z"
+        },
+        "viewports": [],
+        "scenarios": ["forced-pass / speed 1"],
+        "verifiedActions": [],
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "failedResponses": 0
+      },
+      "forcedPassSinceFirstTableMs": {
+        "before": 1788,
+        "after": 773
+      },
+      "incomingRayReviewFinishedSinceFirstTableMs": {
+        "before": 6716,
+        "after": 5029
+      },
+      "scope": "Single isolated dev-browser observations of the same already-played incoming three-frame Ray chain, measured from first rendered table. Includes UI scheduling overhead. This is separate from the full programmed sequence and is not a device performance benchmark."
+    },
+    "protections": "Available hand/Hidden/board/Legend reactions, mandatory choices, movement, damage, mulligan and End turn remain manual. Pause/menu protections and important-event reading times pass; no frames are skipped."
+  },
+  "limitations": [
+    "Chromium touch emulation and native Linux WPE WebKit; no physical iOS device testing",
+    "Exploratory, interrupted or failed attempts contribute no passing cases",
+    "Earlier complete engine/precon matrix and bot pilot were not rerun for this presentation-only change",
+    "Hosted rooms and existing user saves were not accessed"
+  ],
+  "screenshots": [
+    {
+      "path": "screenshots/control-flow-desktop.png",
+      "capturedSourceSha256": "d316f2df95b91400277cb72bd650b8695bda46f84e92a1a93b4046a3e60b8257",
+      "scope": "1440px central move confirmation; desktop CSS unchanged after this checkpoint"
+    },
+    {
+      "path": "screenshots/control-flow-mobile.png",
+      "capturedSourceSha256": "40e973982f26befc34195eb7c20631d5795dfc4614af741ee25dc9d9d4a96212",
+      "scope": "320px final short portrait selection with the allied Might scrolled into view"
+    }
+  ]
+}

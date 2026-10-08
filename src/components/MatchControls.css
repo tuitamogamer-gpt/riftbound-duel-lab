@@ -1,4 +1,10 @@
 /* One decision area: source card, available moves, and permanent player piles. */
+.decision-context {
+  display: contents;
+}
+.app.is-game .visual-controls .review-navigation .review-previous {
+  min-width: 44px;
+}
 .app.is-game .game-layout {
   grid-template-rows: 36px 42px minmax(0, 1fr) 126px;
 }
