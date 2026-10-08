@@ -1,0 +1,346 @@
+{
+  "recordedAt": "2026-10-08T07:06:27.573267+00:00",
+  "scope": "Desktop/mobile presentation and event effects. Local synthetic fixtures; final exact-commit CI and production worker/offline smoke are verified after push. No new full-engine regression, precon matrix or AI pilot claim.",
+  "source": {
+    "baselineCommit": "caba4be36b837950f3a8034302c0273bcfdbd644",
+    "sourceSha256": "ddd6eb85d8ae1f21c02887dc4e44d4545c24ce684bb3e3055c54a62d99b0899e",
+    "gameDataSha256": "c4d575ef73f84eec34b427fe6812a602776b1059a6b7a5e1338685e39cbc21d3",
+    "requiredWorkflowSha256": "826678e4249b78cf2dde1d6835f00262134b8cf262a0675982c897c95b9fb7c8",
+    "frozenFiles": 408,
+    "unchangedGameDataFiles": 112,
+    "changedSourceFiles": [
+      {
+        "path": "src/components/EffectFeedback.css",
+        "sha256": "fbc9c1aeae7c91bd71ab90cb1786438bab408c034e88ac96d0a596369cce9e92"
+      },
+      {
+        "path": "src/components/HandTray.css",
+        "sha256": "95076e7ef178437d1f1a466e0f62c6c69e4c81a05a88ead77d361da24c21fc5c"
+      },
+      {
+        "path": "src/components/MobileBoardNav.css",
+        "sha256": "70f8508c35fb63a871fb8dd9dd4d46b3dab453721a86dcbc8610d8ebaeb91b5e"
+      },
+      {
+        "path": "src/components/MobileMatchMenu.css",
+        "sha256": "f5c2fa20bfef50ad015df84119f39589ac907624ab03605abb2632b41556196f"
+      },
+      {
+        "path": "src/components/ScreenHighlight.css",
+        "sha256": "7b9aa81a04817b7dab5da75f1ca489a17d0e107b17f1a8f99f5a72fc964be7bf"
+      },
+      {
+        "path": "src/components/ScreenHighlight.tsx",
+        "sha256": "9139e5d06178ed7165a20a28ef8084f9debcdf8e9eef332efeca861fe92df339"
+      },
+      {
+        "path": "src/components/TableMoments.css",
+        "sha256": "c1b5cfff2f72b8c93bd332566e16393c8c36d409214c8b1c988ec038b4e141b0"
+      },
+      {
+        "path": "src/components/TableMoments.tsx",
+        "sha256": "d850518875ff609390fd41fb9d314d6a9fdc740e1d652202677dc35c499662ee"
+      },
+      {
+        "path": "src/desktop-table.css",
+        "sha256": "a67c1ba0d712f4db781a615b296091f45eb97e279f23b1b342cff64c4b71bded"
+      },
+      {
+        "path": "src/match-layout.css",
+        "sha256": "b53d6e3f9f927f6bc68fb2a0687b4f9cdd5e3db6eb38e0c98ee46b01d7c6d9bd"
+      },
+      {
+        "path": "src/mobile-table.css",
+        "sha256": "fe557363fb7754f721ffbb455f7303a74603f3ce3db8bac13b930d1a650487fd"
+      },
+      {
+        "path": "tests/event-highlights.test.ts",
+        "sha256": "6a941d972f71acb48923e643ec37013c509e96933eddfc4ed835a92e3e2c34e1"
+      }
+    ],
+    "hashEncoding": "SHA-256 of compact UTF-8 JSON array [{path,sha256}] sorted by path; individual files hash their exact bytes."
+  },
+  "checks": {
+    "targeted": {
+      "command": [
+        "npm",
+        "test",
+        "--",
+        "tests/event-highlights.test.ts",
+        "tests/table-moments.test.ts",
+        "tests/effect-feedback.test.ts",
+        "tests/playback.test.ts",
+        "tests/mobile-presentation.test.ts",
+        "tests/mobile-duel-fixtures.test.ts",
+        "tests/decision-presentation.test.ts",
+        "tests/stack-presentation.test.ts",
+        "tests/status-presentation.test.ts",
+        "tests/turn-presentation.test.ts",
+        "tests/body-scroll-lock.test.ts",
+        "--maxWorkers=2",
+        "--testTimeout=30000",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/design-polish-2026-10-08/targeted-tests.json"
+      ],
+      "startedAt": "2026-10-08T06:53:41.251548+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "sourceSha256": "ddd6eb85d8ae1f21c02887dc4e44d4545c24ce684bb3e3055c54a62d99b0899e",
+      "completedAt": "2026-10-08T06:54:03.598069+00:00",
+      "signal": null,
+      "changedSourceFiles": []
+    },
+    "build": {
+      "command": ["npm", "run", "build"],
+      "startedAt": "2026-10-08T06:53:41.235332+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "sourceSha256": "ddd6eb85d8ae1f21c02887dc4e44d4545c24ce684bb3e3055c54a62d99b0899e",
+      "completedAt": "2026-10-08T06:54:25.650869+00:00",
+      "signal": null,
+      "changedSourceFiles": []
+    },
+    "catalog": {
+      "command": ["npm", "run", "cards:check"],
+      "startedAt": "2026-10-08T06:53:41.265759+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "sourceSha256": "ddd6eb85d8ae1f21c02887dc4e44d4545c24ce684bb3e3055c54a62d99b0899e",
+      "completedAt": "2026-10-08T06:53:46.326806+00:00",
+      "signal": null,
+      "changedSourceFiles": []
+    },
+    "final-capture": {
+      "command": [
+        "node",
+        "/workspace/scratch/design-polish-2026-10-08/capture-baseline.mjs",
+        "http://127.0.0.1:5297",
+        "after"
+      ],
+      "startedAt": "2026-10-08T06:53:41.255657+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "sourceSha256": "ddd6eb85d8ae1f21c02887dc4e44d4545c24ce684bb3e3055c54a62d99b0899e",
+      "completedAt": "2026-10-08T06:54:23.195839+00:00",
+      "signal": null,
+      "changedSourceFiles": []
+    }
+  },
+  "focusedTests": {
+    "total": 99,
+    "passed": 99,
+    "failed": 0,
+    "files": 11,
+    "reportSha256": "0681fc61716c1f11b0f71ef7581e804b69cdd6636dddbedf4c3e5495b64925f7",
+    "suites": [
+      "body-scroll-lock.test.ts",
+      "decision-presentation.test.ts",
+      "effect-feedback.test.ts",
+      "event-highlights.test.ts",
+      "mobile-duel-fixtures.test.ts",
+      "mobile-presentation.test.ts",
+      "playback.test.ts",
+      "stack-presentation.test.ts",
+      "status-presentation.test.ts",
+      "table-moments.test.ts",
+      "turn-presentation.test.ts"
+    ]
+  },
+  "catalog": {
+    "executableEntries": 1459,
+    "precons": 13,
+    "providerSnapshotUnchanged": true
+  },
+  "compiledBuild": {
+    "buildId": "9a587903c820",
+    "assets": 81,
+    "index": "/assets/index-CXGEpMgZ.js",
+    "indexSha256": "37a613836702c8ec78c6cddf1e20e7d8c0d4147997cbbcccfbe93e87340f1aff",
+    "worker": "/assets/worker-BcVPqZ85.js",
+    "workerSha256": "e8ed7fb237696712f1c94a247711b01c93c32053d5c37b9c9984a946f03e49a6",
+    "manifestSha256": "d9d26877b40a7caa2d57fc105f05f83c7adff48ff9f4dbd242099533194a9d1f",
+    "sourceSha256": "ddd6eb85d8ae1f21c02887dc4e44d4545c24ce684bb3e3055c54a62d99b0899e"
+  },
+  "browserChecks": {
+    "finalNativeWebKit": {
+      "completedAt": "2026-10-08T06:59:53.102Z",
+      "engine": "Linux WPE WebKit",
+      "engineVersion": "26.0",
+      "scope": "Fresh deterministic synthetic loopback duel fixtures, rendered in native Linux WPE WebKit26 with real Playwright tap interactions; CSS/layout/reduced-motion and nested modal focus checks; final champion, phase, and damage notification geometry additionally excludes score, zone navigation, hand toolbar, and match controls. Not physical Safari/iOS; no native swipe claim, no production rooms or user saves accessed.",
+      "actualProcess": {
+        "state": "passed",
+        "startedAt": "2026-10-08T06:57:17.871Z",
+        "childPid": 109693,
+        "actualProcessExitCode": 0,
+        "actualProcessSignal": null,
+        "completedAt": "2026-10-08T06:59:53.990Z"
+      },
+      "sourceSha256": "ddd6eb85d8ae1f21c02887dc4e44d4545c24ce684bb3e3055c54a62d99b0899e",
+      "rootFreezeBefore": {
+        "checkedAt": "2026-10-08T06:57:18.357Z",
+        "sourceSha256": "ddd6eb85d8ae1f21c02887dc4e44d4545c24ce684bb3e3055c54a62d99b0899e",
+        "fileCount": 408,
+        "matchedFiles": 408,
+        "mismatches": []
+      },
+      "rootFreezeAfter": {
+        "checkedAt": "2026-10-08T06:59:52.997Z",
+        "sourceSha256": "ddd6eb85d8ae1f21c02887dc4e44d4545c24ce684bb3e3055c54a62d99b0899e",
+        "fileCount": 408,
+        "matchedFiles": 408,
+        "mismatches": []
+      },
+      "runs": 27,
+      "originalMobileFixtureRuns": 21,
+      "additionalEffectRuns": 6,
+      "viewports": [
+        {
+          "width": 320,
+          "height": 568
+        },
+        {
+          "width": 390,
+          "height": 844
+        },
+        {
+          "width": 844,
+          "height": 390
+        }
+      ],
+      "fixtureModes": [
+        "main",
+        "crowded",
+        "champion",
+        "combat",
+        "reaction",
+        "hidden",
+        "mulligan",
+        "phase",
+        "damage"
+      ],
+      "failedRuns": [],
+      "exhaustedMightChecks": 39,
+      "overlappingExhaustedMight": 0,
+      "pageErrors": [],
+      "failedRequests": [],
+      "failedResponses": [],
+      "rawReportSha256": "7b9d130fbc58ea69fcfaa991af9dcc7c64296a4498445d09bc44bb6f81eb30e7",
+      "protectedControlChecks": 9
+    },
+    "desktopTargeted": {
+      "cases": 6,
+      "actualProcessExitCode": 0,
+      "scope": "1280x720 and1440x900 crowded/reaction/champion; actual Details and Escape focus return, hand hover, bounded synthetic stack scrolling. Desktop700+ rules unchanged after this checkpoint.",
+      "reportSha256": "61ca9ac404a19221b78f66bdeabfa7b7cd9d62f9f6ad31f08ecda2268f0f744d",
+      "completedAt": "2026-10-08T06:38:51.183Z"
+    },
+    "desktopShortFinal": {
+      "cases": 8,
+      "actualProcessExitCode": 0,
+      "scope": "Final short-height rule at1280x600/650/699/720 crowded+reaction; no Exhausted/Might intersections or document overflow; actual field/base/stack Details, focus return and hand hover.",
+      "reportSha256": "7503c716386df63f379d0fc944d6882d2ac3d1bff811de44d72e66b3869da84b",
+      "completedAt": "2026-10-08T06:53:09.112Z"
+    },
+    "desktopRunes": {
+      "cases": 2,
+      "actualProcessExitCode": 0,
+      "scope": "Final desktop rune geometry at720 and900. Short-height rule does not apply to these dimensions.",
+      "reportSha256": "38255b32c33f8c573f7e28296d82e4b344effdbd555a6300636ed9648cca47dd",
+      "completedAt": "2026-10-08T06:37:38.239Z"
+    },
+    "mobileTouch": {
+      "cases": 15,
+      "actualProcessExitCode": 0,
+      "scope": "320x568/390x844/844x390 main/crowded/combat/hidden/mulligan; actual taps, sheet/menu scroll, nested Details, focus return, rotation and reduced motion. All four owned mobile CSS files unchanged since this checkpoint; final whole-source WebKit run above covers integrated effects.",
+      "reportSha256": "4dfabbfc6d83da473839cae0af65bede87d3b7d924250eb22fddf3bbfb2ad34c",
+      "completedAt": "2026-10-08T06:18:50.662Z"
+    },
+    "effectsInitial": {
+      "cases": 14,
+      "actualProcessExitCode": 0,
+      "scope": "Paused and reduced-motion cases before final landscape positioning correction; not final landscape geometry proof.",
+      "reportSha256": "c4603efddc0ea21fa9d01e466759132b31e256339d436e0948e7a4b93d9a43a4",
+      "completedAt": "2026-10-08T06:17:17.006Z"
+    },
+    "effectsMotionInitial": {
+      "cases": 3,
+      "actualProcessExitCode": 0,
+      "scope": "Actual Resume/Pause/Resume; desktop1x/mobileportrait1x/desktop2x. Final positioning correction is landscape-only.",
+      "reportSha256": "e2d2b426bce0dacd1db69f7cb124f9122efac815961b146f2b7a5ac52a9812c7",
+      "completedAt": "2026-10-08T06:21:24.023Z"
+    },
+    "effectsLandscapeFinal": {
+      "cases": 12,
+      "actualProcessExitCode": 0,
+      "scope": "Chromium568x320/667x375/844x390 and native WebKit844x390, each champion/phase/damage; no overlaps with scores, zone navigation, hand tools, action controls or Might.",
+      "reportSha256": "6da1ef09152808012348577917db22d2dd39c254b5000e6612cd39dc4633ec81",
+      "completedAt": "2026-10-08T06:51:12.137Z"
+    },
+    "effectsLandscapeMotionFinal": {
+      "cases": 2,
+      "actualProcessExitCode": 0,
+      "scope": "Actual animated Resume/Pause/Resume at568x320 and844x390; protected controls stay clear, paused opacity1/timer hidden, frame advance removes entry.",
+      "reportSha256": "956501f507d1df7f3518cd8bcab8ac40c45bc74c5a2568b7f8cdbd9b05efc975",
+      "completedAt": "2026-10-08T06:52:24.481Z"
+    },
+    "finalRootScreenshots": {
+      "cases": 8,
+      "actualProcessExitCode": 0,
+      "sourceSha256": "ddd6eb85d8ae1f21c02887dc4e44d4545c24ce684bb3e3055c54a62d99b0899e",
+      "scope": "Eight Chromium screenshots at exact final source; isolated exact-baseline capture on a separate Vite cache. No overflow or page errors. These counts overlap other fixture checks and are not additive."
+    },
+    "desktopShortVisualMetrics": {
+      "cases": 4,
+      "actualProcessExitCode": 0,
+      "completedAt": "2026-10-08T07:03:42.035Z",
+      "reportSha256": "9f3e9de541033911f9fc2ebf63d3ca54231cf1a63cd9590d7eede7dd87aba24c",
+      "scope": "Actual Exhausted token artwork stays clear of Might at600/650/699/720px. Compact badge14px, text10px andShield10x10px;720px battlefield186px/hand106px/runes35px unchanged."
+    }
+  },
+  "excludedAttempts": [
+    {
+      "actualProcessExitCode": 1,
+      "reason": "Earlier desktop broad harness found short-height Exhausted/Might overlap; compact badge correction subsequently passed the fresh final8 cases. Failed prototype and covered-centre mouse harness attempts contribute no passing cases."
+    },
+    {
+      "actualProcessExitCode": 1,
+      "reason": "Initial screenshot capture waited for the table before pressing Resume duel; corrected capture ran in full. Mixed concurrent-dev before screenshots were replaced by an isolated exact-baseline capture."
+    },
+    {
+      "reason": "Early mobile geometry was measured before the finite sheet animation completed; final complete15-case run waits for completion."
+    },
+    {
+      "actualProcessExitCode": 1,
+      "actualProcessSignal": null,
+      "sourceSha256": "ddd6eb85d8ae1f21c02887dc4e44d4545c24ce684bb3e3055c54a62d99b0899e",
+      "reason": "Extra-fixture setup navigated before initial synthetic app finished dynamic imports. Private harness now waits for initialized Resume UI; final27 are from a complete fresh process, with no recovered partial cases or filtered page errors."
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "docs/screenshots/visual-polish-champion-landscape.png",
+      "sha256": "81f4c766b779709e404357bedc7ee26c39be549e72d617c9f1b738b557b212c4",
+      "bytes": 198505,
+      "syntheticFixture": true
+    },
+    {
+      "path": "docs/screenshots/visual-polish-desktop-after.png",
+      "sha256": "9f5a1e725ad86e8c9ccd2c52eb7c9fd3e407f3453d1bf55b6e09d3ac810b17e6",
+      "bytes": 1184929,
+      "syntheticFixture": true
+    },
+    {
+      "path": "docs/screenshots/visual-polish-desktop-before.png",
+      "sha256": "33924d28e247e417d0aa2788a12619b6ace59cdb3bc82b522c3fbaaaa33a270a",
+      "bytes": 1184030,
+      "syntheticFixture": true
+    },
+    {
+      "path": "docs/screenshots/visual-polish-mobile-after.png",
+      "sha256": "9c7271315195594bcc46ba0b4dae45173730bb7874b10fa06fa4ea7e0b5f4f9d",
+      "bytes": 336796,
+      "syntheticFixture": true
+    }
+  ]
+}

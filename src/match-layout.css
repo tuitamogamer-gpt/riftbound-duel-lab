@@ -1480,3 +1480,64 @@ body:has(.app.is-game) {
     top: -3px;
   }
 }
+
+/* Desktop chrome follows the same colour cues as the cards, without taking
+   space from the table or moving controls when priority changes. */
+@media (min-width: 801px) and (min-height: 501px) {
+  .app.is-game .game-layout > .turn-flow {
+    border-left: 3px solid var(--you, #5ad8c6);
+    box-shadow:
+      inset 0 1px 0 #ffffff08,
+      0 3px 14px #02070c33;
+  }
+  .app.is-game .game-layout > .turn-flow:has(.turn-owner.is-opponent) {
+    border-left-color: var(--foe, #f29a9a);
+  }
+  .app.is-game .game-layout > .turn-flow.window-reaction {
+    border-right-color: #c7a8ff66;
+  }
+  .app.is-game
+    .game-layout:has(.turn-owner:not(.is-opponent))
+    .player-bar.player-0 {
+    border-color: #5ad8c666;
+    background: linear-gradient(90deg, #14362eee, #102330a8 70%);
+  }
+  .app.is-game .game-layout:has(.turn-owner.is-opponent) .player-bar.player-1 {
+    border-color: #f29a9a66;
+    background: linear-gradient(90deg, #35242cee, #102330a8 70%);
+  }
+  .app.is-game .playmat > .visual-controls {
+    border-top-width: 2px;
+    box-shadow:
+      inset 0 1px 0 #ffffff09,
+      0 8px 24px #02070c55;
+  }
+  .app.is-game .playmat > .visual-controls.window-reaction {
+    box-shadow:
+      inset 0 1px 0 #c7a8ff22,
+      0 8px 24px #02070c55;
+  }
+  .app.is-game .playmat > .visual-controls .decision-copy p {
+    color: #c1d2dc;
+    line-height: 1.45;
+  }
+  .app.is-game .visual-controls .context-action:focus-visible {
+    outline-offset: 3px;
+  }
+  .app.is-game .match-controls .gold-button:not(:disabled):hover {
+    filter: brightness(1.08);
+  }
+}
+
+@media (min-width: 801px) and (min-height: 501px) and (hover: hover) and (pointer: fine) {
+  .app.is-game .hand-card-wrap:focus-within .game-card,
+  .app.is-game .hand-card-wrap:hover .game-card {
+    box-shadow:
+      0 8px 18px #000b,
+      0 0 0 1px #e9c97b88;
+  }
+  .app.is-game .unit-wrap:focus-within > .game-card,
+  .app.is-game .unit-wrap:hover > .game-card {
+    filter: drop-shadow(0 4px 7px #000b);
+  }
+}

@@ -1,5 +1,16 @@
 # Production deployment
 
+## Desktop and mobile polish — 8 October 2026
+
+The [visual polish](VISUAL-POLISH.md) improves battlefield spacing, mobile touch
+controls and signature/event presentation. The [focused validation
+record](visual-polish-qa-2026-10-08.json) preserves the final source hashes and
+actual process receipts. It passes 99 tests across 11 files, production build and
+catalog consistency. Game, AI and catalog inputs remain unchanged from
+`caba4be36b837950f3a8034302c0273bcfdbd644`; earlier regression and pilot records
+remain historical. Exact-commit CI, both READY production aliases and fresh
+worker/offline smoke checks are verified after push.
+
 ## Final Spiritforged follow-up — 8 October 2026
 
 The final follow-up corrects Rumble recycling and Riposte counter finalization after control changes. It preserves original physical card ownership, handles attached hybrid Gear aliases once and reuses the common counter resolver. The [focused validation](final-physical-ownership-validation-2026-10-08.json) passed **247 tests across ten files**, including nine new cases, plus production build, catalog consistency and report guards. Its compiled build is **a4bb75b3d4e9**, with **81 offline assets**. Required CI now also runs both existing Spiritforged suites.

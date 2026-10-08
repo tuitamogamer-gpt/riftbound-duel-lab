@@ -4,11 +4,13 @@
 .effect-announcement {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
   min-width: 0;
-  border-left: 3px solid var(--effect-color);
-  padding-left: 10px;
+  border-left: 2px solid var(--effect-color);
+  padding: 7px 10px;
+  border-radius: 0 9px 9px 0;
+  background: linear-gradient(90deg, #ffffff05, transparent);
   animation: effect-announce 0.3s ease-out both;
 }
 .effect-damage,
@@ -33,7 +35,8 @@
   height: 60px;
   object-fit: cover;
   border-radius: 3px;
-  box-shadow: 0 0 14px #ffffff20;
+  flex-shrink: 0;
+  box-shadow: 0 3px 12px #0005;
 }
 .effect-message {
   flex: 1;
@@ -41,6 +44,7 @@
 }
 .effect-kicker {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   font-size: 9px;
@@ -62,12 +66,14 @@
   line-height: 1.25;
   display: block;
   margin-top: 2px;
+  overflow-wrap: anywhere;
 }
 .effect-message > p {
   font-size: 12px;
   line-height: 1.3;
   margin: 2px 0;
   color: #e1ebed;
+  overflow-wrap: anywhere;
 }
 .effect-outcomes {
   display: flex;
@@ -78,9 +84,12 @@
 .effect-outcomes > span {
   color: var(--effect-color);
   font-size: 10px;
-  border-radius: 3px;
-  background: #0003;
-  padding: 2px 5px;
+  border: 1px solid #ffffff10;
+  border-radius: 5px;
+  background: #08182370;
+  padding: 3px 6px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 .app.is-game .match-content {
   position: relative;
@@ -99,11 +108,11 @@
 }
 .effect-trails path {
   stroke: var(--effect-color);
-  stroke-width: 3;
+  stroke-width: 2;
   fill: none;
   stroke-linecap: round;
   stroke-dasharray: 0.12 0.88;
-  filter: drop-shadow(0 0 5px var(--effect-color));
+  filter: drop-shadow(0 0 3px var(--effect-color));
   animation: effect-travel 0.85s ease-out both;
 }
 .field-effect {
@@ -121,23 +130,28 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  background: #263643f5;
-  border: 1px solid #e3c17b88;
-  color: #ffe3a2;
-  border-radius: 4px;
-  padding: 4px 8px;
+  max-width: calc(100% - 16px);
+  background: #152936f5;
+  border: 1px solid #e3c17b55;
+  color: #ffe5b0;
+  border-radius: 7px;
+  padding: 5px 9px;
   font-size: 10px;
-  white-space: nowrap;
-  box-shadow: 0 3px 12px #0005;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  box-shadow: 0 4px 14px #0004;
+}
+.field-effect-label > svg {
+  flex-shrink: 0;
 }
 .field-effect-wave {
   position: absolute;
   inset: 20% 28%;
   border-radius: 50%;
-  border: 2px solid #f5cb7e;
+  border: 1px solid var(--effect-color);
   box-shadow:
-    0 0 30px #eec47770,
-    inset 0 0 30px #eec47730;
+    0 0 20px #eec47735,
+    inset 0 0 20px #eec47718;
   animation: field-effect-wave 1.1s ease-out both;
 }
 .app.is-game .unit-wrap.event-highlight[data-event]:after {
@@ -178,7 +192,7 @@
 @keyframes effect-announce {
   from {
     opacity: 0.3;
-    transform: translateX(10px);
+    transform: translateY(5px);
   }
   to {
     opacity: 1;
@@ -203,28 +217,28 @@
 }
 @keyframes field-effect-wave {
   from {
-    transform: scale(0.4);
-    opacity: 1;
+    transform: scale(0.6);
+    opacity: 0.65;
   }
   to {
-    transform: scale(3);
+    transform: scale(2.4);
     opacity: 0;
   }
 }
 @keyframes effect-label {
   from {
     opacity: 0;
-    margin-top: 8px;
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
-    margin-top: 0;
+    transform: none;
   }
 }
 @media (max-width: 650px) {
   .effect-announcement {
     gap: 7px;
-    padding-left: 5px;
+    padding: 5px 7px;
     grid-column: 1 / -1;
   }
   .effect-announcement > img {
@@ -238,15 +252,16 @@
     font-size: 10px;
   }
   .effect-kicker {
-    font-size: 7px;
-    gap: 3px;
+    font-size: 8px;
+    gap: 4px;
   }
   .effect-kicker b {
-    font-size: 6px;
+    font-size: 7px;
     padding-left: 4px;
   }
   .effect-outcomes > span {
-    font-size: 8px;
+    font-size: 9px;
+    padding: 2px 5px;
   }
   .app.is-game .match-controls:has(.effect-announcement) {
     display: flex;
@@ -259,22 +274,39 @@
     height: 32px;
     justify-content: flex-end;
   }
-  .app.is-game .match-controls:has(.effect-announcement) .decision-actions:has(.playing-indicator) {
+  .app.is-game
+    .match-controls:has(.effect-announcement)
+    .decision-actions:has(.playing-indicator) {
     display: none;
   }
   .app.is-game .match-controls:has(.effect-announcement) .playing-indicator {
     display: none;
   }
   .field-effect-label {
-    font-size: 7px;
-    max-width: 98%;
+    font-size: 9px;
+    max-width: calc(100% - 8px);
     white-space: normal;
-    padding: 3px;
+    padding: 4px 6px;
   }
   .app.is-game .score > .player-effect-label {
     font-size: 7px;
     padding: 1px 4px;
   }
+}
+[data-playback-paused="true"] .effect-announcement,
+[data-playback-paused="true"] .player-effect-label,
+.app.is-game
+  [data-playback-paused="true"]
+  .unit-wrap.event-highlight[data-event]:after {
+  animation: none;
+}
+[data-playback-paused="true"] .field-effect-wave {
+  display: none;
+}
+[data-playback-paused="true"] .effect-trails path {
+  animation: none;
+  stroke-dasharray: 4 7;
+  opacity: 0.3;
 }
 @media (prefers-reduced-motion: reduce) {
   .effect-announcement,
@@ -289,7 +321,7 @@
   .effect-trails path {
     animation: none;
     stroke-dasharray: 4 7;
-    opacity: 0.4;
+    opacity: 0.3;
     stroke-width: 2;
   }
 }

@@ -259,9 +259,11 @@
     width: 44px;
     height: 44px;
     border: 1px solid #8195a448;
-    border-radius: 5px;
-    background: #0a1727b8;
+    border-radius: 7px;
+    background: linear-gradient(180deg, #16313dc4, #0a1727d9);
     color: #dce6eb;
+    box-shadow: inset 0 1px #c5d8dd0d;
+    touch-action: manipulation;
   }
   .hand-mobile-tools .hand-scroll-button {
     width: 44px;
@@ -279,7 +281,8 @@
   }
   .hand-mobile-tools .hand-expand-button {
     padding: 0;
-    color: #e3d7b4;
+    color: #f0dba5;
+    border-color: #cfba774a;
     font:
       600 10px/1 "DM Sans",
       sans-serif;
@@ -314,12 +317,14 @@
     padding: 0 3px;
     border: 1px solid #c5a66a99;
     border-radius: 5px;
-    background: #152130f2;
+    background: linear-gradient(180deg, #263441f5, #101e2cf5);
     color: #ffdb88;
     text-shadow: 0 1px #000;
     font:
       600 12px/1 "DM Sans",
       sans-serif;
+    box-shadow: 0 1px 4px #0008;
+    font-variant-numeric: tabular-nums;
   }
   .hand-mobile-cost .hand-power {
     border-color: #af98d799;
@@ -380,9 +385,26 @@
     width: 100%;
     max-height: 94dvh;
     border-radius: 16px 16px 0 0;
+    border-color: #c6b78470;
+    background: linear-gradient(150deg, #17313e, #0a1827 75%);
+    box-shadow:
+      inset 0 1px #f1ddb32b,
+      0 -15px 70px #0009;
   }
   .hand-sheet-header {
     padding: 14px 14px 10px;
+    background: #0e202c80;
+  }
+  .hand-sheet h2 {
+    color: #f4deb0;
+    letter-spacing: -0.02em;
+  }
+  .hand-sheet h2 span {
+    font-variant-numeric: tabular-nums;
+  }
+  .hand-sheet-close {
+    border-color: #c6b7844d;
+    background: #0b1e2dcc;
   }
   .hand-sheet-cards {
     grid-template-columns: minmax(0, 1fr);
@@ -392,12 +414,23 @@
   .hand-sheet-card {
     gap: 12px;
     padding: 10px;
+    border-color: #91b0b137;
+    background: linear-gradient(120deg, #112c36b8, #091723b8);
+    box-shadow: inset 0 1px #d6e8e00b;
+  }
+  .hand-sheet-card.is-selected {
+    border-color: #b0e8c6;
+    background: linear-gradient(120deg, #174437bf, #0e2a2bbf);
+    box-shadow:
+      inset 3px 0 #9ee1ba,
+      inset 0 1px #b0e8c624;
   }
   .hand-sheet-art {
     flex-basis: clamp(84px, 27vw, 116px);
   }
   .hand-sheet-art > .game-card {
     width: 100%;
+    box-shadow: 0 5px 12px #0006;
   }
   .hand-sheet-card h3 {
     font-size: 16px;
@@ -406,8 +439,25 @@
     font-size: 13px;
     line-height: 1.55;
   }
+  .hand-sheet-availability {
+    color: #b5efd0;
+  }
+  .hand-sheet-actions .hand-sheet-select {
+    background: linear-gradient(180deg, #2c6048, #204434);
+    box-shadow: inset 0 1px #d4f4dd1c;
+  }
+  .hand-sheet-actions .hand-sheet-select.is-unavailable {
+    background: #35404a;
+  }
+  .hand-sheet-actions button,
+  .hand-sheet-footer button,
+  .hand-sheet-close {
+    touch-action: manipulation;
+  }
   .hand-sheet-footer {
     padding: 10px 14px max(12px, env(safe-area-inset-bottom));
+    background: #0b1d2c;
+    border-color: #c6b78430;
   }
 }
 

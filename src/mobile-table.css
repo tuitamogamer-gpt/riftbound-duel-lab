@@ -19,6 +19,8 @@
   .app.is-game .match-toolbar {
     height: 44px;
     gap: 4px;
+    border-bottom: 1px solid #91aeba20;
+    background: linear-gradient(180deg, #07131c99, #07131c30);
   }
   .app.is-game .match-toolbar .icon-button,
   .app.is-game .match-toolbar .text-button {
@@ -98,6 +100,9 @@
     gap: 6px;
     border-radius: 12px;
     background: radial-gradient(ellipse at 50% 30%, #17344380, #081722d9 70%);
+    box-shadow:
+      inset 0 1px 0 #a8c5c018,
+      0 8px 26px #0003;
   }
   .app.is-game .victory-track {
     display: none;
@@ -111,11 +116,13 @@
     padding: 0 5px 0 0;
     border: 1px solid #56bdae4a;
     border-radius: 8px;
-    background: linear-gradient(100deg, #153d39, #142b30);
+    background: linear-gradient(105deg, #164038, #112832 85%);
+    box-shadow: inset 0 1px #8ce2cc12;
   }
   .app.is-game .player-bar.player-1 {
-    background: linear-gradient(100deg, #3a2636, #232637);
+    background: linear-gradient(105deg, #392534, #192636 85%);
     border-color: #e9a2aa40;
+    box-shadow: inset 0 1px #e9a2aa12;
   }
   .app.is-game .legend-portrait {
     width: 38px;
@@ -155,6 +162,7 @@
       600 12px "DM Sans",
       sans-serif;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
   }
   .mobile-resource-count small {
     font-size: 10px;
@@ -169,6 +177,8 @@
     font:
       800 23px/1 "Exo 2",
       sans-serif;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 14px currentColor;
   }
   .app.is-game .score > small {
     font-size: 9px;
@@ -310,6 +320,7 @@
     height: 100%;
     padding: 20px 5px 6px;
     border-radius: 9px;
+    box-shadow: inset 0 1px #a8c5c014;
   }
   .app.is-game .mobile-base-panel .base-zone.has-gear {
     padding-top: 44px;
@@ -429,6 +440,8 @@
     flex-direction: row;
     align-items: center;
     padding: 0 9px;
+    background: linear-gradient(100deg, #06131de8, #07151b80);
+    border-bottom: 1px solid #c4b78021;
   }
   .app.is-game .field-heading button {
     font-size: 12px;
@@ -500,6 +513,7 @@
   .app.is-game .field-might-side b {
     font-size: 19px;
     line-height: 22px;
+    font-variant-numeric: tabular-nums;
   }
   .app.is-game .field-might-side small,
   .app.is-game .field-might-label small {
@@ -552,13 +566,14 @@
     right: 1px;
     bottom: 18px;
     padding: 3px;
-    background: #081721e8;
+    background: linear-gradient(180deg, #081721df, #07131cf5);
     color: #fff4d6;
     font-size: 10px;
     font-weight: 600;
     line-height: 11px;
     text-align: center;
     pointer-events: none;
+    text-shadow: 0 1px 2px #000;
   }
   .app.is-game :is(.field-half, .base-units) > .unit-wrap > .unit-power {
     left: 0;
@@ -604,6 +619,11 @@
   .app.is-game .hand-title .hand-title-name {
     font-size: 9px;
     letter-spacing: 0;
+    color: #c6d6da;
+  }
+  .app.is-game .hand-title-name b {
+    color: #ebd499;
+    font-variant-numeric: tabular-nums;
   }
   .app.is-game .hand-section > .card-piles {
     grid-area: 1 / 2;
@@ -614,7 +634,7 @@
   .app.is-game .hand-section .pile-button {
     display: grid;
     place-items: center;
-    width: 40px;
+    width: 44px;
     min-height: 44px;
   }
   .app.is-game .hand-section .pile-art {
@@ -633,6 +653,7 @@
   }
   .app.is-game .hand-section .pile-caption b {
     font-size: 13px;
+    font-variant-numeric: tabular-nums;
   }
   .app.is-game .player-cards .hand {
     grid-area: 2 / 1 / 3 / -1;
@@ -667,6 +688,11 @@
     gap: 6px;
     padding: 8px;
     border-radius: 11px;
+    background: linear-gradient(120deg, #123039f5, #091e2bf5);
+    border-color: #6cd5bc80;
+    box-shadow:
+      inset 0 1px #a8f1d918,
+      0 -3px 14px #0002;
   }
   .app.is-game .visual-controls .decision-source {
     grid-area: 1 / 1;
@@ -807,20 +833,6 @@
     .decision-copy {
     grid-area: 1 / 1;
     padding-right: 0;
-  }
-  .app.is-game .screen-highlight-label {
-    top: max(4px, env(safe-area-inset-top));
-    left: 96px;
-    max-width: calc(100vw - 198px);
-    padding: 4px 6px;
-    font-size: 10px;
-  }
-  .app.is-game .screen-highlight-detail,
-  .app.is-game .screen-highlight-label > svg {
-    display: none;
-  }
-  .app.is-game .champion-entrance {
-    top: 172px;
   }
   .app.is-game .modal.card-detail {
     max-height: 90dvh;

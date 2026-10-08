@@ -157,6 +157,59 @@ describe("signature champion arrival", () => {
 });
 
 describe("public screen events", () => {
+  it("keeps a single live announcement for champion, score, draw and phase moments", () => {
+    const turn = eventReview(eventOpening(), "end-turn");
+    const holding = eventOpening();
+    holding.units = [combatUnit("holder", 1)];
+    holding.fields[0].controller = 1;
+    const score = eventReview(holding, "end-turn");
+    const examples = [
+      ["champion", championArrivalReview()],
+      ["score", score],
+      ["draw", turn],
+      ["phase", turn],
+    ] as const;
+    for (const [kind, review] of examples) {
+      const active = shown(
+        review,
+        (candidate) => publicTableEvents(candidate)[0]?.kind === kind,
+      );
+      const highlight = renderToStaticMarkup(
+        createElement(ScreenHighlight, { review: active }),
+      );
+      expect(highlight).toContain("screen-highlight-edge");
+      expect(highlight).toContain('data-highlight-covered="true"');
+      expect(highlight).toContain('aria-hidden="true"');
+      expect(highlight).not.toContain('role="status"');
+      expect(highlight).not.toContain('aria-live="polite"');
+      expect(
+        renderToStaticMarkup(
+          createElement(TableMoment, {
+            game: active.frames[active.index].state,
+            review: active,
+            inspect: () => {},
+          }),
+        ),
+      ).toContain('role="status"');
+    }
+  });
+  it("keeps unrepresented older draws and damage announcements readable", () => {
+    const olderDraw = synthetic();
+    olderDraw.frames[0].state.players[1].hand.push("ogn-004-298");
+    const damage = shown(
+      spellEventReview("damage"),
+      (review) => publicTableEvents(review)[0]?.kind === "damage",
+    );
+    for (const review of [olderDraw, damage]) {
+      const html = renderToStaticMarkup(
+        createElement(ScreenHighlight, { review }),
+      );
+      expect(html).toContain('role="status"');
+      expect(html).toContain('aria-live="polite"');
+      expect(html).not.toContain('data-highlight-covered="true"');
+      expect(html).not.toContain("ogn-004-298");
+    }
+  });
   it.each(["damage", "buff", "play", "counter"] as const)(
     "highlights the real %s engine transition",
     (mode) => {

@@ -235,6 +235,9 @@ export function ChampionEntrance({
         <strong>{card.name}</strong>
         <small>{t("Enters play")}</small>
       </div>
+      <span className="champion-entrance-timer" aria-hidden="true">
+        <i />
+      </span>
     </div>
   );
 }

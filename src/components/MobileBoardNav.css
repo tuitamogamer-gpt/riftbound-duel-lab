@@ -21,20 +21,25 @@
     min-height: 56px;
     padding: 5px 5px 5px 7px;
     overflow: hidden;
-    border: 1px solid #72908e80;
+    border: 1px solid #72908e61;
     border-left: 3px solid #a6aaa780;
-    border-radius: 8px;
+    border-radius: 9px;
     background: #13252f;
     color: #dce7e6;
     text-align: left;
     touch-action: manipulation;
+    box-shadow: inset 0 1px #d6e6d916;
+    transition:
+      border-color 160ms ease,
+      color 160ms ease,
+      box-shadow 160ms ease;
   }
   .mobile-zone-tile::after {
     content: "";
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(100deg, #071c2dea 15%, #071c2da8 100%);
+    background: linear-gradient(105deg, #061723f5 12%, #071c2db8 80%);
   }
   .mobile-zone-art {
     position: absolute;
@@ -60,17 +65,26 @@
     color: #fff0ca;
     box-shadow:
       inset 0 -2px #efd17c,
-      0 0 0 1px #efd17c35;
+      inset 0 1px #fff2c140,
+      0 0 0 1px #efd17c35,
+      0 3px 12px #d7b56016;
+  }
+  .mobile-board-nav .mobile-zone-tile[aria-pressed="true"]::after {
+    background: linear-gradient(105deg, #172832f2 12%, #092732b8 80%);
   }
   .mobile-zone-tile.has-target {
     box-shadow: inset 0 0 0 1px #75edc7;
+  }
+  .mobile-zone-tile.has-target .mobile-target-dot {
+    filter: drop-shadow(0 0 3px #75edc780);
   }
   .mobile-zone-tile.has-event {
     background: #354034;
     outline: 1px solid #fff0ac85;
     outline-offset: -3px;
   }
-  .mobile-zone-tile.has-combat::after {
+  .mobile-zone-tile.has-combat::after,
+  .mobile-board-nav .mobile-zone-tile.has-combat[aria-pressed="true"]::after {
     background: linear-gradient(100deg, #3c211ded, #071c2dbb);
   }
   .mobile-zone-name {
@@ -84,6 +98,7 @@
     line-height: 11px;
     min-height: 22px;
     text-shadow: 0 1px 2px #000;
+    letter-spacing: 0.01em;
   }
   .mobile-zone-counts {
     display: flex;
@@ -91,6 +106,7 @@
     gap: 2px;
     margin-top: 3px;
     line-height: 10px;
+    font-variant-numeric: tabular-nums;
   }
   .mobile-zone-counts > span {
     display: flex;
@@ -131,6 +147,18 @@
   .mobile-zone-tile:focus-visible {
     outline: 2px solid #fff1bd;
     outline-offset: 1px;
+  }
+  .mobile-zone-tile:active {
+    transform: translateY(1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-board-nav .mobile-zone-tile {
+    transition: none;
+  }
+  .mobile-zone-tile:active {
+    transform: none;
   }
 }
 
