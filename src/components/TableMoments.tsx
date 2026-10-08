@@ -17,6 +17,8 @@ import { useI18n } from "../i18n";
 import { CardSleeve } from "./CardSleeve";
 import type { Review } from "./StepFlow";
 import "./TableMoments.css";
+import { MomentMotion } from "../motion/MomentMotion";
+import { significantMoment } from "../motion/significant-events";
 
 const phases = {
   awaken: {
@@ -45,11 +47,13 @@ export function TableMoment({
   review,
   inspect,
   playbackSpeed = 1,
+  motionPaused = false,
 }: {
   game: GameState;
   review: Review | null;
   inspect: (card: CatalogCard) => void;
   playbackSpeed?: PlaybackSpeed;
+  motionPaused?: boolean;
 }) {
   const { t } = useI18n();
   const frame = review?.frames[review.index];
@@ -58,7 +62,13 @@ export function TableMoment({
   const phase = phaseMoment(review);
   const champion = championMoment(review);
   if (review && champion)
-    return <ChampionEntrance review={review} playbackSpeed={playbackSpeed} />;
+    return (
+      <ChampionEntrance
+        review={review}
+        playbackSpeed={playbackSpeed}
+        motionPaused={motionPaused}
+      />
+    );
   if (!review || (!score && !draw && !phase)) return null;
   const player = score?.player ?? draw?.player ?? game.currentPlayer;
   const phaseInfo = phase && phases[phase];
@@ -112,6 +122,14 @@ export function TableMoment({
         <div className="moment-title">
           {phaseInfo && !score ? (
             <span className="moment-letter">{phaseInfo.letter}</span>
+          ) : score && significantMoment(review)?.kind === "conquer" ? (
+            <MomentMotion
+              key={momentKey(review)}
+              kind="conquer"
+              opponent={player === 1}
+              paused={motionPaused}
+              speed={playbackSpeed}
+            />
           ) : (
             <Icon size={26} />
           )}
@@ -197,9 +215,11 @@ export function TableMoment({
 export function ChampionEntrance({
   review,
   playbackSpeed = 1,
+  motionPaused = false,
 }: {
   review: Review;
   playbackSpeed?: PlaybackSpeed;
+  motionPaused?: boolean;
 }) {
   const { t } = useI18n();
   const unit = championMoment(review);
@@ -220,6 +240,13 @@ export function ChampionEntrance({
       aria-atomic="true"
     >
       <span className="champion-entrance-halo" aria-hidden="true" />
+      <MomentMotion
+        key={momentKey(review)}
+        kind="champion"
+        opponent={unit.owner === 1}
+        paused={motionPaused}
+        speed={playbackSpeed}
+      />
       <div className="champion-entrance-portrait" aria-hidden="true">
         <img src={cardArtUrl(card)} alt="" />
         <Crown className="champion-entrance-crown" size={21} />

@@ -1,0 +1,113 @@
+{
+  "scope": "Hyperframes authoring composition and shared deterministic GSAP runtime; not live-match browser QA",
+  "hyperframesVersion": "0.8.141",
+  "gsapVersion": "3.15.0",
+  "composition": {
+    "id": "significant-events",
+    "width": 960,
+    "height": 540,
+    "durationSeconds": 1.25,
+    "liveGameMaximumDecalCssPixels": 80,
+    "representativeTimesSeconds": [0.12, 0.3, 0.54, 0.95, 1.24]
+  },
+  "verification": {
+    "lint": {
+      "exitCode": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "strictCombinedCheck": {
+      "exitCode": 0,
+      "browserSkipped": false,
+      "runtimeErrors": 0,
+      "layoutErrors": 0,
+      "layoutWarnings": 0,
+      "contrastPassed": 32,
+      "contrastChecked": 32
+    },
+    "strictInspect": {
+      "exitCode": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "studioPreview": {
+      "actualLaunchAndStatusExitCode": 0,
+      "title": "HyperFrames Studio",
+      "representativeFrameSeconds": 0.54,
+      "pageErrors": 0,
+      "inspected": true,
+      "stoppedAfterReview": true
+    },
+    "choreographyMap": {
+      "exitCode": 0,
+      "tweens": 31,
+      "durationSeconds": 1.25,
+      "deadZones": [],
+      "flagsReviewed": {
+        "collision": 22,
+        "pacedFast": 1
+      },
+      "flagInterpretation": "Intentional nesting: aura, rays, ring and seal layer inside each event panel. No text collision, clipping or off-canvas warning. The one fast 0.18 second tween is the final review-label fade; gameplay seal exit remains 0.25 seconds."
+    },
+    "sourceUnchangedDuringFinalChecks": true,
+    "sourceSha256": "ad3fe80f20c7b3cfaa97f49a0b08b5f539f86134b4c79c4662a9da9f49a34162"
+  },
+  "sourceFiles": [
+    {
+      "path": "motion/hyperframes/DESIGN.md",
+      "sha256": "0a85734c070a7736e9b7e337450a0b53f64071cf51a3c1412458adc2d9c7a04d"
+    },
+    {
+      "path": "motion/hyperframes/README.md",
+      "sha256": "1aded892293cf3a603df865569bffb8280c163330b335279264e1e71251606c7"
+    },
+    {
+      "path": "motion/hyperframes/assets/dm-sans-LICENSE.txt",
+      "sha256": "6fbd040a29c2037a765dfb9f2561e9965b5c95c6dcb5dce516089d63d5f17af7"
+    },
+    {
+      "path": "motion/hyperframes/assets/dm-sans-latin-500-normal.woff2",
+      "sha256": "19bf1984956517c35c2bd35b6cdedac12a21d6fcd3596c614ecdfb88b648909d"
+    },
+    {
+      "path": "motion/hyperframes/assets/dm-sans-latin-700-normal.woff2",
+      "sha256": "35c5efa0e5daa52ee5c6500f5be354bf751fb65c4e49e1d6806c6eb5883e8fe9"
+    },
+    {
+      "path": "motion/hyperframes/assets/exo-2-LICENSE.txt",
+      "sha256": "7644b74e07215f62af4ebbfcf2b0f06a428d70d32c41e751fba93763a683c3f5"
+    },
+    {
+      "path": "motion/hyperframes/assets/exo-2-latin-800-italic.woff2",
+      "sha256": "82306bad68848703afce2593b60ce1862148c700279045ac373753ea016ab0a1"
+    },
+    {
+      "path": "motion/hyperframes/bundle-entry.ts",
+      "sha256": "c412bfe5584a95b6b1427ceb250314100ea77d030c42028db5d1673a42ddea4a"
+    },
+    {
+      "path": "motion/hyperframes/hyperframes.json",
+      "sha256": "53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50"
+    },
+    {
+      "path": "motion/hyperframes/index.html",
+      "sha256": "17910e61991a8e5c2d2e89693b2889a35093dbb9434ae7c30a68706c4b338a03"
+    },
+    {
+      "path": "motion/hyperframes/meta.json",
+      "sha256": "092a707dea48e4a8f2016e746e3e0aff69bb2db761eee06db5766e85c6becf31"
+    },
+    {
+      "path": "motion/hyperframes/package.json",
+      "sha256": "74a5b5e7a9d70f340ddc20e34740fcbec439fa26ebbb4326a69a19eb63d51b7f"
+    },
+    {
+      "path": "motion/hyperframes/tactical-burst.gsap.js",
+      "sha256": "f037e0888b57e7fa4fb7996a6fabec4b20ccba620a4dbfe6b33531c96cb4b8d6"
+    },
+    {
+      "path": "src/motion/hyperframes-timeline.ts",
+      "sha256": "c56d1da099726261728cb5e990a9e18b0c291a4ef9060deb7a7a9e7f6120bd1e"
+    }
+  ]
+}

@@ -1,0 +1,338 @@
+{
+  "authoringTool": "Tesseract",
+  "cliVersion": "0.3.1",
+  "viewBox": [
+    0,
+    0,
+    160,
+    160
+  ],
+  "palette": {
+    "brass": "#e9c97b",
+    "teal": "#7de4cd",
+    "navy": "#10202d"
+  },
+  "durationMs": 2400,
+  "easing": [
+    0.16,
+    1,
+    0.3,
+    1
+  ],
+  "opacityKeysMs": [
+    [
+      0,
+      0
+    ],
+    [
+      140,
+      1
+    ],
+    [
+      1920,
+      1
+    ],
+    [
+      2399,
+      0
+    ]
+  ],
+  "scaleKeysMs": [
+    [
+      0,
+      0.92
+    ],
+    [
+      420,
+      1
+    ],
+    [
+      1920,
+      1
+    ],
+    [
+      2399,
+      1.02
+    ]
+  ],
+  "runtime": "Use these SVG paths directly in Remotion; native MOV previews are never shipped in the game.",
+  "events": [
+    {
+      "event": "signature",
+      "document": "SignatureSigil.tsrct",
+      "groupId": 100,
+      "sha256": "27ddea63a31dfed9104a6a2c100b2b66d422d48cfa7318be1806551bcefce540",
+      "bytes": 32595,
+      "paths": [
+        {
+          "id": "diamond",
+          "path": "M80 24 L136 80 L80 136 L24 80 Z",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1.4,
+          "opacity": 0.76,
+          "fillOpacity": 0,
+          "drawStartMs": 0,
+          "drawEndMs": 420
+        },
+        {
+          "id": "leftWing",
+          "path": "M68 42 L30 80 L68 118",
+          "stroke": "#7de4cd",
+          "strokeWidth": 1.1,
+          "opacity": 0.5,
+          "fillOpacity": 0,
+          "drawStartMs": 70,
+          "drawEndMs": 380
+        },
+        {
+          "id": "rightWing",
+          "path": "M92 42 L130 80 L92 118",
+          "stroke": "#7de4cd",
+          "strokeWidth": 1.1,
+          "opacity": 0.5,
+          "fillOpacity": 0,
+          "drawStartMs": 70,
+          "drawEndMs": 380
+        },
+        {
+          "id": "leftRule",
+          "path": "M4 80 L18 80",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1,
+          "opacity": 0.45,
+          "fillOpacity": 0,
+          "drawStartMs": 220,
+          "drawEndMs": 520
+        },
+        {
+          "id": "rightRule",
+          "path": "M142 80 L156 80",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1,
+          "opacity": 0.45,
+          "fillOpacity": 0,
+          "drawStartMs": 220,
+          "drawEndMs": 520
+        },
+        {
+          "id": "crown",
+          "path": "M60 70 L71 80 L80 60 L89 80 L100 70 L96 94 L64 94 Z",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1.8,
+          "opacity": 1,
+          "fillOpacity": 0.12,
+          "drawStartMs": 130,
+          "drawEndMs": 490
+        },
+        {
+          "id": "crownBase",
+          "path": "M64 100 L96 100",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1.4,
+          "opacity": 1,
+          "fillOpacity": 0,
+          "drawStartMs": 130,
+          "drawEndMs": 490
+        }
+      ]
+    },
+    {
+      "event": "victory",
+      "document": "VictorySigil.tsrct",
+      "groupId": 100,
+      "sha256": "f462a50fbea33600867884cf79425093bb01d1d881a99a7c0c5fdca158a4ee5b",
+      "bytes": 43559,
+      "paths": [
+        {
+          "id": "diamond",
+          "path": "M80 24 L136 80 L80 136 L24 80 Z",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1.4,
+          "opacity": 0.76,
+          "fillOpacity": 0,
+          "drawStartMs": 0,
+          "drawEndMs": 420
+        },
+        {
+          "id": "leftWing",
+          "path": "M68 42 L30 80 L68 118",
+          "stroke": "#7de4cd",
+          "strokeWidth": 1.1,
+          "opacity": 0.5,
+          "fillOpacity": 0,
+          "drawStartMs": 70,
+          "drawEndMs": 380
+        },
+        {
+          "id": "rightWing",
+          "path": "M92 42 L130 80 L92 118",
+          "stroke": "#7de4cd",
+          "strokeWidth": 1.1,
+          "opacity": 0.5,
+          "fillOpacity": 0,
+          "drawStartMs": 70,
+          "drawEndMs": 380
+        },
+        {
+          "id": "leftRule",
+          "path": "M4 80 L18 80",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1,
+          "opacity": 0.45,
+          "fillOpacity": 0,
+          "drawStartMs": 220,
+          "drawEndMs": 520
+        },
+        {
+          "id": "rightRule",
+          "path": "M142 80 L156 80",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1,
+          "opacity": 0.45,
+          "fillOpacity": 0,
+          "drawStartMs": 220,
+          "drawEndMs": 520
+        },
+        {
+          "id": "cup",
+          "path": "M65 58 L95 58 L95 78 L89 91 L80 97 L71 91 L65 78 Z",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1.8,
+          "opacity": 1,
+          "fillOpacity": 0.12,
+          "drawStartMs": 130,
+          "drawEndMs": 490
+        },
+        {
+          "id": "leftHandle",
+          "path": "M65 64 L53 64 L53 77 L60 85 L69 85",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1.4,
+          "opacity": 1,
+          "fillOpacity": 0,
+          "drawStartMs": 130,
+          "drawEndMs": 490
+        },
+        {
+          "id": "rightHandle",
+          "path": "M95 64 L107 64 L107 77 L100 85 L91 85",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1.4,
+          "opacity": 1,
+          "fillOpacity": 0,
+          "drawStartMs": 130,
+          "drawEndMs": 490
+        },
+        {
+          "id": "stem",
+          "path": "M80 97 L80 110",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1.8,
+          "opacity": 1,
+          "fillOpacity": 0,
+          "drawStartMs": 130,
+          "drawEndMs": 490
+        },
+        {
+          "id": "base",
+          "path": "M67 112 L93 112",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1.8,
+          "opacity": 1,
+          "fillOpacity": 0,
+          "drawStartMs": 130,
+          "drawEndMs": 490
+        }
+      ]
+    },
+    {
+      "event": "conquer",
+      "document": "ConquerSigil.tsrct",
+      "groupId": 100,
+      "sha256": "3a77006045219544c999f82b9e1d9baecb0eece077c1366771f19bb6f49d3525",
+      "bytes": 35699,
+      "paths": [
+        {
+          "id": "diamond",
+          "path": "M80 24 L136 80 L80 136 L24 80 Z",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1.4,
+          "opacity": 0.76,
+          "fillOpacity": 0,
+          "drawStartMs": 0,
+          "drawEndMs": 420
+        },
+        {
+          "id": "leftWing",
+          "path": "M68 42 L30 80 L68 118",
+          "stroke": "#7de4cd",
+          "strokeWidth": 1.1,
+          "opacity": 0.5,
+          "fillOpacity": 0,
+          "drawStartMs": 70,
+          "drawEndMs": 380
+        },
+        {
+          "id": "rightWing",
+          "path": "M92 42 L130 80 L92 118",
+          "stroke": "#7de4cd",
+          "strokeWidth": 1.1,
+          "opacity": 0.5,
+          "fillOpacity": 0,
+          "drawStartMs": 70,
+          "drawEndMs": 380
+        },
+        {
+          "id": "leftRule",
+          "path": "M4 80 L18 80",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1,
+          "opacity": 0.45,
+          "fillOpacity": 0,
+          "drawStartMs": 220,
+          "drawEndMs": 520
+        },
+        {
+          "id": "rightRule",
+          "path": "M142 80 L156 80",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1,
+          "opacity": 0.45,
+          "fillOpacity": 0,
+          "drawStartMs": 220,
+          "drawEndMs": 520
+        },
+        {
+          "id": "pole",
+          "path": "M67 56 L67 110",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1.8,
+          "opacity": 1,
+          "fillOpacity": 0,
+          "drawStartMs": 130,
+          "drawEndMs": 490
+        },
+        {
+          "id": "standard",
+          "path": "M67 57 L101 57 L94 70 L101 83 L67 83 Z",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1.8,
+          "opacity": 1,
+          "fillOpacity": 0.12,
+          "drawStartMs": 130,
+          "drawEndMs": 490
+        },
+        {
+          "id": "base",
+          "path": "M57 112 L77 112",
+          "stroke": "#e9c97b",
+          "strokeWidth": 1.4,
+          "opacity": 1,
+          "fillOpacity": 0,
+          "drawStartMs": 130,
+          "drawEndMs": 490
+        }
+      ]
+    }
+  ]
+}

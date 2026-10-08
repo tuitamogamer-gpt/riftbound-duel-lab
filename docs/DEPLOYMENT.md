@@ -1,5 +1,15 @@
 # Production deployment
 
+## Significant-event animations — 8 October 2026
+
+The [important game animations](SIGNIFICANT-MOTION.md) use Remotion, native
+Tesseract vector authoring and Hyperframes' shared GSAP timeline. The [focused
+record](significant-motion-qa-2026-10-08.json) preserves the final source and
+verification scope. The local suite passes 127 tests in 12 files, production
+build and catalog consistency. Existing game and AI inputs remain byte-identical
+to `2c406626a6c74126bce35183a40ee87cf8804581`. Exact-commit CI, both READY aliases
+and fresh production worker/offline checks are verified after push.
+
 ## Desktop and mobile polish — 8 October 2026
 
 The [visual polish](VISUAL-POLISH.md) improves battlefield spacing, mobile touch

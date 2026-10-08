@@ -7,6 +7,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build && node scripts/build-duel-server.mjs",
     "preview": "vite preview --host 127.0.0.1",
+    "motion:studio": "remotion studio motion/remotion/Root.tsx --no-open",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:bots": "vitest run tests/ai-acceptance.test.ts tests/new-bot.test.ts tests/bot-tactics.test.ts",
@@ -23,12 +24,17 @@
     "@fontsource/dm-sans": "^5.3.0",
     "@fontsource/exo-2": "^5.3.0",
     "@piltoverarchive/riftbound-deck-codes": "1.5.0",
+    "@remotion/player": "4.0.534",
     "@vercel/blob": "^2.8.1",
+    "gsap": "3.15.0",
     "lucide-react": "^0.468.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "remotion": "4.0.534",
+    "zod": "4.5.4"
   },
   "devDependencies": {
+    "@remotion/cli": "4.0.534",
     "@types/node": "^26.6.4",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",

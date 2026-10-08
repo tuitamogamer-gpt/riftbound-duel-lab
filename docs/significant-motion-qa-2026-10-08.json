@@ -1,0 +1,624 @@
+{
+  "recordedAt": "2026-10-08T10:47:57.190158+00:00",
+  "scope": "Significant public game-event animations and compact notices. Local synthetic resolver sessions; exact-commit CI and both production aliases plus fresh worker/offline/motion checks are verified after push. Earlier full engine, precon matrix and bot-pilot proofs retain historical scope.",
+  "source": {
+    "baselineCommit": "2c406626a6c74126bce35183a40ee87cf8804581",
+    "sourceSha256": "ba01ea6f023ed9bce4931e4957c1b78ecc8b3b1092e2f9fb46b3ec266088d8a9",
+    "gameDataSha256": "c4d575ef73f84eec34b427fe6812a602776b1059a6b7a5e1338685e39cbc21d3",
+    "frozenFiles": 443,
+    "unchangedGameDataFiles": 112,
+    "changedSourceFiles": [
+      {
+        "path": ".github/workflows/ci.yml",
+        "sha256": "296a8deb9204d95dfbef2879e53a1bea6ef3bee64c70d6ed4c144a48d6341613"
+      },
+      {
+        "path": "motion/README.md",
+        "sha256": "9454ecdb5406e6cdde7a1592f01849843d0966cfb5622344700239da395309bb"
+      },
+      {
+        "path": "motion/hyperframes/.gitignore",
+        "sha256": "30b20f9b05099c756a0dfeae87036a682506cd6c7f18e83b408d58fc20f99a22"
+      },
+      {
+        "path": "motion/hyperframes/DESIGN.md",
+        "sha256": "0a85734c070a7736e9b7e337450a0b53f64071cf51a3c1412458adc2d9c7a04d"
+      },
+      {
+        "path": "motion/hyperframes/README.md",
+        "sha256": "1aded892293cf3a603df865569bffb8280c163330b335279264e1e71251606c7"
+      },
+      {
+        "path": "motion/hyperframes/assets/dm-sans-LICENSE.txt",
+        "sha256": "6fbd040a29c2037a765dfb9f2561e9965b5c95c6dcb5dce516089d63d5f17af7"
+      },
+      {
+        "path": "motion/hyperframes/assets/dm-sans-latin-500-normal.woff2",
+        "sha256": "19bf1984956517c35c2bd35b6cdedac12a21d6fcd3596c614ecdfb88b648909d"
+      },
+      {
+        "path": "motion/hyperframes/assets/dm-sans-latin-700-normal.woff2",
+        "sha256": "35c5efa0e5daa52ee5c6500f5be354bf751fb65c4e49e1d6806c6eb5883e8fe9"
+      },
+      {
+        "path": "motion/hyperframes/assets/exo-2-LICENSE.txt",
+        "sha256": "7644b74e07215f62af4ebbfcf2b0f06a428d70d32c41e751fba93763a683c3f5"
+      },
+      {
+        "path": "motion/hyperframes/assets/exo-2-latin-800-italic.woff2",
+        "sha256": "82306bad68848703afce2593b60ce1862148c700279045ac373753ea016ab0a1"
+      },
+      {
+        "path": "motion/hyperframes/bundle-entry.ts",
+        "sha256": "c412bfe5584a95b6b1427ceb250314100ea77d030c42028db5d1673a42ddea4a"
+      },
+      {
+        "path": "motion/hyperframes/hyperframes.json",
+        "sha256": "53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50"
+      },
+      {
+        "path": "motion/hyperframes/index.html",
+        "sha256": "17910e61991a8e5c2d2e89693b2889a35093dbb9434ae7c30a68706c4b338a03"
+      },
+      {
+        "path": "motion/hyperframes/meta.json",
+        "sha256": "092a707dea48e4a8f2016e746e3e0aff69bb2db761eee06db5766e85c6becf31"
+      },
+      {
+        "path": "motion/hyperframes/package.json",
+        "sha256": "74a5b5e7a9d70f340ddc20e34740fcbec439fa26ebbb4326a69a19eb63d51b7f"
+      },
+      {
+        "path": "motion/hyperframes/tactical-burst.gsap.js",
+        "sha256": "f037e0888b57e7fa4fb7996a6fabec4b20ccba620a4dbfe6b33531c96cb4b8d6"
+      },
+      {
+        "path": "motion/hyperframes/verification.json",
+        "sha256": "f9d112cd39d3e42b6003441b55a54582a6161980426922f2f64c92fb7e79ca05"
+      },
+      {
+        "path": "motion/remotion/Root.tsx",
+        "sha256": "f5f31c30db1fbac5246a86a3a4b98af8ecfeca57c71c7e364bef192753ca6ed5"
+      },
+      {
+        "path": "motion/tesseract/ConquerSigil.tsrct",
+        "sha256": "3a77006045219544c999f82b9e1d9baecb0eece077c1366771f19bb6f49d3525"
+      },
+      {
+        "path": "motion/tesseract/README.md",
+        "sha256": "ea6f537a2a4674ac764b9f180f5f7d8b0907cb0c9c3a184b4802b5cf61a0fd86"
+      },
+      {
+        "path": "motion/tesseract/SignatureSigil.tsrct",
+        "sha256": "27ddea63a31dfed9104a6a2c100b2b66d422d48cfa7318be1806551bcefce540"
+      },
+      {
+        "path": "motion/tesseract/VictorySigil.tsrct",
+        "sha256": "f462a50fbea33600867884cf79425093bb01d1d881a99a7c0c5fdca158a4ee5b"
+      },
+      {
+        "path": "motion/tesseract/native-signature-preview.png",
+        "sha256": "4b54c6120ee39f8d993a1bd878ae0b4d41614ac068b25aba1cd69810ac441c43"
+      },
+      {
+        "path": "motion/tesseract/sigil-geometry.json",
+        "sha256": "099441d125ef544603ab6d419cc62663e1185e1132af2f0d95b02d827b3b9a95"
+      },
+      {
+        "path": "package-lock.json",
+        "sha256": "5705b0de396d5ef79a783e97aa151183464d33c216d97ea19b3d0d6c29cd8ae4"
+      },
+      {
+        "path": "package.json",
+        "sha256": "1fa309f79b0f2cc8ab474581fedcf31584a406c8bad4a5f1d234e8ee1a13a240"
+      },
+      {
+        "path": "src/App.tsx",
+        "sha256": "f90c70910ba7ff8e9eac320867a2ec97b57b302baaf4645a13fa6b36b2744d23"
+      },
+      {
+        "path": "src/components/ScreenHighlight.tsx",
+        "sha256": "5bfb565b6c1c7712c77e12c0d336cb31252a29bc3efedcd456ae3b2cbfd9aafc"
+      },
+      {
+        "path": "src/components/TableMoments.tsx",
+        "sha256": "b8fd899c9167024fd04480125b30218ed8d09687d98494dca80c4fb4cc66cf7d"
+      },
+      {
+        "path": "src/motion/MomentMotion.css",
+        "sha256": "9d159351cf130615e8a002642bdca4f3f495a179beafa7a941f7381c132242ce"
+      },
+      {
+        "path": "src/motion/MomentMotion.tsx",
+        "sha256": "dc6df8fd4293e9a56690a2e26003202aa48ad0328aa6e4521f61e0ea0033874d"
+      },
+      {
+        "path": "src/motion/RemotionMoment.tsx",
+        "sha256": "e5f417fa1a7c8270e175ea7c5ef632fe783e99ce057a91e85b0c731a1c75aa14"
+      },
+      {
+        "path": "src/motion/RiftSealComposition.tsx",
+        "sha256": "57a7cee88a8e2cb3cbf6ba704ce29eeccece29ccc59be2c089e34c2dfac12036"
+      },
+      {
+        "path": "src/motion/TacticalMoment.tsx",
+        "sha256": "1d484fd5bcc32225766caee86288049137348a665e90ccb331d05e3bee0a4131"
+      },
+      {
+        "path": "src/motion/hyperframes-timeline.ts",
+        "sha256": "c56d1da099726261728cb5e990a9e18b0c291a4ef9060deb7a7a9e7f6120bd1e"
+      },
+      {
+        "path": "src/motion/significant-events.ts",
+        "sha256": "6229e9c607674c6bcebca55375d8548e1cb55a174561d61308336f37b7cb13ff"
+      },
+      {
+        "path": "src/motion/useReducedMotion.ts",
+        "sha256": "b0ad7589449792beed469f437509fe494304608add157a2c42bff1c68ace02e7"
+      },
+      {
+        "path": "tests/fixtures/significant-motion.ts",
+        "sha256": "def3c912813e9ce94f967411aab08e9440817d212d058d78b4d2101793eb0086"
+      },
+      {
+        "path": "tests/significant-motion-preview.html",
+        "sha256": "9421ba0b6236ef6bd684c36fd306c988dc2eb09ce901344ce80a6acf9adc2bb4"
+      },
+      {
+        "path": "tests/significant-motion.test.ts",
+        "sha256": "d65c281cd8fbf47362955b9b5342f8cfd48308b1b15f0e6a6d69d228b6be76f4"
+      }
+    ],
+    "hashEncoding": "SHA-256 of compact UTF-8 JSON array [{path,sha256}] sorted by path; individual files hash exact bytes."
+  },
+  "checks": {
+    "targeted": {
+      "command": [
+        "npm",
+        "test",
+        "--",
+        "tests/significant-motion.test.ts",
+        "tests/event-highlights.test.ts",
+        "tests/table-moments.test.ts",
+        "tests/effect-feedback.test.ts",
+        "tests/playback.test.ts",
+        "tests/mobile-presentation.test.ts",
+        "tests/mobile-duel-fixtures.test.ts",
+        "tests/decision-presentation.test.ts",
+        "tests/stack-presentation.test.ts",
+        "tests/status-presentation.test.ts",
+        "tests/turn-presentation.test.ts",
+        "tests/body-scroll-lock.test.ts",
+        "--maxWorkers=2",
+        "--testTimeout=30000",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/significant-motion-2026-10-08/targeted-tests.json"
+      ],
+      "startedAt": "2026-10-08T10:35:27.052487+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "sourceSha256": "ba01ea6f023ed9bce4931e4957c1b78ecc8b3b1092e2f9fb46b3ec266088d8a9",
+      "completedAt": "2026-10-08T10:35:58.207753+00:00",
+      "signal": null,
+      "changedSourceFiles": []
+    },
+    "build": {
+      "command": ["npm", "run", "build"],
+      "startedAt": "2026-10-08T10:35:27.029915+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "sourceSha256": "ba01ea6f023ed9bce4931e4957c1b78ecc8b3b1092e2f9fb46b3ec266088d8a9",
+      "completedAt": "2026-10-08T10:36:19.559209+00:00",
+      "signal": null,
+      "changedSourceFiles": []
+    },
+    "catalog": {
+      "command": ["npm", "run", "cards:check"],
+      "startedAt": "2026-10-08T10:35:26.953836+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "sourceSha256": "ba01ea6f023ed9bce4931e4957c1b78ecc8b3b1092e2f9fb46b3ec266088d8a9",
+      "completedAt": "2026-10-08T10:35:32.806667+00:00",
+      "signal": null,
+      "changedSourceFiles": []
+    },
+    "fallback": {
+      "command": [
+        "node",
+        "/workspace/scratch/significant-motion-2026-10-08/fallback-qa.mjs"
+      ],
+      "startedAt": "2026-10-08T10:35:26.986916+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "sourceSha256": "ba01ea6f023ed9bce4931e4957c1b78ecc8b3b1092e2f9fb46b3ec266088d8a9",
+      "completedAt": "2026-10-08T10:35:35.326674+00:00",
+      "signal": null,
+      "changedSourceFiles": []
+    },
+    "silent-player-proof": {
+      "command": [
+        "node",
+        "/workspace/scratch/significant-motion-2026-10-08/silent-player-proof.mjs"
+      ],
+      "startedAt": "2026-10-08T10:41:33.883965+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "sourceSha256": "ba01ea6f023ed9bce4931e4957c1b78ecc8b3b1092e2f9fb46b3ec266088d8a9",
+      "completedAt": "2026-10-08T10:41:41.782697+00:00",
+      "signal": null,
+      "changedSourceFiles": []
+    }
+  },
+  "tests": {
+    "passed": 127,
+    "files": 12,
+    "newSignificantMotionTests": 28,
+    "actualResolverFixtureModes": 14,
+    "coverage": [
+      "Only displayed public results",
+      "No future-frame reveal",
+      "Hidden and copied-token privacy",
+      "Actual impact only and no repeated identical impact",
+      "Successful counter only",
+      "Conquer and Hold",
+      "Victory precedence",
+      "Real saved-session parsing and engine equivalence"
+    ]
+  },
+  "build": {
+    "buildId": "614c1042b3dd",
+    "assets": 84,
+    "index": "/assets/index-99Aj4Coj.js",
+    "indexSha256": "70a143b477728bf8831f6be0fac4b2a40336403b7704bd25a917720196d12615",
+    "worker": "/assets/worker-BcVPqZ85.js",
+    "workerSha256": "e8ed7fb237696712f1c94a247711b01c93c32053d5c37b9c9984a946f03e49a6",
+    "manifestSha256": "ce5522cd44de10629d55ebf1c515bd737a843cdd2f34f93c79dd32a5a0680a55",
+    "sourceSha256": "ba01ea6f023ed9bce4931e4957c1b78ecc8b3b1092e2f9fb46b3ec266088d8a9",
+    "motionAssets": [
+      "/assets/RemotionMoment-BF_h_se1.js",
+      "/assets/TacticalMoment-NRYZpRVU.js",
+      "/assets/useReducedMotion-D_yY_fm5.js"
+    ]
+  },
+  "tools": {
+    "remotion": {
+      "version": "4.0.534",
+      "runtime": "@remotion/player",
+      "studioCompositions": ["SignatureSeal", "VictorySeal"],
+      "reviewedFrame": 21,
+      "dimensions": [160, 160],
+      "fps": 30,
+      "frames": 72,
+      "pageErrors": [],
+      "nativeSourceEditable": true,
+      "defaultPropsUiSaveTested": false
+    },
+    "tesseract": {
+      "version": "0.3.1",
+      "nativeRenderExitCode": 0,
+      "nativeVideoPlaybackExitCode": 0,
+      "sources": [
+        {
+          "path": "SignatureSigil.tsrct",
+          "sha256": "27ddea63a31dfed9104a6a2c100b2b66d422d48cfa7318be1806551bcefce540",
+          "bytes": 32595
+        },
+        {
+          "path": "VictorySigil.tsrct",
+          "sha256": "f462a50fbea33600867884cf79425093bb01d1d881a99a7c0c5fdca158a4ee5b",
+          "bytes": 43559
+        },
+        {
+          "path": "ConquerSigil.tsrct",
+          "sha256": "3a77006045219544c999f82b9e1d9baecb0eece077c1366771f19bb6f49d3525",
+          "bytes": 35699
+        }
+      ],
+      "audioStreams": 0,
+      "transparentPixelFractionAtReview": 0.91140625,
+      "previewsReviewed": 3,
+      "previewMoviesBundledInGame": false
+    },
+    "hyperframes": {
+      "scope": "Hyperframes authoring composition and shared deterministic GSAP runtime; not live-match browser QA",
+      "hyperframesVersion": "0.8.141",
+      "gsapVersion": "3.15.0",
+      "composition": {
+        "id": "significant-events",
+        "width": 960,
+        "height": 540,
+        "durationSeconds": 1.25,
+        "liveGameMaximumDecalCssPixels": 80,
+        "representativeTimesSeconds": [0.12, 0.3, 0.54, 0.95, 1.24]
+      },
+      "verification": {
+        "lint": {
+          "exitCode": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        "strictCombinedCheck": {
+          "exitCode": 0,
+          "browserSkipped": false,
+          "runtimeErrors": 0,
+          "layoutErrors": 0,
+          "layoutWarnings": 0,
+          "contrastPassed": 32,
+          "contrastChecked": 32
+        },
+        "strictInspect": {
+          "exitCode": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        "studioPreview": {
+          "actualLaunchAndStatusExitCode": 0,
+          "title": "HyperFrames Studio",
+          "representativeFrameSeconds": 0.54,
+          "pageErrors": 0,
+          "inspected": true,
+          "stoppedAfterReview": true
+        },
+        "choreographyMap": {
+          "exitCode": 0,
+          "tweens": 31,
+          "durationSeconds": 1.25,
+          "deadZones": [],
+          "flagsReviewed": {
+            "collision": 22,
+            "pacedFast": 1
+          },
+          "flagInterpretation": "Intentional nesting: aura, rays, ring and seal layer inside each event panel. No text collision, clipping or off-canvas warning. The one fast 0.18 second tween is the final review-label fade; gameplay seal exit remains 0.25 seconds."
+        },
+        "sourceUnchangedDuringFinalChecks": true,
+        "sourceSha256": "ad3fe80f20c7b3cfaa97f49a0b08b5f539f86134b4c79c4662a9da9f49a34162"
+      },
+      "sourceFiles": [
+        {
+          "path": "motion/hyperframes/DESIGN.md",
+          "sha256": "0a85734c070a7736e9b7e337450a0b53f64071cf51a3c1412458adc2d9c7a04d"
+        },
+        {
+          "path": "motion/hyperframes/README.md",
+          "sha256": "1aded892293cf3a603df865569bffb8280c163330b335279264e1e71251606c7"
+        },
+        {
+          "path": "motion/hyperframes/assets/dm-sans-LICENSE.txt",
+          "sha256": "6fbd040a29c2037a765dfb9f2561e9965b5c95c6dcb5dce516089d63d5f17af7"
+        },
+        {
+          "path": "motion/hyperframes/assets/dm-sans-latin-500-normal.woff2",
+          "sha256": "19bf1984956517c35c2bd35b6cdedac12a21d6fcd3596c614ecdfb88b648909d"
+        },
+        {
+          "path": "motion/hyperframes/assets/dm-sans-latin-700-normal.woff2",
+          "sha256": "35c5efa0e5daa52ee5c6500f5be354bf751fb65c4e49e1d6806c6eb5883e8fe9"
+        },
+        {
+          "path": "motion/hyperframes/assets/exo-2-LICENSE.txt",
+          "sha256": "7644b74e07215f62af4ebbfcf2b0f06a428d70d32c41e751fba93763a683c3f5"
+        },
+        {
+          "path": "motion/hyperframes/assets/exo-2-latin-800-italic.woff2",
+          "sha256": "82306bad68848703afce2593b60ce1862148c700279045ac373753ea016ab0a1"
+        },
+        {
+          "path": "motion/hyperframes/bundle-entry.ts",
+          "sha256": "c412bfe5584a95b6b1427ceb250314100ea77d030c42028db5d1673a42ddea4a"
+        },
+        {
+          "path": "motion/hyperframes/hyperframes.json",
+          "sha256": "53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50"
+        },
+        {
+          "path": "motion/hyperframes/index.html",
+          "sha256": "17910e61991a8e5c2d2e89693b2889a35093dbb9434ae7c30a68706c4b338a03"
+        },
+        {
+          "path": "motion/hyperframes/meta.json",
+          "sha256": "092a707dea48e4a8f2016e746e3e0aff69bb2db761eee06db5766e85c6becf31"
+        },
+        {
+          "path": "motion/hyperframes/package.json",
+          "sha256": "74a5b5e7a9d70f340ddc20e34740fcbec439fa26ebbb4326a69a19eb63d51b7f"
+        },
+        {
+          "path": "motion/hyperframes/tactical-burst.gsap.js",
+          "sha256": "f037e0888b57e7fa4fb7996a6fabec4b20ccba620a4dbfe6b33531c96cb4b8d6"
+        },
+        {
+          "path": "src/motion/hyperframes-timeline.ts",
+          "sha256": "c56d1da099726261728cb5e990a9e18b0c291a4ef9060deb7a7a9e7f6120bd1e"
+        }
+      ]
+    }
+  },
+  "browser": [
+    {
+      "name": "Chromium geometry/significance",
+      "engine": "Chromium",
+      "engineVersion": "143.0.7499.4",
+      "cases": 54,
+      "passed": 54,
+      "physicalDevice": false,
+      "scope": "Fresh loopback synthetic real-resolver sessions; no production saves or rooms. Real touch taps on mobile, decorative motion geometry/focus and current-source bytes guarded when freeze is provided.",
+      "startedAt": "2026-10-08T10:40:18.182Z",
+      "completedAt": "2026-10-08T10:43:53.125Z",
+      "process": {
+        "startedAt": "2026-10-08T10:40:17.740Z",
+        "state": "passed",
+        "actualProcessExitCode": 0,
+        "actualProcessSignal": null,
+        "sourceFreeze": "ba01ea6f023ed9bce4931e4957c1b78ecc8b3b1092e2f9fb46b3ec266088d8a9",
+        "childPid": 130521,
+        "completedAt": "2026-10-08T10:43:53.326Z"
+      },
+      "viewports": ["1280x650", "1440x900", "320x568", "390x844", "844x390"],
+      "pageErrors": [],
+      "failedRequests": [],
+      "failedResponses": [],
+      "sourceUnchangedBeforeAndAfter": true
+    },
+    {
+      "name": "Native WPE geometry/significance",
+      "engine": "Linux WPE WebKit26",
+      "engineVersion": "26.0",
+      "cases": 34,
+      "passed": 34,
+      "physicalDevice": false,
+      "scope": "Fresh loopback synthetic real-resolver sessions; no production saves or rooms. Real touch taps on mobile, decorative motion geometry/focus and current-source bytes guarded when freeze is provided.",
+      "startedAt": "2026-10-08T10:42:01.574Z",
+      "completedAt": "2026-10-08T10:45:33.998Z",
+      "process": {
+        "startedAt": "2026-10-08T10:42:01.155Z",
+        "state": "passed",
+        "actualProcessExitCode": 0,
+        "actualProcessSignal": null,
+        "sourceFreeze": "ba01ea6f023ed9bce4931e4957c1b78ecc8b3b1092e2f9fb46b3ec266088d8a9",
+        "childPid": 131233,
+        "completedAt": "2026-10-08T10:45:34.310Z"
+      },
+      "viewports": ["320x568", "390x844", "844x390"],
+      "pageErrors": [],
+      "failedRequests": [],
+      "failedResponses": [],
+      "sourceUnchangedBeforeAndAfter": true
+    },
+    {
+      "name": "Chromium live clocks",
+      "engine": "Chromium",
+      "engineVersion": "143.0.7499.4",
+      "cases": 8,
+      "passed": 8,
+      "physicalDevice": false,
+      "scope": "Actual local-game Pause/Resume, speed and live prefers-reduced-motion browser preferences. Fresh synthetic sessions, no hosted game state.",
+      "startedAt": "2026-10-08T10:43:04.015Z",
+      "completedAt": "2026-10-08T10:44:17.437Z",
+      "process": {
+        "startedAt": "2026-10-08T10:42:58.926Z",
+        "state": "passed",
+        "actualProcessExitCode": 0,
+        "actualProcessSignal": null,
+        "sourceFreeze": "ba01ea6f023ed9bce4931e4957c1b78ecc8b3b1092e2f9fb46b3ec266088d8a9",
+        "childPid": 131978,
+        "completedAt": "2026-10-08T10:44:17.551Z"
+      },
+      "viewports": ["1440x900", "390x844"],
+      "pageErrors": [],
+      "failedRequests": [],
+      "failedResponses": [],
+      "sourceUnchangedBeforeAndAfter": true
+    },
+    {
+      "name": "Native WPE live clocks, solo",
+      "engine": "Linux WPE WebKit26",
+      "engineVersion": "26.0",
+      "cases": 2,
+      "passed": 2,
+      "physicalDevice": false,
+      "scope": "Actual local-game Pause/Resume, speed and live prefers-reduced-motion browser preferences. Fresh synthetic sessions, no hosted game state.",
+      "startedAt": "2026-10-08T10:46:15.999Z",
+      "completedAt": "2026-10-08T10:46:37.611Z",
+      "process": {
+        "startedAt": "2026-10-08T10:46:15.586Z",
+        "state": "passed",
+        "actualProcessExitCode": 0,
+        "actualProcessSignal": null,
+        "sourceFreeze": "ba01ea6f023ed9bce4931e4957c1b78ecc8b3b1092e2f9fb46b3ec266088d8a9",
+        "childPid": 134000,
+        "completedAt": "2026-10-08T10:46:38.066Z"
+      },
+      "viewports": ["390x844"],
+      "pageErrors": [],
+      "failedRequests": [],
+      "failedResponses": [],
+      "sourceUnchangedBeforeAndAfter": true
+    }
+  ],
+  "staticFallback": {
+    "completedAt": "2026-10-08T10:35:35.110Z",
+    "scope": "Deliberately rejected lazy Remotion module in a fresh synthetic loopback touch session; failure is injected, unrelated to production network availability.",
+    "blockedRequests": ["/src/motion/RemotionMoment.tsx"],
+    "staticFallbackVisible": true,
+    "actualNextEffectAdvances": true,
+    "before": 1,
+    "after": 2,
+    "pageErrors": [],
+    "passed": true
+  },
+  "silentPlayer": {
+    "startedAt": "2026-10-08T10:41:34.496Z",
+    "passed": true,
+    "scope": "Fresh actual Chromium champion fixture; constructor proxy counts Web Audio creation without replacing behavior, actual game Resume/Pause controls; no hosted state.",
+    "pageErrors": [],
+    "sourceBefore": {
+      "sourceSha256": "ba01ea6f023ed9bce4931e4957c1b78ecc8b3b1092e2f9fb46b3ec266088d8a9",
+      "files": 443,
+      "changed": []
+    },
+    "engineVersion": "143.0.7499.4",
+    "start": {
+      "frame": 21,
+      "paused": "true",
+      "audioConstructions": 0,
+      "audioSupported": true,
+      "at": 5361.0999999940395
+    },
+    "playing": {
+      "frame": 22,
+      "paused": "false",
+      "audioConstructions": 0,
+      "audioSupported": true,
+      "at": 5679.89999999851
+    },
+    "paused": {
+      "frame": 23,
+      "paused": "true",
+      "audioConstructions": 0,
+      "audioSupported": true,
+      "at": 6036
+    },
+    "pausedStill": {
+      "frame": 23,
+      "paused": "true",
+      "audioConstructions": 0,
+      "audioSupported": true,
+      "at": 6261.5999999940395
+    },
+    "sourceAfter": {
+      "sourceSha256": "ba01ea6f023ed9bce4931e4957c1b78ecc8b3b1092e2f9fb46b3ec266088d8a9",
+      "files": 443,
+      "changed": []
+    },
+    "completedAt": "2026-10-08T10:41:41.745Z"
+  },
+  "behavior": {
+    "events": [
+      "signature champion entrance",
+      "gained points: Conquer or Hold",
+      "actual combat impact",
+      "successful counter",
+      "victory"
+    ],
+    "routineMotionPlayers": false,
+    "decorativePlayersFocusable": false,
+    "pausePreservesProgress": true,
+    "playbackSpeeds": [0.5, 1, 2],
+    "liveReducedMotion": true,
+    "silentPlayerStartsMutedWithZeroVolume": true,
+    "newReviewDelay": false,
+    "geometryChecksProtect": [
+      "scores",
+      "Might",
+      "hand navigation",
+      "decisions",
+      "mobile board navigation"
+    ]
+  },
+  "limits": [
+    "Linux browser touch emulation and native WPE WebKit; no physical iOS device claim.",
+    "Interrupted and failed exploratory attempts are excluded from final passing counts.",
+    "No fresh whole-engine regression, full precon matrix, bot-pilot or hosted-room availability claim."
+  ]
+}

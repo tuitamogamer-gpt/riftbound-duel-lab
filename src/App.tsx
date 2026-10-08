@@ -841,6 +841,19 @@ export default function App() {
     setError("");
     setScreen("game");
   };
+  const playbackPaused =
+    paused ||
+    previewActive ||
+    !visible ||
+    !!inspected ||
+    !!pileView ||
+    handExpanded ||
+    mobileMenuOpen ||
+    sessionManagerOpen ||
+    !!paymentAction ||
+    help ||
+    logOpen ||
+    confirmNew;
   const header = (
     <header className="topbar">
       <button
@@ -1130,20 +1143,7 @@ export default function App() {
             id="main-content"
             style={{ "--playback-speed": playbackSpeed } as React.CSSProperties}
             data-review-paused={paused}
-            data-playback-paused={
-              paused ||
-              previewActive ||
-              !visible ||
-              !!inspected ||
-              !!pileView ||
-              handExpanded ||
-              mobileMenuOpen ||
-              sessionManagerOpen ||
-              !!paymentAction ||
-              help ||
-              logOpen ||
-              confirmNew
-            }
+            data-playback-paused={playbackPaused}
           >
             <div className="match-toolbar">
               <button
@@ -1540,10 +1540,12 @@ export default function App() {
                     review={review}
                     inspect={setInspected}
                     playbackSpeed={playbackSpeed}
+                    motionPaused={playbackPaused}
                   />
                   <ScreenHighlight
                     review={review}
                     playbackSpeed={playbackSpeed}
+                    motionPaused={playbackPaused}
                   />
                 </div>
                 <EffectTrails review={review} />

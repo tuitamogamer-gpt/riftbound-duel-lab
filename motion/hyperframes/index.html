@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=960, height=540" />
+    <title>Riftbound tactical moments</title>
+    <script src="tactical-burst.gsap.js"></script>
+    <style>
+      @font-face {
+        font-family: "Exo 2";
+        src: url("assets/exo-2-latin-800-italic.woff2") format("woff2");
+        font-style: italic;
+        font-weight: 800;
+      }
+      @font-face {
+        font-family: "DM Sans";
+        src: url("assets/dm-sans-latin-500-normal.woff2") format("woff2");
+        font-style: normal;
+        font-weight: 500;
+      }
+      @font-face {
+        font-family: "DM Sans";
+        src: url("assets/dm-sans-latin-700-normal.woff2") format("woff2");
+        font-style: normal;
+        font-weight: 700;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 960px;
+        height: 540px;
+        overflow: hidden;
+        background: #050b11;
+      }
+      [data-composition-id="significant-events"] {
+        width: 960px;
+        height: 540px;
+        color: #eff4f6;
+        font-family: "DM Sans", sans-serif;
+      }
+      .scene-content {
+        width: 100%;
+        height: 100%;
+        padding: 38px 46px 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .eyebrow {
+        margin: 0;
+        color: #5ad8c6;
+        font-weight: 700;
+        font-size: 16px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0;
+        color: #e9c97b;
+        font:
+          italic 800 60px/1.05 "Exo 2",
+          sans-serif;
+        letter-spacing: -0.025em;
+      }
+      .subtitle {
+        margin: 0;
+        color: #bccad3;
+        font-size: 20px;
+        line-height: 1.4;
+      }
+      .events {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 22px;
+        flex: 1;
+        min-height: 0;
+        padding-top: 12px;
+      }
+      .event {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        border: 1px solid #ffffff1c;
+        border-radius: 14px;
+        background: #0f1f2b;
+        --event-accent: #e9c97b;
+      }
+      .event[data-kind="counter"] {
+        --event-accent: #c7a8ff;
+      }
+      .event[data-kind="conquer"] {
+        --event-accent: #5ad8c6;
+      }
+      h2 {
+        margin: 0;
+        font:
+          italic 800 30px/1.15 "Exo 2",
+          sans-serif;
+        letter-spacing: 0.025em;
+        text-transform: uppercase;
+      }
+      .decal {
+        position: relative;
+        width: 160px;
+        height: 160px;
+        flex: 0 0 160px;
+        color: var(--event-accent);
+        pointer-events: none;
+      }
+      [data-motion-aura] {
+        position: absolute;
+        inset: 22px;
+        background: radial-gradient(circle, currentColor 0%, transparent 70%);
+        opacity: 0.16;
+        border-radius: 50%;
+      }
+      [data-motion-ring] {
+        position: absolute;
+        inset: 26px;
+        border: 2px solid currentColor;
+        border-radius: 50%;
+      }
+      [data-motion-rays] {
+        position: absolute;
+        inset: 0;
+      }
+      [data-motion-rays] svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.5;
+      }
+      [data-motion-seal] {
+        position: absolute;
+        inset: 50px;
+        display: grid;
+        place-items: center;
+        border: 1px solid currentColor;
+        border-radius: 12px;
+        background: #050b11;
+        box-shadow: 0 0 18px #050b11;
+      }
+      [data-motion-seal] svg {
+        width: 34px;
+        height: 34px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.7;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .footer {
+        margin: 0;
+        color: #bccad3;
+        font-size: 18px;
+        line-height: 1.4;
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      data-hf-id="hf-60dx"
+      id="root"
+      data-composition-id="significant-events"
+      data-start="0"
+      data-duration="1.25"
+      data-width="960"
+      data-height="540"
+    >
+      <div data-hf-id="hf-9j12" id="scene" class="scene-content">
+        <p data-hf-id="hf-h0dl" class="eyebrow">Riftbound · Duel Lab</p>
+        <h1 data-hf-id="hf-iyki">Tactical moments</h1>
+        <p data-hf-id="hf-3i4v" class="subtitle">
+          A decisive accent. The table stays readable.
+        </p>
+        <div data-hf-id="hf-g4h7" class="events">
+          <section data-hf-id="hf-1mrs" class="event" data-kind="combat">
+            <div data-hf-id="hf-o0s4" class="decal" aria-hidden="true">
+              <div
+                data-hf-id="hf-thku"
+                id="combat-aura"
+                id="counter-aura"
+                id="conquer-aura"
+                data-motion-aura=""
+                data-layout-ignore=""
+              ></div>
+              <div
+                data-hf-id="hf-8157"
+                id="combat-ring"
+                id="counter-ring"
+                id="conquer-ring"
+                data-motion-ring=""
+                data-layout-ignore=""
+              ></div>
+              <div
+                data-hf-id="hf-n33o"
+                id="combat-rays"
+                id="counter-rays"
+                id="conquer-rays"
+                data-motion-rays=""
+                data-layout-ignore=""
+              >
+                <svg data-hf-id="hf-e2ht" viewBox="0 0 80 80">
+                  <path
+                    data-hf-id="hf-eg6c"
+                    d="M40 5v7m0 56v7M5 40h7m56 0h7M15 15l5 5m40 40 5 5M15 65l5-5m40-40 5-5"
+                  />
+                </svg>
+              </div>
+              <div
+                data-hf-id="hf-5v2h"
+                id="combat-seal"
+                id="counter-seal"
+                id="conquer-seal"
+                data-motion-seal=""
+              >
+                <svg data-hf-id="hf-ulu9" viewBox="0 0 24 24">
+                  <path
+                    data-hf-id="hf-5o9y"
+                    d="m4 3 14 14m-3 3 5-5m-3 3 3 3M20 3 6 17m3 3-5-5m3 3-3 3M4 3v5h5m11-5v5h-5"
+                  />
+                </svg>
+              </div>
+            </div>
+            <h2 data-hf-id="hf-ft1z">Combat impact</h2>
+          </section>
+          <section data-hf-id="hf-laes" class="event" data-kind="counter">
+            <div data-hf-id="hf-hszw" class="decal" aria-hidden="true">
+              <div
+                data-hf-id="hf-slr6"
+                id="counter-aura"
+                data-motion-aura=""
+                data-layout-ignore=""
+              ></div>
+              <div
+                data-hf-id="hf-khez"
+                id="counter-ring"
+                data-motion-ring=""
+                data-layout-ignore=""
+              ></div>
+              <div
+                data-hf-id="hf-0n7w"
+                id="counter-rays"
+                data-motion-rays=""
+                data-layout-ignore=""
+              >
+                <svg data-hf-id="hf-yqt1" viewBox="0 0 80 80">
+                  <path
+                    data-hf-id="hf-ttek"
+                    d="M40 5v7m0 56v7M5 40h7m56 0h7M15 15l5 5m40 40 5 5M15 65l5-5m40-40 5-5"
+                  />
+                </svg>
+              </div>
+              <div data-hf-id="hf-m931" id="counter-seal" data-motion-seal="">
+                <svg data-hf-id="hf-1tol" viewBox="0 0 24 24">
+                  <path
+                    data-hf-id="hf-qvvq"
+                    d="M12 3 20 6v6c0 4-5 7-8 9-3-2-8-5-8-9V6l8-3ZM8 8l8 8m0-8-8 8"
+                  />
+                </svg>
+              </div>
+            </div>
+            <h2 data-hf-id="hf-wdjc">Countered</h2>
+          </section>
+          <section data-hf-id="hf-h52b" class="event" data-kind="conquer">
+            <div data-hf-id="hf-gm2t" class="decal" aria-hidden="true">
+              <div
+                data-hf-id="hf-t027"
+                id="conquer-aura"
+                data-motion-aura=""
+                data-layout-ignore=""
+              ></div>
+              <div
+                data-hf-id="hf-k33y"
+                id="conquer-ring"
+                data-motion-ring=""
+                data-layout-ignore=""
+              ></div>
+              <div
+                data-hf-id="hf-zgat"
+                id="conquer-rays"
+                data-motion-rays=""
+                data-layout-ignore=""
+              >
+                <svg data-hf-id="hf-zxq4" viewBox="0 0 80 80">
+                  <path
+                    data-hf-id="hf-smhh"
+                    d="M40 5v7m0 56v7M5 40h7m56 0h7M15 15l5 5m40 40 5 5M15 65l5-5m40-40 5-5"
+                  />
+                </svg>
+              </div>
+              <div data-hf-id="hf-ng04" id="conquer-seal" data-motion-seal="">
+                <svg data-hf-id="hf-30lo" viewBox="0 0 24 24">
+                  <path
+                    data-hf-id="hf-4it3"
+                    d="M5 21V3m0 1h13l-3 4 3 4H5M3 21h6"
+                  />
+                </svg>
+              </div>
+            </div>
+            <h2 data-hf-id="hf-au0x">Conquered</h2>
+          </section>
+        </div>
+        <p data-hf-id="hf-jydy" class="footer">
+          <span data-hf-id="hf-u5ks">Finite public event accents</span
+          ><span data-hf-id="hf-ebs0">01.25 s</span>
+        </p>
+      </div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      tl.from(
+        ".eyebrow",
+        { opacity: 0, x: -5, duration: 0.2, ease: "power3.out" },
+        0.1,
+      );
+      tl.from(
+        "h1",
+        { opacity: 0, y: 5, duration: 0.27, ease: "expo.out" },
+        0.12,
+      );
+      tl.from(
+        ".subtitle",
+        { opacity: 0, duration: 0.24, ease: "sine.out" },
+        0.16,
+      );
+      tl.from(
+        ".event",
+        { opacity: 0, y: 3, duration: 0.26, ease: "power2.out", stagger: 0.02 },
+        0.1,
+      );
+      tl.from(
+        "h2",
+        { opacity: 0, y: 2, duration: 0.21, ease: "power3.out", stagger: 0.02 },
+        0.22,
+      );
+      tl.from(
+        ".footer",
+        { opacity: 0, duration: 0.24, ease: "sine.out" },
+        0.22,
+      );
+      document.querySelectorAll(".event").forEach((event) => {
+        const burst = RiftboundMotion.createTacticalBurstTimeline(
+          event.querySelector(".decal"),
+          { kind: event.dataset.kind },
+        );
+        // Flatten these *existing* runtime tweens into the review timeline.
+        // The choreography helper recursively visits timelines; flat ownership
+        // prevents duplicate entries while preserving every canonical time.
+        burst.getChildren(false, true, false).forEach((tween) => {
+          tl.add(tween, tween.startTime());
+        });
+        burst.kill();
+      });
+      tl.to(
+        ".eyebrow, h1, .subtitle, h2, .footer",
+        { opacity: 0, duration: 0.18, ease: "power2.in" },
+        1.07,
+      );
+      window.__timelines["significant-events"] = tl;
+      tl.seek(0);
+      tl.startTime(0);
+    </script>
+  </body>
+</html>

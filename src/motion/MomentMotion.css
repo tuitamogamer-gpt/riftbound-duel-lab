@@ -1,0 +1,259 @@
+.moment-motion {
+  display: inline-block;
+  position: relative;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  overflow: hidden;
+  pointer-events: none;
+  color: #e9c97b;
+  vertical-align: middle;
+}
+.motion-combat {
+  color: #f4d388;
+}
+.motion-counter {
+  color: #ff9d80;
+}
+.motion-opponent {
+  --motion-side: #f1a6a6;
+}
+.moment-motion-fallback {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  inset: 25%;
+}
+.tactical-motion,
+.tactical-motion > span {
+  position: absolute;
+  inset: 0;
+  transform-origin: center;
+  pointer-events: none;
+}
+.tactical-motion svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.tactical-motion [data-motion-aura] {
+  border-radius: 50%;
+  background: radial-gradient(circle, #e9c97b28, transparent 70%);
+}
+.tactical-motion [data-motion-ring] {
+  inset: 12%;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+.tactical-motion [data-motion-seal] {
+  inset: 28%;
+}
+.tactical-motion .tactical-rest-icon {
+  inset: 28%;
+  opacity: 0.65;
+}
+.champion-entrance > .moment-motion {
+  position: absolute;
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  width: 110px;
+  height: 110px;
+  margin-block: auto;
+  z-index: -1;
+  opacity: 0.72;
+}
+.champion-entrance .champion-entrance-portrait {
+  animation: none;
+}
+.screen-highlight-label .motion-victory {
+  width: 64px;
+  height: 64px;
+}
+.screen-highlight-label > .moment-motion:not(.motion-victory) {
+  width: 32px;
+  height: 32px;
+}
+.screen-highlight-label > .moment-motion + span {
+  min-width: 0;
+}
+.screen-highlight[data-highlight-significant="false"] {
+  animation: none;
+}
+.screen-highlight[data-highlight-significant="false"] .screen-highlight-edge {
+  display: none;
+}
+.app.is-game .playmat > :is(.moment-score, .moment-draw) {
+  position: fixed;
+  inset: auto;
+  top: max(58px, calc(env(safe-area-inset-top) + 58px));
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  width: min(340px, calc(100vw - 24px));
+  display: block;
+}
+.app.is-game :is(.moment-score, .moment-draw) .moment-halo {
+  display: none;
+}
+.app.is-game .moment-score .moment-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px;
+  min-width: 0;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  text-align: left;
+  box-shadow: 0 8px 24px #0005;
+}
+.app.is-game .moment-score .moment-owner {
+  grid-area: 1 / 1;
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+.app.is-game .moment-score .moment-score-path {
+  grid-area: 1 / 2;
+  gap: 6px;
+  font-size: 8px;
+  justify-content: end;
+}
+.app.is-game .moment-score .moment-score-path b {
+  font-size: 16px;
+}
+.app.is-game .moment-score .moment-title {
+  grid-area: 2 / 1;
+  gap: 8px;
+  min-width: 0;
+}
+.app.is-game .moment-score .moment-title strong {
+  font-size: 22px;
+  letter-spacing: 0.5px;
+}
+.app.is-game .moment-score .moment-title .moment-motion {
+  width: 30px;
+  height: 30px;
+}
+.app.is-game .moment-score .moment-point {
+  grid-area: 2 / 2 / 4 / 3;
+  justify-self: end;
+  text-align: center;
+  font-size: 36px;
+  text-shadow: none;
+}
+.app.is-game .moment-score .moment-point small {
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+.app.is-game .moment-score .moment-source {
+  grid-area: 3 / 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+}
+.app.is-game .moment-score .moment-timer {
+  grid-area: 4 / 1 / 5 / 3;
+  justify-self: center;
+  width: 80px;
+  margin-top: 2px;
+}
+.app.is-game .moment-draw .moment-content {
+  width: 100%;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid #e9c97b45;
+  border-radius: 12px;
+  background: linear-gradient(115deg, #192d38f5, #0c1924f5);
+  box-shadow: 0 8px 24px #0005;
+}
+.app.is-game
+  .moment-draw
+  :is(.moment-owner, .moment-source, .moment-hint, .moment-timer) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.app.is-game .moment-draw .moment-title {
+  animation: none;
+}
+.app.is-game .moment-draw .moment-title strong {
+  font-size: 20px;
+}
+.app.is-game .moment-draw .moment-letter {
+  width: 26px;
+  height: 26px;
+  font-size: 16px;
+}
+.app.is-game .moment-draw .moment-cards {
+  gap: 8px;
+  padding: 0;
+}
+.app.is-game .moment-draw :is(.moment-drawn-card, .moment-card-back) {
+  width: 44px;
+  flex-basis: 44px;
+  animation: none;
+}
+.app.is-game .moment-draw .moment-drawn-card > span:not(.card-sleeve) {
+  display: none;
+}
+@media (max-width: 800px) {
+  .app.is-game .playmat > :is(.moment-score, .moment-draw) {
+    top: max(172px, calc(env(safe-area-inset-top) + 172px));
+  }
+}
+@media (max-width: 800px) and (max-height: 700px) {
+  .app.is-game .playmat > :is(.moment-score, .moment-draw) {
+    top: max(156px, calc(env(safe-area-inset-top) + 156px));
+  }
+}
+@media (max-width: 1000px) and (max-height: 500px) and (min-aspect-ratio: 3/2) {
+  .app.is-game .playmat > :is(.moment-score, .moment-draw) {
+    position: absolute;
+    grid-area: chain;
+    top: 8px;
+    width: min(300px, calc(100% - 20px));
+  }
+}
+@media (min-width: 801px) and (min-height: 501px) {
+  .app.is-game .champion-entrance {
+    top: max(58px, calc(env(safe-area-inset-top) + 58px));
+    left: 0;
+    right: 0;
+    margin-inline: auto;
+    gap: 12px;
+    padding: 10px 14px;
+  }
+  .app.is-game .champion-entrance-portrait {
+    flex-basis: 48px;
+    height: 67px;
+  }
+  .app.is-game .champion-entrance-copy strong {
+    font-size: 23px;
+  }
+  .app.is-game .champion-entrance-copy > span {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+  .app.is-game .champion-entrance > .moment-motion {
+    width: 86px;
+    height: 86px;
+    left: -4px;
+  }
+}
+@media (max-height: 500px) {
+  .champion-entrance > .moment-motion {
+    width: 86px;
+    height: 86px;
+    left: -4px;
+  }
+  .screen-highlight-label .motion-victory {
+    width: 48px;
+    height: 48px;
+  }
+}
