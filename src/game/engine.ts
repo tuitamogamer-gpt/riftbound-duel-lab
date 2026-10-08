@@ -31,7 +31,12 @@ import {
 import { getCardTypes } from "../data/cards";
 import { isCardType } from "../data/cards";
 import { advanceDeaths } from "./death-replacements";
-import { physicalOwner, physicalCard, detach } from "./objects";
+import {
+  physicalOwner,
+  physicalCard,
+  detach,
+  returnBoardCardsToHand,
+} from "./objects";
 import { getUnitTags } from "./board-rules";
 import {
   allCardTags,
@@ -1952,7 +1957,13 @@ function* iterateTargets(
     return;
   }
   const units = s.units.filter((u) => effectTargetMatches(s, u, e, sourceId));
-  const gears = s.gears.filter((g) => effectTargetMatches(s, g, e, sourceId));
+  const gears = s.gears.filter((g) => {
+    const unit = s.units.find((u) => u.id === g.id);
+    return (
+      effectTargetMatches(s, g, e, sourceId) &&
+      (!unit || !protectedFrom(s, unit, p))
+    );
+  });
   if (e.target === "empowerObject") {
     yield* [
       ...units.filter((u) => !protectedFrom(s, u, p)).map((u) => u.id),
@@ -2540,12 +2551,16 @@ function payBoardCost(
   } else if (cost.kind === "killUnit") killUnits(s, [sourceId]);
   else if (cost.kind === "killGear") killGear(s, sourceId);
   else {
-    const gear = s.gears.find((g) => g.id === sourceId)!;
-    event(s, "bounce", p, gear.cardId, gear.id, base(p));
-    s.gears = s.gears.filter((g) => g.id !== sourceId);
-    for (const unit of s.units)
-      unit.gear = unit.gear.filter((id) => id !== sourceId);
-    if (!gear.token) s.players[gear.owner].hand.push(gear.cardId);
+    returnBoardCardsToHand(s, [sourceId], (object) =>
+      event(
+        s,
+        "bounce",
+        p,
+        object.cardId,
+        object.id,
+        "location" in object ? object.location : base(object.owner),
+      ),
+    );
   }
   log(s, `Additional cost: ${label}.`, "play", p);
 }
@@ -2818,13 +2833,16 @@ function boardCandidates(
       result.push({ ...u, might: getMight(s, u) });
     }
   if (e.cardTypes?.includes("Gear"))
-    for (const g of s.gears)
+    for (const g of s.gears) {
+      const unit = s.units.find((u) => u.id === g.id);
       if (
         owns(g.owner) &&
+        (!unit || !protectedFrom(s, unit, p)) &&
         (!e.excludeSource || g.id !== sourceId) &&
         effectTargetMatches(s, g, e, sourceId)
       )
         result.push({ ...g, location: base(g.owner), might: 0 });
+    }
   if (e.cardTypes?.includes("Hidden"))
     for (const h of s.hidden ?? [])
       if (owns(h.owner) && (!e.excludeSource || h.id !== sourceId))
@@ -6260,11 +6278,16 @@ function executeEffects(
           break;
         }
         if (u) {
-          event(s, "bounce", u.owner, u.cardId, u.id, u.location);
-          s.units = s.units.filter((v) => v.id !== u.id);
-          if (!u.token) s.players[physicalOwner(u)].hand.push(physicalCard(u));
-          for (const gear of s.gears.filter((g) => g.attachedTo === u.id))
-            detach(s, gear);
+          returnBoardCardsToHand(s, [u.id], (object) =>
+            event(
+              s,
+              "bounce",
+              object.owner,
+              object.cardId,
+              object.id,
+              u.location,
+            ),
+          );
         }
         break;
       case "equip": {

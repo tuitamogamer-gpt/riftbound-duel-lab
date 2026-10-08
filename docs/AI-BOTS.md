@@ -1,6 +1,8 @@
 # Battlefield bots — implementation and verification
 
-Implementation date: **6 October 2026**. Configuration: `battlefield-planner-1`.
+Original implementation date: **6 October 2026**. The historical measurements below used `battlefield-planner-1`.
+
+The current configuration is **`battlefield-planner-3`**. It retains authorized active Nocturne/Predict inspections, current public hand reveals and physical-card inventory when sampling synthetic worlds; unknown future draws remain private. A separate decision-local optimization preserved all 104 fixed-node trace comparisons and reduced measured planning time by 23.7% on the checked corpus. See [performance methodology and limits](AI-PERFORMANCE.md) and [current catalog validation](AI-CATALOG-UPDATE.md). Completed legal-action replays from versions 1 and 2 remain readable; unknown policy versions are rejected. The earlier card counts and strength samples below are dated historical evidence, not measurements of the current release.
 
 The existing 1v1 game now runs Beginner, Normal, Hard and Expert policies in a Web Worker. Every player-owned decision goes through the same engine as human play, including off-turn reactions, triggered choices, grouped movement, payment, damage assignment, and mulligans. The toolbar shows a short public explanation. A complete local replay, including private diagnostic data, can be downloaded after the match ends.
 

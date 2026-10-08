@@ -44,17 +44,40 @@ export function useOnlineRoom() {
   filterRef.current = filter;
   const current = useRef(credentials);
   current.current = credentials;
-  const working = useRef(false);
+  const mounted = useRef(true);
+  const operation = useRef<AbortController | null>(null);
+  const polling = useRef<AbortController | null>(null);
   const generation = useRef(0);
   const retryAction = useRef<Extract<OnlineRequest, { op: "act" }> | null>(
     null,
   );
   const joinToken = useRef(onlineSecret());
   const [pendingRetry, setPendingRetry] = useState(false);
+  const invalidatePoll = useCallback(() => {
+    generation.current++;
+    polling.current?.abort();
+    polling.current = null;
+  }, []);
+  const cancelOperation = useCallback(() => {
+    operation.current?.abort();
+    operation.current = null;
+  }, []);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      cancelOperation();
+      invalidatePoll();
+    };
+  }, [cancelOperation, invalidatePoll]);
   const refresh = useCallback(async () => {
     const seat = current.current;
-    if (!seat || working.current) return;
+    if (!mounted.current || !seat || operation.current || polling.current)
+      return;
     const version = generation.current;
+    const request = new AbortController();
+    polling.current = request;
+    const timeout = setTimeout(() => request.abort(), 15_000);
     try {
       const response = await requestOnlineRoom(
         {
@@ -63,9 +86,14 @@ export function useOnlineRoom() {
           seatToken: seat.seatToken,
           ...filterRef.current,
         },
-        AbortSignal.timeout(15_000),
+        request.signal,
       );
-      if (version !== generation.current) return;
+      if (
+        !mounted.current ||
+        polling.current !== request ||
+        version !== generation.current
+      )
+        return;
       const intent = pendingJoinRef.current;
       if (
         intent &&
@@ -86,8 +114,15 @@ export function useOnlineRoom() {
       );
       setError(null);
     } catch (value) {
-      if (version === generation.current)
+      if (
+        mounted.current &&
+        polling.current === request &&
+        version === generation.current
+      )
         setError(value instanceof OnlineClientError ? value.code : "network");
+    } finally {
+      clearTimeout(timeout);
+      if (polling.current === request) polling.current = null;
     }
   }, []);
   useEffect(() => {
@@ -103,23 +138,25 @@ export function useOnlineRoom() {
     return () => {
       clearInterval(interval);
       document.removeEventListener("visibilitychange", visible);
-      generation.current++;
+      invalidatePoll();
     };
-  }, [credentials, refresh]);
+  }, [credentials, refresh, invalidatePoll]);
   useEffect(() => {
     void refresh();
   }, [filter, refresh]);
   const run = async (body: OnlineRequest) => {
-    if (working.current) return null;
-    working.current = true;
+    if (!mounted.current || operation.current) return null;
+    const request = new AbortController();
+    operation.current = request;
+    const timeout = setTimeout(() => request.abort(), 30_000);
     setBusy(true);
     setError(null);
-    generation.current++;
+    invalidatePoll();
     try {
-      const response = await requestOnlineRoom(
-        body,
-        AbortSignal.timeout(30_000),
-      );
+      const response = await requestOnlineRoom(body, request.signal);
+      // A reply can arrive even after its fetch was aborted. Forgetting a seat,
+      // leaving this screen, or starting another request must keep it forgotten.
+      if (!mounted.current || operation.current !== request) return null;
       if (response.credentials) {
         const own = response.credentials;
         const persisted = storeOnlineCredentials(own);
@@ -139,6 +176,7 @@ export function useOnlineRoom() {
       setPendingRetry(false);
       return response.room;
     } catch (value) {
+      if (!mounted.current || operation.current !== request) return null;
       const code = value instanceof OnlineClientError ? value.code : "network";
       setError(code);
       if (body.op === "join") {
@@ -171,9 +209,15 @@ export function useOnlineRoom() {
       }
       return null;
     } finally {
-      working.current = false;
-      setBusy(false);
-      void refresh();
+      clearTimeout(timeout);
+      // An old request must never unlock or refresh a newer room operation.
+      if (operation.current === request) {
+        operation.current = null;
+        if (mounted.current) {
+          setBusy(false);
+          void refresh();
+        }
+      }
     }
   };
   return {
@@ -184,7 +228,7 @@ export function useOnlineRoom() {
     resumeUnavailable,
     filter,
     setFilter: (next: typeof filter) => {
-      generation.current++;
+      invalidatePoll();
       filterRef.current = next;
       setFilter(next);
     },
@@ -199,6 +243,7 @@ export function useOnlineRoom() {
       invitation: { roomId: string; inviteToken: string },
       selection: OnlineDeckSelection,
     ) => {
+      if (!mounted.current || operation.current) return null;
       const cached = readOnlineCredentials(),
         old = pendingJoinRef.current;
       const same =
@@ -270,7 +315,8 @@ export function useOnlineRoom() {
           })
         : Promise.resolve(null),
     forget: () => {
-      generation.current++;
+      cancelOperation();
+      invalidatePoll();
       storeOnlineCredentials(null);
       storeOnlineJoinIntent(null);
       setPendingJoin(null);
@@ -279,7 +325,10 @@ export function useOnlineRoom() {
       current.current = null;
       setRoom(null);
       setFilter({});
+      filterRef.current = {};
       setError(null);
+      setBusy(false);
+      setResumeUnavailable(false);
       retryAction.current = null;
       setPendingRetry(false);
     },

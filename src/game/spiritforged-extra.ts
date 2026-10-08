@@ -9,6 +9,7 @@ import { isCardType } from "../data/cards";
 import { getUnitTags } from "./board-rules";
 import { getCard } from "../data/cards";
 import { getScript } from "./scripts";
+import { returnBoardCardsToHand } from "./objects";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
 import type {
   CardScript,
@@ -225,12 +226,17 @@ function choose(
   });
 }
 function bounceGear(s: GameState, id: string, ctx: PreconContext) {
-  const g = s.gears.find((g) => g.id === id);
-  if (!g) return;
-  ctx.cardEvent(s, "bounce", g.owner, g.cardId, g.id, `base:${g.owner}`);
-  for (const u of s.units) u.gear = u.gear.filter((id) => id !== g.id);
-  s.gears = s.gears.filter((x) => x.id !== g.id);
-  if (!g.token) s.players[g.owner].hand.push(g.cardId);
+  if (!s.gears.some((gear) => gear.id === id)) return;
+  returnBoardCardsToHand(s, [id], (object) =>
+    ctx.cardEvent(
+      s,
+      "bounce",
+      object.owner,
+      object.cardId,
+      object.id,
+      "location" in object ? object.location : `base:${object.owner}`,
+    ),
+  );
 }
 export const spiritforgedExtraModule: ExpansionModule = {
   might(s, u, value) {
@@ -438,29 +444,19 @@ export const spiritforgedExtraModule: ExpansionModule = {
         break;
       case "downwell": {
         // Return the complete simultaneous group before any state-based death check.
-        const units = [...s.units],
-          gears = [...s.gears];
-        for (const u of units)
-          ctx.cardEvent(s, "bounce", u.owner, u.cardId, u.id, u.location);
-        for (const g of gears)
-          ctx.cardEvent(
-            s,
-            "bounce",
-            g.owner,
-            g.cardId,
-            g.id,
-            `base:${g.owner}`,
-          );
-        const unitIds = new Set(units.map((u) => u.id));
-        const gearIds = new Set(gears.map((g) => g.id));
-        s.units = s.units.filter((u) => !unitIds.has(u.id));
-        s.gears = s.gears.filter((g) => !gearIds.has(g.id));
-        for (const u of s.units)
-          u.gear = u.gear.filter((id) => !gearIds.has(id));
-        for (const u of units)
-          if (!u.token) s.players[u.owner].hand.push(u.cardId);
-        for (const g of gears)
-          if (!g.token) s.players[g.owner].hand.push(g.cardId);
+        returnBoardCardsToHand(
+          s,
+          [...s.units, ...s.gears].map((object) => object.id),
+          (object) =>
+            ctx.cardEvent(
+              s,
+              "bounce",
+              object.owner,
+              object.cardId,
+              object.id,
+              "location" in object ? object.location : `base:${object.owner}`,
+            ),
+        );
         break;
       }
       case "blood-money":

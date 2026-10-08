@@ -115,6 +115,53 @@
   font-size: 11px;
   margin: 10px 0 20px;
 }
+.builder-recovery {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0;
+  padding: 14px;
+  border: 1px solid #9f865670;
+  background: #e6d8b950;
+}
+.builder-recovery > div {
+  flex: 1 1 300px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.builder-recovery p {
+  font-size: 11px;
+  line-height: 1.6;
+  margin: 6px 0 0;
+}
+.builder-edit-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.builder-undo {
+  display: flex;
+  gap: 7px;
+}
+.builder-undo .builder-button {
+  font-size: 11px;
+  padding: 8px 12px;
+}
+.builder-edit-tools > p {
+  flex: 1 1 260px;
+  max-width: 440px;
+  font-size: 11px;
+  line-height: 1.6;
+  margin: 0;
+}
+.deck-builder .builder-backup-error {
+  color: #8b322a;
+  font-weight: 700;
+}
 .builder-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 390px);
@@ -166,6 +213,44 @@
   border: 0;
   background: transparent;
   padding-left: 0;
+}
+.builder-clear-search {
+  min-width: 44px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+}
+.builder-filter-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  grid-column: 1 / -1;
+}
+.builder-filter-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 15px;
+  justify-content: space-between;
+  color: var(--builder-muted);
+}
+.builder-filter-tools small {
+  flex: 1 1 260px;
+  font-size: 10px;
+  line-height: 1.7;
+}
+.builder-reset-filters {
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.builder-empty-results {
+  padding: 20px 12px;
+  text-align: center;
+  border: 1px solid var(--builder-line);
+  background: #fffcf4;
 }
 .builder-checkbox {
   display: flex;
@@ -247,6 +332,11 @@
   display: block;
   font-size: 10px;
   color: var(--builder-gold);
+}
+.builder-card-copy > .builder-card-stats {
+  margin-top: 5px;
+  color: var(--builder-muted);
+  font-weight: 700;
 }
 .builder-card-copy > p {
   margin: 8px 0;
@@ -654,6 +744,10 @@
   }
   .builder-filters {
     gap: 7px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .builder-filters > select:last-of-type {
+    grid-column: 1 / -1;
   }
   .deck-builder .builder-filters > select {
     font-size: 11px;

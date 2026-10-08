@@ -425,7 +425,12 @@ export function writeCompletedMatch(
     const entries = readEntries(target);
     if (entries.some((existing) => existing.id === entry.id))
       return { saved: true, entry, entries };
-    const retained = persistEntries([entry, ...entries], target);
+    const retained = persistEntries(
+      [entry, ...entries].sort(
+        (a, b) => Date.parse(b.endedAt) - Date.parse(a.endedAt),
+      ),
+      target,
+    );
     return { saved: true, entry, entries: retained };
   } catch (cause) {
     return {

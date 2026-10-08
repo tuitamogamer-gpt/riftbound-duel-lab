@@ -244,6 +244,14 @@ export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
       issues.push(
         issue("unknown-card", `Nepoznat ID karte: ${cardId}`, { cardId }),
       );
+    else if (card.supertype === "Token")
+      issues.push(
+        issue(
+          "token-card",
+          `Token karta ne može se uvrstiti u špil: ${card.name}`,
+          { cardId },
+        ),
+      );
     else if (card.bannedInDuel)
       issues.push(
         issue(

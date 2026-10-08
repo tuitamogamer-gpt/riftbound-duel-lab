@@ -1,0 +1,20 @@
+.route-recovery {
+  max-width: 800px;
+  margin: 48px auto;
+  padding: 24px;
+}
+.route-recovery h1 {
+  font-size: clamp(24px, 5vw, 36px);
+}
+.route-recovery p {
+  line-height: 1.6;
+}
+.route-recovery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+.route-recovery-actions button {
+  min-height: 44px;
+}

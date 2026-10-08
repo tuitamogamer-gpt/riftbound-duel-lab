@@ -20,6 +20,10 @@
   outline: 2px solid #997c39;
   outline-offset: 3px;
 }
+.history-caption:focus-visible {
+  outline: 2px solid #997c39;
+  outline-offset: 3px;
+}
 .history-header {
   display: flex;
   align-items: center;
@@ -225,6 +229,174 @@
   font-size: 11px;
   color: var(--history-muted);
 }
+.history-speed,
+.history-navigation label,
+.history-move-filters > label:first-child,
+.history-bookmark-editor label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--history-muted);
+}
+.history-speed {
+  margin-left: auto;
+}
+.history-speed select {
+  padding: 6px 10px;
+}
+.history-navigation {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+.history-navigation .history-button {
+  font-size: 11px;
+  padding: 10px;
+}
+.history-bookmark-editor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 12px;
+  background: #e9e3d3;
+}
+.history-bookmark-recovery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 18px;
+}
+.history-bookmark-recovery > .history-confirm {
+  width: 100%;
+}
+.history-bookmark-editor label {
+  flex: 1 1 220px;
+}
+.history-bookmark-editor input {
+  font: inherit;
+  color: var(--history-ink);
+  min-height: 44px;
+  min-width: 0;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--history-line);
+  background: var(--history-paper);
+  box-sizing: border-box;
+}
+.history-move-list,
+.history-bookmarks {
+  margin: 16px 0;
+  border: 1px solid var(--history-line);
+  background: var(--history-paper);
+  padding: 0 12px 12px;
+}
+.history-move-list summary,
+.history-bookmarks summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 700;
+}
+.history-move-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.history-moments-filter {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.history-moments-filter input {
+  width: 18px;
+  height: 18px;
+  accent-color: #987332;
+}
+.history-moves {
+  max-height: 260px;
+  overflow-y: auto;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overscroll-behavior: contain;
+}
+.history-moves button {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+  min-height: 58px;
+  width: 100%;
+  padding: 10px;
+  color: var(--history-ink);
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--history-line);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.history-moves button[aria-current="step"] {
+  background: #efe4c9;
+  box-shadow: inset 3px 0 #987332;
+}
+.history-moves button > span {
+  font-size: 10px;
+  color: var(--history-muted);
+}
+.history-moves button > strong {
+  font-size: 12px;
+}
+.history-moves button > small {
+  color: #2b6754;
+}
+.history-move-pages {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.history-move-pages > span {
+  font-size: 11px;
+  color: var(--history-muted);
+}
+.history-move-pages .history-button {
+  font-size: 11px;
+  padding: 9px;
+}
+.history-bookmarks ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.history-bookmarks li {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+.history-bookmarks li .history-button:first-child {
+  flex: 1;
+  flex-direction: column;
+  align-items: start;
+  text-align: left;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.history-bookmarks li span {
+  font-weight: 400;
+}
 .history-scrub {
   width: 100%;
   height: 44px;
@@ -418,6 +590,15 @@
   }
   .history-playback .history-button {
     padding: 10px;
+  }
+  .history-speed {
+    margin-left: 0;
+  }
+  .history-navigation > label {
+    width: 100%;
+  }
+  .history-navigation > .history-button {
+    flex: 1 1 120px;
   }
   .history-tools .history-button {
     flex: 1 1 150px;

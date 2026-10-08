@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowDown, ArrowUp, Check, RotateCcw, X } from "lucide-react";
 import { domainColors } from "../catalog";
@@ -57,13 +57,6 @@ export function PaymentPicker({
     [next[index], next[other]] = [next[other], next[index]];
     setOrder(next);
   };
-  useEffect(() => {
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, []);
   if (typeof document === "undefined") return null;
   return createPortal(
     <div className="modal-backdrop payment-picker-backdrop" onClick={onClose}>

@@ -33,6 +33,9 @@ jobs:
           tests/engine.test.ts
           tests/rules-regression.test.ts
           tests/rules-errata.test.ts
+          tests/physical-board-return.test.ts
+          tests/hybrid-copy-protection.test.ts
+          tests/physical-verdict.test.ts
           tests/card-registry.test.ts
           tests/card-script-compiler.test.ts
           tests/catalog-core.test.ts
@@ -41,13 +44,23 @@ jobs:
           tests/session-storage.test.ts
           tests/payment-decisions.test.ts
           tests/deck-builder.test.ts
+          tests/catalog-query.test.ts
+          tests/deck-token-validation.test.ts
+          tests/builder-draft.test.ts
+          tests/builder-history.test.ts
           tests/training.test.ts
+          tests/training-guidance.test.ts
+          tests/replay-navigation.test.ts
+          tests/replay-bookmarks.test.ts
           tests/ai-profiles.test.ts
           tests/ai-prepared-fallback.test.ts
           tests/ai-inspection-ownership.test.ts
+          tests/ai-authorized-knowledge.test.ts
           tests/public-hand-reveals.test.ts
           tests/online-rooms.test.ts
           tests/online-client.test.ts
+          tests/service-worker.test.ts
+          tests/body-scroll-lock.test.ts
           tests/online-api.test.ts
           tests/online-mulligan.test.ts
           tests/blob-room-storage.test.ts
@@ -56,6 +69,8 @@ jobs:
           tests/match-series.test.ts
           tests/match-history.test.ts
           tests/mobile-presentation.test.ts
+          tests/predict-decision-art.test.ts
+          tests/trash-play-presentation.test.ts
           tests/card-wave13.test.ts
           tests/card-wave14.test.ts
           tests/card-wave15.test.ts

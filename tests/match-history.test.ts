@@ -324,3 +324,98 @@ describe("public replay frame analysis", () => {
     ).toHaveLength(2);
   });
 });
+
+describe("chronological retention for replay imports", () => {
+  const date = (minute: number) =>
+    `2026-10-07T21:${String(minute).padStart(2, "0")}:00Z`;
+  function fullArchive() {
+    const target = storage();
+    for (let seed = 1; seed <= MAX_HISTORY_MATCHES; seed++) {
+      const match = completed(seed);
+      expect(
+        writeCompletedMatch(
+          match.replay,
+          { final: match.final, endedAt: date(seed) },
+          target,
+        ).saved,
+      ).toBe(true);
+    }
+    return target;
+  }
+  it("checks an older single replay without evicting newer retained matches", () => {
+    const target = fullArchive();
+    const before = target.getItem(MATCH_HISTORY_KEY);
+    const old = completed(100);
+    const envelope = {
+      schema: 1,
+      replay: old.replay,
+      endedAt: "2020-01-01T00:00:00Z",
+    };
+    const result = importCompletedMatch(JSON.stringify(envelope), target);
+    expect(result.saved).toBe(true);
+    expect(result.entries).toHaveLength(MAX_HISTORY_MATCHES);
+    expect(result.entries?.some((entry) => entry.id === result.entry?.id)).toBe(
+      false,
+    );
+    expect(target.getItem(MATCH_HISTORY_KEY)).toBe(before);
+    const backup = importCompletedMatch(
+      JSON.stringify({ version: 1, entries: [envelope] }),
+      target,
+    );
+    expect(backup.entries).toEqual(result.entries);
+    expect(target.getItem(MATCH_HISTORY_KEY)).toBe(before);
+  });
+  it("keeps a newer completed match and evicts the actual oldest archived result", () => {
+    const target = fullArchive();
+    const previous = readMatchHistory(target).entries;
+    const oldestId = previous.at(-1)!.id;
+    const latest = completed(101);
+    const result = writeCompletedMatch(
+      latest.replay,
+      { final: latest.final, endedAt: "2026-10-07T22:00:00Z" },
+      target,
+    );
+    expect(result.saved).toBe(true);
+    expect(result.entries).toHaveLength(MAX_HISTORY_MATCHES);
+    expect(result.entries?.[0].id).toBe(result.entry!.id);
+    expect(result.entries?.some((entry) => entry.id === oldestId)).toBe(false);
+    expect(result.entries?.map((entry) => entry.endedAt)).toEqual(
+      [...result.entries!]
+        .sort((a, b) => Date.parse(b.endedAt) - Date.parse(a.endedAt))
+        .map((entry) => entry.endedAt),
+    );
+  });
+  it("does not promote or rewrite a duplicate replay with a different supplied completion date", () => {
+    const target = storage();
+    const original = completed(1);
+    writeCompletedMatch(
+      original.replay,
+      {
+        final: original.final,
+        endedAt: "2026-10-07T21:00:00Z",
+        playerDeckName: "Original name",
+      },
+      target,
+    );
+    const next = completed(2);
+    writeCompletedMatch(
+      next.replay,
+      { final: next.final, endedAt: "2026-10-07T22:00:00Z" },
+      target,
+    );
+    const before = target.getItem(MATCH_HISTORY_KEY);
+    const duplicate = writeCompletedMatch(
+      original.replay,
+      {
+        final: original.final,
+        endedAt: "2030-01-01T00:00:00Z",
+        playerDeckName: "Changed name",
+      },
+      target,
+    );
+    expect(duplicate.saved).toBe(true);
+    expect(duplicate.entries).toHaveLength(2);
+    expect(duplicate.entries?.at(-1)?.playerDeckName).toBe("Original name");
+    expect(target.getItem(MATCH_HISTORY_KEY)).toBe(before);
+  });
+});

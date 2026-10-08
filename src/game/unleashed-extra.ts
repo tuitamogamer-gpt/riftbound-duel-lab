@@ -9,6 +9,7 @@ import { isCardType } from "../data/cards";
 import { getUnitTags } from "./board-rules";
 import { canPlayCard } from "./board-rules";
 import { getCard } from "../data/cards";
+import { detach, physicalCard, physicalOwner } from "./objects";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
 import type {
   CardScript,
@@ -714,9 +715,9 @@ export const unleashedExtraModule: ExpansionModule = {
         if (target)
           choose(
             s,
-            target.owner,
+            physicalOwner(target),
             ["top", "bottom"].map((where) => ({
-              label: `Put ${getCard(target.cardId).name} on ${where}`,
+              label: `Put ${getCard(physicalCard(target)).name} on ${where}`,
               targetId: target.id,
               effects: [
                 fx("verdict-place", { condition: where, cardName: target.id }),
@@ -728,13 +729,15 @@ export const unleashedExtraModule: ExpansionModule = {
       case "verdict-place": {
         const unit = s.units.find((u) => u.id === e.cardName);
         if (!unit) break;
+        const owner = physicalOwner(unit),
+          cardId = physicalCard(unit);
         for (const gear of s.gears.filter((g) => g.attachedTo === unit.id))
-          gear.attachedTo = undefined;
+          detach(s, gear);
         s.units = s.units.filter((u) => u.id !== unit.id);
+        s.gears = s.gears.filter((g) => g.id !== unit.id);
         if (!unit.token) {
-          if (e.condition === "top")
-            s.players[unit.owner].deck.unshift(unit.cardId);
-          else recycleCards(s, unit.owner, [unit.cardId], p);
+          if (e.condition === "top") s.players[owner].deck.unshift(cardId);
+          else recycleCards(s, owner, [cardId], p);
         }
         break;
       }

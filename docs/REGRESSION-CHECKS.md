@@ -1,5 +1,13 @@
 # Regression checks
 
+## Latest local acceptance — 8 October 2026
+
+The final source snapshot passed **2,681 unique tests in 120 files**: 2,458 ordinary-suite cases plus 223 unique precon cases. The latter comprise all **169 ordered pairs** and 54 focused cases. Local execution used two complementary **PRECON_SHARD=0/2** and **1/2** processes, each with one worker; the ordinary suite used two workers; the workflow below uses three shards of the same unchanged pair list. The repeated focused cases count once in either partition.
+
+All three fresh processes completed with actual exit **0**, native JSON success and zero failed/pending tests. The strict precon verifier and expected-identity summarizer pass with zero missing, uncollected or unresolved cases. [The final machine-readable record](regression-validation-2026-10-08.json) includes all source hashes and actual execution receipts. Earlier attempts interrupted for verified rules corrections or by the execution-environment restart contribute no cases; the 7 October recovered/mixed inventory below stays historical.
+
+The source was frozen after the physical hybrid-return, copied-type/protection and Keeper’s Verdict fixes, including 35 new focused rules regressions. Required CI now includes those suites, catalog/builder recovery, replay/training helpers, authorized bot inspection, Predict/trash presentation, service-worker storage failures and body-scroll locks. No original seeds, game/action limits or invariant assertions were reduced for this release.
+
 Every pull request and push to `main` runs the **Required checks** workflow. It installs the locked dependencies, checks catalog consistency, runs the core engine/imported-rule cases (including cross-wave saved decisions), and compiles the production build. It uses two Vitest workers to keep CPU contention predictable.
 
 The **Complete regression and precon matrix** workflow runs each Monday at 03:17 UTC and can be started through GitHub Actions → Run workflow. Its jobs divide the complete suite without omitting tests:

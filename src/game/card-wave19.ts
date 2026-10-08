@@ -6,6 +6,7 @@ import {
 } from "./text-sources";
 import { cards, getCard, isCardType } from "../data/cards";
 import { isFace } from "./board-rules";
+import { detach } from "./objects";
 import type { CardScript, GameState, PlayerId, Unit } from "./types";
 import type { ExpansionModule } from "./later-precon-engine";
 const plain: CardScript = { implemented: true };
@@ -95,11 +96,15 @@ export function lethal(s: GameState, u: Unit, might: number) {
 }
 /** The same object is indexed by both types. Rehydrate aliases after JSON saves. */
 export function syncHybridObjects(s: GameState) {
-  s.gears = s.gears.filter(
-    (g) =>
-      !isCardType(getCard(g.cardId), "Unit") ||
-      s.units.some((u) => u.id === g.id),
-  );
+  const units = new Map(s.units.map((unit) => [unit.id, unit]));
+  s.gears = s.gears.filter((gear) => {
+    const unit = units.get(gear.id);
+    const retained = unit
+      ? isCardType(getCard(unit.cardId), "Gear")
+      : !isCardType(getCard(gear.cardId), "Unit");
+    if (!retained) detach(s, gear);
+    return retained;
+  });
   for (const u of s.units.filter((u) =>
     isCardType(getCard(u.cardId), "Gear"),
   )) {

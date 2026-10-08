@@ -119,6 +119,17 @@
   opacity: 0.5;
   cursor: default;
 }
+.training-lab .training-jump-button {
+  display: none;
+}
+.training-decision > .training-jump-button {
+  margin-bottom: 14px;
+}
+.training-board:focus-visible,
+.training-decision:focus-visible {
+  outline: 2px solid #74c9f6;
+  outline-offset: 3px;
+}
 .training-header > .ghost-button {
   color: #172c35;
   background: #fffaf0;
@@ -150,6 +161,94 @@
   gap: 10px 22px;
   color: #c6cede;
   padding: 18px 0;
+}
+.training-guidance {
+  padding: 18px 0 6px;
+  border-bottom: 1px solid #30384a;
+}
+.training-guidance ol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.training-guidance li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #aebbd0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.training-guidance li > span:first-child {
+  display: grid;
+  flex: 0 0 24px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid #536078;
+  border-radius: 50%;
+  color: #d6be82;
+}
+.training-guidance li.complete,
+.training-guidance li.complete > span:first-child {
+  color: #a4e3bf;
+  border-color: #588b71;
+}
+.training-guidance li[aria-current="step"] {
+  color: #f1e5c9;
+  font-weight: 700;
+}
+.training-guidance .training-step-state {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.training-next-hint,
+.training-attempt-feedback {
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 12px;
+  border-radius: 6px;
+  background: #192638;
+  color: #cee0f1;
+}
+.training-attempt-feedback {
+  color: #f5c8af;
+  background: #392a25;
+  border-left: 3px solid #bd8461;
+}
+.training-damage-guide {
+  margin: 14px 0;
+  border: 1px solid #536078;
+  border-radius: 6px;
+  padding: 12px;
+}
+.training-damage-guide h3 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: #f1e5c9;
+}
+.training-damage-guide > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 7px 0;
+}
+.training-damage-guide strong {
+  width: 100%;
+}
+.training-damage-guide span {
+  color: #becbdc;
 }
 .training-play-area {
   display: grid;
@@ -339,6 +438,9 @@
   line-height: 1.6;
 }
 @media (max-width: 800px) {
+  .training-lab .training-jump-button {
+    display: inline-flex;
+  }
   .training-lab {
     padding-top: 18px;
   }
@@ -374,6 +476,9 @@
     flex-direction: column;
   }
   .training-play-area {
+    grid-template-columns: 1fr;
+  }
+  .training-guidance ol {
     grid-template-columns: 1fr;
   }
   .training-board {

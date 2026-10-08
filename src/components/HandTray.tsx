@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Expand, Info, X, Zap } from "lucide-react";
@@ -7,7 +7,9 @@ import { readableText } from "../data/cards";
 import type { GameAction, GameState } from "../game/types";
 import type { PlaybackSpeed } from "../game/playback";
 import { reviewDelay } from "../game/presentation";
+import { decisionReason } from "../game/decision-reasons";
 import { useI18n } from "../i18n";
+import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 import { Card } from "./Card";
 import { CardPiles, type PileView } from "./CardPiles";
 import { EquipmentRules } from "./EquipmentRules";
@@ -51,27 +53,65 @@ export function HandTray({
   const scroll = useRef<HTMLDivElement>(null);
   const dialog = useRef<HTMLElement>(null);
   const openButton = useRef<HTMLButtonElement>(null);
+  useBodyScrollLock(expanded);
   const [range, setRange] = useState({
     first: 0,
     last: 0,
     previous: false,
     next: false,
   });
+  const [checkedCard, setCheckedCard] = useState<{
+    index: number;
+    id: string;
+  } | null>(null);
   const hand = game.players[0].hand;
+  const canInteract = interactive && game.winner === null;
   const opening = game.phase === "mulligan" && !game.players[0].mulliganDone;
   const draw = review?.frames[review.index]?.draw;
   const close = () => onExpandedChange(false);
+  const playableSources = useMemo(() => {
+    const sources = new Set<string>();
+    for (const action of legal)
+      if (action.sourceId?.startsWith("hand:"))
+        sources.add(action.sourceId.split(":jayce:")[0]);
+    return sources;
+  }, [legal]);
   const isPlayable = (index: number) =>
-    opening ||
-    legal.some(
-      (action) =>
-        action.sourceId === `hand:${index}` ||
-        action.sourceId?.startsWith(`hand:${index}:jayce:`),
-    );
+    opening || playableSources.has(`hand:${index}`);
   const canSelect = (index: number) =>
-    interactive &&
-    isPlayable(index) &&
+    canInteract &&
     (!opening || mulligan.includes(index) || mulligan.length < 2);
+  const checkedReason = useMemo(
+    () =>
+      expanded &&
+      canInteract &&
+      !opening &&
+      checkedCard &&
+      hand[checkedCard.index] === checkedCard.id
+        ? decisionReason(game, legal, `hand:${checkedCard.index}`)
+        : null,
+    [expanded, canInteract, opening, checkedCard, hand, game, legal],
+  );
+
+  useEffect(() => {
+    if (!expanded) setCheckedCard(null);
+  }, [expanded]);
+
+  useEffect(() => {
+    if (!selected?.startsWith("hand:")) return;
+    const index = Number(selected.split(":")[1]);
+    const element = scroll.current;
+    const card =
+      element?.querySelectorAll<HTMLElement>(".hand-card-wrap")[index];
+    if (!element || !card) return;
+    const visible = element.getBoundingClientRect();
+    const bounds = card.getBoundingClientRect();
+    if (bounds.left >= visible.left && bounds.right <= visible.right) return;
+    element.scrollBy({
+      left: bounds.left - visible.left - (visible.width - bounds.width) / 2,
+      behavior: "auto",
+    });
+  }, [selected]);
 
   useEffect(() => {
     const element = scroll.current;
@@ -109,11 +149,8 @@ export function HandTray({
   useEffect(() => {
     if (!expanded) return;
     const previous = document.activeElement as HTMLElement | null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     dialog.current?.querySelector<HTMLButtonElement>("button")?.focus();
     return () => {
-      document.body.style.overflow = previousOverflow;
       if (previous?.isConnected) previous.focus();
       else openButton.current?.focus();
     };
@@ -132,6 +169,10 @@ export function HandTray({
 
   const selectFromSheet = (index: number) => {
     if (!canSelect(index)) return;
+    if (!opening && !isPlayable(index)) {
+      setCheckedCard({ index, id: hand[index] });
+      return;
+    }
     select(`hand:${index}`);
     if (!opening) close();
   };
@@ -214,9 +255,9 @@ export function HandTray({
               <Card
                 card={card}
                 selected={selected === `hand:${index}` || replacing}
-                onClick={() => interactive && select(`hand:${index}`)}
-                playable={interactive && isPlayable(index)}
-                disabled={!canSelect(index)}
+                onClick={() => canInteract && select(`hand:${index}`)}
+                playable={canInteract && isPlayable(index)}
+                disabled={!canSelect(index) || !isPlayable(index)}
               />
               <div className="hand-mobile-cost" aria-hidden="true">
                 {card.energy !== null && (
@@ -301,7 +342,11 @@ export function HandTray({
                           "Choose up to 2 cards to replace, then return to confirm.",
                         )
                       : t(
-                          "Read a card, select it, then choose a move on the table.",
+                          game.winner !== null
+                            ? "The duel is complete. You can still read your cards."
+                            : canInteract
+                              ? "Read a card, select it, then choose a move on the table."
+                              : "Read your cards here. Return to the table to continue the duel.",
                         )}
                   </p>
                 </div>
@@ -357,18 +402,47 @@ export function HandTray({
                             </span>
                           )}
                         </div>
+                        {!opening && canInteract && (
+                          <span
+                            className={`hand-sheet-availability ${isPlayable(index) ? "is-playable" : "is-unavailable"}`}
+                          >
+                            {t(
+                              isPlayable(index)
+                                ? "Available play"
+                                : "No available play",
+                            )}
+                          </span>
+                        )}
                         <p className="hand-sheet-rules">
                           {readableText(card.text) ||
                             t("Ova karta nema dodatni tekst efekta.")}
                         </p>
                         <RulesErrata name={card.name} />
                         <EquipmentRules cardId={card.id} />
+                        {checkedCard?.index === index && checkedReason && (
+                          <p
+                            className="hand-sheet-unavailable-reason"
+                            role="status"
+                          >
+                            {t(checkedReason)}
+                          </p>
+                        )}
                         <div className="hand-sheet-actions">
                           <button
                             type="button"
-                            className="hand-sheet-select"
+                            className={`hand-sheet-select ${!opening && !isPlayable(index) ? "is-unavailable" : ""}`}
                             disabled={!canSelect(index)}
-                            aria-pressed={isSelected}
+                            aria-pressed={
+                              opening || isPlayable(index)
+                                ? isSelected
+                                : undefined
+                            }
+                            aria-expanded={
+                              !opening && !isPlayable(index)
+                                ? checkedCard?.index === index &&
+                                  !!checkedReason
+                                : undefined
+                            }
                             onClick={() => selectFromSheet(index)}
                           >
                             {t(
@@ -376,7 +450,9 @@ export function HandTray({
                                 ? replacing
                                   ? "Keep this card"
                                   : "Replace this card"
-                                : "Select card",
+                                : isPlayable(index)
+                                  ? "Select card"
+                                  : "Check availability",
                             )}
                           </button>
                           <button

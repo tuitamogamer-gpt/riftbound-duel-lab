@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 import { Trash2, X } from "lucide-react";
 import { findCard, type CatalogCard } from "../catalog";
 import { cardArtUrl } from "../data/art";
@@ -81,6 +82,7 @@ export function PileDialog({
 }) {
   const { t } = useI18n();
   const dialog = useRef<HTMLDivElement>(null);
+  useBodyScrollLock();
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     dialog.current?.querySelector<HTMLButtonElement>("button")?.focus();
@@ -165,8 +167,15 @@ export function PileDialog({
                   if (!card) return null;
                   const source = `trash:${index}`;
                   const playable =
-                    view.player === 0 &&
-                    legal.some((action) => action.sourceId === source);
+                    view.player === 0
+                      ? legal.find(
+                          (action) =>
+                            action.player === 0 &&
+                            action.category === "play" &&
+                            (action.sourceId === source ||
+                              action.sourceId?.startsWith(`${source}:`)),
+                        )
+                      : undefined;
                   return (
                     <div className="pile-card-entry" key={`${id}:${index}`}>
                       <Card
@@ -182,7 +191,7 @@ export function PileDialog({
                           className="pile-play"
                           onClick={() => {
                             close();
-                            select(source);
+                            select(playable.sourceId!);
                           }}
                         >
                           {t("Play from trash")}

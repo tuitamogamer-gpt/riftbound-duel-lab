@@ -30,7 +30,7 @@ function isAvailable(anchor: HTMLElement) {
   if (!anchor.isConnected || !anchor.getClientRects().length) return false;
   const dialogs = Array.from(
     document.querySelectorAll<HTMLElement>(
-      ".modal-backdrop, [aria-modal='true']",
+      ".modal-backdrop, [aria-modal='true'], .result-banner",
     ),
   ).filter((dialog) => dialog.getClientRects().length);
   const topDialog = dialogs.at(-1);

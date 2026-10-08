@@ -4,6 +4,7 @@ import { getRulesCardId, getScript, isImplemented } from "../scripts";
 import type { GameState, PlayerId, PlayerState } from "../types";
 import { botRandom, hash } from "./config";
 import type { PublicHandReveal } from "../hand-reveals";
+import { physicalCard, physicalOwner } from "../objects";
 
 type ObservedPlayer = Omit<
   PlayerState,
@@ -17,6 +18,10 @@ type ObservedPlayer = Omit<
   runeList?: string[];
   knownTop?: string;
   knownTopCards?: string[];
+  /** Current positions of an explicitly active, previously inspected batch. */
+  knownDeckPositions?: { index: number; cardId: string }[];
+  /** An active, explicitly revealed hand choice; expires with that choice. */
+  knownHand?: string[];
 };
 export type ObservedState = Omit<
   GameState,
@@ -78,7 +83,44 @@ function inspectedCards(s: GameState, viewer: PlayerId): [string[], string[]] {
     "ven-extra:lightning-finish": 3,
     "wave14:herald-selected": 3,
   };
-  for (const effect of choice.options?.flatMap((o) => o.effects ?? []) ?? []) {
+  // A Nocturne replacement pauses the original look instruction before its
+  // final selection is formed. Its keep branch retains the entire inspected
+  // batch; the banish branch has already reduced lookCount by one.
+  const interruptedLooks = new Set([
+    "ven:pakaa",
+    "unl-wave3:diana-reveal",
+    "wave14:herald",
+    "wave8:teemo",
+    "sfd-extra:smith",
+    "sfd-extra:ornn-select",
+    "unl-extra:select-top",
+    "unl-extra:predict-two",
+    "unl:predict-two",
+    "origins-more:stacked-deck",
+    "origins-more:candlelit",
+    "wave3:called-shot",
+    "ven-wave3:predict",
+    "ven-extra:lightning",
+    "sfd:conservatory",
+  ]);
+  const effects = choice.options?.flatMap((o) => o.effects ?? []) ?? [];
+  if (effects.some((e) => e.custom === "inspection:nocturne")) {
+    const count = Math.max(
+      0,
+      ...effects
+        .filter(
+          (e) =>
+            e.lookCount !== undefined &&
+            (interruptedLooks.has(e.custom ?? "") ||
+              e.type === "predict" ||
+              (e.type === "playCard" && e.play?.zone === "top")),
+        )
+        .map((e) => e.lookCount!),
+    );
+    inspected[viewer] = s.players[viewer].deck.slice(0, count);
+    return inspected;
+  }
+  for (const effect of effects) {
     if (effect.custom === "card-play:select" && effect.play?.zone === "top") {
       const owner = effect.play.zoneOwner ?? viewer;
       inspected[owner] = s.players[owner].deck.slice(0, effect.play.count ?? 1);
@@ -99,7 +141,13 @@ function inspectedCards(s: GameState, viewer: PlayerId): [string[], string[]] {
         "unl-extra:select-top-apply",
       ].includes(effect.custom ?? "")
     ) {
-      const payload = JSON.parse(effect.cardName ?? "{}");
+      let payload: { viewed?: unknown; top?: unknown };
+      try {
+        payload = JSON.parse(effect.cardName ?? "{}");
+      } catch {
+        continue;
+      }
+      if (!payload || typeof payload !== "object") continue;
       const viewed = payload.viewed ?? payload.top;
       if (
         Array.isArray(viewed) &&
@@ -111,6 +159,49 @@ function inspectedCards(s: GameState, viewer: PlayerId): [string[], string[]] {
     }
   }
   return inspected;
+}
+
+/** These two effects reveal the enemy hand before this named selection. */
+function inspectedHand(s: GameState, viewer: PlayerId): string[] | undefined {
+  const choice = s.pendingChoice;
+  if (choice?.player !== viewer) return;
+  const enemy = (1 - viewer) as PlayerId;
+  const effects = choice.options?.flatMap((o) => o.effects ?? []) ?? [];
+  const ashe = effects.some((e) => e.custom === "wave16:ashe-banish");
+  const skewer =
+    (s.resolving ?? []).some(
+      (item) => item.player === viewer && item.cardId === "unl-139-219",
+    ) &&
+    effects.some(
+      (e) =>
+        e.custom === "card-play:select" &&
+        e.play?.zone === "hand" &&
+        e.play.zoneOwner === enemy,
+    );
+  return ashe || skewer ? [...s.players[enemy].hand] : undefined;
+}
+
+function inspectedPositions(s: GameState, viewer: PlayerId) {
+  if (s.pendingChoice?.player !== viewer) return [];
+  const selectedEffects = new Set([
+    "wave14:herald-selected",
+    "sfd-extra:ornn-finish",
+    "unl-extra:select-top-apply",
+  ]);
+  const deck = s.players[viewer].deck;
+  const positions = new Set(
+    (s.selectedInspections ?? [])
+      .filter(
+        (batch) =>
+          batch.owner === viewer &&
+          selectedEffects.has(batch.effect.custom ?? ""),
+      )
+      .flatMap((batch) => batch.positions)
+      .filter((index) => index >= 0 && index < deck.length),
+  );
+  return [...positions]
+    .sort((a, b) => a - b)
+    .map((index) => ({ index, cardId: deck[index] }));
 }
 
 /** Only this adapter may see the live state. No live reference reaches policy/search. */
@@ -171,13 +262,22 @@ export function getObservation(s: GameState, viewer: PlayerId): Observation {
   // Configuration is public; registered opponent deck identifiers/lists are not.
   if (s.matchConfig) state.matchConfig = structuredClone(s.matchConfig);
   const inspected = inspectedCards(s, viewer);
+  const revealedHand = inspectedHand(s, viewer);
+  const batchPositions = inspectedPositions(s, viewer);
   state.players = s.players.map((p) => {
     const { deck, runeDeck, hand, deckList, runeList, ...publicPlayer } = p;
     const own = p.id === viewer,
       open = !!s.matchConfig?.openDecklists;
     const registered = own || open ? decksById[p.deckId] : undefined;
+    const publicData = structuredClone(publicPlayer) as Partial<ObservedPlayer>;
+    // A legality shell or imported extra fields cannot authorize themselves.
+    // Regenerate these facts solely from the current audited choice below.
+    delete publicData.knownTop;
+    delete publicData.knownTopCards;
+    delete publicData.knownDeckPositions;
+    delete publicData.knownHand;
     return {
-      ...structuredClone(publicPlayer),
+      ...publicData,
       name: `Player ${p.id + 1}`,
       deckId: own || open ? p.deckId : "private",
       hand: own ? [...hand] : [],
@@ -207,6 +307,10 @@ export function getObservation(s: GameState, viewer: PlayerId): Observation {
             knownTop: inspected[p.id][0],
             knownTopCards: inspected[p.id],
           }
+        : {}),
+      ...(!own && revealedHand ? { knownHand: revealedHand } : {}),
+      ...(own && batchPositions.length
+        ? { knownDeckPositions: batchPositions }
         : {}),
     };
   }) as [ObservedPlayer, ObservedPlayer];
@@ -289,6 +393,12 @@ export function sampleState(
   const data = structuredClone(o.state);
   const hidden = data.hidden ?? [];
   const hiddenHypotheses = new Map<string, string>();
+  // Hybrid Unit/Gear cards occupy both public collections but remain one card.
+  const physicalBoard = [
+    ...new Map(
+      [...data.units, ...data.gears].map((object) => [object.id, object]),
+    ).values(),
+  ];
   const players = data.players.map((p) => {
     const {
       handCount,
@@ -296,6 +406,8 @@ export function sampleState(
       runeDeckCount,
       knownTop,
       knownTopCards,
+      knownHand,
+      knownDeckPositions,
       ...rest
     } = p;
     const own = p.id === o.viewer;
@@ -307,28 +419,44 @@ export function sampleState(
     const pick = () => available[Math.floor(random() * available.length)];
     const used = [
       ...p.hand,
+      ...(!own ? (knownHand ?? []) : []),
       ...p.discard,
       ...p.banished,
-      ...data.units
-        .filter((u) => u.owner === p.id && !u.token)
-        .map((u) => u.cardId),
-      ...data.gears
-        .filter((g) => g.owner === p.id && !g.token)
-        .map((g) => g.cardId),
+      ...physicalBoard
+        .filter((object) => physicalOwner(object) === p.id && !object.token)
+        .map(physicalCard),
       ...hidden
         .filter((h) => h.owner === p.id && h.cardId !== "unknown")
         .map((h) => h.cardId),
       ...data.stack
-        .filter((i) => i.player === p.id && i.kind === "spell")
+        .filter(
+          (i) => (i.originalOwner ?? i.player) === p.id && i.kind === "spell",
+        )
         .map((i) => i.cardId),
       ...(data.resolving ?? [])
-        .filter((i) => i.player === p.id && i.kind === "spell")
+        .filter(
+          (i) => (i.originalOwner ?? i.player) === p.id && i.kind === "spell",
+        )
         .map((i) => i.cardId),
     ];
+    const knownPrefix = (knownTopCards ?? (knownTop ? [knownTop] : [])).slice(
+      0,
+      deckCount,
+    );
+    const knownPositions = new Map(
+      (knownDeckPositions ?? [])
+        .filter(({ index }) => index >= 0 && index < deckCount)
+        .map(({ index, cardId }) => [index, cardId]),
+    );
+    knownPrefix.forEach((cardId, index) => knownPositions.set(index, cardId));
     let remaining = shuffled(
       subtract(
         [...(p.deckList ?? []), p.championId],
-        [...used, ...(p.championAvailable ? [p.championId] : [])],
+        [
+          ...used,
+          ...knownPositions.values(),
+          ...(p.championAvailable ? [p.championId] : []),
+        ],
       ),
     );
     for (const faceDown of hidden.filter(
@@ -346,18 +474,13 @@ export function sampleState(
     }
     const hand = own
       ? [...p.hand]
-      : Array.from({ length: handCount }, () => remaining.shift() ?? pick());
+      : knownHand
+        ? [...knownHand]
+        : Array.from({ length: handCount }, () => remaining.shift() ?? pick());
     const deck = Array.from(
       { length: deckCount },
-      () => remaining.shift() ?? pick(),
+      (_, index) => knownPositions.get(index) ?? remaining.shift() ?? pick(),
     );
-    for (const [i, card] of (
-      knownTopCards ?? (knownTop ? [knownTop] : [])
-    ).entries()) {
-      const index = deck.indexOf(card, i);
-      if (index >= 0) [deck[i], deck[index]] = [deck[index], deck[i]];
-      else if (i < deck.length) deck[i] = card;
-    }
     const runes = shuffled(
       subtract(
         p.runeList ?? [],
@@ -409,10 +532,14 @@ export function observationRulesView(o: Observation): GameState {
     log: [],
     players: s.players.map((p) => ({
       ...p,
-      hand: p.id === o.viewer ? p.hand : Array(p.handCount).fill("unknown"),
+      hand:
+        p.id === o.viewer
+          ? p.hand
+          : (p.knownHand ?? Array(p.handCount).fill("unknown")),
       deck: Array.from(
         { length: p.deckCount },
         (_, i) =>
+          p.knownDeckPositions?.find(({ index }) => index === i)?.cardId ??
           p.knownTopCards?.[i] ??
           (i === 0 && p.knownTop ? p.knownTop : "unknown"),
       ),

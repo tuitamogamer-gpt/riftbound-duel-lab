@@ -190,6 +190,16 @@ export function validateDeck(deck: StarterDeck): string[] {
       ...errors,
       ...[...new Set(missing)].map((id) => `Unknown card: ${id}`),
     ];
+  // Generated pieces enter through card effects; their printed type is not
+  // permission to register them as cards, even in a historical deck.
+  for (const id of new Set([
+    ...allIds,
+    ...(deck.sideboard ?? []).map((entry) => entry.cardId),
+  ]))
+    if (cardsById[id]?.supertype === "Token")
+      errors.push(
+        `Tokens cannot be registered in a deck: ${cardsById[id].name}`,
+      );
   const mainCount = deck.main.reduce((count, entry) => count + entry.count, 0);
   if (mainCount < 39)
     errors.push(

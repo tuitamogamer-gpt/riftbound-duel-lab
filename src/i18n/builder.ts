@@ -1,4 +1,7 @@
 export const builderMessages: Record<string, [string, string, string]> = {
+  Energy: ["Energy", "Energija", "Energia"],
+  Power: ["Power", "Moć", "Potere"],
+  Might: ["Might", "Might", "Forza"],
   "Deck builder": ["Deck builder", "Graditelj špilova", "Costruttore di mazzi"],
   "YOUR CARDS · YOUR STRATEGY": [
     "YOUR CARDS · YOUR STRATEGY",
@@ -309,5 +312,123 @@ export const builderMessages: Record<string, [string, string, string]> = {
     "The main deck reached the app limit of {count} cards.",
     "Glavni špil je dostigao ograničenje aplikacije od {count} karata.",
     "Il mazzo principale ha raggiunto il limite dell'app di {count} carte.",
+  ],
+  "Unfinished deck draft": [
+    "Unfinished deck draft",
+    "Nedovršeni nacrt špila",
+    "Bozza del mazzo incompleta",
+  ],
+  "Token karta ne može se uvrstiti u špil: {card}": [
+    "A generated token cannot be registered in a deck: {card}",
+    "Token karta ne može se uvrstiti u špil: {card}",
+    "Una pedina generata non può essere registrata nel mazzo: {card}",
+  ],
+  "An unfinished draft is available": [
+    "An unfinished draft is available",
+    "Dostupan je nedovršeni nacrt",
+    "È disponibile una bozza incompleta",
+  ],
+  "The stored draft could not be read": [
+    "The stored draft could not be read",
+    "Sačuvani nacrt se nije mogao pročitati",
+    "Impossibile leggere la bozza salvata",
+  ],
+  "Restore {name}, or discard its backup to keep editing this deck.": [
+    "Restore {name}, or discard its backup to keep editing this deck.",
+    "Vrati {name} ili odbaci njegovu kopiju da nastaviš uređivati ovaj špil.",
+    "Ripristina {name} o elimina la sua copia per continuare a modificare questo mazzo.",
+  ],
+  "The stored draft remains untouched. Export your current list, or clear the unreadable backup to enable draft saving.":
+    [
+      "The stored draft remains untouched. Export your current list, or clear the unreadable backup to enable draft saving.",
+      "Sačuvani nacrt je sačuvan bez promjena. Izvezi trenutnu listu ili ukloni nečitljivu kopiju da uključiš spremanje nacrta.",
+      "La bozza salvata rimane intatta. Esporta la lista attuale o elimina la copia illeggibile per abilitare il salvataggio della bozza.",
+    ],
+  "Restore draft": ["Restore draft", "Vrati nacrt", "Ripristina bozza"],
+  "Discard stored draft": [
+    "Discard stored draft",
+    "Odbaci sačuvani nacrt",
+    "Elimina bozza salvata",
+  ],
+  "Clear unreadable backup": [
+    "Clear unreadable backup",
+    "Ukloni nečitljivu kopiju",
+    "Elimina copia illeggibile",
+  ],
+  "Unfinished draft restored. Review the list before saving.": [
+    "Unfinished draft restored. Review the list before saving.",
+    "Nedovršeni nacrt je vraćen. Pregledaj listu prije spremanja.",
+    "Bozza incompleta ripristinata. Controlla la lista prima di salvarla.",
+  ],
+  "Undo edit": ["Undo edit", "Poništi izmjenu", "Annulla modifica"],
+  "Redo edit": ["Redo edit", "Ponovi izmjenu", "Ripeti modifica"],
+  "Draft backup failed. Export your list to keep a copy.": [
+    "Draft backup failed. Export your list to keep a copy.",
+    "Spremanje nacrta nije uspjelo. Izvezi listu da sačuvaš kopiju.",
+    "Salvataggio della bozza non riuscito. Esporta la lista per conservarne una copia.",
+  ],
+  "Choose what to do with the stored draft before automatic backup resumes.": [
+    "Choose what to do with the stored draft before automatic backup resumes.",
+    "Odaberi šta uraditi sa sačuvanim nacrtom da se automatsko spremanje nastavi.",
+    "Scegli cosa fare con la bozza salvata per riprendere il salvataggio automatico.",
+  ],
+  "Unfinished draft backed up in this browser.": [
+    "Unfinished draft backed up in this browser.",
+    "Nedovršeni nacrt je sačuvan u ovom pregledniku.",
+    "Bozza incompleta salvata in questo browser.",
+  ],
+  "Edits are backed up here. Save a legal deck to play it.": [
+    "Edits are backed up here. Save a legal deck to play it.",
+    "Izmjene se ovdje čuvaju. Sačuvaj legalan špil da igraš njime.",
+    "Le modifiche vengono salvate qui. Salva un mazzo legale per giocarlo.",
+  ],
+  "Search name, rules, tag or card ID…": [
+    "Search name, rules, tag or card ID…",
+    "Pretraži naziv, pravila, tag ili ID…",
+    "Cerca nome, regole, tag o ID carta…",
+  ],
+  "Clear card search": [
+    "Clear card search",
+    "Očisti pretragu karata",
+    "Cancella ricerca carte",
+  ],
+  "Filter by card set": [
+    "Filter by card set",
+    "Filtriraj po setu karata",
+    "Filtra per espansione",
+  ],
+  "Sort cards": ["Sort cards", "Poredaj karte", "Ordina carte"],
+  "Name · A–Z": ["Name · A–Z", "Naziv · A–Z", "Nome · A–Z"],
+  "Energy · low to high": [
+    "Energy · low to high",
+    "Energija · od niže do više",
+    "Energia · crescente",
+  ],
+  "Energy · high to low": [
+    "Energy · high to low",
+    "Energija · od više do niže",
+    "Energia · decrescente",
+  ],
+  "Might · high to low": [
+    "Might · high to low",
+    "Might · od višeg do nižeg",
+    "Forza · decrescente",
+  ],
+  "Can add to this section": [
+    "Can add to this section",
+    "Mogu se dodati u ovu sekciju",
+    "Aggiungibili a questa sezione",
+  ],
+  "Use several terms to narrow results. Card IDs include alternate printings.":
+    [
+      "Use several terms to narrow results. Card IDs include alternate printings.",
+      "Koristi više pojmova da suziš rezultate. ID obuhvata i alternativna izdanja.",
+      "Usa più termini per restringere i risultati. Gli ID includono le stampe alternative.",
+    ],
+  "Reset filters": ["Reset filters", "Poništi filtere", "Reimposta filtri"],
+  "Showing {shown} of {count} rules cards": [
+    "Showing {shown} of {count} rules cards",
+    "Prikazano {shown} od {count} karata po pravilima",
+    "Visualizzate {shown} di {count} carte con regole diverse",
   ],
 };

@@ -1,0 +1,923 @@
+{
+  "checkedAt": "2026-10-07T23:18:06.884327+00:00",
+  "baseCommit": "c74ce44a66a9e30ca3abb95b1a6ae4c9ba9fa5ed",
+  "origin": "http://127.0.0.1:5173",
+  "method": "Fresh Playwright Chromium contexts, touch interaction on compact screens, keyboard interaction for dialog and skip-link checks, deterministic loopback fixtures.",
+  "sourceSha256": {
+    "src/components/HandTray.tsx": "3a2eef6353420bb608f485044e0c3370c8b0e2034308c9d3869ee0f62fbb4d02",
+    "src/components/HandTray.css": "38ad75f5604e8a895b2bd8aea98f7085c7c8681f078a7074b9bf576c5d58ed01",
+    "src/components/MobileMatchMenu.tsx": "be6c1dad8f9977fefdcf75d2acae6ff4c307ed8929b6490b2b96bb505b67dc06",
+    "src/i18n/mobile.ts": "4d404a3fb21915588d227e2bcffca6bf9486368a0a6f4903b2a5515e777ba17a",
+    "src/hooks/useBodyScrollLock.ts": "c13ed9df00e5007dab72479779c8dc960f8746a82d2ceb21f60aa0a654415d32",
+    "src/hooks/useDialogFocus.ts": "8f84fb3d031408577a03d8f54e3996fe70056156416487b39666a7b5e1ecd313",
+    "src/components/AppDialog.tsx": "5b15bf916fb2ee4539ab9da584d1207c72f55552699b51809dd62c598375b983"
+  },
+  "screenMatrix": {
+    "cases": 32,
+    "viewports": ["1440x900", "320x568", "390x844", "844x390"],
+    "modes": [
+      "champion",
+      "combat",
+      "crowded",
+      "hidden",
+      "main",
+      "move",
+      "mulligan",
+      "reaction"
+    ],
+    "uncaughtPageErrors": 0,
+    "horizontalOverflowCases": 0,
+    "casesSummary": [
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "mode": "mulligan",
+        "controlsBottom": 833,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "mode": "main",
+        "controlsBottom": 833,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "mode": "move",
+        "controlsBottom": 833,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "mode": "combat",
+        "controlsBottom": 833,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "mode": "reaction",
+        "controlsBottom": 833,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "mode": "hidden",
+        "controlsBottom": 833,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "mode": "crowded",
+        "controlsBottom": 833,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "mode": "champion",
+        "controlsBottom": 833,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 320,
+          "height": 568
+        },
+        "mode": "mulligan",
+        "controlsBottom": 558,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 320,
+          "height": 568
+        },
+        "mode": "main",
+        "controlsBottom": 558,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 320,
+          "height": 568
+        },
+        "mode": "move",
+        "controlsBottom": 558,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 320,
+          "height": 568
+        },
+        "mode": "combat",
+        "controlsBottom": 558,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 320,
+          "height": 568
+        },
+        "mode": "reaction",
+        "controlsBottom": 558,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 320,
+          "height": 568
+        },
+        "mode": "hidden",
+        "controlsBottom": 558,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 320,
+          "height": 568
+        },
+        "mode": "crowded",
+        "controlsBottom": 558,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 320,
+          "height": 568
+        },
+        "mode": "champion",
+        "controlsBottom": 558,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "mode": "mulligan",
+        "controlsBottom": 380,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "mode": "main",
+        "controlsBottom": 380,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "mode": "move",
+        "controlsBottom": 380,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "mode": "combat",
+        "controlsBottom": 380,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "mode": "reaction",
+        "controlsBottom": 380,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "mode": "hidden",
+        "controlsBottom": 380,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "mode": "crowded",
+        "controlsBottom": 380,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "mode": "champion",
+        "controlsBottom": 380,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "mode": "mulligan",
+        "controlsBottom": 577.375,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "mode": "main",
+        "controlsBottom": 577.375,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "mode": "move",
+        "controlsBottom": 577.375,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "mode": "combat",
+        "controlsBottom": 577.375,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "mode": "reaction",
+        "controlsBottom": 577.375,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "mode": "hidden",
+        "controlsBottom": 577.375,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "mode": "crowded",
+        "controlsBottom": 577.375,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "mode": "champion",
+        "controlsBottom": 577.375,
+        "horizontalOverflow": false,
+        "uncaughtPageErrors": []
+      }
+    ]
+  },
+  "scopedEngineTests": {
+    "passed": 46,
+    "failed": 0,
+    "files": [
+      "tests/mobile-presentation.test.ts",
+      "tests/mobile-duel-fixtures.test.ts",
+      "tests/payment-decisions.test.ts"
+    ]
+  },
+  "checks": {
+    "compactInteractions": {
+      "checkedAt": "2026-10-07T23:13:25.964Z",
+      "results": [
+        {
+          "viewport": {
+            "width": 320,
+            "height": 568
+          },
+          "menuSummaryTrap": true,
+          "menuRestoresFocus": true,
+          "settings44px": true,
+          "unavailableCheckDoesNotPlay": true,
+          "fullAvailabilityReasonVisible": true,
+          "selectedCardScrolledIntoView": true,
+          "lastCardSelectionDoesNotPlay": true,
+          "pausedSheetReadOnly": true,
+          "mulliganLimitTwo": true,
+          "opponentHiddenFacePrivate": true,
+          "horizontalOverflow": false,
+          "pageErrors": []
+        },
+        {
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "menuSummaryTrap": true,
+          "menuRestoresFocus": true,
+          "settings44px": true,
+          "unavailableCheckDoesNotPlay": true,
+          "fullAvailabilityReasonVisible": true,
+          "selectedCardScrolledIntoView": true,
+          "lastCardSelectionDoesNotPlay": true,
+          "pausedSheetReadOnly": true,
+          "mulliganLimitTwo": true,
+          "opponentHiddenFacePrivate": true,
+          "horizontalOverflow": false,
+          "pageErrors": []
+        },
+        {
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "menuSummaryTrap": true,
+          "menuRestoresFocus": true,
+          "settings44px": true,
+          "unavailableCheckDoesNotPlay": true,
+          "fullAvailabilityReasonVisible": true,
+          "selectedCardScrolledIntoView": true,
+          "lastCardSelectionDoesNotPlay": true,
+          "pausedSheetReadOnly": true,
+          "mulliganLimitTwo": true,
+          "opponentHiddenFacePrivate": true,
+          "horizontalOverflow": false,
+          "pageErrors": []
+        }
+      ]
+    },
+    "opponentPriority": {
+      "checkedAt": "2026-10-07T23:13:51.620Z",
+      "results": [
+        {
+          "viewport": {
+            "width": 320,
+            "height": 568
+          },
+          "enemyPriority": true,
+          "paused": false,
+          "allSelectionDisabled": true,
+          "noAvailabilityProbe": true,
+          "revisionUnchanged": true,
+          "heldWorkerOnlyForStableInspection": true
+        },
+        {
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "enemyPriority": true,
+          "paused": false,
+          "allSelectionDisabled": true,
+          "noAvailabilityProbe": true,
+          "revisionUnchanged": true,
+          "heldWorkerOnlyForStableInspection": true
+        },
+        {
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "enemyPriority": true,
+          "paused": false,
+          "allSelectionDisabled": true,
+          "noAvailabilityProbe": true,
+          "revisionUnchanged": true,
+          "heldWorkerOnlyForStableInspection": true
+        }
+      ]
+    },
+    "groupMovement": {
+      "checkedAt": "2026-10-07T23:14:20.294Z",
+      "results": [
+        {
+          "viewport": {
+            "width": 320,
+            "height": 568
+          },
+          "touchAddSecondUnit": true,
+          "unitsStayAtOriginUntilConfirm": true,
+          "selectedDestinationReachable": true,
+          "explicitMoveTwoUnitsConfirmation": true,
+          "exactTwoUnitsMoved": true,
+          "sixUnitsRemainAtOrigin": true,
+          "revisionAdvanced": true,
+          "pageErrors": []
+        },
+        {
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "touchAddSecondUnit": true,
+          "unitsStayAtOriginUntilConfirm": true,
+          "selectedDestinationReachable": true,
+          "explicitMoveTwoUnitsConfirmation": true,
+          "exactTwoUnitsMoved": true,
+          "sixUnitsRemainAtOrigin": true,
+          "revisionAdvanced": true,
+          "pageErrors": []
+        },
+        {
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "touchAddSecondUnit": true,
+          "unitsStayAtOriginUntilConfirm": true,
+          "selectedDestinationReachable": true,
+          "explicitMoveTwoUnitsConfirmation": true,
+          "exactTwoUnitsMoved": true,
+          "sixUnitsRemainAtOrigin": true,
+          "revisionAdvanced": true,
+          "pageErrors": []
+        }
+      ]
+    },
+    "completedHand": {
+      "checkedAt": "2026-10-07T23:13:18.218Z",
+      "results": [
+        {
+          "viewport": {
+            "width": 320,
+            "height": 568
+          },
+          "validPreVictoryFixture": true,
+          "actualConfirmedMovementWinsMatch": true,
+          "paused": false,
+          "completedHandReadOnly": true,
+          "availabilitySuppressed": true,
+          "cardInspectionStillAvailable": true,
+          "escapeReturnsToHand": true,
+          "revisionUnchanged": true,
+          "openedWithKeyboardAboveExistingResultBanner": true
+        },
+        {
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "validPreVictoryFixture": true,
+          "actualConfirmedMovementWinsMatch": true,
+          "paused": false,
+          "completedHandReadOnly": true,
+          "availabilitySuppressed": true,
+          "cardInspectionStillAvailable": true,
+          "escapeReturnsToHand": true,
+          "revisionUnchanged": true,
+          "openedWithKeyboardAboveExistingResultBanner": true
+        },
+        {
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "validPreVictoryFixture": true,
+          "actualConfirmedMovementWinsMatch": true,
+          "paused": false,
+          "completedHandReadOnly": true,
+          "availabilitySuppressed": true,
+          "cardInspectionStillAvailable": true,
+          "escapeReturnsToHand": true,
+          "revisionUnchanged": true,
+          "openedWithKeyboardAboveExistingResultBanner": true
+        }
+      ]
+    },
+    "nestedScrollLocks": {
+      "checkedAt": "2026-10-07T23:14:55.808Z",
+      "results": [
+        {
+          "viewport": {
+            "width": 320,
+            "height": 568
+          },
+          "handDetailNestedLock": true,
+          "childCloseKeepsParentLock": true,
+          "lastCloseRestoresOriginalOverflow": true,
+          "menuLogHandoff": true,
+          "menuRulesHandoff": true,
+          "menuSavedHandoff": true,
+          "noStaleHiddenOverflow": true
+        },
+        {
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "handDetailNestedLock": true,
+          "childCloseKeepsParentLock": true,
+          "lastCloseRestoresOriginalOverflow": true,
+          "menuLogHandoff": true,
+          "menuRulesHandoff": true,
+          "menuSavedHandoff": true,
+          "noStaleHiddenOverflow": true
+        },
+        {
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "handDetailNestedLock": true,
+          "childCloseKeepsParentLock": true,
+          "lastCloseRestoresOriginalOverflow": true,
+          "menuLogHandoff": true,
+          "menuRulesHandoff": true,
+          "menuSavedHandoff": true,
+          "noStaleHiddenOverflow": true
+        }
+      ]
+    },
+    "appKeyboardFocus": {
+      "checkedAt": "2026-10-07T23:12:29.293Z",
+      "results": [
+        {
+          "check": "390 Build a deck",
+          "hashPreserved": true,
+          "mainFocused": true,
+          "nextControlReachable": true,
+          "skipLinkHiddenAfterUse": true
+        },
+        {
+          "check": "390 Training lab",
+          "hashPreserved": true,
+          "mainFocused": true,
+          "nextControlReachable": true,
+          "skipLinkHiddenAfterUse": true
+        },
+        {
+          "check": "390 Match history",
+          "hashPreserved": true,
+          "mainFocused": true,
+          "nextControlReachable": true,
+          "skipLinkHiddenAfterUse": true
+        },
+        {
+          "check": "390 Card library",
+          "hashPreserved": true,
+          "mainFocused": true,
+          "nextControlReachable": true,
+          "skipLinkHiddenAfterUse": true
+        },
+        {
+          "check": "390 Private invitation",
+          "hashPreserved": true,
+          "mainFocused": true,
+          "nextControlReachable": true,
+          "skipLinkHiddenAfterUse": true
+        },
+        {
+          "check": "390 Match log nested CardDetail",
+          "focusInside": true,
+          "tabWrap": true,
+          "nestedEscapePreservesLog": true,
+          "nestedFocusRestored": true,
+          "outerEscapeRestoresTrigger": true
+        },
+        {
+          "check": "390 Rules dialog",
+          "focusInside": true,
+          "officialLinksParticipateInTabOrder": true,
+          "tabWrap": true,
+          "escapeRestoresTrigger": true
+        },
+        {
+          "check": "1440 Build a deck",
+          "hashPreserved": true,
+          "mainFocused": true,
+          "nextControlReachable": true,
+          "skipLinkHiddenAfterUse": true
+        },
+        {
+          "check": "1440 Training lab",
+          "hashPreserved": true,
+          "mainFocused": true,
+          "nextControlReachable": true,
+          "skipLinkHiddenAfterUse": true
+        },
+        {
+          "check": "1440 Match history",
+          "hashPreserved": true,
+          "mainFocused": true,
+          "nextControlReachable": true,
+          "skipLinkHiddenAfterUse": true
+        },
+        {
+          "check": "1440 Card library",
+          "hashPreserved": true,
+          "mainFocused": true,
+          "nextControlReachable": true,
+          "skipLinkHiddenAfterUse": true
+        },
+        {
+          "check": "1440 Private invitation",
+          "hashPreserved": true,
+          "mainFocused": true,
+          "nextControlReachable": true,
+          "skipLinkHiddenAfterUse": true
+        },
+        {
+          "check": "1440 Match log nested CardDetail",
+          "focusInside": true,
+          "tabWrap": true,
+          "nestedEscapePreservesLog": true,
+          "nestedFocusRestored": true,
+          "outerEscapeRestoresTrigger": true
+        },
+        {
+          "check": "1440 Rules dialog",
+          "focusInside": true,
+          "officialLinksParticipateInTabOrder": true,
+          "tabWrap": true,
+          "escapeRestoresTrigger": true
+        }
+      ]
+    },
+    "seriesSkipLink": {
+      "checkedAt": "2026-10-07T23:15:07.088Z",
+      "results": [
+        {
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "sideboardingSeriesVisible": true,
+          "mainTargetFocused": true,
+          "fragmentUnchanged": true,
+          "nextControlReachable": true,
+          "skipLinkHidesAfterUse": true
+        },
+        {
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "sideboardingSeriesVisible": true,
+          "mainTargetFocused": true,
+          "fragmentUnchanged": true,
+          "nextControlReachable": true,
+          "skipLinkHidesAfterUse": true
+        }
+      ]
+    },
+    "backgroundScrollAfterFix": {
+      "checkedAt": "2026-10-07T23:03:55.298Z",
+      "results": [
+        {
+          "viewport": {
+            "width": 320,
+            "height": 568
+          },
+          "kind": "lobby-help",
+          "initial": {
+            "windowY": 0,
+            "documentY": 0,
+            "bodyOverflow": "hidden",
+            "backdrops": [
+              {
+                "y": 0,
+                "height": 568,
+                "scrollHeight": 568
+              }
+            ]
+          },
+          "afterBackdropWheel": {
+            "windowY": 0,
+            "documentY": 0,
+            "bodyOverflow": "hidden",
+            "backdrops": [
+              {
+                "y": 0,
+                "height": 568,
+                "scrollHeight": 568
+              }
+            ]
+          },
+          "afterModalEndWheel": {
+            "windowY": 0,
+            "documentY": 0,
+            "bodyOverflow": "hidden",
+            "backdrops": [
+              {
+                "y": 0,
+                "height": 568,
+                "scrollHeight": 568
+              }
+            ]
+          },
+          "afterClose": {
+            "windowY": 0,
+            "documentY": 0,
+            "bodyOverflow": "",
+            "backdrops": []
+          },
+          "backgroundMoved": false
+        },
+        {
+          "viewport": {
+            "width": 320,
+            "height": 568
+          },
+          "kind": "library-card-detail",
+          "initial": {
+            "windowY": 448,
+            "documentY": 448,
+            "bodyOverflow": "hidden",
+            "backdrops": [
+              {
+                "y": 0,
+                "height": 568,
+                "scrollHeight": 568
+              }
+            ]
+          },
+          "afterModalEndWheel": {
+            "windowY": 448,
+            "documentY": 448,
+            "bodyOverflow": "hidden",
+            "backdrops": [
+              {
+                "y": 0,
+                "height": 568,
+                "scrollHeight": 568
+              }
+            ]
+          },
+          "afterClose": {
+            "windowY": 448,
+            "documentY": 448,
+            "bodyOverflow": "",
+            "backdrops": []
+          },
+          "backgroundMoved": false
+        },
+        {
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "kind": "lobby-help",
+          "initial": {
+            "windowY": 0,
+            "documentY": 0,
+            "bodyOverflow": "hidden",
+            "backdrops": [
+              {
+                "y": 0,
+                "height": 844,
+                "scrollHeight": 844
+              }
+            ]
+          },
+          "afterBackdropWheel": {
+            "windowY": 0,
+            "documentY": 0,
+            "bodyOverflow": "hidden",
+            "backdrops": [
+              {
+                "y": 0,
+                "height": 844,
+                "scrollHeight": 844
+              }
+            ]
+          },
+          "afterModalEndWheel": {
+            "windowY": 0,
+            "documentY": 0,
+            "bodyOverflow": "hidden",
+            "backdrops": [
+              {
+                "y": 0,
+                "height": 844,
+                "scrollHeight": 844
+              }
+            ]
+          },
+          "afterClose": {
+            "windowY": 0,
+            "documentY": 0,
+            "bodyOverflow": "",
+            "backdrops": []
+          },
+          "backgroundMoved": false
+        },
+        {
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "kind": "library-card-detail",
+          "initial": {
+            "windowY": 0,
+            "documentY": 0,
+            "bodyOverflow": "hidden",
+            "backdrops": [
+              {
+                "y": 0,
+                "height": 844,
+                "scrollHeight": 844
+              }
+            ]
+          },
+          "afterModalEndWheel": {
+            "windowY": 0,
+            "documentY": 0,
+            "bodyOverflow": "hidden",
+            "backdrops": [
+              {
+                "y": 0,
+                "height": 844,
+                "scrollHeight": 844
+              }
+            ]
+          },
+          "afterClose": {
+            "windowY": 0,
+            "documentY": 0,
+            "bodyOverflow": "",
+            "backdrops": []
+          },
+          "backgroundMoved": false
+        }
+      ]
+    }
+  },
+  "limits": [
+    "These are local browser checks, not production-deployment checks.",
+    "The completed-match hand uses a valid pre-victory position and reaches the win through actual movement and focus-pass actions; opening its hand above the existing result banner uses keyboard navigation.",
+    "The opponent-priority fixture reaches the opponent turn through the actual end-turn action, then holds that isolated context's bot worker so the decision window remains inspectable."
+  ]
+}

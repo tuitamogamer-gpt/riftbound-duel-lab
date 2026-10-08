@@ -167,13 +167,13 @@ export function evaluate(
       }),
     ).length;
   };
-  const playableHand = (actor: PlayerId) =>
-    s.players[actor].hand.reduce((n, id) => {
+  const playableHand = (actor: PlayerId) => {
+    const resources = getResources(s, actor);
+    return s.players[actor].hand.reduce((n, id) => {
       // The legality shell preserves public hand size without identities.
       if (id === "unknown") return n + 1;
       const c = getCard(id),
-        sc = getScript(id),
-        r = getResources(s, actor);
+        sc = getScript(id);
       const recovery = recoveryTargets(actor, sc?.spell);
       const useful =
         recovery !== null
@@ -190,9 +190,13 @@ export function evaluate(
           (profile === "recursion" && recovery
             ? Math.min(recovery, 3) * 0.2
             : 0)) *
-          Math.max(0.3, 1.5 - Math.max(0, (c.energy ?? 0) - r.energy) * 0.15)
+          Math.max(
+            0.3,
+            1.5 - Math.max(0, (c.energy ?? 0) - resources.energy) * 0.15,
+          )
       );
     }, 0);
+  };
   let continuation = 0;
   if (
     s.priorityPlayer === p &&

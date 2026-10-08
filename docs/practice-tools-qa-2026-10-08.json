@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "reportDate": "2026-10-08",
+  "generatedAt": "2026-10-07T23:43:20.475605Z",
+  "scope": [
+    "Contextual lesson objectives, actionable Undo guidance, lethal damage arithmetic, completion feedback and progress-save retry.",
+    "Turn and public key-moment navigation, perspective-safe move filters, playback speed and keyboard controls, and bounded move pagination.",
+    "Separate local replay bookmarks with captured-frame editing, failed-write preservation and unreadable-note recovery.",
+    "Newest-first replay retention, selection of actually retained imports, and a fresh persisted import baseline for another-tab writes.",
+    "Actual frame Might in practice and historical card previews, and mobile board/action focus navigation."
+  ],
+  "sourceCheckpoints": {
+    "finalOwnedSourceSha256": {
+      "src/game/replay-bookmarks.ts": "dfa8e94d4dd2573311db1e35fa8c8e1ff5cfaf87b6e9168b3023ca7d9cf25be6",
+      "src/game/replay-navigation.ts": "d28f362bb2624451ca6f396eb4713ded79d22c790646d15bbe941a595c1b602d",
+      "src/game/training-guidance.ts": "8de8b3b2a780eac8f5aff866a4f6b3bbd9262132933286d8a702663bb539a063",
+      "src/game/match-history.ts": "019eed64e91a010114cb8e7024d1c5b0fdab606e50f180fb3387c96b5e6c7f0d",
+      "src/components/MatchHistory.tsx": "e41856a9af7f265faaf2477f05f09801102d295934d19a9938d1e65ca98c9acd"
+    },
+    "finalUI": "MatchHistory.tsx e41856a9 includes the last UI-only fresh-import-baseline fix.",
+    "earlierBrowserCheckpoint": "The corrected-engine controls, 24-lesson and long-pagination runs precede that last UI-only amendment. Their results are retained for their tested scope.",
+    "finalUITargetedChecks": "The history boundary and actual two-tab runs were repeated against the final e41856a9 UI. TypeScript also completed after that amendment.",
+    "gameHelpers": "The listed game helper bytes stayed unchanged across the final UI-only amendment."
+  },
+  "focusedTests": {
+    "artifact": "final-corrected-engine-checkpoint.json",
+    "command": "npx vitest run tests/replay-navigation.test.ts tests/replay-bookmarks.test.ts tests/training-guidance.test.ts tests/match-history.test.ts tests/training.test.ts tests/i18n.test.ts --maxWorkers=1 --reporter=json",
+    "actualExitCode": 0,
+    "total": 52,
+    "passed": 52,
+    "failed": 0,
+    "checkpoint": "Corrected engine and final listed game helpers, before the last UI-only import-baseline amendment.",
+    "exitEvidence": "Command completion returned exit code 0; this value was not inferred only from the JSON success field."
+  },
+  "staticChecks": {
+    "typeScript": {
+      "command": "npx tsc --noEmit",
+      "actualExitCode": 0,
+      "checkpoint": "After final UI-only amendment",
+      "artifact": "typecheck-final.log"
+    },
+    "whitespace": {
+      "command": "git diff --check",
+      "actualExitCode": 0
+    }
+  },
+  "browser": {
+    "runner": "Headless Chromium with Playwright; isolated refreshed source snapshot at localhost port 5197.",
+    "viewports": [
+      {
+        "width": 320,
+        "height": 568
+      },
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 844,
+        "height": 390
+      },
+      {
+        "width": 1440,
+        "height": 900
+      }
+    ],
+    "controls": {
+      "completedAt": "2026-10-07T23:27:19.411Z",
+      "artifact": "practice-after.json",
+      "viewportCases": 4,
+      "actualExitCode": 0,
+      "passed": [
+        "Selected-player hand shown and opponent hand absent in both perspectives",
+        "Turn/key-moment navigation and actor/moment filters",
+        "Playback speed and keyboard stepping",
+        "Bookmark reload, deletion cleanup and canonical export preservation",
+        "Native quota failure preserves prior note bytes and shows feedback",
+        "Wrong movement/counter attempts give Undo guidance",
+        "Lethal arithmetic and failed-progress-save retry"
+      ],
+      "pageErrors": 0,
+      "horizontalDocumentOverflow": false
+    },
+    "trainingCompletion": {
+      "completedAt": "2026-10-07T23:27:57.445240+00:00",
+      "artifact": "training-final-corrected-engine.json",
+      "actualExitCode": 0,
+      "lessonsPerViewport": 6,
+      "completedLessonFlows": 24,
+      "passed": [
+        "All lesson objectives complete",
+        "Active-step hints hidden after completion",
+        "Every completed checklist step marked complete",
+        "Undo, Retry and six-of-six progress",
+        "Actual Might preview",
+        "Mobile focus jumps preserve the URL/hash"
+      ],
+      "pageErrors": 0,
+      "horizontalDocumentOverflow": false
+    },
+    "longReplayPagination": {
+      "completedAt": "2026-10-07T23:28:10.387Z",
+      "artifact": "practice-long-locales.json",
+      "actualExitCode": 0,
+      "decisions": 102,
+      "maximumRenderedMoveRows": 40,
+      "pages": 3,
+      "locales": [
+        "en",
+        "sr",
+        "it"
+      ],
+      "viewports": [
+        {
+          "width": 320,
+          "height": 568
+        },
+        {
+          "width": 1440,
+          "height": 900
+        }
+      ],
+      "passed": [
+        "Frame and moment jumps follow the relevant move page",
+        "Actor/moment filters retain valid pagination",
+        "Translated replay and training layouts fit mobile and desktop"
+      ],
+      "pageErrors": 0,
+      "horizontalDocumentOverflow": false
+    },
+    "finalHistoryBoundaries": {
+      "completedAt": "2026-10-07T23:32:57.789Z",
+      "artifact": "history-boundaries-final.json",
+      "actualExitCode": 0,
+      "uiSha256": "e41856a9af7f265faaf2477f05f09801102d295934d19a9938d1e65ca98c9acd",
+      "viewports": [
+        {
+          "width": 320,
+          "height": 568
+        },
+        {
+          "width": 1440,
+          "height": 900
+        }
+      ],
+      "passed": [
+        "Older valid replay at the 20-match limit preserves archive bytes and selection and shows the retention notice",
+        "Mixed backup selects a newly retained match rather than a discarded first entry",
+        "Historical preview uses actual Might",
+        "Unreadable note bytes survive opening history and export unchanged",
+        "Cancelling note reset preserves bytes; confirmed note reset keeps the match archive",
+        "Bookmark editor saves its captured original frame; Play and Space cannot advance it while editing"
+      ],
+      "pageErrors": 0,
+      "horizontalDocumentOverflow": false
+    },
+    "finalActualTwoTabImport": {
+      "completedAt": "2026-10-07T23:32:14.011Z",
+      "artifact": "history-two-tab-final.json",
+      "actualExitCode": 0,
+      "uiSha256": "e41856a9af7f265faaf2477f05f09801102d295934d19a9938d1e65ca98c9acd",
+      "viewports": [
+        {
+          "width": 320,
+          "height": 568
+        },
+        {
+          "width": 1440,
+          "height": 900
+        }
+      ],
+      "scenario": "Tab A opens empty history. Tab B saves 20 legal completed matches. Tab A imports an older valid replay.",
+      "beforeFix": "An unrelated match added by Tab B was selected and the intended retention warning was suppressed.",
+      "afterFix": "The fresh 20-match archive is displayed, the older replay gets an honest retention notice, no unrelated match is selected, and exact stored archive bytes are preserved.",
+      "pageErrors": 0,
+      "horizontalDocumentOverflow": false
+    }
+  },
+  "bookmarkCapacity": {
+    "maxMatches": 20,
+    "maxBookmarksPerMatch": 10,
+    "maxNoteJavaScriptCodeUnits": 160,
+    "rawCapBytes": 262144,
+    "maximumMeasuredValidPayloadBytes": 224847,
+    "fourFullCapacityRoundtripCases": [
+      "CJK",
+      "Control characters requiring JSON escaping",
+      "Emoji",
+      "Unpaired surrogates requiring JSON escaping"
+    ],
+    "testResult": "All four full-capacity cases pass inside the 52-test focused run."
+  },
+  "privacyAndLimits": [
+    "This document includes no match states, replay payloads, private hands or hidden bot traces.",
+    "Navigation consumes existing observed historical frames and perspective labels. Practice feedback uses the public practice position.",
+    "Bookmarks are browser-local and never alter canonical completed replay exports.",
+    "Completed canonical exports remain full reproducible completed-match records; perspective-safe display does not make exported replay data a redacted public record.",
+    "This scoped report does not assert completion or results of the final whole-repository suite, AI pilot, deployment or production checks."
+  ]
+}

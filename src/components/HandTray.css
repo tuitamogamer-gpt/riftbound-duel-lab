@@ -128,6 +128,27 @@
   align-items: center;
   gap: 3px;
 }
+.hand-sheet-availability {
+  display: inline-flex;
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #b7dfc8;
+}
+.hand-sheet-availability.is-unavailable {
+  color: #d5c7a9;
+}
+.hand-sheet-unavailable-reason {
+  margin: 0 0 12px;
+  padding: 10px;
+  border-left: 2px solid #dcc594;
+  border-radius: 0 5px 5px 0;
+  color: #f1e5cb;
+  background: #61503840;
+  font-size: 12px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
 .hand-sheet-rules {
   margin: 9px 0 12px;
   color: #d4dce5;
@@ -166,6 +187,11 @@
   border-color: #93c6aa;
   color: #daf5e4;
   background: #254b3b;
+}
+.hand-sheet-actions .hand-sheet-select.is-unavailable {
+  border-color: #a4a694;
+  color: #ede5d6;
+  background: #35404a;
 }
 .hand-sheet-actions button:disabled {
   opacity: 0.4;

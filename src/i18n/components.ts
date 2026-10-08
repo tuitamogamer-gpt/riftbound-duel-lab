@@ -1,5 +1,33 @@
 // UI labels and review summaries. Printed card rules and proper names stay in English.
 export const componentMessages: Record<string, [string, string, string]> = {
+  "Starting a new duel will replace your unfinished series ({you}–{bot}).": [
+    "Starting a new duel will replace your unfinished series ({you}–{bot}).",
+    "Novi duel će zamijeniti tvoju nedovršenu seriju ({you}–{bot}).",
+    "Un nuovo duello sostituirà la serie non completata ({you}–{bot}).",
+  ],
+  "Continue series": ["Continue series", "Nastavi seriju", "Continua la serie"],
+  "{shown} of {count} matching entries": [
+    "{shown} of {count} matching entries",
+    "{shown} od {count} pronađenih karata",
+    "{shown} di {count} carte trovate",
+  ],
+  "This screen could not be opened.": [
+    "This screen could not be opened.",
+    "Ovaj ekran nije moguće otvoriti.",
+    "Impossibile aprire questa schermata.",
+  ],
+  "Return to the arena, or reload the page to try again when your connection is available.":
+    [
+      "Return to the arena, or reload the page to try again when your connection is available.",
+      "Vrati se u arenu ili ponovo učitaj stranicu kada veza bude dostupna.",
+      "Torna all’arena oppure ricarica la pagina quando la connessione è disponibile.",
+    ],
+  "Return to arena": ["Return to arena", "Vrati se u arenu", "Torna all’arena"],
+  "Reload page": [
+    "Reload page",
+    "Ponovo učitaj stranicu",
+    "Ricarica la pagina",
+  ],
   "Card set": ["Card set", "Set karata", "Espansione"],
   "All sets": ["All sets", "Svi setovi", "Tutte le espansioni"],
   "Rules tokens": ["Rules tokens", "Tokeni za igru", "Pedine di gioco"],

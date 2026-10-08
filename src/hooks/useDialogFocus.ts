@@ -1,21 +1,24 @@
 import { useEffect, useRef } from "react";
+import { useBodyScrollLock } from "./useBodyScrollLock";
 
 /** Only the top modal handles keyboard navigation; nested inspection preserves its parent. */
-export function useDialogFocus(close: () => void) {
+export function useDialogFocus(close: () => void, active = true) {
+  useBodyScrollLock(active);
   const panel = useRef<HTMLElement>(null);
   const closeRef = useRef(close);
   closeRef.current = close;
   useEffect(() => {
+    if (!active) return;
     const previous = document.activeElement as HTMLElement | null;
     const element = panel.current;
     if (!element) return;
     const items = () =>
       Array.from(
         element.querySelectorAll<HTMLElement>(
-          "button:not(:disabled), select, input, [tabindex='0']",
+          "button:not(:disabled), select:not(:disabled), input:not(:disabled):not([type='hidden']), textarea:not(:disabled), a[href], summary, [tabindex]:not([tabindex='-1'])",
         ),
-      ).filter((item) => item.getClientRects().length);
-    items()[0]?.focus({ preventScroll: true });
+      ).filter((item) => item.tabIndex >= 0 && item.getClientRects().length);
+    (items()[0] ?? element).focus({ preventScroll: true });
     const onKey = (event: KeyboardEvent) => {
       const top = Array.from(
         document.querySelectorAll<HTMLElement>("[aria-modal='true']"),
@@ -56,7 +59,13 @@ export function useDialogFocus(close: () => void) {
         const controls = items();
         const first = controls[0];
         const last = controls.at(-1);
+        if (!first || !last) {
+          event.preventDefault();
+          element.focus({ preventScroll: true });
+          return;
+        }
         if (
+          !element.contains(document.activeElement) ||
           (event.shiftKey && document.activeElement === first) ||
           (!event.shiftKey && document.activeElement === last)
         ) {
@@ -70,6 +79,6 @@ export function useDialogFocus(close: () => void) {
       document.removeEventListener("keydown", onKey);
       if (previous?.isConnected) previous.focus({ preventScroll: true });
     };
-  }, []);
+  }, [active]);
   return panel;
 }

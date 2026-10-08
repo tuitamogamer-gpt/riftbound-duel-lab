@@ -71,6 +71,31 @@ export const mobileMessages: Record<string, [string, string, string]> = {
     "Sostituisci questa carta",
   ],
   "Select card": ["Select card", "Izaberi kartu", "Seleziona carta"],
+  "Check availability": [
+    "Check availability",
+    "Provjeri dostupnost",
+    "Verifica disponibilità",
+  ],
+  "Available play": [
+    "Available play",
+    "Potez je dostupan",
+    "Mossa disponibile",
+  ],
+  "No available play": [
+    "No available play",
+    "Nema dostupnog poteza",
+    "Nessuna mossa disponibile",
+  ],
+  "Read your cards here. Return to the table to continue the duel.": [
+    "Read your cards here. Return to the table to continue the duel.",
+    "Ovdje možeš pročitati karte. Vrati se na stol da nastaviš duel.",
+    "Leggi qui le tue carte. Torna al tavolo per continuare il duello.",
+  ],
+  "The duel is complete. You can still read your cards.": [
+    "The duel is complete. You can still read your cards.",
+    "Duel je završen. I dalje možeš pročitati svoje karte.",
+    "Il duello è terminato. Puoi ancora leggere le tue carte.",
+  ],
   Details: ["Details", "Detalji", "Dettagli"],
   "{count}/2 cards selected": [
     "{count}/2 cards selected",

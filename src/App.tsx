@@ -42,7 +42,6 @@ import { OfflineTools } from "./components/OfflineTools";
 import { PaymentPicker } from "./components/PaymentPicker";
 import { shouldOfferPayment } from "./game/payment-presentation";
 import { cardArtUrl } from "./data/art";
-import { catalogMeta } from "./data/cards";
 import { type StarterDeck } from "./data/decks";
 import { DeckImport } from "./components/DeckImport";
 import { Lobby } from "./components/Lobby";
@@ -54,6 +53,9 @@ import {
   saveImportedDecks,
 } from "./game/deck-import";
 import { Card, CardDetail } from "./components/Card";
+import { AppDialog } from "./components/AppDialog";
+import { RouteBoundary } from "./components/RouteBoundary";
+import { MatchResultPanel } from "./components/MatchResultPanel";
 import { RuneCard } from "./components/RuneCard";
 import { GearRow } from "./components/GearRow";
 import { CardSleeve } from "./components/CardSleeve";
@@ -133,6 +135,11 @@ import {
   publicExplanation,
 } from "./game/ai/presentation";
 import "./roadmap.css";
+const CardLibrary = lazy(() =>
+  import("./components/CardLibrary").then((module) => ({
+    default: module.CardLibrary,
+  })),
+);
 const DeckBuilder = lazy(() =>
   import("./components/DeckBuilder").then((module) => ({
     default: module.DeckBuilder,
@@ -164,9 +171,6 @@ const BoardInteraction = createContext<{
 
 const supported = (c: CatalogCard) =>
   Boolean(scripts[c.id]) || c.type === "Rune";
-const catalogSets = [
-  ...new Map(catalog.map((card) => [card.set, card.setName])).entries(),
-];
 const locationName = (l?: string) =>
   l === "base:0"
     ? "Tvoja baza"
@@ -793,6 +797,18 @@ export default function App() {
       setError(e instanceof Error ? e.message : String(e));
     }
   };
+  const unfinishedSeries = Boolean(series && series.phase !== "complete");
+  const requestNewGame = () => {
+    if ((match && (review || match.winner === null)) || unfinishedSeries)
+      setConfirmNew(true);
+    else start();
+  };
+  const continueCurrent = () => {
+    setConfirmNew(false);
+    if (unfinishedSeries) resumeSeries();
+    else if (match) setScreen("game");
+    else setScreen("lobby");
+  };
   const chooseDeck = (id: string) => {
     setPlayerDeck(id);
     if (!visibleDecks.some((deck) => deck.id === id)) {
@@ -880,7 +896,19 @@ export default function App() {
       value={{ ...highlights, game: game || undefined }}
     >
       <div className={`app ${screen === "game" ? "is-game" : ""}`}>
-        <a className="skip-link" href="#main-content">
+        <a
+          className="skip-link"
+          href="#main-content"
+          onClick={(event) => {
+            event.preventDefault();
+            const content = document.getElementById("main-content");
+            if (content) {
+              content.setAttribute("tabindex", "-1");
+              content.focus({ preventScroll: true });
+              content.scrollIntoView({ block: "start" });
+            }
+          }}
+        >
           {t("Preskoči na sadržaj")}{" "}
         </a>
         {screen !== "game" && header}
@@ -905,11 +933,7 @@ export default function App() {
               onPlayer={chooseDeck}
               onBot={setBotDeck}
               onDifficulty={(value) => setDifficulty(value as Difficulty)}
-              onStart={() =>
-                match && (review || match.winner === null)
-                  ? setConfirmNew(true)
-                  : start()
-              }
+              onStart={requestNewGame}
               onResume={() => setScreen("game")}
               onImport={() => setImportOpen(true)}
               onDetails={setDeckDetails}
@@ -984,89 +1008,122 @@ export default function App() {
             <OfflineTools decks={[selectedPlayerDeck, selectedBotDeck]} />
           </>
         )}
-        {screen === "library" && <Library inspect={setInspected} />}
-        {screen === "builder" && (
-          <Suspense
-            fallback={
-              <p className="route-loading" role="status">
-                {t("Loading…")}
-              </p>
-            }
-          >
-            <DeckBuilder
-              initialDeck={builderDeck}
-              availableDecks={allDecks}
-              onSave={saveBuiltDeck}
-              onDelete={deleteBuiltDeck}
-              onClose={() => setScreen("lobby")}
-            />
-          </Suspense>
-        )}
-        {screen === "training" && (
-          <Suspense
-            fallback={
-              <p className="route-loading" role="status">
-                {t("Loading…")}
-              </p>
-            }
-          >
-            <TrainingLab onBack={() => setScreen("lobby")} />
-          </Suspense>
-        )}
-        {screen === "online" && (
-          <Suspense
-            fallback={
-              <p className="route-loading" role="status">
-                {t("Loading…")}
-              </p>
-            }
-          >
-            <OnlineDuel
-              availableDecks={allDecks}
-              onBack={() => {
-                if (window.location.hash.startsWith("#duel="))
-                  window.history.replaceState(
-                    null,
-                    "",
-                    window.location.pathname + window.location.search,
-                  );
-                setScreen("lobby");
-              }}
-            />
-          </Suspense>
-        )}
-        {screen === "history" && (
-          <Suspense
-            fallback={
-              <p className="route-loading" role="status">
-                {t("Loading…")}
-              </p>
-            }
-          >
-            <MatchHistory onBack={() => setScreen("lobby")} />
-          </Suspense>
-        )}
-        {screen === "series" && series && (
-          <Suspense
-            fallback={
-              <p className="route-loading" role="status">
-                {t("Loading…")}
-              </p>
-            }
-          >
-            <SeriesPanel
-              series={series}
-              onClose={() => setScreen("lobby")}
-              onStartGame={startSeriesGame}
-              onChange={(next) => {
-                setSeries(next);
-                const saved = saveMatchSeries(next);
-                setSeriesSaveError(!saved);
-                return saved;
-              }}
-            />
-          </Suspense>
-        )}
+        <RouteBoundary key={screen} onBack={() => setScreen("lobby")}>
+          {screen === "library" && (
+            <Suspense
+              fallback={
+                <p
+                  className="route-loading"
+                  role="status"
+                  id="main-content"
+                  tabIndex={-1}
+                >
+                  {t("Loading…")}
+                </p>
+              }
+            >
+              <CardLibrary inspect={setInspected} />
+            </Suspense>
+          )}
+          {screen === "builder" && (
+            <Suspense
+              fallback={
+                <p
+                  className="route-loading"
+                  role="status"
+                  id="main-content"
+                  tabIndex={-1}
+                >
+                  {t("Loading…")}
+                </p>
+              }
+            >
+              <DeckBuilder
+                initialDeck={builderDeck}
+                availableDecks={allDecks}
+                onSave={saveBuiltDeck}
+                onDelete={deleteBuiltDeck}
+                onClose={() => setScreen("lobby")}
+              />
+            </Suspense>
+          )}
+          {screen === "training" && (
+            <div id="main-content" tabIndex={-1}>
+              <Suspense
+                fallback={
+                  <p className="route-loading" role="status">
+                    {t("Loading…")}
+                  </p>
+                }
+              >
+                <TrainingLab onBack={() => setScreen("lobby")} />
+              </Suspense>
+            </div>
+          )}
+          {screen === "online" && (
+            <Suspense
+              fallback={
+                <p
+                  className="route-loading"
+                  role="status"
+                  id="main-content"
+                  tabIndex={-1}
+                >
+                  {t("Loading…")}
+                </p>
+              }
+            >
+              <OnlineDuel
+                availableDecks={allDecks}
+                onBack={() => {
+                  if (window.location.hash.startsWith("#duel="))
+                    window.history.replaceState(
+                      null,
+                      "",
+                      window.location.pathname + window.location.search,
+                    );
+                  setScreen("lobby");
+                }}
+              />
+            </Suspense>
+          )}
+          {screen === "history" && (
+            <div id="main-content" tabIndex={-1}>
+              <Suspense
+                fallback={
+                  <p className="route-loading" role="status">
+                    {t("Loading…")}
+                  </p>
+                }
+              >
+                <MatchHistory onBack={() => setScreen("lobby")} />
+              </Suspense>
+            </div>
+          )}
+          {screen === "series" && series && (
+            <div id="main-content" tabIndex={-1}>
+              <Suspense
+                fallback={
+                  <p className="route-loading" role="status">
+                    {t("Loading…")}
+                  </p>
+                }
+              >
+                <SeriesPanel
+                  series={series}
+                  onClose={() => setScreen("lobby")}
+                  onStartGame={startSeriesGame}
+                  onChange={(next) => {
+                    setSeries(next);
+                    const saved = saveMatchSeries(next);
+                    setSeriesSaveError(!saved);
+                    return saved;
+                  }}
+                />
+              </Suspense>
+            </div>
+          )}
+        </RouteBoundary>
         {screen === "game" && game && (
           <main
             className="game-layout"
@@ -1520,42 +1577,38 @@ export default function App() {
               />
             )}
             {logOpen && (
-              <div className="modal-backdrop" onClick={() => setLogOpen(false)}>
-                <section
-                  className="modal match-history"
-                  role="dialog"
-                  aria-modal="true"
-                  aria-label={t("Dnevnik meča")}
-                  onClick={(event) => event.stopPropagation()}
+              <AppDialog
+                className="match-history"
+                label={t("Dnevnik meča")}
+                close={() => setLogOpen(false)}
+              >
+                <button
+                  className="close-button"
+                  onClick={() => setLogOpen(false)}
+                  aria-label={t("Zatvori")}
                 >
-                  <button
-                    className="close-button"
-                    onClick={() => setLogOpen(false)}
-                    aria-label={t("Zatvori")}
-                  >
-                    ×
-                  </button>
-                  <h2>{t("Dnevnik meča")}</h2>
-                  <CombatPanel
-                    game={game}
-                    review={review}
-                    legal={[]}
-                    onAction={doAction}
-                    inspect={setInspected}
-                  />
-                  {[...game.log].reverse().map((entry) => (
-                    <p key={entry.id}>
-                      <b>{entry.turn}</b> {t(entry.text)}
-                    </p>
-                  ))}
-                </section>
-              </div>
+                  ×
+                </button>
+                <h2>{t("Dnevnik meča")}</h2>
+                <CombatPanel
+                  game={game}
+                  review={review}
+                  legal={[]}
+                  onAction={doAction}
+                  inspect={setInspected}
+                />
+                {[...game.log].reverse().map((entry) => (
+                  <p key={entry.id}>
+                    <b>{entry.turn}</b> {t(entry.text)}
+                  </p>
+                ))}
+              </AppDialog>
             )}
             {!review && game.winner !== null && (
-              <div className="result-banner">
+              <MatchResultPanel>
                 <Trophy size={40} />
                 <span className="eyebrow"> {t("DUEL JE ZAVRŠEN")} </span>
-                <h2>
+                <h2 id="match-result-title">
                   {game.winner === 0
                     ? t("Pobjeda je tvoja.")
                     : t("Rift pripada protivniku.")}
@@ -1587,7 +1640,7 @@ export default function App() {
                     )}
                   </p>
                 )}
-                <button className="gold-button" onClick={start}>
+                <button className="gold-button" onClick={requestNewGame}>
                   {t("Novi duel")} <RotateCcw size={17} />
                 </button>
                 <button
@@ -1610,7 +1663,7 @@ export default function App() {
                 >
                   {t("Promijeni špil")}{" "}
                 </button>
-              </div>
+              </MatchResultPanel>
             )}
           </main>
         )}
@@ -1622,119 +1675,114 @@ export default function App() {
           />
         )}
         {deckDetails && (
-          <div className="modal-backdrop" onClick={() => setDeckDetails(null)}>
-            <section
-              className="modal deck-list-modal"
-              role="dialog"
-              aria-modal="true"
-              aria-label={t("Sastav: {deck}", { deck: t(deckDetails.name) })}
-              onClick={(e) => e.stopPropagation()}
+          <AppDialog
+            className="deck-list-modal"
+            label={t("Sastav: {deck}", { deck: t(deckDetails.name) })}
+            close={() => setDeckDetails(null)}
+          >
+            <button
+              className="close-button"
+              onClick={() => setDeckDetails(null)}
+              aria-label={t("Zatvori sastav")}
             >
-              <button
-                className="close-button"
-                onClick={() => setDeckDetails(null)}
-                aria-label={t("Zatvori sastav")}
-              >
-                ×
-              </button>
-              <div className="eyebrow">
-                {t(deckDetails.product ?? "LOKALNI ŠPIL")}
+              ×
+            </button>
+            <div className="eyebrow">
+              {t(deckDetails.product ?? "LOKALNI ŠPIL")}
+            </div>
+            <h2>{t(deckDetails.name)}</h2>
+            <div className="deck-sleeve-preview">
+              <CardSleeve player={deckDetails} />
+              <div>
+                <strong>
+                  {deckDetails.champion} · {t("Signature sleeve")}
+                </strong>
+                <p>
+                  {t("Automatically used on your deck and face-down cards.")}
+                </p>
               </div>
-              <h2>{t(deckDetails.name)}</h2>
-              <div className="deck-sleeve-preview">
-                <CardSleeve player={deckDetails} />
-                <div>
-                  <strong>
-                    {deckDetails.champion} · {t("Signature sleeve")}
-                  </strong>
-                  <p>
-                    {t("Automatically used on your deck and face-down cards.")}
-                  </p>
-                </div>
-              </div>
-              <p>
-                {t("{count} cards · 12 runes ·", {
-                  count:
-                    1 +
-                    deckDetails.main.reduce((n, entry) => n + entry.count, 0),
-                })}{" "}
+            </div>
+            <p>
+              {t("{count} cards · 12 runes ·", {
+                count:
+                  1 + deckDetails.main.reduce((n, entry) => n + entry.count, 0),
+              })}{" "}
+              {
+                (deckDetails.battlefieldIds ?? [deckDetails.battlefieldId])
+                  .length
+              }{" "}
+              {t("bojišta")}{" "}
+            </p>
+            <p>
+              {getDeckScriptCoverage(deckDetails).complete
+                ? t("Sve karte su podržane za igranje.")
+                : t(
+                    `Još nisu podržane: ${getDeckScriptCoverage(deckDetails)
+                      .missing.map((c) => c.name)
+                      .join(", ")}`,
+                  )}
+            </p>
+            <div className="deck-preview-list">
+              {[
                 {
-                  (deckDetails.battlefieldIds ?? [deckDetails.battlefieldId])
-                    .length
-                }{" "}
-                {t("bojišta")}{" "}
-              </p>
-              <p>
-                {getDeckScriptCoverage(deckDetails).complete
-                  ? t("Sve karte su podržane za igranje.")
-                  : t(
-                      `Još nisu podržane: ${getDeckScriptCoverage(deckDetails)
-                        .missing.map((c) => c.name)
-                        .join(", ")}`,
-                    )}
-              </p>
-              <div className="deck-preview-list">
-                {[
-                  {
-                    title: "Legenda",
-                    entries: [{ cardId: deckDetails.legendId, count: 1 }],
-                  },
-                  {
-                    title: "Izabrani champion",
-                    entries: [{ cardId: deckDetails.championId, count: 1 }],
-                  },
-                  { title: "Glavni špil", entries: deckDetails.main },
-                  { title: "Runes", entries: deckDetails.runes },
-                  ...(deckDetails.sideboard?.length
-                    ? [{ title: "Sideboard", entries: deckDetails.sideboard }]
-                    : []),
-                  {
-                    title: "Bojišta",
-                    entries: (
-                      deckDetails.battlefieldIds ?? [deckDetails.battlefieldId]
-                    ).map((cardId) => ({ cardId, count: 1 })),
-                  },
-                ].map((group) => (
-                  <section key={group.title}>
-                    <h3>{t(group.title)}</h3>
-                    {group.entries.map((entry, i) => (
-                      <button
-                        key={`${entry.cardId}-${i}`}
-                        data-card-preview={entry.cardId}
-                        onClick={() => {
-                          const card = findCard(entry.cardId);
-                          if (card) setInspected(card);
-                        }}
-                      >
-                        <span>{entry.count}×</span>{" "}
-                        {findCard(entry.cardId)?.name ?? entry.cardId}
-                        <Search size={13} />
-                      </button>
-                    ))}
-                  </section>
-                ))}
-              </div>
-              <div className="deck-source-links">
-                {(
-                  deckDetails.sourceUrls ??
-                  (deckDetails.sourceUrl ? [deckDetails.sourceUrl] : [])
-                ).map((url, i) => (
-                  <a href={url} key={url} target="_blank" rel="noreferrer">
-                    {t("Izvor liste")} {i + 1} ↗
-                  </a>
-                ))}
-              </div>
-              {deckDetails.importNotes?.map((note) => (
-                <small key={note}>{t(note)}</small>
+                  title: "Legenda",
+                  entries: [{ cardId: deckDetails.legendId, count: 1 }],
+                },
+                {
+                  title: "Izabrani champion",
+                  entries: [{ cardId: deckDetails.championId, count: 1 }],
+                },
+                { title: "Glavni špil", entries: deckDetails.main },
+                { title: "Runes", entries: deckDetails.runes },
+                ...(deckDetails.sideboard?.length
+                  ? [{ title: "Sideboard", entries: deckDetails.sideboard }]
+                  : []),
+                {
+                  title: "Bojišta",
+                  entries: (
+                    deckDetails.battlefieldIds ?? [deckDetails.battlefieldId]
+                  ).map((cardId) => ({ cardId, count: 1 })),
+                },
+              ].map((group) => (
+                <section key={group.title}>
+                  <h3>{t(group.title)}</h3>
+                  {group.entries.map((entry, i) => (
+                    <button
+                      key={`${entry.cardId}-${i}`}
+                      data-card-preview={entry.cardId}
+                      onClick={() => {
+                        const card = findCard(entry.cardId);
+                        if (card) setInspected(card);
+                      }}
+                    >
+                      <span>{entry.count}×</span>{" "}
+                      {findCard(entry.cardId)?.name ?? entry.cardId}
+                      <Search size={13} />
+                    </button>
+                  ))}
+                </section>
               ))}
-              <button
-                className="gold-button"
-                onClick={() => exportDeck(deckDetails)}
-              >
-                {t("Izvezi .txt")}{" "}
-              </button>
-            </section>
-          </div>
+            </div>
+            <div className="deck-source-links">
+              {(
+                deckDetails.sourceUrls ??
+                (deckDetails.sourceUrl ? [deckDetails.sourceUrl] : [])
+              ).map((url, i) => (
+                <a href={url} key={url} target="_blank" rel="noreferrer">
+                  {t("Izvor liste")} {i + 1} ↗
+                </a>
+              ))}
+            </div>
+            {deckDetails.importNotes?.map((note) => (
+              <small key={note}>{t(note)}</small>
+            ))}
+            <button
+              className="gold-button"
+              onClick={() => exportDeck(deckDetails)}
+            >
+              {t("Izvezi .txt")}{" "}
+            </button>
+          </AppDialog>
         )}
         {error && (
           <div className="error-toast" role="alert">
@@ -1824,24 +1872,30 @@ export default function App() {
         )}
         {help && <Help close={() => setHelp(false)} />}
         {confirmNew && (
-          <div className="modal-backdrop">
-            <section className="modal small-modal">
-              <h2> {t("Započni novi duel?")} </h2>
-              <p> {t("Trenutni sačuvani meč bit će zamijenjen novim.")} </p>
-              <button className="gold-button" onClick={start}>
-                {t("Započni novi duel")}{" "}
-              </button>
-              <button
-                className="outline-button"
-                onClick={() => {
-                  setConfirmNew(false);
-                  setScreen("game");
-                }}
-              >
-                {t("Nastavi trenutni")}{" "}
-              </button>
-            </section>
-          </div>
+          <AppDialog
+            className="small-modal"
+            label={t("Započni novi duel?")}
+            close={continueCurrent}
+          >
+            <h2> {t("Započni novi duel?")} </h2>
+            <p> {t("Trenutni sačuvani meč bit će zamijenjen novim.")} </p>
+            {unfinishedSeries && series && (
+              <p>
+                {t(
+                  "Starting a new duel will replace your unfinished series ({you}–{bot}).",
+                  { you: series.scores[0], bot: series.scores[1] },
+                )}
+              </p>
+            )}
+            <button className="gold-button" onClick={start}>
+              {t("Započni novi duel")}{" "}
+            </button>
+            <button className="outline-button" onClick={continueCurrent}>
+              {t(
+                unfinishedSeries ? "Continue series" : "Nastavi trenutni",
+              )}{" "}
+            </button>
+          </AppDialog>
         )}
       </div>
     </HighlightContext.Provider>
@@ -2196,279 +2250,99 @@ function BoardZone({
     </section>
   );
 }
-function Library({ inspect }: { inspect: (c: CatalogCard) => void }) {
-  const { t, locale } = useI18n();
-  const [search, setSearch] = useState(""),
-    [domain, setDomain] = useState("Sve domene"),
-    [type, setType] = useState("Sve vrste"),
-    [set, setSet] = useState("all"),
-    [baseOnly, setBaseOnly] = useState(false),
-    [onlyScripted, setOnlyScripted] = useState(false),
-    [limit, setLimit] = useState(60);
-  const filtered = useMemo(
-    () =>
-      catalog.filter(
-        (c) =>
-          (!baseOnly || !c.variant) &&
-          (set === "all" || c.set === set) &&
-          (!search ||
-            `${c.name} ${c.text} ${c.id} ${c.set}`
-              .toLowerCase()
-              .includes(search.toLowerCase())) &&
-          (domain === "Sve domene" || c.domains.includes(domain)) &&
-          (type === "Sve vrste" || c.type === type) &&
-          (!onlyScripted || supported(c)),
-      ),
-    [search, domain, type, set, baseOnly, onlyScripted],
-  );
-  return (
-    <main className="library" id="main-content">
-      <div className="eyebrow"> {t("RIFTCODEX · KATALOG KARATA")} </div>
-      <h1>
-        {t("Znanje je prednost")}
-        <span>.</span>
-      </h1>
-      <p>
-        {t(
-          "Originalne karte i tekstovi efekata. Oznaka „Podržana” znači da je karta podržana u meču.",
-        )}{" "}
-      </p>
-      <p className="catalog-snapshot">
-        {t("{printings} printings · {tokens} rules tokens · Snapshot {date}", {
-          printings: catalogMeta.count,
-          tokens: catalog.length - catalogMeta.count,
-          date: new Date(catalogMeta.fetchedAt).toLocaleDateString(
-            locale === "sr" ? "sr-Latn" : locale,
-            {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-              timeZone: "UTC",
-            },
-          ),
-        })}
-      </p>
-      <div className="library-filters">
-        <div className="search-input">
-          <Search size={19} />
-          <input
-            aria-label={t("Pretraži karte")}
-            placeholder={t("Pretraži ime ili tekst karte…")}
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setLimit(60);
-            }}
-          />
-        </div>
-        <select
-          aria-label={t("Domena")}
-          value={domain}
-          onChange={(e) => setDomain(e.target.value)}
-        >
-          {["Sve domene", "Fury", "Calm", "Mind", "Body", "Chaos", "Order"].map(
-            (d) => (
-              <option key={d} value={d}>
-                {t(d)}
-              </option>
-            ),
-          )}
-        </select>
-        <select
-          aria-label={t("Card set")}
-          value={set}
-          onChange={(e) => {
-            setSet(e.target.value);
-            setLimit(60);
-          }}
-        >
-          <option value="all">{t("All sets")}</option>
-          {catalogSets.map(([id, name]) => (
-            <option key={id} value={id}>
-              {id === "TOKEN" ? t("Rules tokens") : name}
-            </option>
-          ))}
-        </select>
-        <label className="scripted-filter">
-          <input
-            type="checkbox"
-            checked={baseOnly}
-            onChange={(e) => {
-              setBaseOnly(e.target.checked);
-              setLimit(60);
-            }}
-          />
-          {t("Base printings only")}
-        </label>
-        <select
-          aria-label={t("Vrsta karte")}
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-        >
-          {[
-            "Sve vrste",
-            "Unit",
-            "Spell",
-            "Gear",
-            "Legend",
-            "Battlefield",
-            "Rune",
-          ].map((d) => (
-            <option key={d} value={d}>
-              {t(d)}
-            </option>
-          ))}
-        </select>
-        <label className="scripted-filter">
-          <input
-            type="checkbox"
-            checked={onlyScripted}
-            onChange={(e) => setOnlyScripted(e.target.checked)}
-          />
-          {t("Samo podržane za igranje")}{" "}
-        </label>
-      </div>
-      <div className="catalog-count">
-        {t("{count} matching entries", { count: filtered.length })}{" "}
-        <span> {t("Podaci su spremljeni lokalno uz aplikaciju")} </span>
-      </div>
-      <div className="catalog-grid">
-        {filtered.slice(0, limit).map((c) => (
-          <div key={c.id}>
-            <Card card={c} onClick={() => inspect(c)} />
-            <div className="catalog-card-name">
-              <strong>{c.name}</strong>
-              <small className="catalog-printing-id">
-                {c.set} · {c.id}
-              </small>
-              <span
-                className={supported(c) ? "scripted-badge" : "catalog-badge"}
-              >
-                {supported(c) ? t("● Podržana") : c.set}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-      {!filtered.length && (
-        <div className="empty-search">
-          <Search size={32} />
-          <h3> {t("Nema pronađenih karata")} </h3>
-          <p> {t("Pokušaj s drugim imenom ili filterima.")} </p>
-        </div>
-      )}
-      {filtered.length > limit && (
-        <button
-          className="outline-button load-more"
-          onClick={() => setLimit((l) => l + 60)}
-        >
-          {t("Prikaži još karata")} <ArrowRight size={16} />
-        </button>
-      )}
-    </main>
-  );
-}
 function Help({ close }: { close: () => void }) {
   const { t } = useI18n();
   return (
-    <div className="modal-backdrop" onClick={close}>
-      <section
-        className="modal help-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-label={t("Kako igrati")}
-        onClick={(e) => e.stopPropagation()}
+    <AppDialog className="help-modal" label={t("Kako igrati")} close={close}>
+      <button
+        className="close-button"
+        onClick={close}
+        aria-label={t("Zatvori")}
       >
-        <button
-          className="close-button"
-          onClick={close}
-          aria-label={t("Zatvori")}
+        ×
+      </button>
+      <div className="eyebrow"> {t("TVOJ PRVI DUEL")} </div>
+      <h2>
+        {t("Osvoji bojišta.")} <br />
+        <em> {t("Zadrži prednost.")} </em>
+      </h2>
+      <div className="help-grid">
+        {[
+          [
+            "01",
+            "Pripremi ruku",
+            "Start with 4 cards and replace up to 2 once. Your Legend starts in its zone with its effects. Your chosen champion starts in a separate zone; pay its cost to play it.",
+          ],
+          [
+            "02",
+            "Upravljaj runama",
+            "Na početku poteza pripremaš karte i dobijaš 2 rune. Iscrpi runu za energiju; recikliraj je za power njene domene. Plaćanje karata radi automatski.",
+          ],
+          [
+            "03",
+            "Pošalji jedinice",
+            "Select a ready unit, then a highlighted battlefield. Add other units if you want, then confirm the move in the center.",
+          ],
+          [
+            "04",
+            "Odgovori na protivnika",
+            "Showdown daje objema stranama priliku za Action i Reaction karte. Lanac efekata rješava se od posljednjeg odigranog.",
+          ],
+          [
+            "05",
+            "Riješi borbu",
+            "Click highlighted enemies to assign combat damage. Both sides deal damage simultaneously. Open the match log for combat details.",
+          ],
+          [
+            "06",
+            "Stigni do 8",
+            "Bod dobijaš osvajanjem ili držanjem bojišta na početku poteza. Za osmi bod osvajanjem moraš bodovati oba bojišta u tom potezu.",
+          ],
+        ].map(([n, heading, p]) => (
+          <div key={n}>
+            <span>{n}</span>
+            <h3>{t(heading)}</h3>
+            <p>{t(p)}</p>
+          </div>
+        ))}
+      </div>
+      <div className="scope-note">
+        <h3> {t("One place for every decision")} </h3>
+        <p>
+          {t(
+            "Select a card on the board and choose its move in the bottom bar. The opponent and effects advance automatically. The game waits whenever you have a real choice. Pause at any time or open the log to review what happened.",
+          )}{" "}
+        </p>
+        <h3> {t("Podrška i izvori")} </h3>
+        <p>
+          {t(
+            "Ovo je nezavisni eksperimentalni simulator. Sve karte u spremljenom katalogu imaju podršku za igranje. Katalog je snimak Riftcodex podataka; podrška za karte ne potvrđuje sve moguće interakcije pravila.",
+          )}{" "}
+        </p>
+        <p>
+          {t(
+            "Riotova Digital Tools Policy ne odobrava automatizovane Riftbound simulatore. Ovaj projekt nema Riot odobrenje.",
+          )}{" "}
+        </p>
+        <a
+          href="https://developer.riotgames.com/docs/riftbound"
+          target="_blank"
+          rel="noreferrer"
         >
-          ×
-        </button>
-        <div className="eyebrow"> {t("TVOJ PRVI DUEL")} </div>
-        <h2>
-          {t("Osvoji bojišta.")} <br />
-          <em> {t("Zadrži prednost.")} </em>
-        </h2>
-        <div className="help-grid">
-          {[
-            [
-              "01",
-              "Pripremi ruku",
-              "Start with 4 cards and replace up to 2 once. Your Legend starts in its zone with its effects. Your chosen champion starts in a separate zone; pay its cost to play it.",
-            ],
-            [
-              "02",
-              "Upravljaj runama",
-              "Na početku poteza pripremaš karte i dobijaš 2 rune. Iscrpi runu za energiju; recikliraj je za power njene domene. Plaćanje karata radi automatski.",
-            ],
-            [
-              "03",
-              "Pošalji jedinice",
-              "Select a ready unit, then a highlighted battlefield. Add other units if you want, then confirm the move in the center.",
-            ],
-            [
-              "04",
-              "Odgovori na protivnika",
-              "Showdown daje objema stranama priliku za Action i Reaction karte. Lanac efekata rješava se od posljednjeg odigranog.",
-            ],
-            [
-              "05",
-              "Riješi borbu",
-              "Click highlighted enemies to assign combat damage. Both sides deal damage simultaneously. Open the match log for combat details.",
-            ],
-            [
-              "06",
-              "Stigni do 8",
-              "Bod dobijaš osvajanjem ili držanjem bojišta na početku poteza. Za osmi bod osvajanjem moraš bodovati oba bojišta u tom potezu.",
-            ],
-          ].map(([n, heading, p]) => (
-            <div key={n}>
-              <span>{n}</span>
-              <h3>{t(heading)}</h3>
-              <p>{t(p)}</p>
-            </div>
-          ))}
-        </div>
-        <div className="scope-note">
-          <h3> {t("One place for every decision")} </h3>
-          <p>
-            {t(
-              "Select a card on the board and choose its move in the bottom bar. The opponent and effects advance automatically. The game waits whenever you have a real choice. Pause at any time or open the log to review what happened.",
-            )}{" "}
-          </p>
-          <h3> {t("Podrška i izvori")} </h3>
-          <p>
-            {t(
-              "Ovo je nezavisni eksperimentalni simulator. Sve karte u spremljenom katalogu imaju podršku za igranje. Katalog je snimak Riftcodex podataka; podrška za karte ne potvrđuje sve moguće interakcije pravila.",
-            )}{" "}
-          </p>
-          <p>
-            {t(
-              "Riotova Digital Tools Policy ne odobrava automatizovane Riftbound simulatore. Ovaj projekt nema Riot odobrenje.",
-            )}{" "}
-          </p>
-          <a
-            href="https://developer.riotgames.com/docs/riftbound"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Riot Digital Tools Policy ↗
-          </a>{" "}
-          ·{" "}
-          <a
-            href="https://playriftbound.com/en-us/rules-hub/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            {t("Službena pravila ↗")}{" "}
-          </a>
-        </div>
-        <button className="gold-button" onClick={close}>
-          {t("Spreman za duel")} <Swords size={17} />
-        </button>
-      </section>
-    </div>
+          Riot Digital Tools Policy ↗
+        </a>{" "}
+        ·{" "}
+        <a
+          href="https://playriftbound.com/en-us/rules-hub/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          {t("Službena pravila ↗")}{" "}
+        </a>
+      </div>
+      <button className="gold-button" onClick={close}>
+        {t("Spreman za duel")} <Swords size={17} />
+      </button>
+    </AppDialog>
   );
 }

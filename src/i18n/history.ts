@@ -1,4 +1,168 @@
 export const historyMessages: Record<string, [string, string, string]> = {
+  "Export bookmark data": [
+    "Export bookmark data",
+    "Izvezi podatke oznaka",
+    "Esporta dati dei segnalibri",
+  ],
+  "Reset unreadable bookmarks": [
+    "Reset unreadable bookmarks",
+    "Resetiraj nečitljive oznake",
+    "Reimposta segnalibri illeggibili",
+  ],
+  "Reset all replay bookmarks? This removes saved notes from this browser and keeps the matches.":
+    [
+      "Reset all replay bookmarks? This removes saved notes from this browser and keeps the matches.",
+      "Resetirati sve oznake replaya? Ovo uklanja spremljene bilješke iz ovog preglednika i čuva mečeve.",
+      "Reimpostare tutti i segnalibri replay? Questo rimuove le note salvate dal browser e conserva le partite.",
+    ],
+  "Reset bookmarks": [
+    "Reset bookmarks",
+    "Resetiraj oznake",
+    "Reimposta segnalibri",
+  ],
+  "Replay bookmarks cleared.": [
+    "Replay bookmarks cleared.",
+    "Oznake replaya su očišćene.",
+    "Segnalibri replay rimossi.",
+  ],
+  "Match history cleared.": [
+    "Match history cleared.",
+    "Historija mečeva je očišćena.",
+    "Cronologia delle partite svuotata.",
+  ],
+  "Replay import checked. History keeps up to {count} newest matches.": [
+    "Replay import checked. History keeps up to {count} newest matches.",
+    "Uvoz replaya je provjeren. Historija čuva do {count} najnovijih mečeva.",
+    "Importazione replay verificata. La cronologia conserva fino a {count} partite più recenti.",
+  ],
+  "This replay is valid, but it falls outside the history size or match limits. Export and remove saved matches, then import it again to keep it.":
+    [
+      "This replay is valid, but it falls outside the history size or match limits. Export and remove saved matches, then import it again to keep it.",
+      "Replay je ispravan, ali prelazi ograničenje veličine ili broja mečeva u historiji. Izvezi i ukloni spremljene mečeve pa ponovo uvezi replay da ga sačuvaš.",
+      "Il replay è valido, ma supera i limiti di dimensione o numero di partite della cronologia. Esporta e rimuovi partite salvate, poi importa di nuovo il replay per conservarlo.",
+    ],
+  "Import checked. No additional matches were retained.": [
+    "Import checked. No additional matches were retained.",
+    "Uvoz je provjeren. Nisu dodani novi mečevi.",
+    "Importazione verificata. Non sono state conservate altre partite.",
+  ],
+  "Bookmarking frame {frame}": [
+    "Bookmarking frame {frame}",
+    "Označavanje kadra {frame}",
+    "Segnalibro al fotogramma {frame}",
+  ],
+  "Previous moves": ["Previous moves", "Prethodni potezi", "Mosse precedenti"],
+  "Next moves": ["Next moves", "Sljedeći potezi", "Mosse successive"],
+  "Moves {first}–{last} of {total}": [
+    "Moves {first}–{last} of {total}",
+    "Potezi {first}–{last} od {total}",
+    "Mosse {first}–{last} di {total}",
+  ],
+  "Replay bookmarks are also removed. Notes are not included in replay backups.":
+    [
+      "Replay bookmarks are also removed. Notes are not included in replay backups.",
+      "Uklanjaju se i oznake replaya. Bilješke nisu uključene u sigurnosne kopije replaya.",
+      "Vengono rimossi anche i segnalibri replay. Le note non sono incluse nei backup dei replay.",
+    ],
+  "Playback speed": ["Playback speed", "Brzina replaya", "Velocità replay"],
+  "Replay frame. Use arrow keys to step, Home or End to jump, and Space to play or pause.":
+    [
+      "Replay frame. Use arrow keys to step, Home or End to jump, and Space to play or pause.",
+      "Kadar replaya. Strelicama mijenjaj kadar, tipkama Home ili End idi na početak ili kraj, a razmakom pokreni ili pauziraj.",
+      "Fotogramma replay. Usa le frecce per avanzare, Home o End per saltare, e Spazio per riprodurre o mettere in pausa.",
+    ],
+  "This replay now has fewer frames; the bookmark opens the nearest available frame.":
+    [
+      "This replay now has fewer frames; the bookmark opens the nearest available frame.",
+      "Replay sada ima manje kadrova; oznaka otvara najbliži dostupni kadar.",
+      "Questo replay ora ha meno fotogrammi; il segnalibro apre il fotogramma disponibile più vicino.",
+    ],
+  "Jump to turn": ["Jump to turn", "Idi na potez", "Vai al turno"],
+  "Previous key moment": [
+    "Previous key moment",
+    "Prethodni ključni trenutak",
+    "Momento chiave precedente",
+  ],
+  "Next key moment": [
+    "Next key moment",
+    "Sljedeći ključni trenutak",
+    "Momento chiave successivo",
+  ],
+  "Move list": ["Move list", "Lista poteza", "Elenco mosse"],
+  "Show moves by": [
+    "Show moves by",
+    "Prikaži poteze igrača",
+    "Mostra mosse di",
+  ],
+  "Both players": ["Both players", "Oba igrača", "Entrambi i giocatori"],
+  "Key moments only": [
+    "Key moments only",
+    "Samo ključni trenuci",
+    "Solo momenti chiave",
+  ],
+  "No moves match these filters.": [
+    "No moves match these filters.",
+    "Nema poteza za ove filtere.",
+    "Nessuna mossa corrisponde ai filtri.",
+  ],
+  "Bookmark this frame": [
+    "Bookmark this frame",
+    "Označi ovaj kadar",
+    "Segna questo fotogramma",
+  ],
+  "Edit bookmark": ["Edit bookmark", "Uredi oznaku", "Modifica segnalibro"],
+  "Bookmark note (optional)": [
+    "Bookmark note (optional)",
+    "Bilješka uz oznaku (opcionalno)",
+    "Nota del segnalibro (facoltativa)",
+  ],
+  "Save bookmark": ["Save bookmark", "Spremi oznaku", "Salva segnalibro"],
+  "Replay bookmarks": [
+    "Replay bookmarks",
+    "Oznake replaya",
+    "Segnalibri replay",
+  ],
+  "Remove bookmark at frame {frame}": [
+    "Remove bookmark at frame {frame}",
+    "Ukloni oznaku kadra {frame}",
+    "Rimuovi segnalibro al fotogramma {frame}",
+  ],
+  "Bookmarks and notes stay in this browser; replay exports contain the original match only.":
+    [
+      "Bookmarks and notes stay in this browser; replay exports contain the original match only.",
+      "Oznake i bilješke ostaju u ovom pregledniku; izvoz replaya sadrži samo originalni meč.",
+      "Segnalibri e note restano in questo browser; i replay esportati contengono solo la partita originale.",
+    ],
+  "Replay bookmark saved.": [
+    "Replay bookmark saved.",
+    "Oznaka replaya je spremljena.",
+    "Segnalibro replay salvato.",
+  ],
+  "Saved bookmarks could not be read. Their stored data was kept.": [
+    "Saved bookmarks could not be read. Their stored data was kept.",
+    "Spremljene oznake nije moguće pročitati. Njihovi podaci su sačuvani.",
+    "Impossibile leggere i segnalibri salvati. I dati memorizzati sono stati conservati.",
+  ],
+  "Bookmarks could not be saved. Previous bookmarks were kept.": [
+    "Bookmarks could not be saved. Previous bookmarks were kept.",
+    "Oznake nije moguće spremiti. Prethodne oznake su sačuvane.",
+    "Impossibile salvare i segnalibri. Quelli precedenti sono stati conservati.",
+  ],
+  "This replay already has 10 bookmarks. Remove one before adding another.": [
+    "This replay already has 10 bookmarks. Remove one before adding another.",
+    "Ovaj replay već ima 10 oznaka. Ukloni jednu prije dodavanja nove.",
+    "Questo replay ha già 10 segnalibri. Rimuovine uno prima di aggiungerne un altro.",
+  ],
+  "Bookmarks already cover 20 matches. Remove an older bookmark first.": [
+    "Bookmarks already cover 20 matches. Remove an older bookmark first.",
+    "Oznake već obuhvaćaju 20 mečeva. Prvo ukloni neku stariju oznaku.",
+    "I segnalibri coprono già 20 partite. Rimuovi prima un vecchio segnalibro.",
+  ],
+  "This replay bookmark is invalid.": [
+    "This replay bookmark is invalid.",
+    "Ova oznaka replaya nije ispravna.",
+    "Questo segnalibro replay non è valido.",
+  ],
   "Public position": [
     "Public position",
     "Javna pozicija",

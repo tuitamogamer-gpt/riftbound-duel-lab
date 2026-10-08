@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, BookOpen, History, Settings2, X } from "lucide-react";
 import { LanguageSelector, useI18n } from "../i18n";
+import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 import type { PlaybackSpeed as Speed } from "../game/playback";
 import { PlaybackSpeed } from "./PlaybackSpeed";
 import "./MobileMatchMenu.css";
@@ -38,6 +39,7 @@ export function MobileMatchMenu({
   const dialog = useRef<HTMLElement>(null);
   const closeRef = useRef(close);
   closeRef.current = close;
+  useBodyScrollLock(open);
   useEffect(() => {
     if (!open) return;
     const previous = document.activeElement as HTMLElement | null;
@@ -45,10 +47,10 @@ export function MobileMatchMenu({
     const focusables = () =>
       Array.from(
         panel?.querySelectorAll<HTMLElement>(
-          "button:not(:disabled), select, [tabindex='0']",
+          "button:not(:disabled), select:not(:disabled), a[href], summary, [tabindex='0']",
         ) ?? [],
-      );
-    focusables()[0]?.focus();
+      ).filter((element) => element.getClientRects().length > 0);
+    focusables()[0]?.focus({ preventScroll: true });
     const key = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();

@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  Bookmark,
+  ChevronFirst,
+  ChevronLast,
   Download,
   Pause,
   Play,
@@ -20,12 +23,28 @@ import {
   historyDeckStats,
   importCompletedMatch,
   MATCH_HISTORY_KEY,
+  MAX_HISTORY_MATCHES,
   MAX_REPLAY_BYTES,
   readMatchHistory,
 } from "../game/match-history";
 import type { CompletedMatch } from "../game/match-history";
+import {
+  adjacentMoment,
+  replayMoves,
+  replayTurns,
+} from "../game/replay-navigation";
+import {
+  clearReplayBookmarks,
+  deleteReplayBookmark,
+  readReplayBookmarks,
+  REPLAY_BOOKMARKS_KEY,
+  removeMatchBookmarks,
+  retainArchivedBookmarks,
+  saveReplayBookmark,
+} from "../game/replay-bookmarks";
 import type { LocationId, PlayerId } from "../game/types";
 import "./MatchHistory.css";
+const MOVES_PER_PAGE = 40;
 
 function download(value: string, filename: string) {
   const url = URL.createObjectURL(
@@ -46,8 +65,20 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
   const [viewer, setViewer] = useState<PlayerId>(0);
   const [playing, setPlaying] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageValues, setMessageValues] = useState<
+    Record<string, string | number>
+  >({});
   const [confirmClear, setConfirmClear] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [speed, setSpeed] = useState(1);
+  const [actorFilter, setActorFilter] = useState("all");
+  const [momentsOnly, setMomentsOnly] = useState(false);
+  const [movePage, setMovePage] = useState(0);
+  const [bookmarkState, setBookmarkState] = useState(readReplayBookmarks);
+  const [bookmarkDraft, setBookmarkDraft] = useState<string | null>(null);
+  const [bookmarkFrame, setBookmarkFrame] = useState(0);
+  const [bookmarkMessage, setBookmarkMessage] = useState("");
+  const [confirmBookmarkReset, setConfirmBookmarkReset] = useState(false);
   const file = useRef<HTMLInputElement>(null);
   const selected = archive.entries.find((entry) => entry.id === selectedId);
   const timeline = useMemo(() => {
@@ -66,6 +97,32 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
   }, [selected]);
   const frame = timeline.frames[index];
   const view = frame?.views[viewer];
+  const turns = useMemo(() => replayTurns(timeline.frames), [timeline.frames]);
+  const moves = useMemo(() => replayMoves(timeline.frames), [timeline.frames]);
+  const visibleMoves = useMemo(
+    () =>
+      moves.filter(
+        (move) =>
+          (!momentsOnly || move.moments.length) &&
+          (actorFilter === "all" ||
+            move.actor === (actorFilter === "you" ? viewer : 1 - viewer)),
+      ),
+    [moves, momentsOnly, actorFilter, viewer],
+  );
+  const movePageCount = Math.max(
+    1,
+    Math.ceil(visibleMoves.length / MOVES_PER_PAGE),
+  );
+  const currentMovePage = Math.min(movePage, movePageCount - 1);
+  const pageMoves = visibleMoves.slice(
+    currentMovePage * MOVES_PER_PAGE,
+    (currentMovePage + 1) * MOVES_PER_PAGE,
+  );
+  const previousMoment = adjacentMoment(timeline.frames, index, -1);
+  const nextMoment = adjacentMoment(timeline.frames, index, 1);
+  const bookmarks = bookmarkState.bookmarks
+    .filter((bookmark) => bookmark.matchId === selectedId)
+    .sort((a, b) => a.frameIndex - b.frameIndex);
   const stats = useMemo(
     () => historyDeckStats(archive.entries),
     [archive.entries],
@@ -82,17 +139,51 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
           }
           return previous + 1;
         }),
-      900,
+      900 / speed,
     );
     return () => window.clearInterval(timer);
-  }, [playing, timeline.frames.length]);
+  }, [playing, timeline.frames.length, speed]);
+
+  useEffect(() => {
+    if (archive.error) return;
+    const result = retainArchivedBookmarks(
+      archive.entries.map((entry) => entry.id),
+    );
+    if (result.saved) setBookmarkState(result);
+    else
+      setBookmarkMessage(
+        result.error ??
+          "Bookmarks could not be saved. Previous bookmarks were kept.",
+      );
+  }, [archive.entries, archive.error]);
+
+  useEffect(() => {
+    const active = visibleMoves.findIndex(
+      (move) => index >= move.firstFrame && index <= move.lastFrame,
+    );
+    if (active >= 0) setMovePage(Math.floor(active / MOVES_PER_PAGE));
+  }, [index, visibleMoves]);
+
+  const seek = (next: number) => {
+    const clamped = Math.max(0, Math.min(next, timeline.frames.length - 1));
+    setIndex(clamped);
+    if (clamped === 0) setMovePage(0);
+    setPlaying(false);
+    setBookmarkDraft(null);
+  };
 
   const choose = (entry: CompletedMatch) => {
     setPlaying(false);
     setIndex(0);
     setViewer(0);
     setSelectedId(entry.id);
+    setActorFilter("all");
+    setMomentsOnly(false);
+    setMovePage(0);
+    setBookmarkDraft(null);
+    setBookmarkMessage("");
     setMessage("");
+    setMessageValues({});
   };
   const remove = (id: string) => {
     const result = deleteCompletedMatch(id);
@@ -104,6 +195,15 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
       return;
     }
     setArchive({ entries: result.entries ?? [] });
+    setMessage("");
+    setMessageValues({});
+    const cleaned = removeMatchBookmarks(id);
+    if (cleaned.saved) setBookmarkState(cleaned);
+    else
+      setBookmarkMessage(
+        cleaned.error ??
+          "Bookmarks could not be saved. Previous bookmarks were kept.",
+      );
     if (id === selectedId) {
       setSelectedId(null);
       setPlaying(false);
@@ -119,6 +219,15 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
       return;
     }
     setArchive({ entries: [] });
+    setMessage("Match history cleared.");
+    setMessageValues({});
+    const cleaned = clearReplayBookmarks();
+    if (cleaned.saved) setBookmarkState(cleaned);
+    else
+      setBookmarkMessage(
+        cleaned.error ??
+          "Bookmarks could not be saved. Previous bookmarks were kept.",
+      );
     setSelectedId(null);
     setConfirmClear(false);
     setPlaying(false);
@@ -128,14 +237,35 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
     setBusy(true);
     setPlaying(false);
     setMessage("");
+    setMessageValues({});
     try {
       if (chosen.size > MAX_REPLAY_BYTES)
         throw new Error("Replay file is too large (maximum 8 MB).");
-      const result = importCompletedMatch(await chosen.text());
+      const raw = await chosen.text();
+      const previous = readMatchHistory();
+      const result = importCompletedMatch(raw);
       if (!result.saved) throw new Error(result.error);
-      setArchive({ entries: result.entries ?? [] });
-      if (result.entry) choose(result.entry);
-      setMessage("Completed replay imported.");
+      const retained = result.entries ?? [];
+      setArchive({ entries: retained });
+      const requested = retained.find((entry) => entry.id === result.entry?.id);
+      const newlyRetained = retained.find(
+        (entry) =>
+          !previous.entries.some((existing) => existing.id === entry.id),
+      );
+      if (requested || newlyRetained) {
+        choose((requested || newlyRetained)!);
+        setMessage(
+          "Replay import checked. History keeps up to {count} newest matches.",
+        );
+        setMessageValues({ count: MAX_HISTORY_MATCHES });
+      } else {
+        setMessage(
+          result.entry
+            ? "This replay is valid, but it falls outside the history size or match limits. Export and remove saved matches, then import it again to keep it."
+            : "Import checked. No additional matches were retained.",
+        );
+        setMessageValues({ count: MAX_HISTORY_MATCHES });
+      }
     } catch (cause) {
       setMessage(
         cause instanceof Error ? cause.message : "Replay import failed.",
@@ -153,6 +283,89 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
       setMessage("Browser storage is unavailable.");
     }
   };
+  const saveBookmark = () => {
+    if (!selected || bookmarkDraft === null) return;
+    const result = saveReplayBookmark(
+      selected.id,
+      bookmarkFrame,
+      timeline.frames.length,
+      bookmarkDraft,
+    );
+    if (result.saved) {
+      setBookmarkState(result);
+      setBookmarkDraft(null);
+      setBookmarkMessage("Replay bookmark saved.");
+    } else
+      setBookmarkMessage(
+        result.error ??
+          "Bookmarks could not be saved. Previous bookmarks were kept.",
+      );
+  };
+  const removeBookmark = (frameIndex: number) => {
+    if (!selected) return;
+    const result = deleteReplayBookmark(selected.id, frameIndex);
+    if (result.saved) {
+      setBookmarkState(result);
+      setBookmarkMessage("");
+    } else
+      setBookmarkMessage(
+        result.error ??
+          "Bookmarks could not be saved. Previous bookmarks were kept.",
+      );
+  };
+  const exportBookmarkData = () => {
+    try {
+      const raw = localStorage.getItem(REPLAY_BOOKMARKS_KEY);
+      if (raw) download(raw, "riftbound-replay-bookmarks-backup.json");
+      else setBookmarkState(readReplayBookmarks());
+    } catch {
+      setBookmarkMessage("Browser storage is unavailable.");
+    }
+  };
+  const resetBookmarkData = () => {
+    const result = clearReplayBookmarks();
+    if (result.saved) {
+      setBookmarkState(result);
+      setConfirmBookmarkReset(false);
+      setBookmarkMessage("Replay bookmarks cleared.");
+    } else
+      setBookmarkMessage(
+        result.error ??
+          "Bookmarks could not be saved. Previous bookmarks were kept.",
+      );
+  };
+  const bookmarkRecovery = bookmarkState.error && (
+    <div className="history-bookmark-recovery">
+      <button className="history-button" onClick={exportBookmarkData}>
+        <Download size={15} />
+        {t("Export bookmark data")}
+      </button>
+      <button
+        className="history-button"
+        onClick={() => setConfirmBookmarkReset(true)}
+      >
+        {t("Reset unreadable bookmarks")}
+      </button>
+      {confirmBookmarkReset && (
+        <div className="history-confirm" role="alert">
+          <p>
+            {t(
+              "Reset all replay bookmarks? This removes saved notes from this browser and keeps the matches.",
+            )}
+          </p>
+          <button className="history-button danger" onClick={resetBookmarkData}>
+            {t("Reset bookmarks")}
+          </button>
+          <button
+            className="history-button"
+            onClick={() => setConfirmBookmarkReset(false)}
+          >
+            {t("Cancel")}
+          </button>
+        </div>
+      )}
+    </div>
+  );
   const momentIndices = timeline.frames.flatMap((frame, index) =>
     frame.moments.length ? [{ index, frame }] : [],
   );
@@ -198,12 +411,13 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
           type="file"
           accept="application/json,.json"
           onChange={(event) => void importFile(event.target.files?.[0])}
+          disabled={busy}
           hidden
         />
         <button
           className="history-button"
           onClick={exportArchive}
-          disabled={!archive.entries.length && !archive.error}
+          disabled={busy || (!archive.entries.length && !archive.error)}
         >
           <Download size={17} />
           {t("Export history backup")}
@@ -211,7 +425,7 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
         <button
           className="history-button"
           onClick={() => setConfirmClear(true)}
-          disabled={!archive.entries.length && !archive.error}
+          disabled={busy || (!archive.entries.length && !archive.error)}
         >
           <Trash2 size={17} />
           {t("Clear history")}
@@ -224,7 +438,16 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
               "Delete all match history from this browser? Export a backup first if you want to keep it.",
             )}
           </p>
-          <button className="history-button danger" onClick={clear}>
+          <p>
+            {t(
+              "Replay bookmarks are also removed. Notes are not included in replay backups.",
+            )}
+          </p>
+          <button
+            className="history-button danger"
+            onClick={clear}
+            disabled={busy}
+          >
             {t("Delete all matches")}
           </button>
           <button
@@ -237,9 +460,15 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
       )}
       {(archive.error || message) && (
         <p className="history-notice" role="status">
-          {t(message || archive.error)}
+          {t(message || archive.error, messageValues)}
         </p>
       )}
+      {!selected && (bookmarkState.error || bookmarkMessage) && (
+        <p className="history-notice" role="status">
+          {t(bookmarkMessage || bookmarkState.error)}
+        </p>
+      )}
+      {!selected && bookmarkRecovery}
       {stats.length > 0 && (
         <section className="history-stats" aria-label={t("Results by deck")}>
           <h2>{t("Results by deck")}</h2>
@@ -331,6 +560,7 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
                   className="history-button"
                   onClick={() => remove(entry.id)}
                   aria-label={t("Delete this match")}
+                  disabled={busy}
                 >
                   <Trash2 size={15} />
                 </button>
@@ -385,8 +615,7 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
                     className="history-button"
                     aria-label={t("Restart replay")}
                     onClick={() => {
-                      setIndex(0);
-                      setPlaying(false);
+                      seek(0);
                     }}
                   >
                     <RotateCcw size={17} />
@@ -396,15 +625,17 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
                     aria-label={t("Previous frame")}
                     disabled={!index}
                     onClick={() => {
-                      setIndex(index - 1);
-                      setPlaying(false);
+                      seek(index - 1);
                     }}
                   >
                     <ArrowLeft size={17} />
                   </button>
                   <button
                     className="history-button primary"
-                    disabled={index >= timeline.frames.length - 1}
+                    disabled={
+                      bookmarkDraft !== null ||
+                      (!playing && index >= timeline.frames.length - 1)
+                    }
                     onClick={() => setPlaying(!playing)}
                   >
                     {playing ? <Pause size={17} /> : <Play size={17} />}
@@ -415,8 +646,7 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
                     aria-label={t("Next frame")}
                     disabled={index >= timeline.frames.length - 1}
                     onClick={() => {
-                      setIndex(index + 1);
-                      setPlaying(false);
+                      seek(index + 1);
                     }}
                   >
                     <ArrowRight size={17} />
@@ -427,7 +657,120 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
                       total: timeline.frames.length,
                     })}
                   </span>
+                  <label className="history-speed">
+                    {t("Playback speed")}
+                    <select
+                      value={speed}
+                      onChange={(event) => setSpeed(Number(event.target.value))}
+                    >
+                      <option value={0.5}>0.5×</option>
+                      <option value={1}>1×</option>
+                      <option value={2}>2×</option>
+                    </select>
+                  </label>
                 </div>
+                <div className="history-navigation">
+                  <label>
+                    {t("Jump to turn")}
+                    <select
+                      value={
+                        turns.find(
+                          (turn) =>
+                            index >= turn.firstFrame && index <= turn.lastFrame,
+                        )?.firstFrame ?? 0
+                      }
+                      onChange={(event) => seek(Number(event.target.value))}
+                    >
+                      {turns.map((turn) => (
+                        <option key={turn.firstFrame} value={turn.firstFrame}>
+                          {t("Turn")} {turn.turn} ·{" "}
+                          {t(turn.player === viewer ? "You" : "Opponent")}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button
+                    className="history-button"
+                    disabled={previousMoment === undefined}
+                    onClick={() =>
+                      previousMoment !== undefined && seek(previousMoment)
+                    }
+                  >
+                    <ChevronFirst size={16} />
+                    {t("Previous key moment")}
+                  </button>
+                  <button
+                    className="history-button"
+                    disabled={nextMoment === undefined}
+                    onClick={() => nextMoment !== undefined && seek(nextMoment)}
+                  >
+                    {t("Next key moment")}
+                    <ChevronLast size={16} />
+                  </button>
+                  <button
+                    className="history-button"
+                    onClick={() => {
+                      setPlaying(false);
+                      setBookmarkFrame(index);
+                      setBookmarkDraft(
+                        bookmarks.find(
+                          (bookmark) => bookmark.frameIndex === index,
+                        )?.note ?? "",
+                      );
+                      setBookmarkMessage("");
+                    }}
+                  >
+                    <Bookmark size={16} />
+                    {t(
+                      bookmarks.some(
+                        (bookmark) => bookmark.frameIndex === index,
+                      )
+                        ? "Edit bookmark"
+                        : "Bookmark this frame",
+                    )}
+                  </button>
+                </div>
+                {bookmarkDraft !== null && (
+                  <form
+                    className="history-bookmark-editor"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      saveBookmark();
+                    }}
+                  >
+                    <label>
+                      {t("Bookmark note (optional)")}
+                      <span>
+                        {t("Bookmarking frame {frame}", {
+                          frame: bookmarkFrame + 1,
+                        })}
+                      </span>
+                      <input
+                        value={bookmarkDraft}
+                        maxLength={160}
+                        onChange={(event) =>
+                          setBookmarkDraft(event.target.value)
+                        }
+                      />
+                    </label>
+                    <button className="history-button primary" type="submit">
+                      {t("Save bookmark")}
+                    </button>
+                    <button
+                      className="history-button"
+                      type="button"
+                      onClick={() => setBookmarkDraft(null)}
+                    >
+                      {t("Cancel")}
+                    </button>
+                  </form>
+                )}
+                {(bookmarkState.error || bookmarkMessage) && (
+                  <p className="history-notice" role="status">
+                    {t(bookmarkMessage || bookmarkState.error)}
+                  </p>
+                )}
+                {bookmarkRecovery}
                 <input
                   className="history-scrub"
                   type="range"
@@ -436,11 +779,33 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
                   value={index}
                   aria-label={t("Replay position")}
                   onChange={(event) => {
-                    setIndex(Number(event.target.value));
-                    setPlaying(false);
+                    seek(Number(event.target.value));
                   }}
                 />
-                <div className="history-caption" aria-live="polite">
+                <div
+                  className="history-caption"
+                  aria-live="polite"
+                  tabIndex={0}
+                  aria-label={t(
+                    "Replay frame. Use arrow keys to step, Home or End to jump, and Space to play or pause.",
+                  )}
+                  onKeyDown={(event) => {
+                    if (event.altKey || event.ctrlKey || event.metaKey) return;
+                    if (event.key === "ArrowLeft") seek(index - 1);
+                    else if (event.key === "ArrowRight") seek(index + 1);
+                    else if (event.key === "Home") seek(0);
+                    else if (event.key === "End")
+                      seek(timeline.frames.length - 1);
+                    else if (event.key === " ") {
+                      if (
+                        bookmarkDraft === null &&
+                        (playing || index < timeline.frames.length - 1)
+                      )
+                        setPlaying((previous) => !previous);
+                    } else return;
+                    event.preventDefault();
+                  }}
+                >
                   <span>
                     {t("Turn")} {view.turn} ·{" "}
                     {view.players.map((player) => player.points).join(" : ")}
@@ -454,6 +819,145 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
                     </span>
                   ))}
                 </div>
+                <details className="history-move-list" open>
+                  <summary>
+                    {t("Move list")} · {moves.length}
+                  </summary>
+                  <div className="history-move-filters">
+                    <label>
+                      {t("Show moves by")}
+                      <select
+                        value={actorFilter}
+                        onChange={(event) => {
+                          setActorFilter(event.target.value);
+                          setMovePage(0);
+                        }}
+                      >
+                        <option value="all">{t("Both players")}</option>
+                        <option value="you">{t("You")}</option>
+                        <option value="opponent">{t("Opponent")}</option>
+                      </select>
+                    </label>
+                    <label className="history-moments-filter">
+                      <input
+                        type="checkbox"
+                        checked={momentsOnly}
+                        onChange={(event) => {
+                          setMomentsOnly(event.target.checked);
+                          setMovePage(0);
+                        }}
+                      />
+                      {t("Key moments only")}
+                    </label>
+                  </div>
+                  <ol className="history-moves">
+                    {pageMoves.map((move) => (
+                      <li key={move.decisionIndex}>
+                        <button
+                          onClick={() => seek(move.firstFrame)}
+                          aria-current={
+                            index >= move.firstFrame && index <= move.lastFrame
+                              ? "step"
+                              : undefined
+                          }
+                        >
+                          <span>
+                            {move.decisionIndex + 1} · {t("Turn")} {move.turn} ·{" "}
+                            {t(move.actor === viewer ? "You" : "Opponent")}
+                          </span>
+                          <strong>{t(move.labels[viewer])}</strong>
+                          {move.moments.length > 0 && (
+                            <small>
+                              {move.moments
+                                .map((moment) => t(moment.label, moment.values))
+                                .join(" / ")}
+                            </small>
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                  </ol>
+                  {movePageCount > 1 && (
+                    <div className="history-move-pages">
+                      <button
+                        className="history-button"
+                        disabled={currentMovePage === 0}
+                        onClick={() => setMovePage(currentMovePage - 1)}
+                      >
+                        <ArrowLeft size={15} />
+                        {t("Previous moves")}
+                      </button>
+                      <span>
+                        {t("Moves {first}–{last} of {total}", {
+                          first: currentMovePage * MOVES_PER_PAGE + 1,
+                          last: Math.min(
+                            (currentMovePage + 1) * MOVES_PER_PAGE,
+                            visibleMoves.length,
+                          ),
+                          total: visibleMoves.length,
+                        })}
+                      </span>
+                      <button
+                        className="history-button"
+                        disabled={currentMovePage >= movePageCount - 1}
+                        onClick={() => setMovePage(currentMovePage + 1)}
+                      >
+                        {t("Next moves")}
+                        <ArrowRight size={15} />
+                      </button>
+                    </div>
+                  )}
+                  {!visibleMoves.length && (
+                    <p>{t("No moves match these filters.")}</p>
+                  )}
+                </details>
+                {bookmarks.length > 0 && (
+                  <details className="history-bookmarks" open>
+                    <summary>
+                      {t("Replay bookmarks")} · {bookmarks.length}/10
+                    </summary>
+                    <p>
+                      {t(
+                        "Bookmarks and notes stay in this browser; replay exports contain the original match only.",
+                      )}
+                    </p>
+                    <ul>
+                      {bookmarks.map((bookmark) => (
+                        <li key={bookmark.frameIndex}>
+                          <button
+                            className="history-button"
+                            onClick={() => seek(bookmark.frameIndex)}
+                          >
+                            {t("Frame {current} of {total}", {
+                              current: Math.min(
+                                bookmark.frameIndex + 1,
+                                timeline.frames.length,
+                              ),
+                              total: timeline.frames.length,
+                            })}
+                            {bookmark.note && <span>{bookmark.note}</span>}
+                            {bookmark.frameIndex >= timeline.frames.length && (
+                              <span>
+                                {t(
+                                  "This replay now has fewer frames; the bookmark opens the nearest available frame.",
+                                )}
+                              </span>
+                            )}
+                          </button>
+                          <button
+                            className="history-button"
+                            aria-label={t("Remove bookmark at frame {frame}", {
+                              frame: bookmark.frameIndex + 1,
+                            })}
+                            onClick={() => removeBookmark(bookmark.frameIndex)}
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
                 <div
                   className="history-public-status"
                   aria-label={t("Public position")}
@@ -523,6 +1027,7 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
                                     small
                                     ready={unit.ready}
                                     damage={unit.damage}
+                                    might={frame.might[unit.id]}
                                     footer={
                                       unit.owner === viewer
                                         ? "Your unit"
@@ -643,8 +1148,7 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
                         className="history-button"
                         key={index}
                         onClick={() => {
-                          setIndex(index);
-                          setPlaying(false);
+                          seek(index);
                         }}
                       >
                         {t("Turn")} {frame.views[viewer].turn} ·{" "}

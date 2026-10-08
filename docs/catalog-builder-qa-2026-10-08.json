@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-08T00:24:04.840089+00:00",
+  "baselineCommit": "c74ce44a66a9e30ca3abb95b1a6ae4c9ba9fa5ed",
+  "environment": {
+    "browser": "Chromium, fresh isolated local-development contexts",
+    "viewports": ["320x568", "390x844", "844x390", "1440x900"],
+    "productionDeploymentTested": false
+  },
+  "scope": "Browser checkpoints collected during the autonomous session. Source hashes below identify the current component implementations; they do not relabel earlier development checks as whole-final-bundle tests. Final compiled-build checks are recorded separately in reliability-qa-2026-10-07.json and webkit-mobile-qa-2026-10-08.json.",
+  "currentComponentSourceSHA256": {
+    "src/catalog-query.ts": "67bc9a8282d64a7a3fe05516da3b8f70bf05d3d38ae410905a143c1492e45725",
+    "src/components/CardLibrary.tsx": "e59fde09eeece991667527b0d082df1373bb23cbcae8b643db1678ded1b2466d",
+    "src/components/CardLibrary.css": "e5f370c6e9e090d7506284415402b46b17a3a01a3da3cd0d563ce95f23a45cc1",
+    "src/components/DeckBuilder.tsx": "04cb535c838ee43ce72ad2ab4ea190f60d1ba695f845f9a0da364e4bfc18b456",
+    "src/components/DeckBuilder.css": "f9190d993b062e2c3fc72b91c68943975ce5ea9d7810cd72feec9937f250ea2c",
+    "src/game/builder-draft.ts": "48ead111928b14fc84c06c3abbb34d6d5dbbb2fbd57721a37f5c47da8095537f",
+    "src/game/builder-history.ts": "a4f2b7ba67b7e22075728d61268b74415e339c840162d27cb664fef5494bcbc4",
+    "src/game/deck-builder.ts": "d7a063e9c8711631654ebb23f417cd7e5bade2084fc62ea9aa9312467bbcf728",
+    "src/game/deck-import.ts": "5894bebee9395800715c22ed12a6ed536e311c83c95e077bfcc860be968f04f5"
+  },
+  "focusedUnitCheckpoint": {
+    "passedTests": 51,
+    "failedTests": 0,
+    "nativeReportSuccess": true,
+    "distinctFiles": 7
+  },
+  "browserChecks": {
+    "cardLibrary": [
+      {
+        "viewport": {
+          "width": 320,
+          "height": 568
+        },
+        "canonical": "OGN · ogn-027-298",
+        "sortFirst": "Elder Dragon",
+        "errors": [],
+        "overflow": false
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "canonical": "OGN · ogn-027-298",
+        "sortFirst": "Elder Dragon",
+        "errors": [],
+        "overflow": false
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "canonical": "OGN · ogn-027-298",
+        "sortFirst": "Elder Dragon",
+        "errors": [],
+        "overflow": false
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "canonical": "OGN · ogn-027-298",
+        "sortFirst": "Elder Dragon",
+        "errors": [],
+        "overflow": false
+      }
+    ],
+    "builderSearchEditingAndRecovery": [
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "alternatePrintingSearch": true,
+        "resetEmptySearch": true,
+        "energySort": true,
+        "undoRedo": true,
+        "explicitDraftRecovery": true,
+        "exactQuantities": true,
+        "overflow": false,
+        "errors": []
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "alternatePrintingSearch": true,
+        "resetEmptySearch": true,
+        "energySort": true,
+        "undoRedo": true,
+        "explicitDraftRecovery": true,
+        "exactQuantities": true,
+        "overflow": false,
+        "errors": []
+      },
+      {
+        "viewport": {
+          "width": 320,
+          "height": 568
+        },
+        "alternatePrintingSearch": true,
+        "resetEmptySearch": true,
+        "energySort": true,
+        "undoRedo": true,
+        "explicitDraftRecovery": true,
+        "exactQuantities": true,
+        "overflow": false,
+        "errors": []
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "alternatePrintingSearch": true,
+        "resetEmptySearch": true,
+        "energySort": true,
+        "undoRedo": true,
+        "explicitDraftRecovery": true,
+        "exactQuantities": true,
+        "overflow": false,
+        "errors": []
+      },
+      {
+        "scenario": "corrupt",
+        "passed": true
+      },
+      {
+        "scenario": "quota",
+        "passed": true
+      },
+      {
+        "scenario": "other-tab",
+        "passed": true
+      }
+    ],
+    "saveDeleteBackupBoundaries": {
+      "unchosenRecoveryPreservedOnSave": true,
+      "ownBackupClearedOnSave": true,
+      "deletedDraftRecoverable": true,
+      "deletionBlockedWhenBackupFails": true,
+      "errors": []
+    },
+    "realTwoTabAndKeyboard": {
+      "actualOtherTabEventPrompt": true,
+      "currentCardsPreserved": true,
+      "pendingBackupNotOverwritten": true,
+      "keyboardUndoRedo": true
+    },
+    "builderSkipTarget": {
+      "focused": "main-content",
+      "hash": "",
+      "overflow": false,
+      "fontReady": true
+    }
+  },
+  "artifactSHA256": {
+    "library/qa.json": "9cde3668d6cbd1777a90d7a65b628d27a81063af686ad90ca835fbd66b2e50b2",
+    "catalog-builder/browser-results.json": "f432536ca523d9429d7700ab875c6c73aa0a9243d61561627d2258bd54a3a795",
+    "catalog-builder/save-delete-results.json": "17ae0be2c5dbcf681a3aa7882aacc2721a17cc6718e4e4a487ad21a1ba946d4c",
+    "catalog-builder/keyboard-tabs-results.json": "eda0c8c87a0408e8420f00fb1080e872d7d7cd0eb7091519d1bbbd31e54a9861",
+    "catalog-builder/skip-link-results.json": "634be7d16dcafc92340dc9317490696f146481834e6032da49d91101e2f83b8f",
+    "catalog-builder/final-tests.json": "cc4cf51fcf04d1c5a1d80721fc0ad04e040896e3672581ba0e302df73b297c8d"
+  },
+  "passed": true
+}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ArrowLeft,
   Check,
@@ -9,6 +9,7 @@ import {
 import { findCard } from "../catalog";
 import { readableText } from "../data/cards";
 import { getMight } from "../game/engine";
+import { unitStatuses } from "../game/status-presentation";
 import {
   applyTrainingAction,
   createTrainingPosition,
@@ -20,6 +21,7 @@ import {
   trainingPublicPosition,
 } from "../game/training";
 import type { TrainingLessonId } from "../game/training";
+import { trainingGuidance } from "../game/training-guidance";
 import type { GameState, LocationId } from "../game/types";
 import { useI18n } from "../i18n";
 import { Card } from "./Card";
@@ -40,10 +42,17 @@ export function TrainingLab({
   const [completed, setCompleted] = useState(readTrainingProgress);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(true);
+  const boardRef = useRef<HTMLDivElement>(null);
+  const decisionRef = useRef<HTMLElement>(null);
+  const jumpTo = (element: HTMLElement | null) => {
+    element?.scrollIntoView({ block: "start" });
+    element?.focus({ preventScroll: true });
+  };
   const lesson = trainingLessons.find((lesson) => lesson.id === id)!;
   const success = trainingComplete(id, game);
   const publicGame = trainingPublicPosition(game);
   const actions = trainingActions(id, game);
+  const guidance = trainingGuidance(id, game);
   const visibleActions = actions.filter(
     (action) =>
       !selected ||
@@ -156,6 +165,12 @@ export function TrainingLab({
           </div>
           <div className="training-reset">
             <button
+              className="ghost-button training-jump-button"
+              onClick={() => jumpTo(decisionRef.current)}
+            >
+              {t("Go to practice moves")}
+            </button>
+            <button
               className="ghost-button"
               onClick={undo}
               disabled={!history.length}
@@ -174,6 +189,61 @@ export function TrainingLab({
           <p>{t(lesson.rule)}</p>
           <p>{t(lesson.hint)}</p>
         </details>
+        <section className="training-guidance" aria-label={t("Exercise steps")}>
+          <ol>
+            {guidance.steps.map((step, index) => (
+              <li
+                key={step.label}
+                className={step.complete ? "complete" : ""}
+                aria-current={
+                  !step.complete &&
+                  guidance.steps
+                    .slice(0, index)
+                    .every((previous) => previous.complete)
+                    ? "step"
+                    : undefined
+                }
+              >
+                <span aria-hidden="true">
+                  {step.complete ? <Check size={15} /> : index + 1}
+                </span>
+                {t(step.label)}
+                <span className="training-step-state">
+                  {t(step.complete ? "Complete" : "Not yet complete")}
+                </span>
+              </li>
+            ))}
+          </ol>
+          {!success && !guidance.retry && (
+            <p className="training-next-hint" role="status">
+              {t(guidance.hint)}
+            </p>
+          )}
+          {guidance.retry && (
+            <p className="training-attempt-feedback" role="status">
+              {t(guidance.retry)}
+            </p>
+          )}
+          {guidance.damage && guidance.damage.length > 0 && (
+            <div className="training-damage-guide">
+              <h3>{t("Damage needed to defeat each defender")}</h3>
+              {guidance.damage.map((target, index) => (
+                <div key={`${index}-${target.cardId}`}>
+                  <strong>{findCard(target.cardId)?.name}</strong>
+                  <span>
+                    {t(
+                      "{might} Might − {damage} existing damage + {prevention} prevention = {lethal} lethal damage",
+                      target,
+                    )}
+                  </span>
+                  <span>
+                    {t("Assigned: {amount}", { amount: target.assigned })}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
         <div className="training-state" aria-live="polite">
           <span>
             {t("Your points")}:{" "}
@@ -196,7 +266,13 @@ export function TrainingLab({
           )}
         </div>
         <div className="training-play-area">
-          <div className="training-board">
+          <div
+            className="training-board"
+            ref={boardRef}
+            role="group"
+            tabIndex={-1}
+            aria-label={t("Practice board")}
+          >
             {publicGame.stack.length > 0 && (
               <section
                 className="training-chain"
@@ -252,6 +328,8 @@ export function TrainingLab({
                               small
                               ready={unit.ready}
                               damage={unit.damage}
+                              might={getMight(game, unit)}
+                              statuses={unitStatuses(game, unit)}
                               selected={selected === unit.id}
                               onClick={() =>
                                 setSelected(
@@ -347,7 +425,18 @@ export function TrainingLab({
               </section>
             )}
           </div>
-          <aside className="training-decision" aria-label={t("Practice moves")}>
+          <aside
+            className="training-decision"
+            aria-label={t("Practice moves")}
+            ref={decisionRef}
+            tabIndex={-1}
+          >
+            <button
+              className="ghost-button training-jump-button"
+              onClick={() => jumpTo(boardRef.current)}
+            >
+              {t("View practice board")}
+            </button>
             {success ? (
               <div className="training-success" role="status">
                 <Check size={28} />
@@ -418,11 +507,19 @@ export function TrainingLab({
               </p>
             )}
             {!saved && (
-              <p role="status" className="training-error">
-                {t(
-                  "Progress is available for this visit; browser storage could not save it.",
-                )}
-              </p>
+              <div className="training-progress-recovery">
+                <p role="status" className="training-error">
+                  {t(
+                    "Progress is available for this visit; browser storage could not save it.",
+                  )}
+                </p>
+                <button
+                  className="ghost-button"
+                  onClick={() => setSaved(saveTrainingProgress(completed))}
+                >
+                  {t("Retry saving progress")}
+                </button>
+              </div>
             )}
             <details className="training-log">
               <summary>{t("Exercise log")}</summary>

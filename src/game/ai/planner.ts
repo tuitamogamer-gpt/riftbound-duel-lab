@@ -146,15 +146,20 @@ export function settleSimulation(
     if (!actions?.length) return null;
     const fallback = fallbackAction(s, s.priorityPlayer)!;
     const forced = ["choice", "damage", "move", "mulligan"].includes(s.phase);
-    const safe = observationRulesView(getObservation(s, s.priorityPlayer));
-    let action =
-      forced || (replies && s.priorityPlayer !== root)
-        ? (getReferenceAction(safe, s.priorityPlayer, actions) ?? fallback)
-        : fallback;
+    const needsReference = forced || (replies && s.priorityPlayer !== root);
+    // A plain pass does not inspect any cards. Build the privacy adapter only
+    // when the response policy actually needs a view of this synthetic state.
+    const safe = needsReference
+      ? observationRulesView(getObservation(s, s.priorityPlayer))
+      : undefined;
+    let action = safe
+      ? (getReferenceAction(safe, s.priorityPlayer, actions) ?? fallback)
+      : fallback;
     if (
       !forced &&
       replies &&
       s.priorityPlayer !== root &&
+      safe &&
       replyAlternative > 0
     ) {
       let remaining = actions;
@@ -240,6 +245,27 @@ export function chooseDecision(
   const seed = options.seed ?? 20261006;
   const s = observationRulesView(observation),
     p = observation.viewer;
+  // Resolver actions return new states. These caches live for one decision,
+  // so immutable synthetic positions can share pure query results without
+  // retaining live games or reusing results across later mutations.
+  const evaluations = new WeakMap<GameState, Evaluation>();
+  const evaluationFor = (state: GameState) => {
+    let value = evaluations.get(state);
+    if (!value) {
+      value = evaluate(state, p, profile);
+      evaluations.set(state, value);
+    }
+    return value;
+  };
+  const positions = new WeakMap<GameState, string>();
+  const positionFor = (state: GameState) => {
+    let value = positions.get(state);
+    if (value === undefined) {
+      value = positionKey(state);
+      positions.set(state, value);
+    }
+    return value;
+  };
   if (
     observation.version !== request.observationVersion ||
     request.actorId !== p
@@ -324,7 +350,7 @@ export function chooseDecision(
             best = {
               first: action,
               state: next,
-              evaluation: evaluate(next, p, profile),
+              evaluation: evaluationFor(next),
               depth: 1,
               confirmed: true,
             };
@@ -351,13 +377,13 @@ export function chooseDecision(
               direct.get(optionKey(action)) ?? applyAction(initial, action);
             const settled = settleSimulation(after, p, budget);
             if (!settled) continue;
-            let outcome = evaluate(settled, p, profile);
+            let outcome = evaluationFor(settled);
             // Visible replies and hidden hypotheses share the original action and bot seed.
             // No alternate root action is selected separately for a secret sample.
             if (difficulty !== "beginner" && budget.available()) {
               const reply = settleSimulation(after, p, budget, true);
-              if (reply && compare(evaluate(reply, p, profile), outcome) < 0)
-                outcome = evaluate(reply, p, profile);
+              if (reply && compare(evaluationFor(reply), outcome) < 0)
+                outcome = evaluationFor(reply);
             }
             const abandoned = initial.fields.filter(
               (f) =>
@@ -377,7 +403,7 @@ export function chooseDecision(
               evaluation: outcome,
               depth: 1,
               confirmed: false,
-              visited: [positionKey(initial), positionKey(settled)],
+              visited: [positionFor(initial), positionFor(settled)],
             };
             alternatives.push(line);
           }
@@ -391,7 +417,7 @@ export function chooseDecision(
                 applyAction(initial, line.first);
               const reply = settleSimulation(after, p, budget, true, variant);
               if (reply) {
-                const ev = evaluate(reply, p, profile);
+                const ev = evaluationFor(reply);
                 if (compare(ev, line.evaluation) < 0) line.evaluation = ev;
               }
             }
@@ -445,12 +471,12 @@ export function chooseDecision(
                     difficulty !== "beginner",
                   );
                   if (!settled) continue;
-                  const key = positionKey(settled);
+                  const key = positionFor(settled);
                   if (parent.visited?.includes(key)) continue;
-                  const ev = evaluate(settled, p, profile);
+                  const ev = evaluationFor(settled);
                   const commitment =
                     parent.evaluation.utility -
-                    evaluate(parent.state, p, profile).utility;
+                    evaluationFor(parent.state).utility;
                   const line: Line = {
                     first: parent.first,
                     state: settled,
@@ -501,8 +527,8 @@ export function chooseDecision(
               const updates: Evaluation[] = [];
               const penalties: number[] = [];
               const offset =
-                evaluate(initial, p, profile).utility -
-                evaluate(hypothesis, p, profile).utility;
+                evaluationFor(initial).utility -
+                evaluationFor(hypothesis).utility;
               for (const line of finalists) {
                 if (!budget.take()) break;
                 const response = settleSimulation(
@@ -512,7 +538,7 @@ export function chooseDecision(
                   true,
                 );
                 if (!response) break;
-                const raw = evaluate(response, p, profile);
+                const raw = evaluationFor(response);
                 // Compare the effect of the response, not the mere presence of
                 // an assumed hand which was absent in the no-response baseline.
                 const rootScore =
@@ -554,7 +580,7 @@ export function chooseDecision(
           // A static position is not a legal alternative to ending the turn.
           // Use it only to reject moves with no strategic progress; otherwise the
           // loss of immediately playable hand options can suppress useful development.
-          const standing = evaluate(initial, p, profile);
+          const standing = evaluationFor(initial);
           const progress =
             best &&
             (best.evaluation.score > standing.score ||

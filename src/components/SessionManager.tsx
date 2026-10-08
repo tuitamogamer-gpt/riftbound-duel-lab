@@ -168,11 +168,8 @@ function SessionDialog({
   const [fileError, setFileError] = useState("");
   const [exportError, setExportError] = useState("");
   useEffect(() => {
-    const overflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     return () => {
       request.current++;
-      document.body.style.overflow = overflow;
     };
   }, []);
   const date = (time: number) =>

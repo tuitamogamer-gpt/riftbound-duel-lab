@@ -47,11 +47,21 @@ Origins, Spiritforged, Unleashed, and Vendetta lists were transcribed from Riot'
 
 ## Practice tools
 
+See the [practice guide](docs/PRACTICE-GUIDE.md) for search examples, draft recovery, lesson steps, replay controls and offline setup.
+
 **Build a deck** clones a precon or saved list and edits the legend, chosen champion, main deck, runes, battlefield pool and up to ten sideboard cards. The builder shares the importer's copy/domain/signature and ban checks, shows the Energy curve and actual card count, and supports saving, editing, deleting and exporting a local list. Main decks can contain 39–999 shuffled cards plus the chosen champion; the importer handles both inclusive exports and explicit remaining-main sections without removing the champion twice.
+
+Builder edits support **Undo/Redo** and Ctrl/⌘Z, with up to 40 edits retained in the current session. An unfinished draft has an explicit local recovery slot. Recover, replace or discard that draft deliberately; invalid stored data and failed writes preserve the existing backup. If another tab changes the recovery slot, the builder reports the conflict before overwriting it. Rules tokens cannot be registered as deck cards.
 
 Choose **Single duel** or **Best of three** in setup. BO3 records each completed game's result, ends at two wins and offers sideboarding between games. Each exchange preserves the exact registered main-plus-sideboard inventory and main count; legend, champion, runes and battlefields stay fixed. The previous loser starts by default, with a practice override. The bot keeps its list between games. This is a practice series, without an official tournament-format claim.
 
+Starting another duel during an unfinished series requires an explicit confirmation. **Continue series** preserves its recorded score and current game.
+
 The **Training lab** contains six playable engine scenarios: deploying, grouped movement and conquering, reactions, Hidden, damage assignment, and holding for victory. Retry and Undo affect only the lesson. **Match history** automatically records completed local duels with replay data, outcome and deck/difficulty statistics. The viewer steps through public observations from either player's perspective and offers postmatch bot diagnostics, replay import/export and deletion. Imported replays are checked against their recorded catalog/rules versions and the current legal-action engine.
+
+Training instructions follow the scenario's current phase and show the next useful step. Replay controls jump between turns or key moments, filter the visible move list, and change playback speed. Long move lists use pages of 40 entries. Local bookmarks retain up to ten frame notes for each of twenty matches; editing a note pauses playback. Import keeps the newest twenty matches and explains when an older replay falls outside that limit.
+
+Replay and session exports contain the complete original match, including both players' private cards, so they can be reconstructed. The replay viewer limits each frame to the selected player's permitted observation. Bookmark notes stay local and are not included in the canonical replay export.
 
 In a match, **Choose runes** enables manual payment ordering. Before confirming a paid action, the picker shows the actual resource cost, recycled/exhausted runes and retained pools from the same resolver that commits the action. Exhausted runes retain the engine's Power-payment priority. The default automatic payment remains available. Missing resources and combat damage assignments now have more precise public explanations.
 
@@ -72,7 +82,7 @@ Executable registration: **1,459 / 1,459 entries**, with **0 unsupported** (1,10
 Retail precons: **13 / 13** have complete executable coverage. All 13 lists have valid structure and complete catalog references. Historical retail contents and current tournament legality remain separate.
 <!-- card-catalog-summary:end -->
 
-The snapshot contains Origins, Proving Grounds, Spiritforged, Unleashed, Vendetta and three promotional sets. Radiance is outside this dated snapshot. The report and library include every provider printing and local token. The library can filter by set or base printings, and search card names, rules text or IDs.
+The snapshot contains Origins, Proving Grounds, Spiritforged, Unleashed, Vendetta and three promotional sets. Radiance is outside this dated snapshot. The report and library include every provider printing and local token. The library and builder search names, rules text, IDs and equivalent printing codes, including when the library shows base faces only. Combine search terms or quote a phrase, filter by set/domain/type and sort by name, Energy or Might. Reset filters restores the complete result list; the builder also offers an addable-cards filter.
 
 ## Scripted play and limits
 

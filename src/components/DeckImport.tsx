@@ -5,6 +5,7 @@ import type { StarterDeck } from "../data/decks";
 import { exportDeckText } from "../game/deck-import";
 import { importDeckSource } from "../game/deck-sources";
 import "./DeckImport.css";
+import { useDialogFocus } from "../hooks/useDialogFocus";
 
 export interface DeckImportProps {
   onImport: (deck: StarterDeck) => void;
@@ -19,6 +20,7 @@ export function DeckImport({
   exampleDeck,
 }: DeckImportProps) {
   const { t } = useI18n();
+  const dialog = useDialogFocus(() => onClose?.(), Boolean(onClose));
   const [text, setText] = useState(initialText);
   const [fileError, setFileError] = useState("");
   const [historical, setHistorical] = useState(false);
@@ -46,6 +48,8 @@ export function DeckImport({
   );
   const panel = (
     <section
+      ref={dialog}
+      tabIndex={onClose ? -1 : undefined}
       className={`deck-import ${onClose ? "modal" : ""}`}
       role={onClose ? "dialog" : undefined}
       aria-modal={onClose ? true : undefined}

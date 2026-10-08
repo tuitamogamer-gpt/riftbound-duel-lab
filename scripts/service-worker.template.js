@@ -41,7 +41,11 @@ self.addEventListener("fetch", (event) => {
           // Keep the install-time shell paired with this worker's complete cache.
           return await fetch(request);
         } catch {
-          return (await caches.match("/index.html")) || Response.error();
+          try {
+            return (await caches.match("/index.html")) || Response.error();
+          } catch {
+            return Response.error();
+          }
         }
       })(),
     );
@@ -59,12 +63,21 @@ self.addEventListener("fetch", (event) => {
     (async () => {
       // These URL-specific files are identical regardless of the Origin header.
       // Module/CSS requests differ from install-time requests on Vary: Origin servers.
-      const cached = await caches.match(request, { ignoreVary: true });
+      let cached;
+      try {
+        cached = await caches.match(request, { ignoreVary: true });
+      } catch {
+        // Storage can be unavailable while a valid network response still exists.
+      }
       if (cached) return cached;
       const response = await fetch(request);
       if (appAsset && response.ok) {
-        const cache = await caches.open(APP_CACHE);
-        await cache.put(request, response.clone());
+        try {
+          const cache = await caches.open(APP_CACHE);
+          await cache.put(request, response.clone());
+        } catch {
+          // Optional caching must not turn a successful chunk download into an error.
+        }
       }
       return response;
     })(),

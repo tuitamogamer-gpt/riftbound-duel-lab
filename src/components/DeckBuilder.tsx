@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import {
   ArrowLeft,
   Check,
@@ -8,9 +8,13 @@ import {
   Plus,
   Search,
   Trash2,
+  Undo2,
+  Redo2,
+  X,
 } from "lucide-react";
 import {
   cardsById,
+  cards,
   getCardTypes,
   isCardType,
   readableText,
@@ -24,6 +28,12 @@ import {
   type StarterDeck,
 } from "../data/decks";
 import { findCard } from "../catalog";
+import {
+  createCardSearchIndex,
+  matchesCardSearch,
+  sortCatalogCards,
+  type CatalogSort,
+} from "../catalog-query";
 import { exportDeckText } from "../game/deck-import";
 import { isImplemented } from "../game/scripts";
 import {
@@ -34,12 +44,24 @@ import {
   builderCompatible,
   builderCount,
   builderCurve,
+  canonicalBuilderId,
   changeBuilderQuantity,
   cloneDeckForBuilder,
   finalizeBuilderDeck,
   type BuilderAddIssue,
   type BuilderSection,
 } from "../game/deck-builder";
+import {
+  builderHistoryReducer,
+  createBuilderHistory,
+} from "../game/builder-history";
+import {
+  BUILDER_DRAFT_KEY,
+  clearBuilderDraft,
+  readBuilderDraft,
+  writeBuilderDraft,
+  type BuilderDraftRead,
+} from "../game/builder-draft";
 import { useI18n } from "../i18n";
 import { CardDetail } from "./Card";
 import "./DeckBuilder.css";
@@ -62,6 +84,14 @@ const domains: Domain[] = [
   "Order",
   "Colorless",
 ];
+const searchIndex = createCardSearchIndex(cards, canonicalBuilderId);
+const cardSets = [
+  ...new Map(
+    cards
+      .filter((card) => card.supertype !== "Token")
+      .map((card) => [card.set, card.setName]),
+  ).entries(),
+].sort(([a], [b]) => a.localeCompare(b));
 const addMessages: Record<BuilderAddIssue, string> = {
   type: "Choose a card for this section.",
   domain: "This card does not match your legend's domains.",
@@ -86,16 +116,31 @@ export function DeckBuilder({
   const addReason = (issue: BuilderAddIssue) =>
     t(addMessages[issue], { count: MAX_MAIN_DECK_SIZE });
   const initial = initialDeck ?? availableDecks[0] ?? decks[0];
-  const [draft, setDraft] = useState(() => cloneDeckForBuilder(initial));
-  const [previousId, setPreviousId] = useState(
-    initialDeck?.source === "Imported deck" ? initialDeck.id : undefined,
+  const [history, dispatch] = useReducer(builderHistoryReducer, undefined, () =>
+    createBuilderHistory({
+      draft: cloneDeckForBuilder(initial),
+      previousId:
+        initialDeck?.source === "Imported deck" ? initialDeck.id : undefined,
+      sourceId: initial.id,
+    }),
   );
-  const [sourceId, setSourceId] = useState(initial.id);
+  const { draft, previousId, sourceId } = history.present;
+  const [storedDraft, setStoredDraft] = useState<BuilderDraftRead>(() =>
+    readBuilderDraft(),
+  );
+  const draftRaw = useRef(storedDraft.raw);
+  const [dirty, setDirty] = useState(false);
+  const [backupStatus, setBackupStatus] = useState<"idle" | "saved" | "error">(
+    storedDraft.status === "unavailable" ? "error" : "idle",
+  );
   const [section, setSection] = useState<BuilderSection>("main");
   const [search, setSearch] = useState("");
   const [domain, setDomain] = useState<Domain | "">("");
   const [type, setType] = useState("");
   const [cost, setCost] = useState("");
+  const [set, setSet] = useState("");
+  const [sort, setSort] = useState<CatalogSort>("name");
+  const [addableOnly, setAddableOnly] = useState(false);
   const [compatibleOnly, setCompatibleOnly] = useState(true);
   const [visibleCount, setVisibleCount] = useState(36);
   const [detailId, setDetailId] = useState<string | null>(null);
@@ -105,17 +150,121 @@ export function DeckBuilder({
 
   useEffect(() => {
     if (!initialDeck) return;
-    setDraft(cloneDeckForBuilder(initialDeck));
-    setPreviousId(
-      initialDeck.source === "Imported deck" ? initialDeck.id : undefined,
-    );
-    setSourceId(initialDeck.id);
+    dispatch({
+      type: "reset",
+      next: {
+        draft: cloneDeckForBuilder(initialDeck),
+        previousId:
+          initialDeck.source === "Imported deck" ? initialDeck.id : undefined,
+        sourceId: initialDeck.id,
+      },
+    });
+    setDirty(false);
+    setBackupStatus(storedDraft.status === "unavailable" ? "error" : "idle");
     setStatus("");
   }, [initialDeck?.id]);
   useEffect(
     () => setVisibleCount(36),
-    [search, domain, type, cost, compatibleOnly, section, draft.legendId],
+    [
+      search,
+      domain,
+      type,
+      cost,
+      set,
+      sort,
+      addableOnly,
+      compatibleOnly,
+      section,
+      draft.legendId,
+    ],
   );
+  useEffect(() => {
+    const sync = (event: StorageEvent) => {
+      if (event.key !== BUILDER_DRAFT_KEY && event.key !== null) return;
+      const current = readBuilderDraft();
+      if (current.raw === draftRaw.current) return;
+      draftRaw.current = current.raw;
+      setStoredDraft(current);
+      setBackupStatus(current.status === "unavailable" ? "error" : "idle");
+    };
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
+  }, []);
+  useEffect(() => {
+    if (
+      !dirty ||
+      storedDraft.status === "ready" ||
+      storedDraft.status === "invalid"
+    )
+      return;
+    const result = writeBuilderDraft(
+      {
+        version: 1,
+        savedAt: new Date().toISOString(),
+        deck: draft,
+        previousId,
+        sourceId,
+      },
+      undefined,
+      draftRaw.current,
+    );
+    if (result.ok) {
+      draftRaw.current = result.raw;
+      setBackupStatus("saved");
+    } else {
+      setBackupStatus("error");
+      if (result.reason === "conflict" || result.reason === "invalid") {
+        const current = readBuilderDraft();
+        draftRaw.current = current.raw;
+        setStoredDraft(current);
+      }
+    }
+  }, [draft, previousId, sourceId, dirty, storedDraft]);
+  useEffect(() => {
+    if (
+      !dirty ||
+      (backupStatus !== "error" &&
+        storedDraft.status !== "ready" &&
+        storedDraft.status !== "invalid")
+    )
+      return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty, backupStatus, storedDraft.status]);
+  useEffect(() => {
+    if (detailId) return;
+    const shortcut = (event: KeyboardEvent) => {
+      if (
+        !(event.ctrlKey || event.metaKey) ||
+        event.altKey ||
+        event.isComposing
+      )
+        return;
+      const key = event.key.toLowerCase();
+      if (key !== "z" && key !== "y") return;
+      const target = event.target;
+      if (
+        target instanceof Element &&
+        target.closest(
+          "input, textarea, select, [contenteditable='true'], [role='dialog'], [aria-modal='true']",
+        )
+      )
+        return;
+      const direction = key === "y" || event.shiftKey ? "redo" : "undo";
+      if (!(direction === "undo" ? history.past.length : history.future.length))
+        return;
+      event.preventDefault();
+      dispatch({ type: direction });
+      setDirty(true);
+      setStatus("");
+    };
+    window.addEventListener("keydown", shortcut);
+    return () => window.removeEventListener("keydown", shortcut);
+  }, [detailId, history.past.length, history.future.length]);
 
   const result = useMemo(() => finalizeBuilderDeck(draft), [draft]);
   const errors = result.issues.filter((issue) => issue.severity === "error");
@@ -142,7 +291,7 @@ export function DeckBuilder({
   );
   const curve = useMemo(() => builderCurve(draft), [draft]);
   const maximumCurve = Math.max(1, ...curve);
-  const mainCount = builderCount(draft.main) + 1;
+  const mainCount = builderCount(draft.main) + (draft.championId ? 1 : 0);
   const runeCount = builderCount(draft.runes);
   const sideCount = builderCount(draft.sideboard ?? []);
   const typeCounts = ["Unit", "Spell", "Gear"].map((kind) => ({
@@ -154,37 +303,96 @@ export function DeckBuilder({
     ),
   }));
   const filtered = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase();
-    return builderCards.filter((card) => {
-      if (
-        section === "runes"
-          ? !isCardType(card, "Rune")
-          : !["Unit", "Spell", "Gear"].some((kind) => isCardType(card, kind))
-      )
-        return false;
-      if (compatibleOnly && !builderCompatible(card, draft.domains))
-        return false;
-      if (domain && !card.domains.includes(domain)) return false;
-      if (type && !isCardType(card, type)) return false;
-      if (
-        cost &&
-        (cost === "9+"
-          ? (card.energy ?? 0) < 9
-          : (card.energy ?? 0) !== Number(cost))
-      )
-        return false;
-      return (
-        !query ||
-        `${card.name} ${card.id} ${readableText(card.text)} ${card.tags.join(" ")}`
-          .toLocaleLowerCase()
-          .includes(query)
-      );
-    });
-  }, [search, section, compatibleOnly, draft.domains, domain, type, cost]);
+    return sortCatalogCards(
+      builderCards.filter((card) => {
+        if (
+          section === "runes"
+            ? !isCardType(card, "Rune")
+            : !["Unit", "Spell", "Gear"].some((kind) => isCardType(card, kind))
+        )
+          return false;
+        if (compatibleOnly && !builderCompatible(card, draft.domains))
+          return false;
+        if (domain && !card.domains.includes(domain)) return false;
+        if (type && !isCardType(card, type)) return false;
+        if (set && !searchIndex.get(card.id)?.sets.includes(set)) return false;
+        if (addableOnly && builderAddIssue(draft, card.id, section))
+          return false;
+        if (
+          cost &&
+          (cost === "9+"
+            ? (card.energy ?? 0) < 9
+            : (card.energy ?? 0) !== Number(cost))
+        )
+          return false;
+        return matchesCardSearch(searchIndex.get(card.id), search);
+      }),
+      sort,
+    );
+  }, [
+    search,
+    section,
+    compatibleOnly,
+    draft,
+    domain,
+    type,
+    cost,
+    set,
+    addableOnly,
+    sort,
+  ]);
 
-  const update = (next: StarterDeck | ((deck: StarterDeck) => StarterDeck)) => {
-    setDraft(next);
+  const update = (
+    next: StarterDeck | ((deck: StarterDeck) => StarterDeck),
+    identity?: { previousId?: string },
+  ) => {
+    dispatch({
+      type: "edit",
+      next: {
+        ...history.present,
+        ...identity,
+        draft: typeof next === "function" ? next(draft) : next,
+      },
+    });
+    setDirty(true);
     setStatus("");
+  };
+  const undo = (direction: "undo" | "redo") => {
+    dispatch({ type: direction });
+    setDirty(true);
+    setStatus("");
+  };
+  const resetFilters = () => {
+    setSearch("");
+    setDomain("");
+    setType("");
+    setCost("");
+    setSet("");
+    setAddableOnly(false);
+    setCompatibleOnly(true);
+  };
+  const discardDraft = () => {
+    const result = clearBuilderDraft(undefined, draftRaw.current);
+    if (result.ok) {
+      draftRaw.current = null;
+      setStoredDraft({ status: "empty", raw: null });
+      setBackupStatus("idle");
+    } else setBackupStatus("error");
+  };
+  const restoreDraft = () => {
+    if (storedDraft.status !== "ready") return;
+    const recovered = storedDraft.draft;
+    update(cloneDeckForBuilder(recovered.deck), {
+      previousId: recovered.previousId,
+    });
+    dispatch({
+      type: "source",
+      id: availableDecks.some((deck) => deck.id === recovered.sourceId)
+        ? recovered.sourceId
+        : initial.id,
+    });
+    setStoredDraft({ status: "empty", raw: null });
+    setStatus("Unfinished draft restored. Review the list before saving.");
   };
   const quantity = (
     cardId: string,
@@ -198,8 +406,7 @@ export function DeckBuilder({
     if (!source) return;
     const copy = cloneDeckForBuilder(source);
     copy.name = `${source.name} · ${t("Copy")}`.slice(0, 120);
-    update(copy);
-    setPreviousId(undefined);
+    update(copy, { previousId: undefined });
   };
   const save = () => {
     if (!result.deck || !draft.name.trim()) return;
@@ -210,7 +417,20 @@ export function DeckBuilder({
           "The deck could not be saved. Export the list to keep a copy.",
         );
       else {
-        setPreviousId(result.deck.id);
+        dispatch({ type: "saved", id: result.deck.id });
+        // Saving another deck must not discard an unchosen recovery backup.
+        if (
+          storedDraft.status !== "ready" &&
+          storedDraft.status !== "invalid"
+        ) {
+          const cleared = clearBuilderDraft(undefined, draftRaw.current);
+          if (cleared.ok) {
+            draftRaw.current = null;
+            setStoredDraft({ status: "empty", raw: null });
+            setBackupStatus("idle");
+          } else setBackupStatus("error");
+        }
+        setDirty(false);
         setStatus("Deck saved in this browser.");
       }
     } catch {
@@ -295,7 +515,12 @@ export function DeckBuilder({
   const detail = findCard(detailId ?? undefined);
 
   return (
-    <section className="deck-builder" aria-labelledby="deck-builder-title">
+    <section
+      className="deck-builder"
+      id="main-content"
+      tabIndex={-1}
+      aria-labelledby="deck-builder-title"
+    >
       <header className="builder-header">
         <div>
           <span className="builder-eyebrow">
@@ -316,12 +541,53 @@ export function DeckBuilder({
         )}
       </header>
 
+      {(storedDraft.status === "ready" || storedDraft.status === "invalid") && (
+        <section
+          className="builder-recovery"
+          aria-label={t("Unfinished deck draft")}
+        >
+          <div>
+            <strong>
+              {t(
+                storedDraft.status === "ready"
+                  ? "An unfinished draft is available"
+                  : "The stored draft could not be read",
+              )}
+            </strong>
+            <p>
+              {storedDraft.status === "ready"
+                ? t(
+                    "Restore {name}, or discard its backup to keep editing this deck.",
+                    { name: storedDraft.draft.deck.name || t("New deck") },
+                  )
+                : t(
+                    "The stored draft remains untouched. Export your current list, or clear the unreadable backup to enable draft saving.",
+                  )}
+            </p>
+          </div>
+          {storedDraft.status === "ready" && (
+            <button className="builder-button primary" onClick={restoreDraft}>
+              {t("Restore draft")}
+            </button>
+          )}
+          <button className="builder-button secondary" onClick={discardDraft}>
+            {t(
+              storedDraft.status === "ready"
+                ? "Discard stored draft"
+                : "Clear unreadable backup",
+            )}
+          </button>
+        </section>
+      )}
+
       <div className="builder-start">
         <label htmlFor="builder-source">{t("Start from a deck")}</label>
         <select
           id="builder-source"
           value={sourceId}
-          onChange={(event) => setSourceId(event.target.value)}
+          onChange={(event) =>
+            dispatch({ type: "source", id: event.target.value })
+          }
         >
           {availableDecks.map((deck) => (
             <option value={deck.id} key={deck.id}>
@@ -343,14 +609,16 @@ export function DeckBuilder({
         <button
           className="builder-button secondary"
           onClick={() => {
-            update({
-              ...draft,
-              name: t("New deck"),
-              main: [],
-              sideboard: [],
-              runes: balancedBuilderRunes(draft.domains),
-            });
-            setPreviousId(undefined);
+            update(
+              {
+                ...draft,
+                name: t("New deck"),
+                main: [],
+                sideboard: [],
+                runes: balancedBuilderRunes(draft.domains),
+              },
+              { previousId: undefined },
+            );
           }}
         >
           {t("New deck")}
@@ -434,6 +702,45 @@ export function DeckBuilder({
           t("Historical format preserves cards banned in current Standard.")}
       </p>
 
+      <div className="builder-edit-tools">
+        <div className="builder-undo">
+          <button
+            className="builder-button secondary"
+            disabled={!history.past.length}
+            onClick={() => undo("undo")}
+            aria-keyshortcuts="Control+Z Meta+Z"
+            title={`${t("Undo edit")} · Ctrl/⌘ Z`}
+          >
+            <Undo2 size={16} />
+            {t("Undo edit")}
+          </button>
+          <button
+            className="builder-button secondary"
+            disabled={!history.future.length}
+            onClick={() => undo("redo")}
+            aria-keyshortcuts="Control+Shift+Z Control+Y Meta+Shift+Z"
+            title={`${t("Redo edit")} · Ctrl/⌘ Shift Z`}
+          >
+            <Redo2 size={16} />
+            {t("Redo edit")}
+          </button>
+        </div>
+        <p
+          className={backupStatus === "error" ? "builder-backup-error" : ""}
+          role="status"
+        >
+          {backupStatus === "error"
+            ? t("Draft backup failed. Export your list to keep a copy.")
+            : storedDraft.status === "ready" || storedDraft.status === "invalid"
+              ? t(
+                  "Choose what to do with the stored draft before automatic backup resumes.",
+                )
+              : backupStatus === "saved"
+                ? t("Unfinished draft backed up in this browser.")
+                : t("Edits are backed up here. Save a legal deck to play it.")}
+        </p>
+      </div>
+
       <div className="builder-mobile-summary">
         <div className="builder-counts">
           <span>
@@ -506,9 +813,18 @@ export function DeckBuilder({
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder={t("Search name, rules or tag…")}
+                placeholder={t("Search name, rules, tag or card ID…")}
                 aria-label={t("Search cards")}
               />
+              {search && (
+                <button
+                  className="builder-clear-search"
+                  onClick={() => setSearch("")}
+                  aria-label={t("Clear card search")}
+                >
+                  <X size={16} />
+                </button>
+              )}
             </label>
             <select
               aria-label={t("Filter by domain")}
@@ -550,18 +866,63 @@ export function DeckBuilder({
                 </option>
               ))}
             </select>
-            <label className="builder-checkbox">
-              <input
-                type="checkbox"
-                checked={compatibleOnly}
-                onChange={(event) => setCompatibleOnly(event.target.checked)}
-              />
-              {t("Legend domains only")}
-            </label>
+            <select
+              aria-label={t("Filter by card set")}
+              value={set}
+              onChange={(event) => setSet(event.target.value)}
+            >
+              <option value="">{t("All sets")}</option>
+              {cardSets.map(([id, name]) => (
+                <option value={id} key={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            <select
+              aria-label={t("Sort cards")}
+              value={sort}
+              onChange={(event) => setSort(event.target.value as CatalogSort)}
+            >
+              <option value="name">{t("Name · A–Z")}</option>
+              <option value="energy-asc">{t("Energy · low to high")}</option>
+              <option value="energy-desc">{t("Energy · high to low")}</option>
+              <option value="might-desc">{t("Might · high to low")}</option>
+            </select>
+            <div className="builder-filter-toggles">
+              <label className="builder-checkbox">
+                <input
+                  type="checkbox"
+                  checked={compatibleOnly}
+                  onChange={(event) => setCompatibleOnly(event.target.checked)}
+                />
+                {t("Legend domains only")}
+              </label>
+              <label className="builder-checkbox">
+                <input
+                  type="checkbox"
+                  checked={addableOnly}
+                  onChange={(event) => setAddableOnly(event.target.checked)}
+                />
+                {t("Can add to this section")}
+              </label>
+            </div>
+          </div>
+          <div className="builder-filter-tools">
+            <small>
+              {t(
+                "Use several terms to narrow results. Card IDs include alternate printings.",
+              )}
+            </small>
+            <button className="builder-reset-filters" onClick={resetFilters}>
+              {t("Reset filters")}
+            </button>
           </div>
           <div className="builder-results-heading">
             <strong>
-              {t("{count} different rules cards", { count: filtered.length })}
+              {t("Showing {shown} of {count} rules cards", {
+                shown: Math.min(visibleCount, filtered.length),
+                count: filtered.length,
+              })}
             </strong>
             <span>
               {t("Adding to: {section}", {
@@ -611,6 +972,21 @@ export function DeckBuilder({
                         .join(" · ")}{" "}
                       · {card.domains.map((value) => t(value)).join(" / ")}
                     </small>
+                    <small className="builder-card-stats">
+                      {[
+                        card.energy === null
+                          ? ""
+                          : `${card.energy} ${t("Energy")}`,
+                        card.power === null
+                          ? ""
+                          : `${card.power} ${t("Power")}`,
+                        card.might === null
+                          ? ""
+                          : `${card.might} ${t("Might")}`,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </small>
                     <p>
                       {readableText(card.text) ||
                         t("No additional rules text.")}
@@ -648,9 +1024,17 @@ export function DeckBuilder({
             })}
           </div>
           {!filtered.length && (
-            <p className="builder-empty">
-              {t("No cards match these filters.")}
-            </p>
+            <div className="builder-empty-results">
+              <p className="builder-empty">
+                {t("No cards match these filters.")}
+              </p>
+              <button
+                className="builder-button secondary"
+                onClick={resetFilters}
+              >
+                {t("Reset filters")}
+              </button>
+            </div>
           )}
           {visibleCount < filtered.length && (
             <button
@@ -931,12 +1315,52 @@ export function DeckBuilder({
         {previousId && onDelete && (
           <button
             className="builder-button danger"
+            disabled={
+              storedDraft.status === "ready" || storedDraft.status === "invalid"
+            }
+            title={
+              storedDraft.status === "ready" || storedDraft.status === "invalid"
+                ? t(
+                    "Choose what to do with the stored draft before automatic backup resumes.",
+                  )
+                : undefined
+            }
             onClick={() => {
+              // The host may navigate away immediately after deletion. Retain
+              // the exact editable list before removing its saved counterpart.
+              const backup = writeBuilderDraft(
+                {
+                  version: 1,
+                  savedAt: new Date().toISOString(),
+                  deck: draft,
+                  sourceId,
+                },
+                undefined,
+                draftRaw.current,
+              );
+              if (!backup.ok) {
+                setBackupStatus("error");
+                setStatus(
+                  "Draft backup failed. Export your list to keep a copy.",
+                );
+                if (
+                  backup.reason === "conflict" ||
+                  backup.reason === "invalid"
+                ) {
+                  const current = readBuilderDraft();
+                  draftRaw.current = current.raw;
+                  setStoredDraft(current);
+                }
+                return;
+              }
+              draftRaw.current = backup.raw;
+              setBackupStatus("saved");
               try {
                 if (onDelete(previousId) === false)
                   setStatus("The deck could not be deleted.");
                 else {
-                  setPreviousId(undefined);
+                  dispatch({ type: "saved", id: undefined });
+                  setDirty(true);
                   setStatus(
                     "Saved deck deleted. Your draft remains available.",
                   );

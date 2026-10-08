@@ -63,7 +63,14 @@ export function MatchControls({
   const stackView = getActionStackView(game, review);
   const forcedPass =
     !review && legal.length === 1 && legal[0].category === "pass";
-  const card = findCard(selectedCardId(game, selected));
+  const selectedAction = selected
+    ? legal.find(
+        (action) => action.sourceId === selected && action.player === 0,
+      )
+    : undefined;
+  const card = findCard(
+    selectedCardId(game, selected) ?? selectedAction?.cardId,
+  );
   const hidden = game.hidden?.find(
     (h) => h.owner === 0 && selected === `hidden:${h.id}`,
   );
@@ -77,6 +84,11 @@ export function MatchControls({
   const sourceCard = review
     ? stackView?.cards[0]?.card
     : (choiceCard ?? card ?? stackView?.cards[0]?.card);
+  const inspectedTop =
+    game.pendingChoice?.kind === "predict" && game.pendingChoice.player === 0
+      ? game.players[game.pendingChoice.effect?.who === "opponent" ? 1 : 0]
+          .deck[0]
+      : undefined;
   const available = sourceActions(game, legal, selected).filter(
     (action) =>
       !target ||
@@ -356,10 +368,7 @@ export function MatchControls({
                       ?.cardId ??
                     game.stack.find((item) => item.id === action.targetId)
                       ?.cardId ??
-                    (game.pendingChoice?.kind === "predict" &&
-                    game.pendingChoice.player === 0
-                      ? game.players[0].deck[0]
-                      : undefined) ??
+                    inspectedTop ??
                     action.cardId,
                 );
                 return (

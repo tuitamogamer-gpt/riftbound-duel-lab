@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "measuredAt": "2026-10-07T22:41:47.764520Z",
+  "baselineCommit": "c74ce44a66a9e30ca3abb95b1a6ae4c9ba9fa5ed",
+  "comparisonPlannerVersion": "battlefield-planner-2",
+  "releasePlannerVersion": "battlefield-planner-3",
+  "isolatedOptimization": [
+    "Construct privacy adapters only when a simulation actually invokes a reference choice or response.",
+    "Cache pure evaluation and position fingerprints for immutable synthetic states within one decision.",
+    "Read an actor's resources once while evaluating its hand."
+  ],
+  "method": {
+    "environment": "Node v24.19.0, x64 Linux, shared execution host",
+    "rounds": 2,
+    "executionOrder": "Baseline first in round 1; optimized first in round 2; one unmeasured warm-up per implementation.",
+    "fixedNodeBudgets": {
+      "normal": 480,
+      "expert": 2200
+    },
+    "botSeed": 771,
+    "wallTimeBudgetEnabled": false,
+    "sourceBundledAndInputsFrozenBeforeComparison": true,
+    "bundleIsolation": {
+      "moduleCount": 71,
+      "changedModules": ["src/game/ai/evaluate.ts", "src/game/ai/planner.ts"],
+      "allOtherBundledModulesByteIdentical": true
+    }
+  },
+  "corpus": {
+    "origin": "Real states collected from deterministic reference-policy matches, not hypothetical resolver shortcuts.",
+    "officialPrecons": 13,
+    "positions": 26,
+    "turns": [4, 5],
+    "unitsMinimum": 2,
+    "unitsMaximum": 7,
+    "inputsSha256": "62ec4ad441332478cf82b2457e97e987e1899498a1a7675a6effe0ad52966e7d"
+  },
+  "exactParity": {
+    "uniqueCases": 52,
+    "pairedComparisons": 104,
+    "matches": 104,
+    "compared": [
+      "Action",
+      "Decision token",
+      "Alternatives and evaluation scores",
+      "Node and generation counts",
+      "Completed depth",
+      "Sample count",
+      "Confirmed win, fallback and incomplete flags",
+      "Public reason text"
+    ],
+    "excluded": ["Trace durationMs"]
+  },
+  "timingSummary": {
+    "normal": {
+      "decisions": 52,
+      "baselineTotalMs": 24936.088,
+      "optimizedTotalMs": 19794.533,
+      "reductionPercent": 20.619,
+      "baselineMedianMs": 449.972,
+      "optimizedMedianMs": 349.484,
+      "fasterDecisions": 49
+    },
+    "expert": {
+      "decisions": 52,
+      "baselineTotalMs": 104437.229,
+      "optimizedTotalMs": 78909.579,
+      "reductionPercent": 24.443,
+      "baselineMedianMs": 1839.297,
+      "optimizedMedianMs": 1471.692,
+      "fasterDecisions": 45
+    },
+    "all": {
+      "decisions": 104,
+      "baselineTotalMs": 129373.317,
+      "optimizedTotalMs": 98704.112,
+      "reductionPercent": 23.706,
+      "baselineMedianMs": 847.1,
+      "optimizedMedianMs": 715.513,
+      "fasterDecisions": 94
+    }
+  },
+  "cpuProfile": {
+    "sampledSeconds": 81.682,
+    "inclusivePercent": {
+      "settleSimulation": 59.822,
+      "structuredClone": 21.622,
+      "getObservation": 17.345,
+      "evaluate": 15.435
+    }
+  },
+  "bundleSha256": {
+    "baseline": "619632584f5e6ab9390e44a9f799f3f38825872387337c3cb689225d1452548b",
+    "optimized": "6b35b029dddb3b1661f45fb3f2b4c8f6f5607a350a5995f206cfa63d03a8a116"
+  },
+  "limitations": [
+    "Timing differences include shared-host contention, JIT and garbage collection.",
+    "Two rounds over 26 positions with 2–7 units do not establish a speed guarantee for every late board, browser or mobile device.",
+    "Node accounting, action order, resolver rules, information boundaries and isolated decisions remained identical; this comparison does not establish greater AI strength.",
+    "Subsequent v3 active-inspection and physical-card resolver corrections intentionally change behavior; their fresh match pilot is a separate validation."
+  ]
+}

@@ -9,6 +9,7 @@ import { cards, getCard } from "../data/cards";
 import { disempower, getUnitTags, isFace } from "./board-rules";
 import { instructedPlay } from "./card-wave13";
 import { takeTrash, trashCards } from "./trash";
+import { returnBoardCardsToHand } from "./objects";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
 import type {
   CardScript,
@@ -486,10 +487,16 @@ export const cardWave15Module: ExpansionModule = {
           );
         const g = s.gears.find((g) => g.id === ctx.targetId && g.owner === p);
         if (g) {
-          s.gears = s.gears.filter((v) => v.id !== g.id);
-          for (const u of s.units) u.gear = u.gear.filter((id) => id !== g.id);
-          if (!g.token) x.hand.push(g.cardId);
-          ctx.cardEvent(s, "bounce", p, g.cardId, g.id, `base:${p}`);
+          returnBoardCardsToHand(s, [g.id], (object) =>
+            ctx.cardEvent(
+              s,
+              "bounce",
+              p,
+              object.cardId,
+              object.id,
+              `base:${p}`,
+            ),
+          );
         }
         const h = s.hidden?.find((h) => h.id === ctx.targetId && h.owner === p);
         if (h) {

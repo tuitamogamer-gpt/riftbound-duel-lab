@@ -1,0 +1,355 @@
+{
+ "generatedAt": "2026-10-08T00:12:57.177582+00:00",
+ "result": "passed",
+ "scope": {
+  "engine": "Real Playwright WebKit",
+  "engineVersion": "26.0",
+  "playwrightVersion": "1.57.0",
+  "browserBuild": "2227",
+  "platform": "Debian GNU/Linux 13 (trixie), WPE headless",
+  "productionOrigin": "http://127.0.0.1:5285",
+  "mobileContexts": "Fresh iPhone 13 settings with explicit 390×844 and 844×390 viewports, isMobile=true, hasTouch=true, reduced motion. Native WebKit with mobile emulation, not physical iOS/Safari device QA.",
+  "fixturePolicy": "Normal production lobby and fresh duel; no source imports, injected game fixtures, engine-state writes or extra simulation workers."
+ },
+ "summary": {
+  "mobileFlowsPassed": 2,
+  "mobileFlowUncaughtPageErrors": 0,
+  "mobileFlowHorizontalOverflows": 0,
+  "separateWheelCasesPassed": 4,
+  "reproducedApplicationBugs": 0,
+  "fullMatrixBuildId": "1752c600ad86",
+  "finalCSmokePassed": true,
+  "finalBuildId": "b2b14dc063c7"
+ },
+ "methods": {
+  "touch": "Tap supplied battlefield/select inspect, start duel, Browse hand, mulligan Replace/Keep, CardDetail Details, Keep hand, Check availability, Select card, Duel menu and log/rules/saves links.",
+  "forms": "selectOption exercises champion deck and starting-player HTML selects; check selects Beginner difficulty.",
+  "keyboard": "First/last control focus followed by native Tab/Shift+Tab verifies wrapping. Enter toggles AI summary; Escape closes top nested CardDetail, hand, menu and handoff dialogs and verifies focus restoration. PageDown at focused dialog and modal end verifies stable background position.",
+  "interactionReadiness": "Wait for phase=main, priorityPlayer=0, turnStep=main, review=null and paused!=true before interactive hand checks.",
+  "mobileScrollLimitation": "Playwright mouse.wheel is unsupported in isMobile WebKit; touchscreen API has no swipe. Mobile lock evidence covers overflow/reference counting and PageDown, not physical iOS touch scrolling.",
+  "wheelCompanion": "Separate fresh WebKit contexts at the same sizes use isMobile=false and hasTouch=true for native wheel support. Wheel on backdrop and after modal body reaches its end checks background position through close; mobile touch scrolling remains unverified."
+ },
+ "commonMobileAssertions": {
+  "tabAndShiftTabWrap": true,
+  "cardDetailCloseRestoresInspectButton": true,
+  "nestedEscapeLeavesHandOpen": true,
+  "nestedCloseKeepsBodyLocked": true,
+  "lastDialogCloseRestoresOriginalOverflow": true,
+  "handCloseRestoresBrowseTrigger": true,
+  "menuAndHandoffCloseRestoreMenuTrigger": true,
+  "availabilityReasonWrapsWithoutOverflow": true,
+  "inspectionAndSelectionPreserveStoredRevision": true
+ },
+ "sourceSha256": {
+  "src/components/HandTray.tsx": "3a2eef6353420bb608f485044e0c3370c8b0e2034308c9d3869ee0f62fbb4d02",
+  "src/components/HandTray.css": "38ad75f5604e8a895b2bd8aea98f7085c7c8681f078a7074b9bf576c5d58ed01",
+  "src/components/MobileMatchMenu.tsx": "be6c1dad8f9977fefdcf75d2acae6ff4c307ed8929b6490b2b96bb505b67dc06",
+  "src/components/MobileMatchMenu.css": "9ed6e7bddd826457ef3e8d2bd24099f1033a72f2e04c68a6c0c80824c5df2634",
+  "src/i18n/mobile.ts": "4d404a3fb21915588d227e2bcffca6bf9486368a0a6f4903b2a5515e777ba17a",
+  "src/components/AppDialog.tsx": "5b15bf916fb2ee4539ab9da584d1207c72f55552699b51809dd62c598375b983",
+  "src/hooks/useDialogFocus.ts": "8f84fb3d031408577a03d8f54e3996fe70056156416487b39666a7b5e1ecd313",
+  "src/hooks/useBodyScrollLock.ts": "c13ed9df00e5007dab72479779c8dc960f8746a82d2ceb21f60aa0a654415d32",
+  "src/App.tsx": "eba2a7bf86d8713d1eb14662462090cd346dd600c121e236afb1b7f1414bd3b8"
+ },
+ "nativePreparation": {
+  "initialLimitation": "Default WebKit launch blocked by seven missing host libraries.",
+  "resolution": "Downloaded browser cache via Playwright CLI. Fetched signed official Debian trixie indexes into scratch; apt-get download retrieved .deb libraries and dpkg-deb -x extracted them locally. Scratch launcher sets task-only LD_LIBRARY_PATH and bundled WebKit paths.",
+  "trustedRepositories": [
+   "https://deb.debian.org/debian",
+   "https://security.debian.org/debian-security"
+  ],
+  "signatureKeyring": "/usr/share/keyrings/debian-archive-keyring.pgp",
+  "extractedPackageCount": 10,
+  "packages": [
+   "libcairo-script-interpreter2",
+   "libgles2",
+   "libgraphene-1.0-0",
+   "libgtk-4-1",
+   "libharfbuzz-icu0",
+   "libhidapi-hidraw0",
+   "libhyphen0",
+   "liblzo2-2",
+   "libmanette-0.2-0",
+   "libwoff1"
+  ],
+  "allEightBundledExecutablesHaveNoUnresolvedLddLibraries": true,
+  "actualLaunchVersion": "26.0",
+  "systemPackagesInstalled": false,
+  "systemAptStateModified": false,
+  "applicationSourceModifiedByThisQA": false,
+  "scratchOnlyPreparationBoundedUnder30Minutes": true
+ },
+ "mobileFlows": [
+  {
+   "viewport": {
+    "width": 390,
+    "height": 844
+   },
+   "buildId": "1752c600ad86",
+   "indexAssets": [
+    "/assets/index-DRx4TAZg.js"
+   ],
+   "passed": true,
+   "commonAssertionsPassed": true,
+   "pageErrors": [],
+   "keyboardScrollLockBackgroundY": {
+    "fieldBodyLock": 3108,
+    "handBodyLock": 0,
+    "Match logBodyLock": 0,
+    "RulesBodyLock": 0,
+    "Saved duelsBodyLock": 0
+   },
+   "screenshots": [
+    "webkit-main-390.png",
+    "webkit-final-390.png"
+   ],
+   "checksReference": "fullBFlowChecks",
+   "layoutMeasurements": [
+    [
+     "lobby",
+     390,
+     390
+    ],
+    [
+     "lobby after CardDetail close",
+     390,
+     390
+    ],
+    [
+     "mulligan table",
+     390,
+     390
+    ],
+    [
+     "main table",
+     390,
+     390
+    ],
+    [
+     "table after menu handoffs",
+     390,
+     390
+    ]
+   ]
+  },
+  {
+   "viewport": {
+    "width": 844,
+    "height": 390
+   },
+   "buildId": "1752c600ad86",
+   "indexAssets": [
+    "/assets/index-DRx4TAZg.js"
+   ],
+   "passed": true,
+   "commonAssertionsPassed": true,
+   "pageErrors": [],
+   "keyboardScrollLockBackgroundY": {
+    "fieldBodyLock": 3064,
+    "handBodyLock": 0,
+    "Match logBodyLock": 0,
+    "RulesBodyLock": 0,
+    "Saved duelsBodyLock": 0
+   },
+   "screenshots": [
+    "webkit-main-844.png",
+    "webkit-final-844.png"
+   ],
+   "checksReference": "fullBFlowChecks",
+   "layoutMeasurements": [
+    [
+     "lobby",
+     844,
+     844
+    ],
+    [
+     "lobby after CardDetail close",
+     844,
+     844
+    ],
+    [
+     "mulligan table",
+     844,
+     844
+    ],
+    [
+     "main table",
+     844,
+     844
+    ],
+    [
+     "table after menu handoffs",
+     844,
+     844
+    ]
+   ]
+  }
+ ],
+ "wheelCompanionCases": [
+  {
+   "viewport": {
+    "width": 390,
+    "height": 844
+   },
+   "dialog": "lobby-help",
+   "passed": true,
+   "backgroundYBefore": 0,
+   "backgroundYAfterBackdropWheel": 0,
+   "backgroundYAfterModalEndWheel": 0,
+   "backgroundYAfterClose": 0,
+   "bodyOverflowDuringDialog": "hidden",
+   "bodyOverflowAfterClose": ""
+  },
+  {
+   "viewport": {
+    "width": 390,
+    "height": 844
+   },
+   "dialog": "library-card-detail",
+   "passed": true,
+   "backgroundYBefore": 0,
+   "backgroundYAfterBackdropWheel": "Included in combined CardDetail wheel sequence",
+   "backgroundYAfterModalEndWheel": 0,
+   "backgroundYAfterClose": 0,
+   "bodyOverflowDuringDialog": "hidden",
+   "bodyOverflowAfterClose": ""
+  },
+  {
+   "viewport": {
+    "width": 844,
+    "height": 390
+   },
+   "dialog": "lobby-help",
+   "passed": true,
+   "backgroundYBefore": 0,
+   "backgroundYAfterBackdropWheel": 0,
+   "backgroundYAfterModalEndWheel": 0,
+   "backgroundYAfterClose": 0,
+   "bodyOverflowDuringDialog": "hidden",
+   "bodyOverflowAfterClose": ""
+  },
+  {
+   "viewport": {
+    "width": 844,
+    "height": 390
+   },
+   "dialog": "library-card-detail",
+   "passed": true,
+   "backgroundYBefore": 367,
+   "backgroundYAfterBackdropWheel": "Included in combined CardDetail wheel sequence",
+   "backgroundYAfterModalEndWheel": 367,
+   "backgroundYAfterClose": 367,
+   "bodyOverflowDuringDialog": "hidden",
+   "bodyOverflowAfterClose": ""
+  }
+ ],
+ "artifacts": {
+  "scratchDirectory": "/workspace/scratch/four-hour-session/mobile",
+  "mobileScript": "webkit-flow.mjs",
+  "mobileRawReport": "webkit-flow.json",
+  "wheelScript": "webkit-wheel.mjs",
+  "wheelRawReport": "webkit-wheel.json",
+  "initialSetupFailure": "webkit-setup.json",
+  "actualEngineLaunch": "webkit-native-launch.json",
+  "nativePackageHashes": "webkit-native/packages.json",
+  "nativeDependencyResolution": "webkit-native/ldd-after.json",
+  "nativeLauncher": "webkit-native/launch-webkit.sh",
+  "reportScript": "webkit-report.py",
+  "finalCScript": "webkit-final-c-smoke.mjs",
+  "finalCReport": "webkit-final-c-smoke.json",
+  "appendCScript": "webkit-report-append-c.py"
+ },
+ "limits": [
+  "No physical iOS device, Safari application or touch-swipe verification.",
+  "No full-match simulation or combat/Hidden/crowded-board engine regression in this WebKit follow-up; those have separate Chromium/engine evidence.",
+  "Page-error and horizontal-overflow assertions cover the two mobile flows. Separate wheel companion measures scroll position and lock restoration only.",
+  "Both final mobile screenshot sets were visually inspected. No browser binaries, Debian libraries or raw private match state are included in this repository report."
+ ],
+ "fullBFlowChecks": [
+  "Precon hero select updates and returns to first official option",
+  "Highlighted supplied battlefield can select and inspect: Select battlefield: Void Gate",
+  "Four-card mulligan can select, cap at two, keep, inspect, nested Escape and restore focus",
+  "Unavailable card check remains open and full reason wraps",
+  "Playable card select closes sheet without playing",
+  "Menu traps keyboard focus, includes AI summary and restores trigger",
+  "Match log handoff, keyboard trap, body lock and close restore",
+  "Rules handoff, keyboard trap, body lock and close restore",
+  "Saved duels handoff, keyboard trap, body lock and close restore"
+ ],
+ "fullBLayoutColumns": [
+  "screen",
+  "viewportWidth",
+  "documentWidth"
+ ],
+ "finalCSmoke": {
+  "checkedAt": "2026-10-08T00:10:07.943Z",
+  "engineVersion": "26.0",
+  "buildId": "b2b14dc063c7",
+  "indexAssets": [
+   "/assets/index-DACqojZ7.js"
+  ],
+  "workerAssets": [
+   "/assets/worker-BsrCyr2L.js"
+  ],
+  "scope": "One fresh C mobile context; narrower smoke than earlier full B matrix. Existing UI hashes unchanged after the Keeper’s Verdict engine fix.",
+  "uiSourceHashesUnchangedFromFullB": true,
+  "passed": true,
+  "checks": [
+   "Fresh C boot loads matching index/worker manifest",
+   "Touch mulligan Replace/Keep and nested CardDetail touch close preserve hand/body lock; Back to table restores overflow",
+   "Main unavailable-hand check stays open and wraps reason",
+   "Main playable-card touch selection closes hand",
+   "Portrait menu→Rules traps initial focus, Escape restores trigger and body overflow",
+   "Live portrait→landscape rotation keeps same duel; landscape hand and menu touch close restore overflow"
+  ],
+  "pageErrors": [],
+  "horizontalOverflow": false,
+  "rotationMethod": "page.setViewportSize: same live duel from 390×844 to 844×390; this is viewport emulation, not physical device rotation.",
+  "storedRevisionPreservedByInspectionSelectionAndRotation": true,
+  "nestedTouchCloseKeepsHandBodyLock": true,
+  "lastTouchCloseRestoresOverflow": true,
+  "layoutColumns": [
+   "screen",
+   "viewportWidth",
+   "viewportHeight",
+   "documentWidth"
+  ],
+  "layoutMeasurements": [
+   [
+    "fresh C lobby",
+    390,
+    844,
+    390
+   ],
+   [
+    "C mulligan table",
+    390,
+    844,
+    390
+   ],
+   [
+    "C main portrait",
+    390,
+    844,
+    390
+   ],
+   [
+    "same C duel rotated landscape",
+    844,
+    390,
+    844
+   ],
+   [
+    "C landscape after hand/menu touch close",
+    844,
+    390,
+    844
+   ]
+  ],
+  "screenshots": [
+   "webkit-c-390.png",
+   "webkit-c-844.png"
+  ],
+  "screenshotsVisuallyInspected": true
+ }
+}

@@ -1,4 +1,221 @@
 export const trainingMessages: Record<string, [string, string, string]> = {
+  "Go to practice moves": [
+    "Go to practice moves",
+    "Idi na poteze za vježbu",
+    "Vai alle mosse di pratica",
+  ],
+  "View practice board": [
+    "View practice board",
+    "Prikaži ploču za vježbu",
+    "Mostra il campo di pratica",
+  ],
+  "Practice board": ["Practice board", "Ploča za vježbu", "Campo di pratica"],
+  "Exercise steps": [
+    "Exercise steps",
+    "Koraci vježbe",
+    "Passaggi dell'esercizio",
+  ],
+  "Not yet complete": [
+    "Not yet complete",
+    "Još nije dovršeno",
+    "Non ancora completato",
+  ],
+  Complete: ["Complete", "Dovršeno", "Completato"],
+  "Retry saving progress": [
+    "Retry saving progress",
+    "Ponovi spremanje napretka",
+    "Riprova a salvare i progressi",
+  ],
+  "Play the unit into your base": [
+    "Play the unit into your base",
+    "Odigraj jedinicu u svoju bazu",
+    "Gioca l'unità nella tua base",
+  ],
+  "Select Playful Phantom in your hand and play it. Its paid cost and exhausted arrival are part of the normal rules.":
+    [
+      "Select Playful Phantom in your hand and play it. Its paid cost and exhausted arrival are part of the normal rules.",
+      "Izaberi Playful Phantom iz ruke i odigraj ga. Plaćanje cijene i iscrpljen ulazak koriste normalna pravila.",
+      "Seleziona Playful Phantom dalla mano e giocala. Il costo pagato e l'ingresso esaurito seguono le regole normali.",
+    ],
+  "Prepare a movement group": [
+    "Prepare a movement group",
+    "Pripremi grupu za kretanje",
+    "Prepara un gruppo di movimento",
+  ],
+  "Include both ready units": [
+    "Include both ready units",
+    "Uključi obje spremne jedinice",
+    "Includi entrambe le unità pronte",
+  ],
+  "Confirm movement to the first battlefield": [
+    "Confirm movement to the first battlefield",
+    "Potvrdi kretanje na prvo bojište",
+    "Conferma il movimento al primo campo",
+  ],
+  "Pass the showdown and earn the conquest point": [
+    "Pass the showdown and earn the conquest point",
+    "Propusti prioritet u obračunu i osvoji bod",
+    "Passa la priorità nello scontro e ottieni il punto conquista",
+  ],
+  "Both units are selected. Confirm movement; neither moves until you confirm.":
+    [
+      "Both units are selected. Confirm movement; neither moves until you confirm.",
+      "Obje jedinice su izabrane. Potvrdi kretanje; nijedna se ne pomiče prije potvrde.",
+      "Entrambe le unità sono selezionate. Conferma il movimento; nessuna si muove prima della conferma.",
+    ],
+  "Your proposed group has one unit. Add the other unit before confirming.": [
+    "Your proposed group has one unit. Add the other unit before confirming.",
+    "Predložena grupa ima jednu jedinicu. Dodaj drugu prije potvrde.",
+    "Il gruppo proposto ha un'unità. Aggiungi l'altra prima di confermare.",
+  ],
+  "Both units have arrived exhausted. Pass priority to settle the open showdown and earn the conquest point.":
+    [
+      "Both units have arrived exhausted. Pass priority to settle the open showdown and earn the conquest point.",
+      "Obje jedinice su stigle iscrpljene. Propusti prioritet da se otvoreni obračun razriješi i donese bod za osvajanje.",
+      "Entrambe le unità sono arrivate esaurite. Passa la priorità per risolvere lo scontro aperto e ottenere il punto conquista.",
+    ],
+  "Start movement with either ready unit. The first click prepares a group without moving it.":
+    [
+      "Start movement with either ready unit. The first click prepares a group without moving it.",
+      "Započni kretanje bilo kojom spremnom jedinicom. Prvi klik priprema grupu bez pomicanja.",
+      "Avvia il movimento con una qualsiasi unità pronta. Il primo clic prepara il gruppo senza muoverlo.",
+    ],
+  "Only one unit moved. Undo that move to add both allies before confirming the group.":
+    [
+      "Only one unit moved. Undo that move to add both allies before confirming the group.",
+      "Pomaknula se samo jedna jedinica. Poništi taj potez i uključi oba saveznika prije potvrde grupe.",
+      "Si è mossa una sola unità. Annulla la mossa per includere entrambi gli alleati prima di confermare il gruppo.",
+    ],
+  "Play Wind Wall targeting Hextech Ray": [
+    "Play Wind Wall targeting Hextech Ray",
+    "Odigraj Wind Wall na Hextech Ray",
+    "Gioca Wind Wall bersagliando Hextech Ray",
+  ],
+  "Pass priority until the chain resolves": [
+    "Pass priority until the chain resolves",
+    "Propusti prioritet do razrješenja lanca",
+    "Passa la priorità finché la catena si risolve",
+  ],
+  "Keep your unit undamaged": [
+    "Keep your unit undamaged",
+    "Sačuvaj jedinicu bez štete",
+    "Mantieni la tua unità senza danni",
+  ],
+  "Wind Wall is above Hextech Ray in the chain. Pass priority to let the counter resolve first.":
+    [
+      "Wind Wall is above Hextech Ray in the chain. Pass priority to let the counter resolve first.",
+      "Wind Wall je iznad Hextech Ray u lancu. Propusti prioritet da se protumjera prva razriješi.",
+      "Wind Wall è sopra Hextech Ray nella catena. Passa la priorità per far risolvere prima la contromossa.",
+    ],
+  "You have priority while Hextech Ray is pending. Answer with Wind Wall before passing.":
+    [
+      "You have priority while Hextech Ray is pending. Answer with Wind Wall before passing.",
+      "Imaš prioritet dok Hextech Ray čeka razrješenje. Odgovori s Wind Wall prije propuštanja.",
+      "Hai priorità mentre Hextech Ray è in attesa. Rispondi con Wind Wall prima di passare.",
+    ],
+  "Hextech Ray resolved without being countered. Undo the pass and answer it with Wind Wall.":
+    [
+      "Hextech Ray resolved without being countered. Undo the pass and answer it with Wind Wall.",
+      "Hextech Ray se razriješio bez protumjere. Poništi propuštanje i odgovori s Wind Wall.",
+      "Hextech Ray si è risolto senza essere neutralizzato. Annulla il passaggio e rispondi con Wind Wall.",
+    ],
+  "Reveal your Hidden Blastcone Fae": [
+    "Reveal your Hidden Blastcone Fae",
+    "Otkrij svoj Hidden Blastcone Fae",
+    "Rivela la tua Blastcone Fae nascosta",
+  ],
+  "Choose the enemy at the same battlefield": [
+    "Choose the enemy at the same battlefield",
+    "Izaberi neprijatelja na istom bojištu",
+    "Scegli il nemico sullo stesso campo",
+  ],
+  "Resolve the local trigger": [
+    "Resolve the local trigger",
+    "Razriješi lokalni okidač",
+    "Risolvi l'innesco locale",
+  ],
+  "Choose the enemy sharing Blastcone Fae's battlefield. The distant enemy is outside this local trigger.":
+    [
+      "Choose the enemy sharing Blastcone Fae's battlefield. The distant enemy is outside this local trigger.",
+      "Izaberi neprijatelja na bojištu Blastcone Fae. Udaljeni neprijatelj nije u dosegu ovog lokalnog okidača.",
+      "Scegli il nemico sul campo di Blastcone Fae. Il nemico distante è fuori da questo innesco locale.",
+    ],
+  "Your card is revealed. Pass any remaining priority to finish resolving its local trigger.":
+    [
+      "Your card is revealed. Pass any remaining priority to finish resolving its local trigger.",
+      "Tvoja karta je otkrivena. Propusti preostali prioritet da dovršiš razrješenje njenog lokalnog okidača.",
+      "La tua carta è rivelata. Passa la priorità restante per completare la risoluzione dell'innesco locale.",
+    ],
+  "Your Hidden card was placed on an earlier turn. Select it and reveal it at its own battlefield.":
+    [
+      "Your Hidden card was placed on an earlier turn. Select it and reveal it at its own battlefield.",
+      "Tvoja Hidden karta postavljena je u ranijem potezu. Izaberi je i otkrij na njenom bojištu.",
+      "La tua carta nascosta è stata posizionata in un turno precedente. Selezionala e rivelala sul suo campo.",
+    ],
+  "Assign lethal damage to one defender": [
+    "Assign lethal damage to one defender",
+    "Dodijeli smrtonosnu štetu jednom branitelju",
+    "Assegna danni letali a un difensore",
+  ],
+  "Assign the remaining damage to the other defender": [
+    "Assign the remaining damage to the other defender",
+    "Dodijeli preostalu štetu drugom branitelju",
+    "Assegna i danni restanti all'altro difensore",
+  ],
+  "Resolve simultaneous combat damage": [
+    "Resolve simultaneous combat damage",
+    "Razriješi istovremenu borbenu štetu",
+    "Risolvi i danni simultanei di combattimento",
+  ],
+  "Assign your remaining damage to the other defender. Both sides deal their assigned damage together.":
+    [
+      "Assign your remaining damage to the other defender. Both sides deal their assigned damage together.",
+      "Dodijeli preostalu štetu drugom branitelju. Obje strane zadaju dodijeljenu štetu istovremeno.",
+      "Assegna i danni restanti all'altro difensore. Entrambe le parti infliggono i danni assegnati insieme.",
+    ],
+  "You have 8 damage. The shielded defender needs 6; the wounded defender needs 2. Either legal order works.":
+    [
+      "You have 8 damage. The shielded defender needs 6; the wounded defender needs 2. Either legal order works.",
+      "Imaš 8 štete. Zaštićeni branitelj treba 6, a ranjeni 2. Oba legalna redoslijeda rade.",
+      "Hai 8 danni. Il difensore protetto ne richiede 6; quello ferito 2. Entrambi gli ordini legali funzionano.",
+    ],
+  "Damage needed to defeat each defender": [
+    "Damage needed to defeat each defender",
+    "Šteta potrebna za poraz svakog branitelja",
+    "Danni necessari per sconfiggere ogni difensore",
+  ],
+  "{might} Might − {damage} existing damage + {prevention} prevention = {lethal} lethal damage":
+    [
+      "{might} Might − {damage} existing damage + {prevention} prevention = {lethal} lethal damage",
+      "{might} Might − {damage} postojeće štete + {prevention} sprječavanja = {lethal} smrtonosne štete",
+      "{might} Might − {damage} danni esistenti + {prevention} prevenzione = {lethal} danni letali",
+    ],
+  "Assigned: {amount}": [
+    "Assigned: {amount}",
+    "Dodijeljeno: {amount}",
+    "Assegnati: {amount}",
+  ],
+  "End your turn with battlefield control intact": [
+    "End your turn with battlefield control intact",
+    "Završi potez uz sačuvanu kontrolu bojišta",
+    "Termina il turno mantenendo il controllo del campo",
+  ],
+  "Hold the battlefield at the start of your next turn": [
+    "Hold the battlefield at the start of your next turn",
+    "Zadrži bojište na početku sljedećeg poteza",
+    "Mantieni il campo all'inizio del tuo prossimo turno",
+  ],
+  "Reach the winning eighth point": [
+    "Reach the winning eighth point",
+    "Dosegni pobjednički osmi bod",
+    "Raggiungi l'ottavo punto vincente",
+  ],
+  "You already have 7 points and control the first battlefield. End your turn; the practice opponent has no threats and ends theirs.":
+    [
+      "You already have 7 points and control the first battlefield. End your turn; the practice opponent has no threats and ends theirs.",
+      "Već imaš 7 bodova i kontroliraš prvo bojište. Završi potez; protivnik za vježbu nema prijetnji i završava svoj.",
+      "Hai già 7 punti e controlli il primo campo. Termina il turno; l'avversario di pratica non ha minacce e termina il suo.",
+    ],
   "Training lab": [
     "Training lab",
     "Trening laboratorij",
