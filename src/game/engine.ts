@@ -4374,7 +4374,7 @@ export function getGroupMoveAction(
   };
 }
 
-function getAbilities(
+export function getAbilities(
   s: GameState,
   p: PlayerId,
   cardId: string,

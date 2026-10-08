@@ -564,7 +564,7 @@
     position: absolute;
     left: 1px;
     right: 1px;
-    bottom: 18px;
+    bottom: 28px;
     padding: 3px;
     background: linear-gradient(180deg, #081721df, #07131cf5);
     color: #fff4d6;
@@ -576,8 +576,9 @@
     text-shadow: 0 1px 2px #000;
   }
   .app.is-game :is(.field-half, .base-units) > .unit-wrap > .unit-power {
-    left: 0;
-    bottom: -14px;
+    left: auto;
+    right: 0;
+    bottom: -26px;
     transform: none;
     font-size: 15px;
     line-height: 20px;
@@ -592,8 +593,8 @@
   .app.is-game :is(.field-half, .base-units) > .unit-wrap > .unit-info {
     opacity: 1;
     top: auto;
-    left: auto;
-    right: -4px;
+    left: -4px;
+    right: auto;
     bottom: -26px;
     width: 44px;
     height: 44px;
@@ -795,6 +796,33 @@
   .app.is-game .visual-controls .context-action small {
     display: none;
   }
+  .app.is-game .visual-controls.has-target-options .context-actions {
+    flex: 1 0 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .app.is-game .visual-controls .context-action.has-target {
+    flex: 1 1 100%;
+    min-width: 0;
+    min-height: 70px;
+    text-align: left;
+  }
+  .app.is-game
+    .visual-controls
+    .context-action.has-target
+    .decision-option-art {
+    width: 38px;
+    height: 53px;
+  }
+  .app.is-game
+    .visual-controls
+    .context-action.has-target
+    .decision-action-label {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
   .app.is-game .visual-controls .gold-button,
   .app.is-game .visual-controls .secondary-decision {
     min-height: 48px;
@@ -947,11 +975,25 @@
    and a useful board viewport. The battlefield scrolls within that viewport;
    its units and Might badges cannot spill over the hand beneath it. */
 @media (max-width: 800px) and (max-height: 700px) and (max-aspect-ratio: 1/1) {
-  .app.is-game .playmat:has(.visual-controls .action-pages) {
+  .app.is-game
+    .playmat:has(
+      .visual-controls .action-pages,
+      .visual-controls.has-target-options
+    ) {
     grid-template-rows: 40px 56px auto minmax(0, 1fr) 98px auto;
   }
-  .app.is-game .playmat:has(.visual-controls .action-pages) .decision-title,
-  .app.is-game .playmat:has(.visual-controls .action-pages) .card-cost-note {
+  .app.is-game
+    .playmat:has(
+      .visual-controls .action-pages,
+      .visual-controls.has-target-options
+    )
+    .decision-title,
+  .app.is-game
+    .playmat:has(
+      .visual-controls .action-pages,
+      .visual-controls.has-target-options
+    )
+    .card-cost-note {
     display: block;
     margin: 0;
     overflow: hidden;
@@ -959,7 +1001,10 @@
     text-overflow: ellipsis;
   }
   .app.is-game
-    .playmat:has(.visual-controls .action-pages)[data-mobile-zone^="field:"]
+    .playmat:has(
+      .visual-controls .action-pages,
+      .visual-controls.has-target-options
+    )[data-mobile-zone^="field:"]
     .battlefields {
     min-height: 0;
     align-items: start;
@@ -970,7 +1015,10 @@
     scrollbar-color: var(--you-line) transparent;
   }
   .app.is-game
-    .playmat:has(.visual-controls .action-pages)
+    .playmat:has(
+      .visual-controls .action-pages,
+      .visual-controls.has-target-options
+    )
     .battlefields
     > .battlefield[data-mobile-active="true"] {
     min-height: calc(244px + var(--mobile-field-footer));
@@ -1069,5 +1117,13 @@
 @media (max-width: 1000px) and (max-height: 380px) and (min-aspect-ratio: 3/2) {
   .app.is-game :is(.field-half, .base-units) > .unit-wrap > .unit-info {
     bottom: -22px;
+  }
+}
+
+/* The card face retains printed cost; targeted decisions reserve space for the effect and recipient. */
+@media (max-width: 800px), (max-width: 1000px) and (max-height: 500px) {
+  .app.is-game .playmat > .visual-controls.has-target-options .card-cost-note,
+  .app.is-game .playmat > .visual-controls.has-target-options .decision-kicker {
+    display: none;
   }
 }

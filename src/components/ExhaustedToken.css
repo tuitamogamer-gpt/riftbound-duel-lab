@@ -48,12 +48,12 @@
   white-space: nowrap;
 }
 
-/* Unit cards reserve the upper-right corner for readiness. The artwork grows
-   14% beyond this box, so keep that corner inset and scale with small cards. */
+/* Keep readiness in the lower-right corner, clear of the status counters above.
+   The artwork grows 14% beyond this box, so inset it and scale with small cards. */
 .unit-wrap .game-card > .exhausted-token {
-  top: 4px;
+  top: auto;
   right: max(2px, 3%);
-  bottom: auto;
+  bottom: max(3px, 3%);
   width: min(20px, 24%);
   height: auto;
 }

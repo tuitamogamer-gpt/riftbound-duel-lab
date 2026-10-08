@@ -68,6 +68,10 @@ import {
   getMight,
 } from "./game/engine";
 import { isMovementSelection, sourceActions } from "./game/flow";
+import {
+  filterFriendlyBuffActions,
+  isFriendlyBuffAction,
+} from "./game/friendly-buff-actions";
 import { gearStatuses, unitStatuses } from "./game/status-presentation";
 import { MatchControls } from "./components/MatchControls";
 import { PileDialog, type PileView } from "./components/CardPiles";
@@ -427,7 +431,10 @@ export default function App() {
   const [botReason, setBotReason] = useState("");
   const [confirmNew, setConfirmNew] = useState(false);
   const legal = useMemo(
-    () => (match && !review && !paused ? getLegalActions(match, 0) : []),
+    () =>
+      match && !review && !paused
+        ? filterFriendlyBuffActions(match, getLegalActions(match, 0))
+        : [],
     [match, review, paused],
   );
   useEffect(() => {
@@ -548,7 +555,10 @@ export default function App() {
       );
       return () => window.clearTimeout(timer);
     }
-    const own = match.priorityPlayer === 0 ? getLegalActions(match, 0) : [];
+    const own =
+      match.priorityPlayer === 0
+        ? filterFriendlyBuffActions(match, getLegalActions(match, 0))
+        : [];
     const next =
       match.priorityPlayer === 1
         ? bot.result?.action
@@ -596,7 +606,12 @@ export default function App() {
         action.targetId === id ||
         (!action.targetId && action.locationId === id),
     );
-    if (candidates.length === 1) doAction(candidates[0]);
+    if (
+      candidates.length === 1 &&
+      game &&
+      !isFriendlyBuffAction(game, candidates[0])
+    )
+      doAction(candidates[0]);
     else if (candidates.length) setTarget(id);
   };
   const selectCard = (source: string) => {

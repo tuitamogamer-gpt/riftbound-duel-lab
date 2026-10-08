@@ -1,5 +1,6 @@
 import { getBotAction } from "./bot";
 import { getLegalActions } from "./engine";
+import { filterFriendlyBuffActions } from "./friendly-buff-actions";
 import type { GameAction, GameState } from "./types";
 
 /** These only edit the proposed group; movement, payment and combat wait for confirmation. */
@@ -62,7 +63,7 @@ export function sourceActions(
   legal: GameAction[],
   selected: string | null,
 ) {
-  const choices = legal.filter(
+  const choices = filterFriendlyBuffActions(game, legal).filter(
     (action) => !["pass", "end"].includes(action.category),
   );
   if (["choice", "damage", "move"].includes(game.phase)) return choices;

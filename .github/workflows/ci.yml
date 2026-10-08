@@ -71,6 +71,8 @@ jobs:
           tests/match-series.test.ts
           tests/match-history.test.ts
           tests/mobile-presentation.test.ts
+          tests/friendly-buff-actions.test.ts
+          tests/action-target-presentation.test.ts
           tests/event-highlights.test.ts
           tests/significant-motion.test.ts
           tests/table-moments.test.ts

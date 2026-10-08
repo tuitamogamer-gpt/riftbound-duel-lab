@@ -3,6 +3,12 @@ import { ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { findCard, type CatalogCard } from "../catalog";
 import { cardArtUrl } from "../data/art";
 import { Card } from "./Card";
+import { useCompactTable } from "../hooks/useCompactTable";
+import {
+  cardEffectSummary,
+  publicActionTargets,
+} from "../game/action-target-presentation";
+import { isFriendlyBuffAction } from "../game/friendly-buff-actions";
 import { readableText } from "../data/cards";
 import { decisionActions, selectedCardId, sourceActions } from "../game/flow";
 import {
@@ -56,6 +62,7 @@ export function MatchControls({
   inspect: (card: CatalogCard) => void;
 }) {
   const { t } = useI18n();
+  const compact = useCompactTable();
   const dispatch = requestAction ?? act;
   const damageSummary =
     !review && game.phase === "damage" ? damageAssignmentSummary(game) : null;
@@ -115,6 +122,14 @@ export function MatchControls({
           .includes(search.trim().toLowerCase()),
       )
     : allActions;
+  const shownTargets = publicActionTargets(
+    game,
+    review?.action ?? { targetId: target ?? undefined },
+  );
+  const hasTargetOptions = actions.some(
+    (action) => publicActionTargets(game, action).length,
+  );
+  const pageSize = compact && hasTargetOptions ? 1 : 3;
   const movement =
     game.phase === "move" && game.pendingMove?.player === 0
       ? game.pendingMove
@@ -133,9 +148,9 @@ export function MatchControls({
     ["pass", "end"].includes(action.category),
   );
   const [pageState, setPage] = useState({ key: "", page: 0 });
-  const pageKey = `${selected}:${target}:${actions.map((action) => action.id).join(";")}`;
+  const pageKey = `${selected}:${target}:${pageSize}:${actions.map((action) => action.id).join(";")}`;
   const page = pageState.key === pageKey ? pageState.page : 0;
-  const pageCount = Math.ceil(actions.length / 3);
+  const pageCount = Math.ceil(actions.length / pageSize);
   const opening = game.phase === "mulligan" && !game.players[0].mulliganDone;
   const keep = legal.find(
     (action) =>
@@ -179,9 +194,12 @@ export function MatchControls({
             ? hiddenStatus
               ? hiddenStatus.hint
               : actions.length
-                ? actions.some((action) => action.targetId)
-                  ? "Choose a highlighted target or an available move."
-                  : readableText(card.text) || "Choose a move."
+                ? selectedAction && isFriendlyBuffAction(game, selectedAction)
+                  ? cardEffectSummary(card.text) ||
+                    "Choose a highlighted target or an available move."
+                  : actions.some((action) => action.targetId)
+                    ? "Choose a highlighted target or an available move."
+                    : readableText(card.text) || "Choose a move."
                 : (blockedReason ??
                   "This card has no legal target, destination or available effect in this position.")
             : game.phase === "damage"
@@ -201,7 +219,7 @@ export function MatchControls({
                         : "Click a glowing card to play it, or a ready unit to move. End your turn when finished.";
   return (
     <section
-      className={`match-controls visual-controls window-${window} ${sourceCard ? "has-source" : ""} ${review || busy ? "is-busy" : ""}`}
+      className={`match-controls visual-controls window-${window} ${sourceCard ? "has-source" : ""} ${hasTargetOptions ? "has-target-options" : ""} ${review || busy ? "is-busy" : ""}`}
       aria-label={t("Game controls")}
     >
       <div className="decision-context">
@@ -257,6 +275,16 @@ export function MatchControls({
               </span>
             )}
           </strong>
+          {shownTargets.length > 0 && (
+            <div className="decision-target-summary">
+              <ArrowRight size={14} aria-hidden="true" />
+              <span>
+                {t("Target: {card}", {
+                  card: shownTargets.map((item) => item.card.name).join(" + "),
+                })}
+              </span>
+            </div>
+          )}
           <p>
             {damageSummary &&
               `${t("Damage remaining: {count}", { count: damageSummary.remaining })} · ${t("{count} lethal assignments", { count: damageSummary.lethal })} · `}
@@ -364,42 +392,70 @@ export function MatchControls({
               {namingSpell && !actions.length && (
                 <span>{t("No matching spells")}</span>
               )}
-              {actions.slice(page * 3, page * 3 + 3).map((action) => {
-                const optionCard = findCard(
-                  game.units.find((unit) => unit.id === action.targetId)
-                    ?.cardId ??
-                    game.gears.find((gear) => gear.id === action.targetId)
-                      ?.cardId ??
-                    game.stack.find((item) => item.id === action.targetId)
-                      ?.cardId ??
-                    inspectedTop ??
-                    action.cardId,
-                );
-                return (
-                  <button
-                    key={action.id}
-                    className="context-action"
-                    onClick={() => dispatch(action)}
-                    title={
-                      t(action.label) +
-                      (action.detail ? ` · ${t(action.detail)}` : "")
-                    }
-                  >
-                    {optionCard?.image && (
-                      <img
-                        className="decision-option-art"
-                        src={cardArtUrl(optionCard)}
-                        alt={optionCard.name}
-                        data-card-preview={optionCard.id}
-                      />
-                    )}
-                    <span>
-                      <strong>{t(action.label)}</strong>
-                      {action.detail && <small>{t(action.detail)}</small>}
-                    </span>
-                  </button>
-                );
-              })}
+              {actions
+                .slice(page * pageSize, page * pageSize + pageSize)
+                .map((action) => {
+                  const targets = publicActionTargets(game, action);
+                  const optionCard = findCard(
+                    targets[0]?.card.id ?? inspectedTop ?? action.cardId,
+                  );
+                  return (
+                    <button
+                      key={action.id}
+                      className={`context-action ${targets.length ? "has-target" : ""}`}
+                      data-target-id={action.targetId}
+                      aria-label={
+                        t(action.label) +
+                        (targets.length
+                          ? ` · ${targets.map((item) => [item.owner === undefined ? "" : t(item.owner === 0 ? "Ti" : "Protivnik"), item.card.name, t(item.location)].filter(Boolean).join(" · ")).join(" + ")}`
+                          : "")
+                      }
+                      onClick={() => dispatch(action)}
+                      title={
+                        t(action.label) +
+                        (action.detail ? ` · ${t(action.detail)}` : "")
+                      }
+                    >
+                      {optionCard?.image && (
+                        <img
+                          className="decision-option-art"
+                          src={cardArtUrl(optionCard)}
+                          alt={optionCard.name}
+                          data-card-preview={optionCard.id}
+                        />
+                      )}
+                      <span>
+                        {targets.length ? (
+                          <>
+                            <span className="decision-action-label">
+                              {t(action.label)}
+                            </span>
+                            {targets.map((item) => (
+                              <span className="decision-target" key={item.id}>
+                                <strong>{item.card.name}</strong>
+                                <small className="decision-target-location">
+                                  {[
+                                    item.owner === undefined
+                                      ? ""
+                                      : t(
+                                          item.owner === 0 ? "Ti" : "Protivnik",
+                                        ),
+                                    t(item.location),
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" · ")}
+                                </small>
+                              </span>
+                            ))}
+                          </>
+                        ) : (
+                          <strong>{t(action.label)}</strong>
+                        )}
+                        {action.detail && <small>{t(action.detail)}</small>}
+                      </span>
+                    </button>
+                  );
+                })}
             </div>
             {pageCount > 1 && (
               <div className="action-pages">

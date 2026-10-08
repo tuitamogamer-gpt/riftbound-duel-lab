@@ -122,6 +122,45 @@
   flex: none;
   border-radius: 3px;
 }
+.decision-target-summary {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  color: #b7f4de;
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.decision-target-summary > svg {
+  flex: none;
+}
+.decision-action-label {
+  display: block;
+  margin-bottom: 3px;
+  color: #b2cac9;
+  font-size: 10px;
+  line-height: 1.3;
+}
+.decision-target {
+  display: block;
+}
+.decision-target + .decision-target {
+  margin-top: 4px;
+}
+.app.is-game .visual-controls .context-action .decision-target strong {
+  color: #fff2c9;
+  font-size: 13px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.app.is-game .visual-controls .context-action .decision-target-location {
+  display: block;
+  color: #b7dccf;
+  font-size: 10px;
+  line-height: 1.3;
+  margin-top: 3px;
+}
 .app.is-game .visual-controls .gold-button {
   font-size: 12px;
   padding: 10px 12px;

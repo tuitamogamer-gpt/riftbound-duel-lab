@@ -1,4 +1,5 @@
 export const flowMessages: Record<string, [string, string, string]> = {
+  "Target: {card}": ["Target: {card}", "Meta: {card}", "Bersaglio: {card}"],
   "Opponent completes a private choice": [
     "Opponent completes a private choice",
     "Protivnik završava skriveni izbor",
