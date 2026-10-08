@@ -1,5 +1,22 @@
 # Production deployment
 
+## Catalog, mobile and practice release — 8 October 2026
+
+Application commit `6249dac131faf033a842fa2e482c180be80c9f59` was pushed to `main`. Both linked production projects reached **READY** for this exact commit, with their public aliases resolving to those deployments:
+
+- [riftbound-duel-lab.vercel.app](https://riftbound-duel-lab.vercel.app/) — `dpl_5BjP14Z7PT53aUBLqC4kAk4pmxU9`.
+- [riftbound-duel-lab-pgml.vercel.app](https://riftbound-duel-lab-pgml.vercel.app/) — `dpl_GoSDqc6ckLk3ENwkMjVHoDAvkRfU`.
+
+The [required GitHub checks](https://github.com/tuitamogamer-gpt/riftbound-duel-lab/actions/runs/37714947999) completed successfully for that commit. Before publication, the complete frozen implementation passed **2,681 unique tests across 120 files**, all **169 ordered precon pairs**, and a fresh **32-game v3 bot pilot** without illegal or blocked games. The [regression record](regression-validation-2026-10-08.json) preserves source hashes and all three actual exit-0 process receipts; interrupted attempts contribute no cases. Catalog coverage remains **1,459 executable entries and all 13 precons** from the unchanged provider snapshot.
+
+Real production Chromium checks passed on both aliases with compiled build **b2b14dc063c7**, **81/81 offline application assets**, 55 selected-deck artwork images, the exact new worker, a real cold offline planner decision without fallback, and paused reload/resume at portrait and landscape sizes. A retained old-primary client also passed the actual **cefb602dc1e3 → b2b14dc063c7** upgrade: the new worker waited, the old client retained its offline shell and cold lazy chunk, the saved duel remained byte-identical, and activation after closing the old client removed the old app cache while preserving 38 downloaded artwork images. See [production continuity, offline and API evidence](reliability-qa-2026-10-07.json).
+
+The [deployed feature checks](live-feature-qa-2026-10-08.json) exercised quoted/multi-term and printing-alias search, Energy sorting, filter reset, Undo/Redo, page reload and explicit draft recovery, and real lesson completion/Undo/Retry at 390 and 1440 pixels. The [native WebKit production follow-up](webkit-mobile-qa-2026-10-08.json) verifies both aliases’ exact assets and response headers, real touch duel controls at 390×844 and 844×390, and Italian catalog/training controls at 320×568. It uses Linux mobile emulation and does not establish testing on physical iOS hardware. The [practice guide](PRACTICE-GUIDE.md) documents the new tools.
+
+A separate [complete production UI game](full-duel-ui-qa-2026-10-08.json) connects the real Normal worker, mobile controls, saved result, captured replay and BO3 flow. The deliberately passing human lost 0–8 on turn 13; the game records 45 decisions, including 29 actual worker choices without prepared fallbacks. Turn/key-moment navigation and the exact-frame note survived reload; game 2 started with the 0–1 score preserved. This one synthetic integration game does not measure AI strength, and game 2 was not played to completion.
+
+Both deployed API entries reject GET with **405** and malformed JSON with **400**, using `private, no-store`, `nosniff` and `no-referrer`. These probes create no rooms or storage objects. **Hosted private rooms remain blocked by the private Blob store configuration**: the connected account previously rejected provisioning with HTTP 403. Local two-seat validation remains separate; see [ONLINE-DUELS.md](ONLINE-DUELS.md).
+
 ## Practice tools release — 7 October 2026
 
 Application tools were published in `8a1bfca67a2f153bf044ce3356cc49b50547d7a8`; the Node function packaging and guest-base labels were corrected in `bb08fe110334b0a5a3b931c8b72040a28865148d`. Both production builds for the latter commit reached **READY**, with their public aliases confirmed:

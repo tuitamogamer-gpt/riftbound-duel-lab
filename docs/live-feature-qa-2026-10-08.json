@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-08T01:53:58.870Z",
+  "mode": "production",
+  "origin": "https://riftbound-duel-lab.vercel.app",
+  "release": {
+    "buildId": "b2b14dc063c7",
+    "commitSha": "6249dac131faf033a842fa2e482c180be80c9f59",
+    "readyAt": "2026-10-08T01:52:48.126Z",
+    "deploymentId": "dpl_5BjP14Z7PT53aUBLqC4kAk4pmxU9",
+    "deploymentUrl": "https://riftbound-duel-aa8v2zvdv-tuitamogamer-7851s-projects.vercel.app",
+    "secondaryDeploymentId": "dpl_GoSDqc6ckLk3ENwkMjVHoDAvkRfU",
+    "secondaryDeploymentUrl": "https://riftbound-duel-lab-pgml-mlb4hvan9-tuitamogamer-7851s-projects.vercel.app",
+    "aliases": [
+      {
+        "origin": "https://riftbound-duel-lab.vercel.app",
+        "projectId": "prj_vSRYnKQZudmN7OY9uHdq35AXHZw0",
+        "deploymentId": "dpl_5BjP14Z7PT53aUBLqC4kAk4pmxU9",
+        "deploymentUrl": "https://riftbound-duel-aa8v2zvdv-tuitamogamer-7851s-projects.vercel.app",
+        "commitSha": "6249dac131faf033a842fa2e482c180be80c9f59",
+        "state": "READY"
+      },
+      {
+        "origin": "https://riftbound-duel-lab-pgml.vercel.app",
+        "projectId": "prj_8x72hY1XBgDcNjcjQKLyX3xgCWXW",
+        "deploymentId": "dpl_GoSDqc6ckLk3ENwkMjVHoDAvkRfU",
+        "deploymentUrl": "https://riftbound-duel-lab-pgml-mlb4hvan9-tuitamogamer-7851s-projects.vercel.app",
+        "commitSha": "6249dac131faf033a842fa2e482c180be80c9f59",
+        "state": "READY"
+      }
+    ]
+  },
+  "expected": {
+    "buildId": "b2b14dc063c7",
+    "assetCount": 81,
+    "index": "/assets/index-DACqojZ7.js",
+    "indexSha256": "88445617edebef7b1ac25bf49941d79e1488becf126bb73d2330a250d6b7d445",
+    "worker": "/assets/worker-BsrCyr2L.js",
+    "workerSha256": "ecc597cd9d94f5577e377df0320aaa25ca094b3a9a330814f929772d725b7fcf"
+  },
+  "scope": "Targeted deployed catalog, builder, first training lesson, and empty-history route checks at 390 and 1440 pixels. Replay controls on saved matches are covered by separate source-backed browser checkpoints.",
+  "safety": {
+    "freshEphemeralBrowserContexts": true,
+    "productionApiRequestsBlocked": true,
+    "nonGetHeadRequestsBlocked": true,
+    "noExistingProfilesOrPersonalData": true,
+    "syntheticLocalDraftOnly": true,
+    "noProductionRoomWrites": true
+  },
+  "viewports": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "pageErrors": [],
+      "failedAppRequests": [],
+      "cancelledArtworkRequests": [],
+      "blockedRequests": [],
+      "workers": [],
+      "geometry": [
+        {
+          "stage": "catalog",
+          "width": 390,
+          "scrollWidth": 390,
+          "height": 844
+        },
+        {
+          "stage": "builder-before-reload",
+          "width": 390,
+          "scrollWidth": 390,
+          "height": 844
+        },
+        {
+          "stage": "builder-after-restore",
+          "width": 390,
+          "scrollWidth": 390,
+          "height": 844
+        },
+        {
+          "stage": "training",
+          "width": 390,
+          "scrollWidth": 390,
+          "height": 844
+        },
+        {
+          "stage": "history-empty",
+          "width": 390,
+          "scrollWidth": 390,
+          "height": 844
+        }
+      ],
+      "buildProof": {
+        "buildId": "b2b14dc063c7",
+        "assetCount": 81,
+        "index": "/assets/index-DACqojZ7.js",
+        "indexSha256": "88445617edebef7b1ac25bf49941d79e1488becf126bb73d2330a250d6b7d445",
+        "worker": "/assets/worker-BsrCyr2L.js",
+        "workerSha256": "ecc597cd9d94f5577e377df0320aaa25ca094b3a9a330814f929772d725b7fcf"
+      },
+      "catalog": {
+        "multiTermAndQuotedPhrase": true,
+        "queryResults": 2,
+        "alternatePrintingFindsBaseFace": true,
+        "baseFace": "OGN · ogn-027-298",
+        "resetRestores1459Entries": true,
+        "energyDescending": {
+          "checkedCards": 60,
+          "firstEnergy": 12,
+          "lastEnergy": 5
+        }
+      },
+      "builder": {
+        "alternatePrintingSearch": true,
+        "addedQuantity": 1,
+        "undoQuantity": 0,
+        "redoQuantity": 1,
+        "draftNameBackedUp": true,
+        "actualPageReloadAndExplicitDraftRestore": true,
+        "restoredExactQuantity": 1
+      },
+      "training": {
+        "lesson": "Deploy your first unit",
+        "initialPhaseHint": "Select Playful Phantom in your hand and play it. Its paid cost and exhausted arrival are part of the normal rules.",
+        "realLegalPlayCompletedLesson": true,
+        "completedChecklist": true,
+        "completionHidesActiveHint": true,
+        "storedProgress": "1 of 6",
+        "undoAndRetryRestoreExercise": true
+      },
+      "history": {
+        "freshEmptyHistoryRouteOpened": true,
+        "qualification": "No saved-replay interaction is claimed by this targeted production smoke."
+      },
+      "passed": true,
+      "completedAt": "2026-10-08T01:54:06.182Z"
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "pageErrors": [],
+      "failedAppRequests": [],
+      "cancelledArtworkRequests": [
+        {
+          "path": "/cards/unl-133-219.webp",
+          "error": "net::ERR_ABORTED"
+        },
+        {
+          "path": "/cards/ogn-001-298.webp",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "blockedRequests": [],
+      "workers": [],
+      "geometry": [
+        {
+          "stage": "catalog",
+          "width": 1440,
+          "scrollWidth": 1440,
+          "height": 900
+        },
+        {
+          "stage": "builder-before-reload",
+          "width": 1440,
+          "scrollWidth": 1440,
+          "height": 900
+        },
+        {
+          "stage": "builder-after-restore",
+          "width": 1440,
+          "scrollWidth": 1440,
+          "height": 900
+        },
+        {
+          "stage": "training",
+          "width": 1440,
+          "scrollWidth": 1440,
+          "height": 900
+        },
+        {
+          "stage": "history-empty",
+          "width": 1440,
+          "scrollWidth": 1440,
+          "height": 900
+        }
+      ],
+      "buildProof": {
+        "buildId": "b2b14dc063c7",
+        "assetCount": 81,
+        "index": "/assets/index-DACqojZ7.js",
+        "indexSha256": "88445617edebef7b1ac25bf49941d79e1488becf126bb73d2330a250d6b7d445",
+        "worker": "/assets/worker-BsrCyr2L.js",
+        "workerSha256": "ecc597cd9d94f5577e377df0320aaa25ca094b3a9a330814f929772d725b7fcf"
+      },
+      "catalog": {
+        "multiTermAndQuotedPhrase": true,
+        "queryResults": 2,
+        "alternatePrintingFindsBaseFace": true,
+        "baseFace": "OGN · ogn-027-298",
+        "resetRestores1459Entries": true,
+        "energyDescending": {
+          "checkedCards": 60,
+          "firstEnergy": 12,
+          "lastEnergy": 5
+        }
+      },
+      "builder": {
+        "alternatePrintingSearch": true,
+        "addedQuantity": 1,
+        "undoQuantity": 0,
+        "redoQuantity": 1,
+        "draftNameBackedUp": true,
+        "actualPageReloadAndExplicitDraftRestore": true,
+        "restoredExactQuantity": 1
+      },
+      "training": {
+        "lesson": "Deploy your first unit",
+        "initialPhaseHint": "Select Playful Phantom in your hand and play it. Its paid cost and exhausted arrival are part of the normal rules.",
+        "realLegalPlayCompletedLesson": true,
+        "completedChecklist": true,
+        "completionHidesActiveHint": true,
+        "storedProgress": "1 of 6",
+        "undoAndRetryRestoreExercise": true
+      },
+      "history": {
+        "freshEmptyHistoryRouteOpened": true,
+        "qualification": "No saved-replay interaction is claimed by this targeted production smoke."
+      },
+      "passed": true,
+      "completedAt": "2026-10-08T01:54:14.772Z"
+    }
+  ],
+  "passed": true,
+  "completedAt": "2026-10-08T01:54:14.786Z",
+  "generatedAt": "2026-10-08T01:54:30.512Z",
+  "actualProcess": {
+    "startedAt": "2026-10-08T01:53:58.437Z",
+    "completedAt": "2026-10-08T01:54:14.828Z",
+    "exitCode": 0,
+    "signal": null,
+    "command": "node live-feature-qa.mjs https://riftbound-duel-lab.vercel.app/ production"
+  },
+  "artifacts": {
+    "resultSHA256": "f07a4e3e96d9e3a1e68a531ea446c0ec25b3c64d971e8123b339ea9c7f541570",
+    "logSHA256": "d9ba4873fa8f94bc623e03efe3e897c6201a76288d6bc887c3a78c3bdde43e0b",
+    "receiptSHA256": "c1a487708b4a89f598633a8a6457308918f39774fed27e9a011563402c19ac9f"
+  },
+  "excludedEarlierHarnessAttempt": {
+    "reason": "Direct Playwright APIRequestContext transport received ECONNREFUSED for Vercel asset proof after browser startup succeeded. Harness changed to browser same-origin GET fetch; the full feature check is rerun fresh.",
+    "actualExitCode": 1,
+    "signal": null,
+    "startedAt": "2026-10-08T01:53:04.542Z",
+    "completedAt": "2026-10-08T01:53:11.958Z",
+    "includedInFinalFeatureCoverage": false,
+    "commitSha": "6249dac131faf033a842fa2e482c180be80c9f59",
+    "artifactSHA256": {
+      "live-feature-production-failure.json": "a079c74c50267f97d720d8c37ca042f09708819bde9f2b2e7f6ac2662d90de14",
+      "live-feature-production.log": "86f096bf8e613ffeb4cdde78288c41f393d6ad4af43e29f88add3f91f54b7e66",
+      "live-feature-production-status.json": "3e65eb25305ad3cc50a3d06a2bce5fd1c670045d6d3aeb1635679145a5fd0bd8"
+    }
+  }
+}

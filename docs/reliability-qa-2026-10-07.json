@@ -1,15 +1,14 @@
 {
-  "checkedAt": "2026-10-08T01:10:11.198Z",
+  "checkedAt": "2026-10-08T01:53:39.265Z",
   "baselineCommit": "c74ce44a66a9e30ca3abb95b1a6ae4c9ba9fa5ed",
   "environment": {
     "browser": "Chromium, headless",
-    "mobileViewports": [
-      "390x844 portrait",
-      "844x390 landscape"
-    ],
+    "mobileViewports": ["390x844 portrait", "844x390 landscape"],
     "onlineServer": "loopback Vite development adapter with in-memory test rooms",
     "serviceWorkerServer": "loopback template fault fixture and exact production A/B app builds on a deployment-switching preview",
-    "productionDeploymentTested": false
+    "productionDeploymentTested": true,
+    "productionBrowser": "Fresh isolated headless Chromium contexts; synthetic local duels only; no physical iOS-device claim",
+    "productionApis": "All browser API requests and every non-GET/HEAD request blocked. Private room storage remains separately blocked by Vercel Blob provisioning HTTP 403."
   },
   "sourceSha256": {
     "src/hooks/useOnlineRoom.ts": "28ee76577622888e94f53bbc8fc3acbb03a22d8ab8189ce680046728d551f6a8",
@@ -150,9 +149,7 @@
     "oldOfflineReload": "A",
     "closedClients": {
       "active": "activated",
-      "caches": [
-        "riftbound-app-B"
-      ]
+      "caches": ["riftbound-app-B"]
     },
     "newOfflineReload": "B",
     "errors": []
@@ -289,10 +286,7 @@
     ],
     "offlineRoutePortraitOverflow": false,
     "deckArt": {
-      "decks": [
-        "precon-zed",
-        "precon-shen"
-      ],
+      "decks": ["precon-zed", "precon-shen"],
       "cachedImages": 55,
       "unavailable": 0,
       "preservedAcrossUpdate": true
@@ -378,10 +372,7 @@
     ],
     "offlineRoutePortraitOverflow": false,
     "deckArt": {
-      "decks": [
-        "precon-zed",
-        "precon-shen"
-      ],
+      "decks": ["precon-zed", "precon-shen"],
       "cachedImages": 55,
       "unavailable": 0
     },
@@ -428,14 +419,8 @@
     "choices": [
       {
         "where": "top",
-        "deckCountsBefore": [
-          30,
-          29
-        ],
-        "deckCountsAfter": [
-          31,
-          29
-        ],
+        "deckCountsBefore": [30, 29],
+        "deckCountsAfter": [31, 29],
         "restoredOriginalPhysicalPorobot": true,
         "copiedShieldbearerCountUnchanged": true,
         "recipientUnitAndHybridAliasRemoved": true,
@@ -444,14 +429,8 @@
       },
       {
         "where": "bottom",
-        "deckCountsBefore": [
-          30,
-          29
-        ],
-        "deckCountsAfter": [
-          31,
-          29
-        ],
+        "deckCountsBefore": [30, 29],
+        "deckCountsAfter": [31, 29],
         "restoredOriginalPhysicalPorobot": true,
         "copiedShieldbearerCountUnchanged": true,
         "recipientUnitAndHybridAliasRemoved": true,
@@ -472,10 +451,7 @@
     "actualWorkerAsset": "/assets/worker-C3uBbka6.js",
     "cachedOfflineAssets": 77,
     "missingCachedAssets": 0,
-    "selectedDecks": [
-      "precon-annie",
-      "precon-lux"
-    ],
+    "selectedDecks": ["precon-annie", "precon-lux"],
     "selectedCachedArtwork": 38,
     "unavailableArtwork": 0,
     "oldPlanner": "battlefield-planner-2",
@@ -487,10 +463,7 @@
       "revision": 2,
       "turn": 1,
       "phase": "main",
-      "deckIds": [
-        "precon-annie",
-        "precon-lux"
-      ],
+      "deckIds": ["precon-annie", "precon-lux"],
       "difficulty": "normal",
       "rulesVersion": "core-2026-07-16+vendetta-faq-2026-08-14",
       "cardDataVersion": "0861c196b3100198a9fffa7b9465afc76a2e4b07db84e63e8efa6145fea25f6c"
@@ -513,10 +486,7 @@
     "actualWorkerAsset": "/assets/worker-C3uBbka6.js",
     "cachedOfflineAssets": 77,
     "missingCachedAssets": 0,
-    "selectedDecks": [
-      "precon-annie",
-      "precon-lux"
-    ],
+    "selectedDecks": ["precon-annie", "precon-lux"],
     "selectedCachedArtwork": 38,
     "unavailableArtwork": 0,
     "oldPlanner": "battlefield-planner-2",
@@ -528,10 +498,7 @@
       "revision": 2,
       "turn": 1,
       "phase": "main",
-      "deckIds": [
-        "precon-annie",
-        "precon-lux"
-      ],
+      "deckIds": ["precon-annie", "precon-lux"],
       "difficulty": "normal",
       "rulesVersion": "core-2026-07-16+vendetta-faq-2026-08-14",
       "cardDataVersion": "0861c196b3100198a9fffa7b9465afc76a2e4b07db84e63e8efa6145fea25f6c"
@@ -540,7 +507,302 @@
     "failedRequests": 0,
     "blockedRequests": 0,
     "oldProductionInstallPassed": true,
-    "productionUpgradeTested": false,
-    "status": "Fresh old paused isolated client retained offline after the environment restart, awaiting root verified exact-commit release flag. Upgrade and new production deployment have not yet been tested."
+    "productionUpgradeTested": true,
+    "status": "Completed actual old-to-new production upgrade with the same retained client. See productionUpgradeQa for uninterrupted process receipt and release evidence.",
+    "upgradeCompletedAt": "2026-10-08T01:52:59.017Z"
+  },
+  "productionUpgradeQa": {
+    "checkedAt": "2026-10-08T01:52:59.017Z",
+    "origin": "https://riftbound-duel-lab.vercel.app",
+    "releaseReady": {
+      "commitSha": "6249dac131faf033a842fa2e482c180be80c9f59",
+      "buildId": "b2b14dc063c7",
+      "readyAt": "2026-10-08T01:52:48.126Z",
+      "deploymentId": "dpl_5BjP14Z7PT53aUBLqC4kAk4pmxU9",
+      "deploymentUrl": "https://riftbound-duel-aa8v2zvdv-tuitamogamer-7851s-projects.vercel.app",
+      "secondaryDeploymentId": "dpl_GoSDqc6ckLk3ENwkMjVHoDAvkRfU",
+      "secondaryDeploymentUrl": "https://riftbound-duel-lab-pgml-mlb4hvan9-tuitamogamer-7851s-projects.vercel.app",
+      "aliases": [
+        {
+          "origin": "https://riftbound-duel-lab.vercel.app",
+          "projectId": "prj_vSRYnKQZudmN7OY9uHdq35AXHZw0",
+          "deploymentId": "dpl_5BjP14Z7PT53aUBLqC4kAk4pmxU9",
+          "deploymentUrl": "https://riftbound-duel-aa8v2zvdv-tuitamogamer-7851s-projects.vercel.app",
+          "commitSha": "6249dac131faf033a842fa2e482c180be80c9f59",
+          "state": "READY"
+        },
+        {
+          "origin": "https://riftbound-duel-lab-pgml.vercel.app",
+          "projectId": "prj_8x72hY1XBgDcNjcjQKLyX3xgCWXW",
+          "deploymentId": "dpl_GoSDqc6ckLk3ENwkMjVHoDAvkRfU",
+          "deploymentUrl": "https://riftbound-duel-lab-pgml-mlb4hvan9-tuitamogamer-7851s-projects.vercel.app",
+          "commitSha": "6249dac131faf033a842fa2e482c180be80c9f59",
+          "state": "READY"
+        }
+      ]
+    },
+    "oldBuildId": "cefb602dc1e3",
+    "newBuildId": "b2b14dc063c7",
+    "sourceSha256": "dbfb64c0004a3c78d7e22e2da0dec5b6d84452df63391edb183d6c9a9452aab5",
+    "gameDataSha256": "c8cba67c644da331ed47c8ad6d518a6a6dba5fed4616f41f05b1ff1660ce4936",
+    "oldOfflineAssets": 77,
+    "newOfflineAssets": 81,
+    "missingOldAssets": 0,
+    "missingNewAssets": 0,
+    "oldMainAsset": "/assets/index-DRbJXDSx.js",
+    "newMainAsset": "/assets/index-DACqojZ7.js",
+    "newWorkerAsset": "/assets/worker-BsrCyr2L.js",
+    "newWorkerSha256": "ecc597cd9d94f5577e377df0320aaa25ca094b3a9a330814f929772d725b7fcf",
+    "waiting": {
+      "newWorkerInstalledWithoutReplacingOldController": true,
+      "controllerChanges": 0,
+      "bothCompleteAppCachesRetained": true
+    },
+    "oldOffline": {
+      "shellReloadPassed": true,
+      "coldHistoryAsset": "/assets/MatchHistory-YcdPnhk4.js",
+      "coldHistoryFromServiceWorker": true,
+      "saveByteIdentical": true
+    },
+    "activation": {
+      "afterOldClientClosed": true,
+      "oldAppCacheRemoved": true,
+      "newAppCachePreserved": true,
+      "selectedDeckArtPreserved": true,
+      "selectedDeckArtCount": 38
+    },
+    "newOfflineResume": {
+      "oldSaveByteIdentical": true,
+      "pausedPreserved": true,
+      "oldRulesAndCatalogAccepted": true,
+      "newPlannerWorkerAvailableOffline": true,
+      "newPlannerWorkerAsset": "/assets/worker-BsrCyr2L.js",
+      "newPlannerWorkerSha256": "ecc597cd9d94f5577e377df0320aaa25ca094b3a9a330814f929772d725b7fcf"
+    },
+    "syntheticPausedSave": {
+      "bytes": 303066,
+      "sha256": "30e5db34928efcd4b696679f748d01cf5458baa02ea46cc536eab2bf68f3268d",
+      "revision": 2,
+      "turn": 1,
+      "paused": true
+    },
+    "pageErrors": 0,
+    "failedRequests": 0,
+    "blockedRequests": 0,
+    "productionApisCached": false,
+    "actualProcess": {
+      "startedAt": "2026-10-08T01:09:57.653Z",
+      "completedAt": "2026-10-08T01:52:59.116Z",
+      "exitCode": 0,
+      "signal": null
+    },
+    "passed": true,
+    "qualification": "The interrupted pre-restart attempt is preserved separately and contributes no completed upgrade assertion. This result uses one uninterrupted fresh retained old-production browser through the actual exact-commit new production deployment."
+  },
+  "liveProductionQa": {
+    "checkedAt": "2026-10-08T01:53:39.265Z",
+    "commitSha": "6249dac131faf033a842fa2e482c180be80c9f59",
+    "buildId": "b2b14dc063c7",
+    "sourceSha256": "dbfb64c0004a3c78d7e22e2da0dec5b6d84452df63391edb183d6c9a9452aab5",
+    "gameDataSha256": "c8cba67c644da331ed47c8ad6d518a6a6dba5fed4616f41f05b1ff1660ce4936",
+    "safety": {
+      "freshEphemeralBrowserContexts": true,
+      "productionApiRequestsBlocked": true,
+      "nonGetHeadRequestsBlocked": true,
+      "localDuelOnly": true
+    },
+    "aliases": [
+      {
+        "origin": "https://riftbound-duel-lab.vercel.app",
+        "resolvedOrigin": "https://riftbound-duel-lab.vercel.app",
+        "checkedAt": "2026-10-08T01:53:23.991Z",
+        "actualMainAsset": "/assets/index-DACqojZ7.js",
+        "offlineAssets": 81,
+        "missingOfflineAssets": 0,
+        "apiResponsesCached": false,
+        "workerAsset": "/assets/worker-BsrCyr2L.js",
+        "workerSha256": "ecc597cd9d94f5577e377df0320aaa25ca094b3a9a330814f929772d725b7fcf",
+        "selectedDeckArt": {
+          "decks": ["precon-zed", "precon-shen"],
+          "cachedImages": 55,
+          "unavailable": 0
+        },
+        "actualOfflineBot": {
+          "configVersion": "battlefield-planner-3",
+          "nodes": 24,
+          "usedFallback": false,
+          "error": null
+        },
+        "offlineReloadPassed": true,
+        "coldOfflineHistoryPassed": true,
+        "pausedOfflineResumePassed": true,
+        "portrait": {
+          "width": 390,
+          "scrollWidth": 390,
+          "height": 844
+        },
+        "landscape": {
+          "width": 844,
+          "scrollWidth": 844,
+          "height": 390
+        },
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "blockedRequests": 0,
+        "passed": true
+      },
+      {
+        "origin": "https://riftbound-duel-lab-pgml.vercel.app",
+        "resolvedOrigin": "https://riftbound-duel-lab-pgml.vercel.app",
+        "checkedAt": "2026-10-08T01:53:39.247Z",
+        "actualMainAsset": "/assets/index-DACqojZ7.js",
+        "offlineAssets": 81,
+        "missingOfflineAssets": 0,
+        "apiResponsesCached": false,
+        "workerAsset": "/assets/worker-BsrCyr2L.js",
+        "workerSha256": "ecc597cd9d94f5577e377df0320aaa25ca094b3a9a330814f929772d725b7fcf",
+        "selectedDeckArt": {
+          "decks": ["precon-zed", "precon-shen"],
+          "cachedImages": 55,
+          "unavailable": 0
+        },
+        "actualOfflineBot": {
+          "configVersion": "battlefield-planner-3",
+          "nodes": 24,
+          "usedFallback": false,
+          "error": null
+        },
+        "offlineReloadPassed": true,
+        "coldOfflineHistoryPassed": true,
+        "pausedOfflineResumePassed": true,
+        "portrait": {
+          "width": 390,
+          "scrollWidth": 390,
+          "height": 844
+        },
+        "landscape": {
+          "width": 844,
+          "scrollWidth": 844,
+          "height": 390
+        },
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "blockedRequests": 0,
+        "passed": true
+      }
+    ],
+    "actualProcess": {
+      "startedAt": "2026-10-08T01:53:10.481Z",
+      "completedAt": "2026-10-08T01:53:39.325Z",
+      "exitCode": 0,
+      "signal": null
+    },
+    "passed": true,
+    "qualification": "Fresh isolated contexts on both public aliases run the actual final-C worker offline. No existing browser profile, private production room or personal saved duel was read or changed."
+  },
+  "liveProductionApiQa": {
+    "checkedAt": "2026-10-08T01:54:20.661Z",
+    "commitSha": "6249dac131faf033a842fa2e482c180be80c9f59",
+    "buildId": "b2b14dc063c7",
+    "scope": "Actual hosted API entry only: GET and a one-byte malformed JSON POST. The malformed body is sent as text/plain so the application handler performs JSON parsing rather than a platform JSON parser. Both requests are rejected before any room or storage operation. No tokens, room creation or valid gameplay payload. The earlier direct-Node-egress failure before HTTP is archived separately and excluded.",
+    "probes": [
+      {
+        "origin": "https://riftbound-duel-lab.vercel.app",
+        "path": "/api/duel",
+        "method": "GET",
+        "requestContentType": null,
+        "status": 405,
+        "headers": {
+          "cache-control": "private, no-store, max-age=0",
+          "referrer-policy": "no-referrer",
+          "x-content-type-options": "nosniff",
+          "allow": "POST",
+          "content-type": "application/json; charset=utf-8",
+          "x-vercel-id": "sfo1::iad1::7shmh-1791424459629-da22da454007",
+          "x-vercel-cache": "MISS",
+          "date": "Thu, 08 Oct 2026 01:54:19 GMT"
+        },
+        "body": {
+          "error": "invalid-request"
+        },
+        "checkedAt": "2026-10-08T01:54:19.805Z",
+        "transportExitCode": 0,
+        "passed": true
+      },
+      {
+        "origin": "https://riftbound-duel-lab.vercel.app",
+        "path": "/api/duel",
+        "method": "POST",
+        "requestContentType": "text/plain",
+        "status": 400,
+        "headers": {
+          "cache-control": "private, no-store, max-age=0",
+          "referrer-policy": "no-referrer",
+          "x-content-type-options": "nosniff",
+          "content-type": "application/json; charset=utf-8",
+          "x-vercel-id": "sfo1::iad1::88rtc-1791424459958-00ec0d3d5556",
+          "x-vercel-cache": "MISS",
+          "date": "Thu, 08 Oct 2026 01:54:20 GMT"
+        },
+        "body": {
+          "error": "invalid-request"
+        },
+        "checkedAt": "2026-10-08T01:54:20.072Z",
+        "transportExitCode": 0,
+        "passed": true
+      },
+      {
+        "origin": "https://riftbound-duel-lab-pgml.vercel.app",
+        "path": "/api/duel",
+        "method": "GET",
+        "requestContentType": null,
+        "status": 405,
+        "headers": {
+          "cache-control": "private, no-store, max-age=0",
+          "referrer-policy": "no-referrer",
+          "x-content-type-options": "nosniff",
+          "allow": "POST",
+          "content-type": "application/json; charset=utf-8",
+          "x-vercel-id": "sfo1::iad1::n285s-1791424460188-9b61f09108cc",
+          "x-vercel-cache": "MISS",
+          "date": "Thu, 08 Oct 2026 01:54:20 GMT"
+        },
+        "body": {
+          "error": "invalid-request"
+        },
+        "checkedAt": "2026-10-08T01:54:20.372Z",
+        "transportExitCode": 0,
+        "passed": true
+      },
+      {
+        "origin": "https://riftbound-duel-lab-pgml.vercel.app",
+        "path": "/api/duel",
+        "method": "POST",
+        "requestContentType": "text/plain",
+        "status": 400,
+        "headers": {
+          "cache-control": "private, no-store, max-age=0",
+          "referrer-policy": "no-referrer",
+          "x-content-type-options": "nosniff",
+          "content-type": "application/json; charset=utf-8",
+          "x-vercel-id": "sfo1::iad1::m4rsz-1791424460550-0edd2811ae3a",
+          "x-vercel-cache": "MISS",
+          "date": "Thu, 08 Oct 2026 01:54:20 GMT"
+        },
+        "body": {
+          "error": "invalid-request"
+        },
+        "checkedAt": "2026-10-08T01:54:20.660Z",
+        "transportExitCode": 0,
+        "passed": true
+      }
+    ],
+    "actualProcess": {
+      "startedAt": "2026-10-08T01:54:19.413Z",
+      "completedAt": "2026-10-08T01:54:20.672Z",
+      "exitCode": 0,
+      "signal": null
+    },
+    "passed": true
   }
 }

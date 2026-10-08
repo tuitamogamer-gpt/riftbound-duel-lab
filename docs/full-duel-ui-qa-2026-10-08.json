@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "validatedAt": "2026-10-08T01:56:44.966Z",
+  "status": "passed",
+  "scope": "Fresh synthetic local best-of-three duel through actual UI; human keeps hand and passes, Normal bot wins; completed replay and browser-local note; no engine state injection or online room.",
+  "applicationCommit": "6249dac131faf033a842fa2e482c180be80c9f59",
+  "deploymentId": "dpl_5BjP14Z7PT53aUBLqC4kAk4pmxU9",
+  "origin": "https://riftbound-duel-lab.vercel.app",
+  "sourceSnapshot": {
+    "sourceSha256": "dbfb64c0004a3c78d7e22e2da0dec5b6d84452df63391edb183d6c9a9452aab5",
+    "gameDataSha256": "c8cba67c644da331ed47c8ad6d518a6a6dba5fed4616f41f05b1ff1660ce4936",
+    "buildId": "b2b14dc063c7",
+    "mainAsset": "/assets/index-DACqojZ7.js",
+    "workerAsset": "/assets/worker-BsrCyr2L.js",
+    "assetCount": 81
+  },
+  "browser": {
+    "engine": "Chromium",
+    "headless": true,
+    "platform": "Linux",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "touch": true,
+    "reducedMotion": true
+  },
+  "execution": {
+    "startedAt": "2026-10-08T01:53:19.858Z",
+    "completedAt": "2026-10-08T01:56:44.848Z",
+    "actualProcessExitCode": 0,
+    "signal": null
+  },
+  "humanUiActions": {
+    "keep": 1,
+    "endOrPass": 15,
+    "mandatoryChoices": 0
+  },
+  "completedMatch": {
+    "entry": {
+      "id": "match-fdbb1d5-6de05dbb-45",
+      "winner": 1,
+      "points": [0, 8],
+      "turns": 13,
+      "decisionCount": 45,
+      "botVersion": "battlefield-planner-3",
+      "deckIds": ["precon-zed", "precon-shen"]
+    },
+    "bot": {
+      "recordedDecisions": 45,
+      "preparedFallbacks": 0,
+      "workerDecisions": 29,
+      "versions": ["battlefield-planner-3"]
+    },
+    "series": {
+      "id": "series-oj28h3-muyvu2xy",
+      "phase": "sideboarding",
+      "scores": [0, 1],
+      "games": 1,
+      "gameNumber": 1
+    }
+  },
+  "replay": {
+    "turnOptions": 14,
+    "turnFrame": 4,
+    "noteFrame": 29,
+    "noteSavedAtExactFrame": true,
+    "reloadRestoresNoteAndFrame": true
+  },
+  "secondGame": {
+    "phase": "playing",
+    "scores": [0, 1],
+    "games": 1,
+    "gameNumber": 2,
+    "duelPhase": "mulligan"
+  },
+  "checks": [
+    "Real lobby starts best-of-three Zed/Shen at Normal, bot first; playback selected at 2x.",
+    "Real worker completes the game; result and automatically captured v3 history match; series becomes 0–1.",
+    "Captured replay reconstructs; turn and key-moment navigation work; a browser-local note survives reload and returns to its exact frame.",
+    "Actual sideboard flow starts game 2 and preserves the 0–1 score and completed first-game record."
+  ],
+  "geometry": {
+    "width": 390,
+    "scrollWidth": 390
+  },
+  "errors": {
+    "page": [],
+    "failedRequests": [],
+    "blockedRequests": []
+  },
+  "safety": {
+    "freshEphemeralContext": true,
+    "apiBlocked": true,
+    "nonGetHeadBlocked": true,
+    "rawStatesOrActionsPublished": false
+  },
+  "evidence": [
+    {
+      "name": "full-duel-ui-production-result.json",
+      "sha256": "00578fe1a972177018c80fdf7d1e5dfb915d8889a6ed4182e1c39895b1f3da29",
+      "location": "Private execution scratch; no raw match states or action records published."
+    },
+    {
+      "name": "full-duel-ui-production-process-status.json",
+      "sha256": "91f359a058df77a7099614aadb6ee59d553864098ab7fea31323d6b288354a12",
+      "location": "Private execution scratch; no raw match states or action records published."
+    },
+    {
+      "name": "full-duel-ui-qa.mjs",
+      "sha256": "6e3f9949a970e5388886d7bbeed320327c1761837085bc21c67536bda892297e",
+      "location": "Private execution scratch; no raw match states or action records published."
+    }
+  ],
+  "qualification": "One synthetic game with an intentionally passing human checks the worker, UI, save, replay and series bridge. It provides no evidence of AI strength or device latency. This was headless Linux Chromium, not a physical phone. Game 2 was started and its preserved score checked; it was not played to completion. Only the completed production run contributes to this receipt; incomplete selector dry runs do not."
+}
