@@ -36,6 +36,8 @@ jobs:
           tests/physical-board-return.test.ts
           tests/hybrid-copy-protection.test.ts
           tests/physical-verdict.test.ts
+          tests/spiritforged.test.ts
+          tests/spiritforged-extra.test.ts
           tests/card-registry.test.ts
           tests/card-script-compiler.test.ts
           tests/catalog-core.test.ts

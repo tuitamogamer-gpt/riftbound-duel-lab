@@ -1,5 +1,13 @@
 # Validation evidence
 
+## Final Spiritforged ownership correction — 8 October 2026
+
+A subsequent legal-action review found two remaining legacy paths: after Possession, Rumble recycled a controlled unit to its controller's deck; after Mystic Reversal, Riposte countered a controlled spell into its controller's trash. Both now use the original physical owner. Rumble also preserves the original card face, detaches its own hybrid Gear alias from a surviving host, removes both board indices once and creates no deck card from a token. Riposte delegates counter finalization to the shared resolver while preserving its separate Might grant.
+
+The final correction passed **247 tests in ten directly related files**, including **nine new regression cases**, with actual exit 0 and unchanged source hashes throughout the run. Production compilation, catalog consistency and regression-report guards also passed. Both existing Spiritforged suites are now included in required CI. The [focused validation record](final-physical-ownership-validation-2026-10-08.json) identifies the exact source and compiled build **a4bb75b3d4e9**.
+
+The complete **2,681-test** regression, **169-pair** matrix, **32-game** bot pilot and production C browser checks below are preserved evidence for application commit `6249dac` and its documentation-only follow-up `71392a0`. They were **not repeated after this final narrow rules correction**.
+
 ## Autonomous improvement release — 8 October 2026
 
 The final frozen implementation passed **2,681 unique cases across 120 files**, including all **169 ordered pairings** of the 13 official precons. The ordinary suite and two complementary precon shards completed without interruption, each with actual process exit **0** and a successful native Vitest report. The 54 focused precon cases repeated by the shards count once. The strictly verified [coverage record](regression-validation-2026-10-08.json) includes normalized identity digests, per-file counts, source hashes and all three process receipts. Earlier attempts were stopped to integrate reproduced physical-card rules fixes, and a later ordinary-suite attempt was interrupted by an execution-environment restart. Their statuses are preserved and their passing prefixes contribute no cases. The completed matrix shards retained their original exit-0 receipts; the ordinary suite was restarted in full with two workers. The historical 7 October mixed-checkpoint evidence below remains separate.

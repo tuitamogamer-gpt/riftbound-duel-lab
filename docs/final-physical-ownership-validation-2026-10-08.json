@@ -1,0 +1,148 @@
+{
+  "generatedAt": "2026-10-08T02:21:01.057192+00:00",
+  "scope": "Final narrow Spiritforged physical-ownership and counter-finalization correction; focused verification, not a repeated full suite, precon matrix or bot pilot.",
+  "previousCompleteRelease": {
+    "commit": "6249dac131faf033a842fa2e482c180be80c9f59",
+    "regressionRecord": "regression-validation-2026-10-08.json",
+    "uniqueTests": 2681,
+    "orderedPreconPairs": 169,
+    "botPilotGames": 32,
+    "sourceSha256": "dbfb64c0004a3c78d7e22e2da0dec5b6d84452df63391edb183d6c9a9452aab5"
+  },
+  "changes": [
+    "Rumble recycles the original physical card to its original owner, detaches attached Equipment and its own hybrid Gear alias, and removes Unit/Gear indices once; tokens do not become deck cards.",
+    "Riposte grants Might independently and uses the shared counter resolver for original ownership, leave-chain replacements and counter immunity."
+  ],
+  "newRegressionCases": 9,
+  "currentSource": {
+    "sourceSha256": "99a1351f0ea89dedfdcf5dc33c734528aebca28e19be8bcbb7c8e182f9e26b5c",
+    "gameDataSha256": "c4d575ef73f84eec34b427fe6812a602776b1059a6b7a5e1338685e39cbc21d3",
+    "fileCount": 408,
+    "changedFromPreviousCompleteRelease": [
+      {
+        "path": "src/game/spiritforged.ts",
+        "beforeSha256": "068553f9f2ed9824f06c738d110eb5164f351fe751e3dc5ea9a79bc9ae0798d4",
+        "afterSha256": "a0c1f3b5689f0f763244da73a29e22a5f912fcf8406bb6f2383523f7d6fb055b"
+      },
+      {
+        "path": "tests/physical-board-return.test.ts",
+        "beforeSha256": "57569b6c79a602a19b2353669d3cdebc5181a8557d9da741ce94c91624b6fce7",
+        "afterSha256": "4048c69d96bf85d2bcd8fa2fa437aaa9764fc2ee4ff8f8a835ed3dadc3b717ec"
+      }
+    ],
+    "requiredWorkflowSha256": "bcdb74c4c7dca1014ce62bdd3f47136242fab156381c871c76512c602b714250"
+  },
+  "focusedVerification": {
+    "startedAt": "2026-10-08T02:19:28.902Z",
+    "completedAt": "2026-10-08T02:19:43.515Z",
+    "actualProcessExitCode": 0,
+    "signal": null,
+    "workers": 2,
+    "passed": 247,
+    "failed": 0,
+    "pending": 0,
+    "testFiles": 10,
+    "perFile": [
+      {
+        "path": "tests/ai-authorized-knowledge.test.ts",
+        "passed": 17
+      },
+      {
+        "path": "tests/card-wave16.test.ts",
+        "passed": 13
+      },
+      {
+        "path": "tests/card-wave22.test.ts",
+        "passed": 5
+      },
+      {
+        "path": "tests/catalog-core.test.ts",
+        "passed": 11
+      },
+      {
+        "path": "tests/hybrid-copy-protection.test.ts",
+        "passed": 13
+      },
+      {
+        "path": "tests/origins-wave4.test.ts",
+        "passed": 63
+      },
+      {
+        "path": "tests/physical-board-return.test.ts",
+        "passed": 23
+      },
+      {
+        "path": "tests/physical-verdict.test.ts",
+        "passed": 8
+      },
+      {
+        "path": "tests/spiritforged-extra.test.ts",
+        "passed": 52
+      },
+      {
+        "path": "tests/spiritforged.test.ts",
+        "passed": 42
+      }
+    ],
+    "sourceUnchangedDuringRun": true,
+    "testedSourceHashes": {
+      "src/game/spiritforged.ts": "a0c1f3b5689f0f763244da73a29e22a5f912fcf8406bb6f2383523f7d6fb055b",
+      "tests/spiritforged.test.ts": "e8063c344b8905bc1b77ca56e9053f47af79100d79569a6154155e363a5315f8",
+      "tests/spiritforged-extra.test.ts": "2762cc9a1599455328484a2f43be748c325cb761d2866d656b89afae9251cbfc",
+      "tests/physical-board-return.test.ts": "4048c69d96bf85d2bcd8fa2fa437aaa9764fc2ee4ff8f8a835ed3dadc3b717ec",
+      "tests/physical-verdict.test.ts": "3d77b70e04f01db8a066a43ccd51e033fc069798eb8fbed98393448c05f088bb",
+      "tests/hybrid-copy-protection.test.ts": "a2f021047acb57ab279dc690e8675269a255d053f30f7d78a3d3616e12420d08",
+      "tests/card-wave16.test.ts": "4030fedadd790dfca534fd0a3749bdac3710ff7468636be0246303acacf98ee5",
+      "tests/card-wave22.test.ts": "927ea31640e0e98e81f31e249228be638e9f8c5214cf8ffa5c6648a71de71f17",
+      "tests/catalog-core.test.ts": "044522e2e35067bb3122b9bd86e0cdd2dda0f4e844290979cf1f7b66c10e78ef",
+      "tests/origins-wave4.test.ts": "11d047e42b95ff44b67a4f59970dd7d1135da777900883e7ba9428e29dab848e",
+      "tests/ai-authorized-knowledge.test.ts": "9cdc96240b68db370010b74e8df944147f49f6e77d4820c80dbc81cf576e916a"
+    },
+    "nativeReportSha256": "6c66b039cda5782a8f7d7d7d548f8fef737a4b0c37042bded49fa3ff1a68bdbf",
+    "processReceiptSha256": "93f499b989e83e3b634ca6e1c52a2566416cdd194fb18b7a5ae0853e2cfc6d0b",
+    "logSha256": "35ed6a1ab67dc2ac7d2db41e80439a057c8abda7c23a8ed867bdc3ad6beb4315"
+  },
+  "checks": {
+    "build": {
+      "command": ["npm", "run", "build"],
+      "startedAt": "2026-10-08T02:19:19.841063+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "completedAt": "2026-10-08T02:19:51.813809+00:00",
+      "signal": null
+    },
+    "catalog": {
+      "command": ["npm", "run", "cards:check"],
+      "startedAt": "2026-10-08T02:18:54.154118+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "completedAt": "2026-10-08T02:18:56.042505+00:00",
+      "signal": null
+    },
+    "report-guards": {
+      "command": ["node", "scripts/check-regression-reports.mjs"],
+      "startedAt": "2026-10-08T02:18:54.161927+00:00",
+      "state": "passed",
+      "exitCode": 0,
+      "completedAt": "2026-10-08T02:18:55.355418+00:00",
+      "signal": null
+    }
+  },
+  "build": {
+    "builtAt": "2026-10-08T02:19:51.813809+00:00",
+    "buildId": "a4bb75b3d4e9",
+    "assets": 81,
+    "index": "/assets/index-CdvqbJPg.js",
+    "indexSha256": "4238319ee23458baea7bb0800d88b9b1484aee9cee1b8d387f2a4d4995e88f6d",
+    "worker": "/assets/worker-BcVPqZ85.js",
+    "workerSha256": "e8ed7fb237696712f1c94a247711b01c93c32053d5c37b9c9984a946f03e49a6",
+    "manifestSha256": "53d13d68c620188dfc4c40a596c8f83686557e555ebf39e50e2e9d89ffea8358",
+    "sourceSha256": "99a1351f0ea89dedfdcf5dc33c734528aebca28e19be8bcbb7c8e182f9e26b5c",
+    "gameDataSha256": "c4d575ef73f84eec34b427fe6812a602776b1059a6b7a5e1338685e39cbc21d3"
+  },
+  "limits": [
+    "The 2681-test full regression, 169-pair matrix, 32-game pilot and earlier production C browser evidence belong to application commit6249dac and its unchanged documentation follow-up71392a0. They were not repeated after this final correction.",
+    "Nine new cases include actual legal Possession and Mystic Reversal sequences from both seats plus isolated attachment/token/replacement fixtures.",
+    "This record precedes the final push and deployment; exact resulting commit, CI and deployed-byte receipts are retained separately."
+  ]
+}

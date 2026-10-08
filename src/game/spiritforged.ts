@@ -6,11 +6,11 @@ import {
 } from "./text-sources";
 import { recycleCards, recycleRunes } from "./zone-events";
 import { isCardType } from "../data/cards";
-import { detach as detachObject } from "./objects";
+import { detach as detachObject, physicalCard, physicalOwner } from "./objects";
 import { getUnitTags } from "./board-rules";
 import { readyForbidden } from "./board-rules";
 import { equipDomains } from "./equipment";
-import { addToTrash, takeTrashAt } from "./trash";
+import { takeTrashAt } from "./trash";
 import { canPlayCard } from "./board-rules";
 import { cards, getCard, type Card } from "../data/cards";
 import type {
@@ -543,12 +543,14 @@ export const spiritforgedModule: ExpansionModule = {
         if (index >= 0) {
           const item = s.stack[index];
           if (u) u.temporaryMight += getCard(item.cardId).energy ?? 0;
-          if (getScript(item.cardId)?.uncounterable) break;
-          s.stack.splice(index, 1);
-          if (item.flowed) {
-            s.players[item.player].banished.push(item.cardId);
-            ctx.cardEvent(s, "banish", item.player, item.cardId);
-          } else addToTrash(s, item.player, item.cardId);
+          ctx.runEffects(
+            s,
+            p,
+            [{ type: "counter", target: "spell" }],
+            spellId,
+            ctx.sourceId,
+            ctx.locationId,
+          );
         }
         break;
       }
@@ -654,9 +656,13 @@ export const spiritforgedModule: ExpansionModule = {
         )
           break;
         ctx.pay(s, p, e.amount ?? 0, c.power ?? 0, c.domains);
-        for (const gid of [...u.gear]) detach(s, gid);
+        const owner = physicalOwner(u),
+          cardId = physicalCard(u);
+        for (const gear of s.gears)
+          if (gear.id === uid || gear.attachedTo === uid) detachObject(s, gear);
         s.units = s.units.filter((x) => x.id !== uid);
-        if (!u.token) recycleCards(s, p, [u.cardId], p);
+        s.gears = s.gears.filter((gear) => gear.id !== uid);
+        if (!u.token) recycleCards(s, owner, [cardId], p);
         takeTrashAt(s, p, index);
         ctx.playUnit(s, p, id, loc as LocationId, false);
         ctx.log?.(

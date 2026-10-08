@@ -1,5 +1,11 @@
 # Production deployment
 
+## Final Spiritforged follow-up — 8 October 2026
+
+The final follow-up corrects Rumble recycling and Riposte counter finalization after control changes. It preserves original physical card ownership, handles attached hybrid Gear aliases once and reuses the common counter resolver. The [focused validation](final-physical-ownership-validation-2026-10-08.json) passed **247 tests across ten files**, including nine new cases, plus production build, catalog consistency and report guards. Its compiled build is **a4bb75b3d4e9**, with **81 offline assets**. Required CI now also runs both existing Spiritforged suites.
+
+This section records the locally verified follow-up before push; its exact final commit, required CI and READY production alias checks are recorded separately. The deployment and complete-regression receipts below describe the earlier `6249dac` application release, whose source differs from this follow-up only in `src/game/spiritforged.ts` and its CI-covered physical-board regression file. The 2,681-test full suite, 169-pair matrix and 32-game pilot were not repeated for this follow-up.
+
 ## Catalog, mobile and practice release — 8 October 2026
 
 Application commit `6249dac131faf033a842fa2e482c180be80c9f59` was pushed to `main`. Both linked production projects reached **READY** for this exact commit, with their public aliases resolving to those deployments:

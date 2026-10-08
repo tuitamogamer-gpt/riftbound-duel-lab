@@ -263,3 +263,200 @@ describe("physical board returns", () => {
     expect(state.players[0].hand).toEqual([ven(137)]);
   });
 });
+
+function rumbleRecycle(state: GameState, targetId: string) {
+  const actor = state.priorityPlayer;
+  state = chain(cast(state, sfd(26)));
+  const rumble = state.units.find((object) => object.cardId === sfd(26))!;
+  state = chain(cast(state, sfd(204)));
+  state.players[actor].discard.push(sfd(21));
+  const before = state.players.map((player) => inventory(state, player.id));
+  state = act(state, `move-start:${rumble.id}:field:1`);
+  state = act(state, "move-confirm");
+  for (let i = 0; i < 12 && !state.pendingChoice; i++)
+    state = act(state, "pass");
+  expect(state.pendingChoice).not.toBeNull();
+  state = chain(
+    act(state, (action) =>
+      action.id.includes(`rumble:${targetId}:${sfd(21)}:base:${actor}`),
+    ),
+  );
+  expect(state.units.some((object) => object.id === targetId)).toBe(false);
+  expect(state.gears.some((object) => object.id === targetId)).toBe(false);
+  expect(state.units.some((object) => object.cardId === sfd(21))).toBe(true);
+  expect(state.players.map((player) => inventory(state, player.id))).toEqual(
+    before,
+  );
+  expect(validState(state)).toBe(true);
+  return state;
+}
+
+describe("physical Rumble recycling and Riposte counters", () => {
+  it.each([0, 1] as const)(
+    "Rumble recycles a Porobot legally taken by Possession to its physical owner's deck, seat %i",
+    (owner) => {
+      const setup = playedPorobot(owner);
+      let state = chain(cast(setup.state, sfd(204)));
+      state = act(state, `move-start:${setup.id}:field:0`);
+      state = act(state, "move-confirm");
+      state = act(state, "pass");
+      expect(state.priorityPlayer).toBe(enemy(owner));
+      state = chain(cast(state, ogn(203), setup.id));
+      expect(
+        state.units.find((object) => object.id === setup.id),
+      ).toMatchObject({
+        owner: enemy(owner),
+        originalOwner: owner,
+      });
+      if (state.phase === "showdown") state = act(act(state, "pass"), "pass");
+      state = chain(act(state, "end-turn"));
+      state.players[enemy(owner)].energy = state.players[enemy(owner)].power =
+        30;
+      state = rumbleRecycle(state, setup.id);
+      expect(state.players[owner].deck.filter((id) => id === porobot)).toEqual([
+        porobot,
+      ]);
+      expect(state.players[enemy(owner)].deck).not.toContain(porobot);
+    },
+  );
+
+  it("Rumble recycles a legally copied Porobot's original face and detaches Spectacles", () => {
+    const setup = playedPorobot(0);
+    let state = chain(cast(setup.state, ogn(51)));
+    const model = state.units.find((object) => object.cardId === ogn(51))!;
+    state = chain(cast(state, ven(137)));
+    const glasses = state.gears.find((object) => object.cardId === ven(137))!;
+    state = act(state, `equip:${glasses.id}:${setup.id}`);
+    state = act(act(state, "pass"), "pass");
+    state = chain(act(state, `choose-custom:spectacles:${model.id}`));
+    expect(state.units.find((object) => object.id === setup.id)?.cardId).toBe(
+      ogn(51),
+    );
+    state = rumbleRecycle(state, setup.id);
+    expect(state.players[0].deck).toContain(porobot);
+    expect(state.players[0].deck).not.toContain(ogn(51));
+    expect(
+      state.gears.find((object) => object.id === glasses.id)?.attachedTo,
+    ).toBeUndefined();
+    expect(state.units.find((object) => object.id === model.id)?.cardId).toBe(
+      ogn(51),
+    );
+  });
+
+  it.each([false, true])(
+    "Rumble detaches a hybrid's own Gear alias from a surviving host, token %s",
+    (token) => {
+      let state = fixture();
+      const hybrid = {
+        ...unit("hybrid"),
+        cardId: porobot,
+        token,
+        ...(token ? { originalCardId: "token-reflection" } : {}),
+        attachedTo: "host",
+        copiedText: ven(137),
+      };
+      const host = {
+        ...unit("host"),
+        cardId: ogn(51),
+        originalCardId: ogn(49),
+        gear: [hybrid.id],
+        grantedTags: [{ sourceId: hybrid.id, tag: "Mech" }],
+        copyEffects: [{ sourceId: hybrid.id, cardId: ogn(51) }],
+        usedAbilities: [`${hybrid.id}:test`],
+      };
+      state.units = [hybrid, host];
+      state.gears = [hybrid];
+      state = rumbleRecycle(state, hybrid.id);
+      expect(state.units.find((object) => object.id === host.id)).toMatchObject(
+        {
+          cardId: ogn(49),
+          gear: [],
+          grantedTags: [],
+          copyEffects: [],
+          usedAbilities: [],
+        },
+      );
+      expect(state.players[0].deck.filter((id) => id === porobot)).toHaveLength(
+        token ? 0 : 1,
+      );
+      expect(state.players[0].deck).not.toContain("token-reflection");
+    },
+  );
+
+  it.each([0, 1] as const)(
+    "Riposte counters a legally controlled spell into its original owner's trash, seat %i",
+    (owner) => {
+      let state = fixture();
+      state.currentPlayer = state.priorityPlayer = state.focusPlayer = owner;
+      state = chain(cast(state, ogn(51)));
+      const mine = state.units.find((object) => object.cardId === ogn(51))!;
+      state = cast(state, sfd(97), mine.id);
+      const spell = state.stack.find((item) => item.cardId === sfd(97))!;
+      while (state.priorityPlayer !== enemy(owner)) state = act(state, "pass");
+      state = cast(state, ogn(80), spell.id);
+      for (let i = 0; i < 10 && !state.pendingChoice; i++)
+        state = act(state, "pass");
+      state = act(state, "choose-custom:retarget:keep");
+      expect(state.stack.find((item) => item.id === spell.id)).toMatchObject({
+        player: enemy(owner),
+        originalOwner: owner,
+      });
+      while (state.priorityPlayer !== owner) state = act(state, "pass");
+      state = chain(cast(state, sfd(206), `${mine.id}~${spell.id}`));
+      expect(state.players[owner].discard).toContain(sfd(97));
+      expect(state.players[enemy(owner)].discard).not.toContain(sfd(97));
+      expect(
+        state.units.find((object) => object.id === mine.id)?.temporaryMight,
+      ).toBe(1);
+    },
+  );
+
+  it("Riposte honors an empowered unit's counter immunity while still giving Might", () => {
+    let state = fixture();
+    state.units = [
+      unit("mine"),
+      { ...unit("guardian", 1, "base:1"), cardId: ven(69), empowered: true },
+    ];
+    state.stack = [
+      {
+        id: "incoming",
+        cardId: sfd(97),
+        player: 1,
+        kind: "spell",
+        targetId: "mine",
+        effects: [{ type: "might", amount: 5, target: "anyUnit" }],
+      },
+    ];
+    state = chain(cast(state, sfd(206), "mine~incoming"));
+    expect(
+      state.units.find((object) => object.id === "mine")?.temporaryMight,
+    ).toBe(6);
+    expect(
+      state.log.some((entry) =>
+        entry.text.includes("Punch First is countered"),
+      ),
+    ).toBe(false);
+  });
+
+  it("Riposte preserves an instructed spell's recycle-on-leave destination", () => {
+    let state = fixture();
+    state.units = [unit("mine")];
+    state.stack = [
+      {
+        id: "incoming",
+        cardId: sfd(97),
+        player: 1,
+        originalOwner: 0,
+        recycleOnLeave: true,
+        kind: "spell",
+        targetId: "mine",
+        effects: [{ type: "might", amount: 5, target: "anyUnit" }],
+      },
+    ];
+    state = chain(cast(state, sfd(206), "mine~incoming"));
+    expect(state.players[0].deck.at(-1)).toBe(sfd(97));
+    expect(state.players[1].deck).not.toContain(sfd(97));
+    expect(state.players[0].discard).not.toContain(sfd(97));
+    expect(state.players[1].discard).not.toContain(sfd(97));
+  });
+});
