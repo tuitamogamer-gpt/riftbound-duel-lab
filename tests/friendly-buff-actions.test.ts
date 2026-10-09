@@ -15,7 +15,7 @@ function position() {
 }
 
 describe("friendly buff action presentation", () => {
-  it.each([ogn(58), ogn(154), ogn(4), sfd(97)])(
+  it.each([ogn(57), ogn(58), ogn(154), ogn(4), sfd(97)])(
     "offers only friendly targets for %s without changing engine legality",
     (cardId) => {
       const game = position();

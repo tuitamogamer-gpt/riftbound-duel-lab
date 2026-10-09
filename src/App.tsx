@@ -69,6 +69,11 @@ import {
 } from "./game/engine";
 import { isMovementSelection, sourceActions } from "./game/flow";
 import {
+  filterHiddenPlayMode,
+  hiddenHandStatus,
+  type HiddenPlayMode,
+} from "./game/hidden-presentation";
+import {
   filterFriendlyBuffActions,
   isFriendlyBuffAction,
 } from "./game/friendly-buff-actions";
@@ -416,6 +421,7 @@ export default function App() {
   const [pileView, setPileView] = useState<PileView | null>(null);
   const [help, setHelp] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
+  const [hiddenPlayMode, setHiddenPlayMode] = useState<HiddenPlayMode>("hide");
   const [error, setError] = useState("");
   const [muted, setMuted] = useState(true);
   const thinking = Boolean(
@@ -599,7 +605,13 @@ export default function App() {
     doAction,
   ]);
 
-  const currentActions = game ? sourceActions(game, legal, selected) : [];
+  const currentActions = game
+    ? sourceActions(
+        game,
+        filterHiddenPlayMode(game, legal, selected, hiddenPlayMode),
+        selected,
+      )
+    : [];
   const chooseTarget = (id: string) => {
     const candidates = currentActions.filter(
       (action) =>
@@ -609,6 +621,7 @@ export default function App() {
     if (
       candidates.length === 1 &&
       game &&
+      !hiddenHandStatus(game, selected, legal) &&
       !isFriendlyBuffAction(game, candidates[0])
     )
       doAction(candidates[0]);
@@ -643,10 +656,15 @@ export default function App() {
       return;
     }
     setTarget(null);
+    setHiddenPlayMode("hide");
     if (compactTable) {
       const zone = soleMobileTargetZone(
         game,
-        sourceActions(game, legal, source),
+        sourceActions(
+          game,
+          filterHiddenPlayMode(game, legal, source, "hide"),
+          source,
+        ),
       );
       if (zone) setMobileZone(zone);
     }
@@ -1486,6 +1504,22 @@ export default function App() {
                     legal={legal}
                     selected={selected}
                     target={target}
+                    hiddenPlayMode={hiddenPlayMode}
+                    setHiddenPlayMode={(mode) => {
+                      setHiddenPlayMode(mode);
+                      setTarget(null);
+                      if (compactTable) {
+                        const zone = soleMobileTargetZone(
+                          game,
+                          sourceActions(
+                            game,
+                            filterHiddenPlayMode(game, legal, selected, mode),
+                            selected,
+                          ),
+                        );
+                        if (zone) setMobileZone(zone);
+                      }
+                    }}
                     clear={() => {
                       setSelected(null);
                       setTarget(null);
@@ -1532,10 +1566,20 @@ export default function App() {
                         if (game.phase === "mulligan") selectCard(source);
                         else if (!review && !thinking && !paused) {
                           setTarget(null);
+                          setHiddenPlayMode("hide");
                           if (compactTable) {
                             const zone = soleMobileTargetZone(
                               game,
-                              sourceActions(game, legal, source),
+                              sourceActions(
+                                game,
+                                filterHiddenPlayMode(
+                                  game,
+                                  legal,
+                                  source,
+                                  "hide",
+                                ),
+                                source,
+                              ),
                             );
                             if (zone) setMobileZone(zone);
                           }
@@ -2211,7 +2255,9 @@ function Destination({ location }: { location: LocationId }) {
       {t(
         options.every((action) => action.category === "move")
           ? "Move here"
-          : "Play here",
+          : options.every((action) => action.id.startsWith("hide:"))
+            ? "Hide here"
+            : "Play here",
       )}{" "}
       <ArrowRight size={13} />
     </button>

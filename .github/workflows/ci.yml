@@ -45,6 +45,9 @@ jobs:
           tests/match-setup.test.ts
           tests/session-storage.test.ts
           tests/payment-decisions.test.ts
+          tests/hidden-play-modes.test.ts
+          tests/hidden-flow.test.ts
+          tests/hidden-card-view.test.ts
           tests/deck-builder.test.ts
           tests/catalog-query.test.ts
           tests/deck-token-validation.test.ts

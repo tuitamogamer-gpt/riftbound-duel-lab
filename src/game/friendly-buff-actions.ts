@@ -21,9 +21,12 @@ function benefitsUnit(effect: Effect): boolean {
       );
     case "special":
       return (
-        ["ven:barrier", "ven:shroud", "ven-wave4:dominus"].includes(
-          effect.custom ?? "",
-        ) ||
+        [
+          "ogn-extra:block",
+          "ven:barrier",
+          "ven:shroud",
+          "ven-wave4:dominus",
+        ].includes(effect.custom ?? "") ||
         (effect.custom === "ven-wave4:sanction" && (effect.amount ?? 0) > 0)
       );
     default:

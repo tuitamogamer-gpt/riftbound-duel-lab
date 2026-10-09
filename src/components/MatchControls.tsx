@@ -23,7 +23,12 @@ import {
   priorityWindow,
   visibleTurnStep,
 } from "../game/presentation";
-import { hiddenCardStatus } from "../game/hidden-presentation";
+import {
+  filterHiddenPlayMode,
+  hiddenCardStatus,
+  hiddenHandStatus,
+  type HiddenPlayMode,
+} from "../game/hidden-presentation";
 import {
   getActionStackView,
   pendingChoiceCardId,
@@ -34,6 +39,8 @@ export function MatchControls({
   legal,
   selected,
   target,
+  hiddenPlayMode = "hide",
+  setHiddenPlayMode,
   clear,
   act,
   requestAction,
@@ -49,6 +56,8 @@ export function MatchControls({
   legal: GameAction[];
   selected: string | null;
   target: string | null;
+  hiddenPlayMode?: HiddenPlayMode;
+  setHiddenPlayMode?: (mode: HiddenPlayMode) => void;
   clear: () => void;
   act: (action: GameAction) => void;
   /** Optional payment-aware dispatcher; the engine still validates confirmation. */
@@ -67,11 +76,16 @@ export function MatchControls({
   const damageSummary =
     !review && game.phase === "damage" ? damageAssignmentSummary(game) : null;
   const window = priorityWindow(game);
+  const modeLegal = filterHiddenPlayMode(game, legal, selected, hiddenPlayMode);
+  const hiddenSetup =
+    !review && !busy && !paused
+      ? hiddenHandStatus(game, selected, legal)
+      : null;
   const stackView = getActionStackView(game, review);
   const forcedPass =
     !review && legal.length === 1 && legal[0].category === "pass";
   const selectedAction = selected
-    ? legal.find(
+    ? modeLegal.find(
         (action) => action.sourceId === selected && action.player === 0,
       )
     : undefined;
@@ -96,7 +110,7 @@ export function MatchControls({
       ? game.players[game.pendingChoice.effect?.who === "opponent" ? 1 : 0]
           .deck[0]
       : undefined;
-  const available = sourceActions(game, legal, selected).filter(
+  const available = sourceActions(game, modeLegal, selected).filter(
     (action) =>
       !target ||
       action.targetId === target ||
@@ -148,7 +162,7 @@ export function MatchControls({
     ["pass", "end"].includes(action.category),
   );
   const [pageState, setPage] = useState({ key: "", page: 0 });
-  const pageKey = `${selected}:${target}:${pageSize}:${actions.map((action) => action.id).join(";")}`;
+  const pageKey = `${selected}:${target}:${hiddenPlayMode}:${pageSize}:${actions.map((action) => action.id).join(";")}`;
   const page = pageState.key === pageKey ? pageState.page : 0;
   const pageCount = Math.ceil(actions.length / pageSize);
   const opening = game.phase === "mulligan" && !game.players[0].mulliganDone;
@@ -193,15 +207,17 @@ export function MatchControls({
           : card
             ? hiddenStatus
               ? hiddenStatus.hint
-              : actions.length
-                ? selectedAction && isFriendlyBuffAction(game, selectedAction)
-                  ? cardEffectSummary(card.text) ||
-                    "Choose a highlighted target or an available move."
-                  : actions.some((action) => action.targetId)
-                    ? "Choose a highlighted target or an available move."
-                    : readableText(card.text) || "Choose a move."
-                : (blockedReason ??
-                  "This card has no legal target, destination or available effect in this position.")
+              : hiddenSetup && hiddenPlayMode === "hide"
+                ? hiddenSetup.hint
+                : actions.length
+                  ? selectedAction && isFriendlyBuffAction(game, selectedAction)
+                    ? cardEffectSummary(card.text) ||
+                      "Choose a highlighted target or an available move."
+                    : actions.some((action) => action.targetId)
+                      ? "Choose a highlighted target or an available move."
+                      : readableText(card.text) || "Choose a move."
+                  : (blockedReason ??
+                    "This card has no legal target, destination or available effect in this position.")
             : game.phase === "damage"
               ? "Click a highlighted enemy to assign your damage."
               : game.phase === "move"
@@ -219,7 +235,7 @@ export function MatchControls({
                         : "Click a glowing card to play it, or a ready unit to move. End your turn when finished.";
   return (
     <section
-      className={`match-controls visual-controls window-${window} ${sourceCard ? "has-source" : ""} ${hasTargetOptions ? "has-target-options" : ""} ${review || busy ? "is-busy" : ""}`}
+      className={`match-controls visual-controls window-${window} ${sourceCard ? "has-source" : ""} ${hasTargetOptions ? "has-target-options" : ""} ${hiddenSetup ? "has-hidden-modes" : ""} ${review || busy ? "is-busy" : ""}`}
       aria-label={t("Game controls")}
     >
       <div className="decision-context">
@@ -266,6 +282,8 @@ export function MatchControls({
               <span className="card-cost-note">
                 {hidden ? (
                   t("Hidden · base cost ignored")
+                ) : hiddenSetup && hiddenPlayMode === "hide" ? (
+                  t(hiddenSetup.costLabel)
                 ) : (
                   <>
                     {t("Printed cost")} · {card.energy ?? 0} {t("ENERGY")} ·{" "}
@@ -326,16 +344,54 @@ export function MatchControls({
           )}
         </div>
       </div>
-      <div className="decision-actions">
-        {selected && !paused && !busy && !review && !opening && (
+      {hiddenSetup && (
+        <div
+          className="hidden-play-modes"
+          role="group"
+          aria-label={t("Play method")}
+        >
           <button
+            type="button"
+            data-hidden-mode="hide"
+            aria-pressed={hiddenPlayMode === "hide"}
+            onClick={() => setHiddenPlayMode?.("hide")}
+          >
+            {t(hiddenSetup.costLabel)}
+          </button>
+          <button
+            type="button"
+            data-hidden-mode="play"
+            aria-pressed={hiddenPlayMode === "play"}
+            onClick={() => setHiddenPlayMode?.("play")}
+          >
+            {t("Play now")}
+            <small>{t("Normal cost")}</small>
+          </button>
+          <button
+            type="button"
             className="cancel-selection"
             onClick={clear}
             aria-label={t("Poništi odabir")}
           >
             <X size={18} />
           </button>
-        )}
+        </div>
+      )}
+      <div className="decision-actions">
+        {selected &&
+          !hiddenSetup &&
+          !paused &&
+          !busy &&
+          !review &&
+          !opening && (
+            <button
+              className="cancel-selection"
+              onClick={clear}
+              aria-label={t("Poništi odabir")}
+            >
+              <X size={18} />
+            </button>
+          )}
         {paused ? (
           <>
             {review && step && (
@@ -403,6 +459,7 @@ export function MatchControls({
                     <button
                       key={action.id}
                       className={`context-action ${targets.length ? "has-target" : ""}`}
+                      data-action-id={action.id}
                       data-target-id={action.targetId}
                       aria-label={
                         t(action.label) +
@@ -451,7 +508,17 @@ export function MatchControls({
                         ) : (
                           <strong>{t(action.label)}</strong>
                         )}
-                        {action.detail && <small>{t(action.detail)}</small>}
+                        {action.id.startsWith("hide:") && hiddenSetup ? (
+                          <small className="hidden-action-cost">
+                            {t(
+                              action.id.endsWith(":energy")
+                                ? "Hide · 1 Energy"
+                                : hiddenSetup.costLabel,
+                            )}
+                          </small>
+                        ) : (
+                          action.detail && <small>{t(action.detail)}</small>
+                        )}
                       </span>
                     </button>
                   );
@@ -502,7 +569,7 @@ export function MatchControls({
                 <ArrowRight size={17} />
               </button>
             )}
-            {ending && (
+            {ending && !(hiddenSetup && actions.length) && (
               <button
                 className={`gold-button end-turn ${selected && actions.length ? "secondary-ending" : ""}`}
                 onClick={() => dispatch(ending)}

@@ -683,6 +683,9 @@
     width: 100%;
     height: var(--hand-card-height);
   }
+  .app.is-game .hand .game-card.selected {
+    transform: none;
+  }
   .app.is-game .hand .game-card img {
     object-fit: cover;
     object-position: center 20%;
@@ -978,20 +981,23 @@
   .app.is-game
     .playmat:has(
       .visual-controls .action-pages,
-      .visual-controls.has-target-options
+      .visual-controls.has-target-options,
+      .visual-controls.has-hidden-modes
     ) {
     grid-template-rows: 40px 56px auto minmax(0, 1fr) 98px auto;
   }
   .app.is-game
     .playmat:has(
       .visual-controls .action-pages,
-      .visual-controls.has-target-options
+      .visual-controls.has-target-options,
+      .visual-controls.has-hidden-modes
     )
     .decision-title,
   .app.is-game
     .playmat:has(
       .visual-controls .action-pages,
-      .visual-controls.has-target-options
+      .visual-controls.has-target-options,
+      .visual-controls.has-hidden-modes
     )
     .card-cost-note {
     display: block;
@@ -1003,7 +1009,8 @@
   .app.is-game
     .playmat:has(
       .visual-controls .action-pages,
-      .visual-controls.has-target-options
+      .visual-controls.has-target-options,
+      .visual-controls.has-hidden-modes
     )[data-mobile-zone^="field:"]
     .battlefields {
     min-height: 0;
@@ -1017,7 +1024,8 @@
   .app.is-game
     .playmat:has(
       .visual-controls .action-pages,
-      .visual-controls.has-target-options
+      .visual-controls.has-target-options,
+      .visual-controls.has-hidden-modes
     )
     .battlefields
     > .battlefield[data-mobile-active="true"] {
@@ -1124,6 +1132,129 @@
 @media (max-width: 800px), (max-width: 1000px) and (max-height: 500px) {
   .app.is-game .playmat > .visual-controls.has-target-options .card-cost-note,
   .app.is-game .playmat > .visual-controls.has-target-options .decision-kicker {
+    display: none;
+  }
+}
+
+@media (max-width: 800px), (max-width: 1000px) and (max-height: 500px) {
+  .app.is-game .playmat > .visual-controls.has-hidden-modes .decision-kicker,
+  .app.is-game .playmat > .visual-controls.has-hidden-modes .card-cost-note {
+    display: none;
+  }
+  .app.is-game .visual-controls.has-hidden-modes .decision-copy p {
+    -webkit-line-clamp: 2;
+  }
+  .app.is-game .visual-controls.has-hidden-modes .decision-copy {
+    padding-right: 0;
+  }
+  .app.is-game .visual-controls.has-hidden-modes .decision-copy > strong {
+    display: block;
+  }
+  .app.is-game .visual-controls.has-hidden-modes > .hidden-play-modes {
+    grid-area: 2 / 1 / 3 / -1;
+    width: 100%;
+    margin: 0;
+  }
+  .app.is-game .visual-controls.has-hidden-modes > .decision-actions {
+    grid-area: 3 / 1 / 4 / -1;
+  }
+  .app.is-game
+    .visual-controls.has-hidden-modes
+    .context-action:not(.has-target) {
+    padding: 4px;
+    min-height: 48px;
+  }
+  .app.is-game
+    .visual-controls.has-hidden-modes
+    .context-action:not(.has-target)
+    .decision-option-art {
+    width: 23px;
+    height: 32px;
+  }
+  .app.is-game .visual-controls.has-hidden-modes .context-action small {
+    display: block;
+  }
+}
+
+/* Hidden's two play methods need a wider action rail; keep hand browsing and
+   pile access together so target paging leaves space for actual hand cards. */
+@media (max-width: 1000px) and (max-height: 500px) and (min-aspect-ratio: 3/2) {
+  .app.is-game .playmat:has(.visual-controls.has-hidden-modes) {
+    grid-template-columns: 72px minmax(0, 1fr) minmax(0, 1fr) minmax(
+        280px,
+        1.1fr
+      );
+  }
+  .app.is-game
+    .playmat:has(.visual-controls.has-hidden-modes)
+    .player-cards
+    > .hand-section {
+    --hand-card-height: min(calc(100cqh - 48px), 132px);
+    grid-template-rows: 44px minmax(0, 1fr);
+  }
+  .app.is-game
+    .playmat:has(.visual-controls.has-hidden-modes)
+    .hand-title-name {
+    display: none;
+  }
+  .app.is-game
+    .playmat:has(.visual-controls.has-hidden-modes)
+    .hand-mobile-tools {
+    grid-area: 1 / 1;
+  }
+  .app.is-game
+    .playmat:has(.visual-controls.has-hidden-modes)
+    .player-cards
+    .hand {
+    grid-area: 2 / 1 / 3 / -1;
+  }
+  .app.is-game
+    .visual-controls.has-hidden-modes
+    .decision-actions:has(.action-pages) {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 4px;
+  }
+  .app.is-game
+    .visual-controls.has-hidden-modes
+    .decision-actions:has(.action-pages)
+    > .context-actions {
+    grid-area: 1 / 2;
+  }
+  .app.is-game .visual-controls.has-hidden-modes .action-pages {
+    display: contents;
+  }
+  .app.is-game
+    .visual-controls.has-hidden-modes
+    .action-pages
+    > button:first-child {
+    grid-area: 1 / 1;
+    align-self: start;
+  }
+  .app.is-game
+    .visual-controls.has-hidden-modes
+    .action-pages
+    > button:last-child {
+    grid-area: 1 / 3;
+    align-self: start;
+  }
+  .app.is-game .visual-controls.has-hidden-modes .action-pages > span {
+    grid-area: 1 / 1;
+    align-self: end;
+    text-align: center;
+    line-height: 14px;
+  }
+  .app.is-game .visual-controls.has-hidden-modes .context-action.has-target {
+    min-width: 0;
+  }
+  .app.is-game
+    .visual-controls.has-hidden-modes
+    .context-action.has-target
+    .decision-option-art {
+    width: 23px;
+    height: 32px;
+  }
+  .app.is-game .visual-controls.has-hidden-modes .decision-action-label {
     display: none;
   }
 }

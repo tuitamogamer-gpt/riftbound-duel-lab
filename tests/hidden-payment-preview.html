@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hidden payment QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      if (!["localhost", "127.0.0.1", "[::1]"].includes(location.hostname))
+        throw new Error(
+          "Hidden QA fixtures are restricted to loopback origins",
+        );
+      const scenario =
+        new URLSearchParams(location.search).get("scenario") || "hide";
+      if (!["hide", "exhausted", "reveal", "blocked"].includes(scenario))
+        throw new Error(`Unknown Hidden QA fixture: ${scenario}`);
+      const match = createCombatFixture();
+      match.phase = "main";
+      match.combat = null;
+      match.fields.forEach((field) => (field.controller = null));
+      match.fields[0].controller = scenario === "blocked" ? null : 0;
+      match.units = [
+        {
+          ...combatUnit("hidden-own-unit", 0, 5, "ogn-049-298"),
+          location: scenario === "blocked" ? "base:0" : "field:0",
+        },
+        {
+          ...combatUnit("hidden-second-ally", 0, 3, "ogn-175-298"),
+          location: scenario === "blocked" ? "base:0" : "field:0",
+        },
+        {
+          ...combatUnit("hidden-enemy-unit", 1, 5, "ogn-219-298"),
+          location: "base:1",
+        },
+      ];
+      const player = match.players[0];
+      player.hand = scenario === "reveal" ? [] : ["ogn-057-298"];
+      player.energy = ["hide", "blocked"].includes(scenario) ? 4 : 0;
+      player.power = 0;
+      player.typedPower = {};
+      player.runes =
+        scenario === "reveal"
+          ? []
+          : [{ id: "hidden-exhausted-rune", domain: "Calm", ready: false }];
+      player.runeDeck = ["Calm"];
+      match.players[1].power = 0;
+      match.hidden =
+        scenario === "reveal"
+          ? [
+              {
+                id: "hidden-free-block",
+                owner: 0,
+                cardId: "ogn-057-298",
+                location: "field:0",
+                hiddenTurn: match.turn - 1,
+              },
+            ]
+          : [];
+      localStorage.setItem("riftbound-duel-language", "en");
+      localStorage.setItem(
+        SAVE_KEY,
+        JSON.stringify({ match, review: null, paused: false }),
+      );
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

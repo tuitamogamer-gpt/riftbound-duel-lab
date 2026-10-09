@@ -1,4 +1,73 @@
 export const flowMessages: Record<string, [string, string, string]> = {
+  "Play method": ["Play method", "Način igranja", "Modalità di gioco"],
+  "Play now": ["Play now", "Odigraj sada", "Gioca ora"],
+  "Normal cost": ["Normal cost", "Normalna cijena", "Costo normale"],
+  "Hide · free": ["Hide · free", "Sakrij · besplatno", "Nascondi · gratis"],
+  "Hide · 1 Energy": [
+    "Hide · 1 Energy",
+    "Sakrij · 1 Energy",
+    "Nascondi · 1 Energia",
+  ],
+  "Hide · 1 Power": [
+    "Hide · 1 Power",
+    "Sakrij · 1 Power",
+    "Nascondi · 1 Potere",
+  ],
+  "Hide for free. Reveal from next turn with no base cost.": [
+    "Hide for free. Reveal from next turn with no base cost.",
+    "Sakrij besplatno. Od sljedećeg poteza otkrij bez plaćanja osnovne cijene.",
+    "Nascondi gratis. Dal prossimo turno, rivela senza pagare il costo base.",
+  ],
+  "Hide for 1 Energy with Teemo. Reveal from next turn with no base cost.": [
+    "Hide for 1 Energy with Teemo. Reveal from next turn with no base cost.",
+    "Uz Teema sakrij za 1 Energy. Od sljedećeg poteza otkrij bez osnovne cijene.",
+    "Con Teemo, nascondi per 1 Energia. Dal prossimo turno, rivela senza costo base.",
+  ],
+  "Recycle any rune. From next turn, play with no base cost.": [
+    "Recycle any rune. From next turn, play with no base cost.",
+    "Recikliraj runu. Od sljedećeg poteza igraj bez osnovne cijene.",
+    "Ricicla qualsiasi runa. Dal prossimo turno, rivela senza costo base.",
+  ],
+  "The game has ended.": [
+    "The game has ended.",
+    "Igra je završena.",
+    "La partita è terminata.",
+  ],
+  "You can only hide cards on your own turn.": [
+    "You can only hide cards on your own turn.",
+    "Karte možeš sakriti samo tokom svog poteza.",
+    "Puoi nascondere carte solo durante il tuo turno.",
+  ],
+  "Wait until you have priority to hide this card.": [
+    "Wait until you have priority to hide this card.",
+    "Sačekaj prioritet da sakriješ ovu kartu.",
+    "Aspetta di avere priorità per nascondere questa carta.",
+  ],
+  "Wait for the chain to finish before hiding this card.": [
+    "Wait for the chain to finish before hiding this card.",
+    "Sačekaj da se lanac razriješi prije sakrivanja.",
+    "Aspetta che la catena si risolva prima di nascondere questa carta.",
+  ],
+  "Control a battlefield before hiding a card there.": [
+    "Control a battlefield before hiding a card there.",
+    "Moraš kontrolisati bojište da na njemu sakriješ kartu.",
+    "Devi controllare un campo di battaglia per nascondervi una carta.",
+  ],
+  "Your controlled battlefields have no empty Hidden slots.": [
+    "Your controlled battlefields have no empty Hidden slots.",
+    "Na tvojim bojištima nema slobodnih Hidden mjesta.",
+    "I campi che controlli non hanno spazi Hidden liberi.",
+  ],
+  "Hiding needs 1 Power (recycle a rune) or Teemo's 1 Energy.": [
+    "Hiding needs 1 Power (recycle a rune) or Teemo's 1 Energy.",
+    "Za sakrivanje treba 1 Power (recikliraj runu) ili 1 Energy uz Teema.",
+    "Per nascondere serve 1 Potere (ricicla una runa) o 1 Energia con Teemo.",
+  ],
+  "Hiding needs 1 Power: recycle a ready or exhausted rune.": [
+    "Hiding needs 1 Power: recycle a ready or exhausted rune.",
+    "Za sakrivanje treba 1 Power: recikliraj spremnu ili iscrpljenu runu.",
+    "Per nascondere serve 1 Potere: ricicla una runa pronta o esaurita.",
+  ],
   "Target: {card}": ["Target: {card}", "Meta: {card}", "Bersaglio: {card}"],
   "Opponent completes a private choice": [
     "Opponent completes a private choice",
@@ -568,6 +637,7 @@ export const flowMessages: Record<string, [string, string, string]> = {
   "More options": ["More options", "Još opcija", "Altre opzioni"],
   "Move here": ["Move here", "Pomjeri ovdje", "Muovi qui"],
   "Play here": ["Play here", "Odigraj ovdje", "Gioca qui"],
+  "Hide here": ["Hide here", "Sakrij ovdje", "Nascondi qui"],
   "Click a card · choose a move in the center": [
     "Click a card · choose a move in the center",
     "Klikni kartu · izaberi potez u sredini",
