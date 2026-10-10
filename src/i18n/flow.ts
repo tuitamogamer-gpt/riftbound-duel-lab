@@ -1,4 +1,9 @@
 export const flowMessages: Record<string, [string, string, string]> = {
+  "Treće bojište": [
+    "Third battlefield",
+    "Treće bojište",
+    "Terzo campo di battaglia",
+  ],
   "Play method": ["Play method", "Način igranja", "Modalità di gioco"],
   "Play now": ["Play now", "Odigraj sada", "Gioca ora"],
   "Normal cost": ["Normal cost", "Normalna cijena", "Costo normale"],

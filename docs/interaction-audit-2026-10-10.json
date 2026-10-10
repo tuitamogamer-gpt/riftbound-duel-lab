@@ -1,0 +1,1544 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-10T11:26:31.630845+00:00",
+  "result": "Local interaction and rules checks passed; hosted private-room storage remains unavailable",
+  "source": {
+    "baseCommit": "1e92d7f677331b32f909de34c4afb05d1fc4a352",
+    "workingTreeModified": true,
+    "applicationDigestEncoding": "SHA256 of path-sorted UTF-8 path TAB file-SHA256 NEWLINE records",
+    "applicationAtRegressionStartSHA256": "fd9904c59b95e787b969fc9e5dfd4a65de6937bb81771bc9e47d9f328731251b",
+    "applicationFinalSHA256": "8adce6372c7eb5afae6cb8adbf39c57116e034cebed914c4c9215a7d16a1f701",
+    "changedDuringRegression": ["src/desktop-table.css"],
+    "qualification": "Rules and JavaScript/TypeScript sources were unchanged throughout the partitioned regression. The desktop CSS repair was integrated during simulations, then passed 14 browser geometry checks, 33 focused tests and the final production build."
+  },
+  "regression": {
+    "expectedFiles": 125,
+    "expectedUniqueTests": 2764,
+    "passedUniqueTests": 2764,
+    "failedUniqueTests": 0,
+    "missingUniqueTests": 0,
+    "unmatchedSourceAssertions": 0,
+    "success": true,
+    "unresolvedSourceErrors": 0,
+    "publishedPreconOrderedPairs": 169,
+    "preconFocusedCasesCountedOnce": 54,
+    "partition": "Every ordinary test file with one worker; precon-effects in complementary PRECON_SHARD=0/3, 1/3 and 2/3 with one worker each. No original seeds, action limits or invariant assertions changed.",
+    "receipts": [
+      {
+        "name": "ordinary",
+        "exitCode": 0,
+        "nativeSuccess": true,
+        "passedTests": 2541,
+        "failedTests": 0,
+        "pendingTests": 0,
+        "reportSHA256": "2b25b1e57021fbcfc5cea292bcc5ad51b71c4542b5722544debf63eb663212ce",
+        "logSHA256": "5d7191b85fba8c0bf09b4b8e7c2be755276f160023fd5355d7fa210a15944a54"
+      },
+      {
+        "name": "precon-0",
+        "exitCode": 0,
+        "nativeSuccess": true,
+        "passedTests": 111,
+        "failedTests": 0,
+        "pendingTests": 0,
+        "reportSHA256": "388202e75c7a012fe5f8794bc7cea3d2a114a0abd1f61ee880e69b23f20ba265",
+        "logSHA256": "e8884db6f5a725e8ab15d5a91bb161a62ab91d93bfa4ecefbc75e5c0690890be"
+      },
+      {
+        "name": "precon-1",
+        "exitCode": 0,
+        "nativeSuccess": true,
+        "passedTests": 110,
+        "failedTests": 0,
+        "pendingTests": 0,
+        "reportSHA256": "40e1fb051b36ab2fab89d73de9c284e7da9291f6a86f4b6548c919e5d26f276e",
+        "logSHA256": "f1d03e08b036d496cbca0d84224801b6598c580d455ceb83115b624eb8ca5fbf"
+      },
+      {
+        "name": "precon-2",
+        "exitCode": 0,
+        "nativeSuccess": true,
+        "passedTests": 110,
+        "failedTests": 0,
+        "pendingTests": 0,
+        "reportSHA256": "482ae2db781b34010b5ddb458a9642734a3806c22009b4e21a31f1350018b4e9",
+        "logSHA256": "4172b8e752182879e67c7757761e4cf86cbb79511e8240d3df6e14c1b75835a0"
+      }
+    ],
+    "expectedManifestSHA256": "abfe662498de0985d749215403e87af055b95b41aacdde6885b34e5fa1892ae8",
+    "completeCaseLedgerSHA256": "8efb085ea5a219beab2d71f34d24854b7b1f986839b7f6df2f4d15b6db775391",
+    "excludedAttempt": {
+      "name": "interrupted-unpartitioned",
+      "exitCode": 143,
+      "reason": "Stopped to repartition the same complete scope into parallel workers. No assertions from this interrupted attempt contribute to the result."
+    }
+  },
+  "finalVerification": {
+    "focusedTests": 33,
+    "focusedReportSHA256": "fa21803df31b3f06ed651efc667a0015c41ea08203c52b6613e9ab19ddfa6f88",
+    "productionBuildExitCode": 0,
+    "productionBuildLogSHA256": "3377223c5c0b08f8ec5c557e218b620ca8659d4a037b9dbd92804e42cbdaa1c6",
+    "registeredPlayableCards": 1459,
+    "unsupportedRegisteredCards": 0,
+    "preconDecks": 13,
+    "reportGuardChecks": 15
+  },
+  "browser": {
+    "coreDuelRuns": [
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scenario": "fresh_mulligan",
+        "status": "passed",
+        "evidence": "Fresh duel, two-card selection, deselection, one-card replacement, opponent mulligan and main phase"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scenario": "grouped_movement",
+        "status": "passed",
+        "evidence": "Group add/remove, empty disabled confirm, cancel without mutations, restart and two-unit move"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scenario": "combat_assignment",
+        "status": "passed",
+        "evidence": "Assign lethal through prevention, assign remainder, opponent assignment, simultaneous damage and surviving attacker"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scenario": "combat_confirm",
+        "status": "passed",
+        "evidence": "Explicit damage confirmation advances to opponent assignment"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scenario": "reaction_chain",
+        "status": "passed",
+        "evidence": "Reaction targets incoming spell, joins stack, priority pass resolves counter without damage"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scenario": "reaction_pass",
+        "status": "passed",
+        "evidence": "Explicit reaction pass resolves incoming damage without spending the available counterspell"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scenario": "manual_payment",
+        "status": "passed",
+        "evidence": "Manual rune reorder previews exact payment; cancel preserves state; confirm matches every rune outcome"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scenario": "save_reload_resume",
+        "status": "passed",
+        "evidence": "Reload resumes committed action and presentation without duplicate unit or payment"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scenario": "training",
+        "status": "passed",
+        "evidence": "Training deploy, completion, undo, next lesson and retry remain interactive"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "fresh_mulligan",
+        "status": "passed",
+        "evidence": "Fresh duel, two-card selection, deselection, one-card replacement, opponent mulligan and main phase"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "grouped_movement",
+        "status": "passed",
+        "evidence": "Group add/remove, empty disabled confirm, cancel without mutations, restart and two-unit move"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "combat_assignment",
+        "status": "passed",
+        "evidence": "Assign lethal through prevention, assign remainder, opponent assignment, simultaneous damage and surviving attacker"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "combat_confirm",
+        "status": "passed",
+        "evidence": "Explicit damage confirmation advances to opponent assignment"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "reaction_chain",
+        "status": "passed",
+        "evidence": "Reaction targets incoming spell, joins stack, priority pass resolves counter without damage"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "reaction_pass",
+        "status": "passed",
+        "evidence": "Explicit reaction pass resolves incoming damage without spending the available counterspell"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "manual_payment",
+        "status": "passed",
+        "evidence": "Manual rune reorder previews exact payment; cancel preserves state; confirm matches every rune outcome"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "save_reload_resume",
+        "status": "passed",
+        "evidence": "Reload resumes committed action and presentation without duplicate unit or payment"
+      },
+      {
+        "engine": "chromium",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "training",
+        "status": "passed",
+        "evidence": "Training deploy, completion, undo, next lesson and retry remain interactive"
+      },
+      {
+        "engine": "webkit",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "fresh_mulligan",
+        "status": "passed",
+        "evidence": "Fresh duel, two-card selection, deselection, one-card replacement, opponent mulligan and main phase"
+      },
+      {
+        "engine": "webkit",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "grouped_movement",
+        "status": "passed",
+        "evidence": "Group add/remove, empty disabled confirm, cancel without mutations, restart and two-unit move"
+      },
+      {
+        "engine": "webkit",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "combat_assignment",
+        "status": "passed",
+        "evidence": "Assign lethal through prevention, assign remainder, opponent assignment, simultaneous damage and surviving attacker"
+      },
+      {
+        "engine": "webkit",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "combat_confirm",
+        "status": "passed",
+        "evidence": "Explicit damage confirmation advances to opponent assignment"
+      },
+      {
+        "engine": "webkit",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "reaction_chain",
+        "status": "passed",
+        "evidence": "Reaction targets incoming spell, joins stack, priority pass resolves counter without damage"
+      },
+      {
+        "engine": "webkit",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "reaction_pass",
+        "status": "passed",
+        "evidence": "Explicit reaction pass resolves incoming damage without spending the available counterspell"
+      },
+      {
+        "engine": "webkit",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "manual_payment",
+        "status": "passed",
+        "evidence": "Manual rune reorder previews exact payment; cancel preserves state; confirm matches every rune outcome"
+      },
+      {
+        "engine": "webkit",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "save_reload_resume",
+        "status": "passed",
+        "evidence": "Reload resumes committed action and presentation without duplicate unit or payment"
+      },
+      {
+        "engine": "webkit",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scenario": "training",
+        "status": "passed",
+        "evidence": "Training deploy, completion, undo, next lesson and retry remain interactive"
+      }
+    ],
+    "mobileSuiteRuns": 30,
+    "mobileReports": [
+      "mobile.json",
+      "mobile-overlays.json",
+      "mobile-session-manager.json"
+    ],
+    "targetLayoutRuns": [
+      {
+        "engine": "chromium",
+        "width": 1440,
+        "height": 900,
+        "longName": false,
+        "status": "passed"
+      },
+      {
+        "engine": "chromium",
+        "width": 1440,
+        "height": 900,
+        "longName": true,
+        "status": "passed"
+      },
+      {
+        "engine": "chromium",
+        "width": 1280,
+        "height": 600,
+        "longName": false,
+        "status": "passed"
+      },
+      {
+        "engine": "chromium",
+        "width": 1280,
+        "height": 600,
+        "longName": true,
+        "status": "passed"
+      },
+      {
+        "engine": "chromium",
+        "width": 1024,
+        "height": 768,
+        "longName": false,
+        "status": "passed"
+      },
+      {
+        "engine": "chromium",
+        "width": 1024,
+        "height": 768,
+        "longName": true,
+        "status": "passed"
+      },
+      {
+        "engine": "chromium",
+        "width": 390,
+        "height": 844,
+        "longName": false,
+        "status": "passed"
+      },
+      {
+        "engine": "chromium",
+        "width": 390,
+        "height": 844,
+        "longName": true,
+        "status": "passed"
+      },
+      {
+        "engine": "chromium",
+        "width": 844,
+        "height": 390,
+        "longName": false,
+        "status": "passed"
+      },
+      {
+        "engine": "chromium",
+        "width": 844,
+        "height": 390,
+        "longName": true,
+        "status": "passed"
+      },
+      {
+        "engine": "webkit",
+        "width": 390,
+        "height": 844,
+        "longName": false,
+        "status": "passed"
+      },
+      {
+        "engine": "webkit",
+        "width": 390,
+        "height": 844,
+        "longName": true,
+        "status": "passed"
+      },
+      {
+        "engine": "webkit",
+        "width": 844,
+        "height": 390,
+        "longName": false,
+        "status": "passed"
+      },
+      {
+        "engine": "webkit",
+        "width": 844,
+        "height": 390,
+        "longName": true,
+        "status": "passed"
+      }
+    ],
+    "supportLayoutRuns": [
+      {
+        "engine": "chromium",
+        "width": 1440,
+        "height": 900,
+        "checks": [
+          {
+            "name": "Catalog search, filters, detail, no results, reset, pagination",
+            "status": "passed",
+            "data": {
+              "filteredDisciplineCount": 2,
+              "afterLoadMore": 120
+            }
+          },
+          {
+            "name": "Language changes preserve catalog filters and persist after reload",
+            "status": "passed"
+          },
+          {
+            "name": "Deck builder quantity edit, undo, redo, identity state and export download",
+            "status": "passed",
+            "data": {
+              "removedName": "Remove one Gust",
+              "exportLength": 683,
+              "download": "Audit-chromium-1440.txt"
+            }
+          },
+          {
+            "name": "Deck save, reload, export/import round trip",
+            "status": "passed",
+            "data": {
+              "savedDecks": 1
+            }
+          },
+          {
+            "name": "All six training lessons complete with Undo, Retry and stored progress",
+            "status": "passed",
+            "data": {
+              "lessons": [
+                {
+                  "title": "Deploy your first unit",
+                  "steps": ["Play Playful Phantom at your base"]
+                },
+                {
+                  "title": "Move together and conquer",
+                  "steps": [
+                    "Move Vanguard Sergeant → battlefield 1",
+                    "Add Shipyard Skulker (3 Might)",
+                    "Move 2 units to battlefield 1",
+                    "Pass focus"
+                  ]
+                },
+                {
+                  "title": "Answer a spell",
+                  "steps": ["Play Wind Wall → Hextech Ray", "Pass priority"]
+                },
+                {
+                  "title": "Reveal a Hidden threat",
+                  "steps": [
+                    "Play Blastcone Fae at battlefield 1",
+                    "Choose target → Playful Phantom",
+                    "Pass priority"
+                  ]
+                },
+                {
+                  "title": "Assign lethal damage",
+                  "steps": [
+                    "Assign 6 damage to Vanguard Sergeant",
+                    "Assign 2 damage to Shipyard Skulker"
+                  ]
+                },
+                {
+                  "title": "Hold for the winning point",
+                  "steps": ["End turn"]
+                }
+              ],
+              "progress": {
+                "version": 1,
+                "completed": [
+                  "deploy",
+                  "movement",
+                  "reaction",
+                  "hidden",
+                  "damage",
+                  "hold"
+                ]
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "status": "passed"
+      },
+      {
+        "engine": "chromium",
+        "width": 390,
+        "height": 844,
+        "checks": [
+          {
+            "name": "Catalog search, filters, detail, no results, reset, pagination",
+            "status": "passed",
+            "data": {
+              "filteredDisciplineCount": 2,
+              "afterLoadMore": 120
+            }
+          },
+          {
+            "name": "Language changes preserve catalog filters and persist after reload",
+            "status": "passed"
+          },
+          {
+            "name": "Deck builder quantity edit, undo, redo, identity state and export download",
+            "status": "passed",
+            "data": {
+              "removedName": "Remove one Gust",
+              "exportLength": 682,
+              "download": "Audit-chromium-390.txt"
+            }
+          },
+          {
+            "name": "Deck save, reload, export/import round trip",
+            "status": "passed",
+            "data": {
+              "savedDecks": 1
+            }
+          },
+          {
+            "name": "All six training lessons complete with Undo, Retry and stored progress",
+            "status": "passed",
+            "data": {
+              "lessons": [
+                {
+                  "title": "Deploy your first unit",
+                  "steps": ["Play Playful Phantom at your base"]
+                },
+                {
+                  "title": "Move together and conquer",
+                  "steps": [
+                    "Move Vanguard Sergeant → battlefield 1",
+                    "Add Shipyard Skulker (3 Might)",
+                    "Move 2 units to battlefield 1",
+                    "Pass focus"
+                  ]
+                },
+                {
+                  "title": "Answer a spell",
+                  "steps": ["Play Wind Wall → Hextech Ray", "Pass priority"]
+                },
+                {
+                  "title": "Reveal a Hidden threat",
+                  "steps": [
+                    "Play Blastcone Fae at battlefield 1",
+                    "Choose target → Playful Phantom",
+                    "Pass priority"
+                  ]
+                },
+                {
+                  "title": "Assign lethal damage",
+                  "steps": [
+                    "Assign 6 damage to Vanguard Sergeant",
+                    "Assign 2 damage to Shipyard Skulker"
+                  ]
+                },
+                {
+                  "title": "Hold for the winning point",
+                  "steps": ["End turn"]
+                }
+              ],
+              "progress": {
+                "version": 1,
+                "completed": [
+                  "deploy",
+                  "movement",
+                  "reaction",
+                  "hidden",
+                  "damage",
+                  "hold"
+                ]
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "status": "passed"
+      },
+      {
+        "engine": "webkit",
+        "width": 390,
+        "height": 844,
+        "checks": [
+          {
+            "name": "Catalog search, filters, detail, no results, reset, pagination",
+            "status": "passed",
+            "data": {
+              "filteredDisciplineCount": 2,
+              "afterLoadMore": 120
+            }
+          },
+          {
+            "name": "Language changes preserve catalog filters and persist after reload",
+            "status": "passed"
+          },
+          {
+            "name": "Deck builder quantity edit, undo, redo, identity state and export download",
+            "status": "passed",
+            "data": {
+              "removedName": "Remove one Gust",
+              "exportLength": 680,
+              "download": "Audit-webkit-390.txt"
+            }
+          },
+          {
+            "name": "Deck save, reload, export/import round trip",
+            "status": "passed",
+            "data": {
+              "savedDecks": 1
+            }
+          },
+          {
+            "name": "All six training lessons complete with Undo, Retry and stored progress",
+            "status": "passed",
+            "data": {
+              "lessons": [
+                {
+                  "title": "Deploy your first unit",
+                  "steps": ["Play Playful Phantom at your base"]
+                },
+                {
+                  "title": "Move together and conquer",
+                  "steps": [
+                    "Move Vanguard Sergeant → battlefield 1",
+                    "Add Shipyard Skulker (3 Might)",
+                    "Move 2 units to battlefield 1",
+                    "Pass focus"
+                  ]
+                },
+                {
+                  "title": "Answer a spell",
+                  "steps": ["Play Wind Wall → Hextech Ray", "Pass priority"]
+                },
+                {
+                  "title": "Reveal a Hidden threat",
+                  "steps": [
+                    "Play Blastcone Fae at battlefield 1",
+                    "Choose target → Playful Phantom",
+                    "Pass priority"
+                  ]
+                },
+                {
+                  "title": "Assign lethal damage",
+                  "steps": [
+                    "Assign 6 damage to Vanguard Sergeant",
+                    "Assign 2 damage to Shipyard Skulker"
+                  ]
+                },
+                {
+                  "title": "Hold for the winning point",
+                  "steps": ["End turn"]
+                }
+              ],
+              "progress": {
+                "version": 1,
+                "completed": [
+                  "deploy",
+                  "movement",
+                  "reaction",
+                  "hidden",
+                  "damage",
+                  "hold"
+                ]
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "status": "passed"
+      }
+    ],
+    "supportTouchRuns": [
+      {
+        "engine": "chromium",
+        "width": 390,
+        "height": 844,
+        "input": "touch",
+        "actions": [
+          {
+            "control": "Cards",
+            "method": "tap"
+          },
+          {
+            "control": "",
+            "method": "tap"
+          },
+          {
+            "control": "Discipline",
+            "method": "tap"
+          },
+          {
+            "control": "Close",
+            "method": "tap"
+          },
+          {
+            "control": "Reset filters",
+            "method": "tap"
+          },
+          {
+            "control": "Show more cards",
+            "method": "tap"
+          },
+          {
+            "control": "Build a deck",
+            "method": "tap"
+          },
+          {
+            "control": "Export text",
+            "method": "tap"
+          },
+          {
+            "control": "Deck list & legality",
+            "method": "tap"
+          },
+          {
+            "control": "Remove one Gust",
+            "method": "tap"
+          },
+          {
+            "control": "Undo edit",
+            "method": "tap"
+          },
+          {
+            "control": "Redo edit",
+            "method": "tap"
+          },
+          {
+            "control": "Undo edit",
+            "method": "tap"
+          },
+          {
+            "control": "Download .txt",
+            "method": "tap"
+          },
+          {
+            "control": "Save deck",
+            "method": "tap"
+          },
+          {
+            "control": "Import deck",
+            "method": "tap"
+          },
+          {
+            "control": "SAVE DECK",
+            "method": "tap"
+          },
+          {
+            "control": "Training lab",
+            "method": "tap"
+          },
+          {
+            "control": "1\nDeploy your first unit",
+            "method": "tap"
+          },
+          {
+            "control": "PLAY PLAYFUL PHANTOM AT YOUR BASE",
+            "method": "tap"
+          },
+          {
+            "control": "Undo practice move",
+            "method": "tap"
+          },
+          {
+            "control": "PLAY PLAYFUL PHANTOM AT YOUR BASE",
+            "method": "tap"
+          },
+          {
+            "control": "Retry exercise",
+            "method": "tap"
+          },
+          {
+            "control": "2\nMove together and conquer",
+            "method": "tap"
+          },
+          {
+            "control": "MOVE VANGUARD SERGEANT → BATTLEFIELD 1",
+            "method": "tap"
+          },
+          {
+            "control": "Undo practice move",
+            "method": "tap"
+          },
+          {
+            "control": "MOVE VANGUARD SERGEANT → BATTLEFIELD 1",
+            "method": "tap"
+          },
+          {
+            "control": "ADD SHIPYARD SKULKER (3 MIGHT)",
+            "method": "tap"
+          },
+          {
+            "control": "MOVE 2 UNITS TO BATTLEFIELD 1",
+            "method": "tap"
+          },
+          {
+            "control": "Pass focus",
+            "method": "tap"
+          },
+          {
+            "control": "Retry exercise",
+            "method": "tap"
+          },
+          {
+            "control": "3\nAnswer a spell",
+            "method": "tap"
+          },
+          {
+            "control": "PLAY WIND WALL → HEXTECH RAY",
+            "method": "tap"
+          },
+          {
+            "control": "Undo practice move",
+            "method": "tap"
+          },
+          {
+            "control": "PLAY WIND WALL → HEXTECH RAY",
+            "method": "tap"
+          },
+          {
+            "control": "Pass priority",
+            "method": "tap"
+          },
+          {
+            "control": "Retry exercise",
+            "method": "tap"
+          },
+          {
+            "control": "4\nReveal a Hidden threat",
+            "method": "tap"
+          },
+          {
+            "control": "PLAY BLASTCONE FAE AT BATTLEFIELD 1",
+            "method": "tap"
+          },
+          {
+            "control": "Undo practice move",
+            "method": "tap"
+          },
+          {
+            "control": "PLAY BLASTCONE FAE AT BATTLEFIELD 1",
+            "method": "tap"
+          },
+          {
+            "control": "CHOOSE TARGET → PLAYFUL PHANTOM",
+            "method": "tap"
+          },
+          {
+            "control": "Pass priority",
+            "method": "tap"
+          },
+          {
+            "control": "Retry exercise",
+            "method": "tap"
+          },
+          {
+            "control": "5\nAssign lethal damage",
+            "method": "tap"
+          },
+          {
+            "control": "ASSIGN 6 DAMAGE TO VANGUARD SERGEANT",
+            "method": "tap"
+          },
+          {
+            "control": "Undo practice move",
+            "method": "tap"
+          },
+          {
+            "control": "ASSIGN 6 DAMAGE TO VANGUARD SERGEANT",
+            "method": "tap"
+          },
+          {
+            "control": "ASSIGN 2 DAMAGE TO SHIPYARD SKULKER",
+            "method": "tap"
+          },
+          {
+            "control": "Retry exercise",
+            "method": "tap"
+          },
+          {
+            "control": "6\nHold for the winning point",
+            "method": "tap"
+          },
+          {
+            "control": "END TURN",
+            "method": "tap"
+          },
+          {
+            "control": "Undo practice move",
+            "method": "tap"
+          },
+          {
+            "control": "END TURN",
+            "method": "tap"
+          },
+          {
+            "control": "Retry exercise",
+            "method": "tap"
+          },
+          {
+            "control": "Training lab",
+            "method": "tap"
+          }
+        ],
+        "checks": [
+          {
+            "name": "Catalog search, filters, detail, no results, reset, pagination",
+            "status": "passed",
+            "data": {
+              "filteredDisciplineCount": 2,
+              "afterLoadMore": 120
+            }
+          },
+          {
+            "name": "Language changes preserve catalog filters and persist after reload",
+            "status": "passed"
+          },
+          {
+            "name": "Deck builder quantity edit, undo, redo, identity state and export download",
+            "status": "passed",
+            "data": {
+              "removedName": "Remove one Gust",
+              "exportLength": 682,
+              "download": "Audit-chromium-390.txt"
+            }
+          },
+          {
+            "name": "Deck save, reload, export/import round trip",
+            "status": "passed",
+            "data": {
+              "savedDecks": 1
+            }
+          },
+          {
+            "name": "All six training lessons complete with Undo, Retry and stored progress",
+            "status": "passed",
+            "data": {
+              "lessons": [
+                {
+                  "title": "Deploy your first unit",
+                  "steps": ["Play Playful Phantom at your base"]
+                },
+                {
+                  "title": "Move together and conquer",
+                  "steps": [
+                    "Move Vanguard Sergeant → battlefield 1",
+                    "Add Shipyard Skulker (3 Might)",
+                    "Move 2 units to battlefield 1",
+                    "Pass focus"
+                  ]
+                },
+                {
+                  "title": "Answer a spell",
+                  "steps": ["Play Wind Wall → Hextech Ray", "Pass priority"]
+                },
+                {
+                  "title": "Reveal a Hidden threat",
+                  "steps": [
+                    "Play Blastcone Fae at battlefield 1",
+                    "Choose target → Playful Phantom",
+                    "Pass priority"
+                  ]
+                },
+                {
+                  "title": "Assign lethal damage",
+                  "steps": [
+                    "Assign 6 damage to Vanguard Sergeant",
+                    "Assign 2 damage to Shipyard Skulker"
+                  ]
+                },
+                {
+                  "title": "Hold for the winning point",
+                  "steps": ["End turn"]
+                }
+              ],
+              "progress": {
+                "version": 1,
+                "completed": [
+                  "deploy",
+                  "movement",
+                  "reaction",
+                  "hidden",
+                  "damage",
+                  "hold"
+                ]
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "status": "passed"
+      },
+      {
+        "engine": "webkit",
+        "width": 390,
+        "height": 844,
+        "input": "touch",
+        "actions": [
+          {
+            "control": "Cards",
+            "method": "tap"
+          },
+          {
+            "control": "",
+            "method": "tap"
+          },
+          {
+            "control": "Discipline",
+            "method": "tap"
+          },
+          {
+            "control": "Close",
+            "method": "tap"
+          },
+          {
+            "control": "Reset filters",
+            "method": "tap"
+          },
+          {
+            "control": "Show more cards",
+            "method": "tap"
+          },
+          {
+            "control": "Build a deck",
+            "method": "tap"
+          },
+          {
+            "control": "Export text",
+            "method": "tap"
+          },
+          {
+            "control": "Deck list & legality",
+            "method": "tap"
+          },
+          {
+            "control": "Remove one Gust",
+            "method": "tap"
+          },
+          {
+            "control": "Undo edit",
+            "method": "tap"
+          },
+          {
+            "control": "Redo edit",
+            "method": "tap"
+          },
+          {
+            "control": "Undo edit",
+            "method": "tap"
+          },
+          {
+            "control": "Download .txt",
+            "method": "tap"
+          },
+          {
+            "control": "Save deck",
+            "method": "tap"
+          },
+          {
+            "control": "Import deck",
+            "method": "tap"
+          },
+          {
+            "control": "SAVE DECK",
+            "method": "tap"
+          },
+          {
+            "control": "Training lab",
+            "method": "tap"
+          },
+          {
+            "control": "1\nDeploy your first unit",
+            "method": "tap"
+          },
+          {
+            "control": "PLAY PLAYFUL PHANTOM AT YOUR BASE",
+            "method": "tap"
+          },
+          {
+            "control": "Undo practice move",
+            "method": "tap"
+          },
+          {
+            "control": "PLAY PLAYFUL PHANTOM AT YOUR BASE",
+            "method": "tap"
+          },
+          {
+            "control": "Retry exercise",
+            "method": "tap"
+          },
+          {
+            "control": "2\nMove together and conquer",
+            "method": "tap"
+          },
+          {
+            "control": "MOVE VANGUARD SERGEANT → BATTLEFIELD 1",
+            "method": "tap"
+          },
+          {
+            "control": "Undo practice move",
+            "method": "tap"
+          },
+          {
+            "control": "MOVE VANGUARD SERGEANT → BATTLEFIELD 1",
+            "method": "tap"
+          },
+          {
+            "control": "ADD SHIPYARD SKULKER (3 MIGHT)",
+            "method": "tap"
+          },
+          {
+            "control": "MOVE 2 UNITS TO BATTLEFIELD 1",
+            "method": "tap"
+          },
+          {
+            "control": "Pass focus",
+            "method": "tap"
+          },
+          {
+            "control": "Retry exercise",
+            "method": "tap"
+          },
+          {
+            "control": "3\nAnswer a spell",
+            "method": "tap"
+          },
+          {
+            "control": "PLAY WIND WALL → HEXTECH RAY",
+            "method": "tap"
+          },
+          {
+            "control": "Undo practice move",
+            "method": "tap"
+          },
+          {
+            "control": "PLAY WIND WALL → HEXTECH RAY",
+            "method": "tap"
+          },
+          {
+            "control": "Pass priority",
+            "method": "tap"
+          },
+          {
+            "control": "Retry exercise",
+            "method": "tap"
+          },
+          {
+            "control": "4\nReveal a Hidden threat",
+            "method": "tap"
+          },
+          {
+            "control": "PLAY BLASTCONE FAE AT BATTLEFIELD 1",
+            "method": "tap"
+          },
+          {
+            "control": "Undo practice move",
+            "method": "tap"
+          },
+          {
+            "control": "PLAY BLASTCONE FAE AT BATTLEFIELD 1",
+            "method": "tap"
+          },
+          {
+            "control": "CHOOSE TARGET → PLAYFUL PHANTOM",
+            "method": "tap"
+          },
+          {
+            "control": "Pass priority",
+            "method": "tap"
+          },
+          {
+            "control": "Retry exercise",
+            "method": "tap"
+          },
+          {
+            "control": "5\nAssign lethal damage",
+            "method": "tap"
+          },
+          {
+            "control": "ASSIGN 6 DAMAGE TO VANGUARD SERGEANT",
+            "method": "tap"
+          },
+          {
+            "control": "Undo practice move",
+            "method": "tap"
+          },
+          {
+            "control": "ASSIGN 6 DAMAGE TO VANGUARD SERGEANT",
+            "method": "tap"
+          },
+          {
+            "control": "ASSIGN 2 DAMAGE TO SHIPYARD SKULKER",
+            "method": "tap"
+          },
+          {
+            "control": "Retry exercise",
+            "method": "tap"
+          },
+          {
+            "control": "6\nHold for the winning point",
+            "method": "tap"
+          },
+          {
+            "control": "END TURN",
+            "method": "tap"
+          },
+          {
+            "control": "Undo practice move",
+            "method": "tap"
+          },
+          {
+            "control": "END TURN",
+            "method": "tap"
+          },
+          {
+            "control": "Retry exercise",
+            "method": "tap"
+          },
+          {
+            "control": "Training lab",
+            "method": "tap"
+          }
+        ],
+        "checks": [
+          {
+            "name": "Catalog search, filters, detail, no results, reset, pagination",
+            "status": "passed",
+            "data": {
+              "filteredDisciplineCount": 2,
+              "afterLoadMore": 120
+            }
+          },
+          {
+            "name": "Language changes preserve catalog filters and persist after reload",
+            "status": "passed"
+          },
+          {
+            "name": "Deck builder quantity edit, undo, redo, identity state and export download",
+            "status": "passed",
+            "data": {
+              "removedName": "Remove one Gust",
+              "exportLength": 680,
+              "download": "Audit-webkit-390.txt"
+            }
+          },
+          {
+            "name": "Deck save, reload, export/import round trip",
+            "status": "passed",
+            "data": {
+              "savedDecks": 1
+            }
+          },
+          {
+            "name": "All six training lessons complete with Undo, Retry and stored progress",
+            "status": "passed",
+            "data": {
+              "lessons": [
+                {
+                  "title": "Deploy your first unit",
+                  "steps": ["Play Playful Phantom at your base"]
+                },
+                {
+                  "title": "Move together and conquer",
+                  "steps": [
+                    "Move Vanguard Sergeant → battlefield 1",
+                    "Add Shipyard Skulker (3 Might)",
+                    "Move 2 units to battlefield 1",
+                    "Pass focus"
+                  ]
+                },
+                {
+                  "title": "Answer a spell",
+                  "steps": ["Play Wind Wall → Hextech Ray", "Pass priority"]
+                },
+                {
+                  "title": "Reveal a Hidden threat",
+                  "steps": [
+                    "Play Blastcone Fae at battlefield 1",
+                    "Choose target → Playful Phantom",
+                    "Pass priority"
+                  ]
+                },
+                {
+                  "title": "Assign lethal damage",
+                  "steps": [
+                    "Assign 6 damage to Vanguard Sergeant",
+                    "Assign 2 damage to Shipyard Skulker"
+                  ]
+                },
+                {
+                  "title": "Hold for the winning point",
+                  "steps": ["End turn"]
+                }
+              ],
+              "progress": {
+                "version": 1,
+                "completed": [
+                  "deploy",
+                  "movement",
+                  "reaction",
+                  "hidden",
+                  "damage",
+                  "hold"
+                ]
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "status": "passed"
+      }
+    ],
+    "localAndHostedOnline": {
+      "auditDate": "2026-10-10",
+      "referenceCommit": "1e92d7f",
+      "local": {
+        "status": "passed",
+        "origin": "http://127.0.0.1:5194",
+        "storage": "MemoryRoomStorage; explicitly enabled loopback-only development adapter",
+        "browser": "Chromium",
+        "clients": [
+          {
+            "seat": "host",
+            "viewport": {
+              "width": 390,
+              "height": 844
+            },
+            "context": "isolated mobile-layout browser context",
+            "input": "Playwright clicks; no touch gestures asserted"
+          },
+          {
+            "seat": "guest",
+            "viewport": {
+              "width": 1440,
+              "height": 900
+            },
+            "context": "separate desktop browser context",
+            "input": "Playwright clicks"
+          }
+        ],
+        "checks": [
+          "Create room",
+          "Join by fragment invitation",
+          "Mulligan selection does not commit",
+          "Cancel selected mulligan without state change",
+          "Explicit confirmation of both mulligans",
+          "Opponent hand and RNG absent from observations",
+          "Reload and resume same room and seat for both clients",
+          "Move filtering and All moves reset",
+          "End-of-turn trigger responses before turn handoff",
+          "Turn handoff to guest",
+          "Accepted guest move",
+          "Idempotent retry does not increment revision again",
+          "Stale revision rejected with HTTP 409 and stale error",
+          "Departure visible to opponent"
+        ],
+        "pageErrors": [],
+        "pageErrorCount": 0,
+        "script": "scripts/online-interaction-check.mjs",
+        "reproduce": [
+          "DUEL_DEV_ROOMS=1 npm run dev -- --port 5194",
+          "QA_ORIGIN=http://127.0.0.1:5194 PLAYWRIGHT_MODULE=/workspace/scratch/browser-qa/node_modules/playwright/index.mjs node scripts/online-interaction-check.mjs"
+        ],
+        "limitations": [
+          "Uses local in-memory room storage, not hosted Vercel Blob.",
+          "Mobile viewport coverage does not assert real touch gesture behavior.",
+          "This targeted room lifecycle check is not an exhaustive online match or all-card interaction test."
+        ]
+      },
+      "hosted": {
+        "mode": "read-only API health check",
+        "request": {
+          "method": "POST",
+          "path": "/api/duel",
+          "operation": "poll",
+          "credentials": "fresh random nonexistent room ID and seat token; omitted from this report"
+        },
+        "results": [
+          {
+            "origin": "https://riftbound-duel-lab.vercel.app",
+            "status": 503,
+            "body": {
+              "error": "storage-unavailable"
+            },
+            "cacheControl": "private, no-store, max-age=0"
+          },
+          {
+            "origin": "https://riftbound-duel-lab-pgml.vercel.app",
+            "status": 503,
+            "body": {
+              "error": "storage-unavailable"
+            },
+            "cacheControl": "private, no-store, max-age=0"
+          }
+        ],
+        "conclusion": "Hosted room storage remains unavailable on both aliases. These responses do not independently identify the exact provisioning or configuration cause.",
+        "productionRoomsCreated": 0,
+        "infrastructureChanged": false
+      }
+    },
+    "hostedOfflineBaseline": {
+      "commit": "1e92d7f677331b32f909de34c4afb05d1fc4a352",
+      "completedAt": "2026-10-10T11:01:08.849Z",
+      "results": [
+        {
+          "url": "https://riftbound-duel-lab.vercel.app",
+          "browser": "chromium",
+          "viewport": "390x844",
+          "input": "touch",
+          "buildId": "5fd91127a2f1",
+          "assets": 84,
+          "missing": [],
+          "api": [],
+          "checks": [
+            "complete app cache",
+            "private APIs absent from cache",
+            "offline reload",
+            "exact saved match restoration",
+            "offline mulligan and bot turn transition",
+            "no page errors or horizontal overflow"
+          ],
+          "status": "passed"
+        },
+        {
+          "url": "https://riftbound-duel-lab-pgml.vercel.app",
+          "browser": "chromium",
+          "viewport": "390x844",
+          "input": "touch",
+          "buildId": "5fd91127a2f1",
+          "assets": 84,
+          "missing": [],
+          "api": [],
+          "checks": [
+            "complete app cache",
+            "private APIs absent from cache",
+            "offline reload",
+            "exact saved match restoration",
+            "offline mulligan and bot turn transition",
+            "no page errors or horizontal overflow"
+          ],
+          "status": "passed"
+        }
+      ]
+    },
+    "rawReportSHA256": {
+      "flows.json": "a6906ca38b790c19b01eb6eb4c4777a2cd8ce4acefc478b6e227d413f9704434",
+      "mobile.json": "d0c6a3b761ea734738c40ded88a6a1e8fe53b7dc2fd573e0d436abbac4bf151b",
+      "mobile-overlays.json": "f0f847cabbc406b50117bf45001f49531e6081424b06ebe473b7c38d3ea5191c",
+      "mobile-session-manager.json": "00a88cb0e8834ed2ae389ff4205cf26661731da52fc00630be1cca202253d0e4",
+      "target-dock-before.json": "af10e8e2e511f0c515714a3035bcbf87d28e3de1ee7d1dbab50d3be7f0e8cd30",
+      "target-dock-after.json": "b78b605f615c84efd6d7b85d4721927338a65da62feda344a601ac89bdd6e131",
+      "support.json": "90f92fb69f35897abf76b3f177654ba5c4423cba834b73126f9f16f691844dcd",
+      "support-touch.json": "a2133a0106ae5fd9ce75bf2b9fdcf94cd59e40572883db94a9a1c550de0dddaf",
+      "online.json": "b739ee48fb4758c1a5f9c78c2adead01c7313977ff6cd688825bb55948730dd0",
+      "offline.json": "80c3166de43c352ff1645112c9ce83e2253291cec5837e1e238c69a9c5ddd94d"
+    }
+  },
+  "fixes": [
+    {
+      "file": "src/game/action-target-presentation.ts",
+      "description": "Display the selected target location on the third battlefield, with EN/SR/IT translation and a target-preservation regression."
+    },
+    {
+      "file": "src/desktop-table.css",
+      "description": "Size desktop target actions and their grid row to fit action labels, target identity and payment details."
+    }
+  ],
+  "limits": [
+    "No physical phones were used; mobile checks use browser emulation. Long-press/swipe/multitouch sequences were Chromium-only.",
+    "Deterministic simulation coverage is not proof of every possible card combination.",
+    "Hosted private rooms return HTTP 503 storage-unavailable on both aliases; the local memory-store test does not validate hosted multiplayer.",
+    "Hosted offline and Hidden baseline checks preceded this audit commit. Final deployment verification is recorded separately after publishing."
+  ]
+}

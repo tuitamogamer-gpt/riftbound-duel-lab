@@ -26,7 +26,9 @@ function locationLabel(location: string | undefined) {
         ? "Lijevo bojište"
         : location === "field:1"
           ? "Desno bojište"
-          : "";
+          : location === "field:2"
+            ? "Treće bojište"
+            : "";
 }
 
 /** Only public objects are resolved; a private card ID is never a target face. */

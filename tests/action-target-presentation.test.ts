@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { MatchControls } from "../src/components/MatchControls";
 import { publicActionTargets } from "../src/game/action-target-presentation";
-import { getLegalActions } from "../src/game/engine";
+import { applyAction, getLegalActions } from "../src/game/engine";
 import type { Review } from "../src/components/StepFlow";
 import { fixture, ogn, unit } from "./fixtures/cards";
 
@@ -65,6 +65,28 @@ describe("public target identity in the decision bar", () => {
       action,
     };
     expect(controls(game, null, review)).toContain("Target: Playful Phantom");
+  });
+  it("names the third battlefield and preserves the chosen buff target there", () => {
+    const game = position();
+    game.fields.push({
+      id: "field:2",
+      cardId: "token-baron-pit",
+      controller: 0,
+    });
+    game.units.find((entry) => entry.id === "ally-field")!.location = "field:2";
+    const action = getLegalActions(game, 0).find(
+      (entry) => entry.sourceId === "hand:0" && entry.targetId === "ally-field",
+    )!;
+    expect(action).toBeDefined();
+    expect(publicActionTargets(game, action)).toMatchObject([
+      { id: "ally-field", owner: 0, location: "Treće bojište" },
+    ]);
+    const html = controls(game, "ally-field");
+    expect(html).toContain("Target: Playful Phantom");
+    expect(html).toContain("You · Third battlefield");
+    expect(html).toContain('data-target-id="ally-field"');
+    expect(html).not.toContain('data-target-id="ally-base"');
+    expect(applyAction(game, action).stack.at(-1)?.targetId).toBe("ally-field");
   });
   it("keeps distinct and repeated public targets without duplicating the same object", () => {
     const game = position();

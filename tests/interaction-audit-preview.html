@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Isolated interaction audit</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Synthetic local QA only. This page is never included in the app build.
+      import { createTrainingPosition } from "/src/game/training.ts";
+      import { getLegalActions } from "/src/game/engine.ts";
+      import { SAVE_KEY, parseSession } from "/src/persistence.ts";
+      import { LANGUAGE_KEY } from "/src/i18n/core.ts";
+      const scenario = new URLSearchParams(location.search).get("scenario");
+      const match = createTrainingPosition(
+        scenario === "payment"
+          ? "deploy"
+          : scenario === "combat-confirm"
+            ? "damage"
+            : scenario,
+      );
+      if (scenario === "payment") {
+        match.players[0].energy = 0;
+        match.players[0].runes = [
+          { id: "audit-calm-0", domain: "Calm", ready: true },
+          { id: "audit-calm-1", domain: "Calm", ready: true },
+          { id: "audit-calm-2", domain: "Calm", ready: true },
+          { id: "audit-calm-3", domain: "Calm", ready: true },
+          { id: "audit-calm-4", domain: "Calm", ready: true },
+          { id: "audit-calm-5", domain: "Calm", ready: true },
+        ];
+        localStorage.setItem("riftbound-payment-mode", "manual");
+      } else localStorage.setItem("riftbound-payment-mode", "auto");
+      if (scenario === "combat-confirm") {
+        match.combat.assignments[0] = {
+          "practice-shielded": 6,
+          "practice-defender": 2,
+        };
+        match.combat.remaining[0] = 0;
+      }
+      const session = { match, review: null, paused: false };
+      if (
+        scenario === "reaction" &&
+        new URLSearchParams(location.search).has("long")
+      )
+        match.stack[0].cardId = "ogn-252-298";
+      if (!parseSession(JSON.stringify(session)).match)
+        throw new Error(`Invalid audit fixture: ${scenario}`);
+      localStorage.setItem(LANGUAGE_KEY, "en");
+      localStorage.setItem("riftbound-duel-playback-speed", "2");
+      localStorage.setItem(SAVE_KEY, JSON.stringify(session));
+      window.auditLegal = getLegalActions(match, 0);
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

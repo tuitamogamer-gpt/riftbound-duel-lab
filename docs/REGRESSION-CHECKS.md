@@ -1,6 +1,12 @@
 # Regression checks
 
-## Latest local acceptance — 8 October 2026
+## Latest local acceptance — 10 October 2026
+
+The interaction audit passed **2,764 unique tests in 125 files**, including all **169 ordered precon pairs**. The ordinary suite and three complementary precon shards finished with actual exit 0, and the strict report checks found no missing or unresolved cases. No seeds, action limits or invariant checks were reduced. Rules and JavaScript/TypeScript sources remained fixed during execution; a desktop-only CSS repair was verified separately with 14 browser layout checks, 33 focused tests and a successful production build.
+
+See [the interaction audit](INTERACTION-AUDIT.md) for browser coverage, reproduction commands and the unresolved hosted-room storage issue, and [the machine-readable evidence](interaction-audit-2026-10-10.json) for process receipts and report hashes.
+
+## Local acceptance — 8 October 2026
 
 The final source snapshot passed **2,681 unique tests in 120 files**: 2,458 ordinary-suite cases plus 223 unique precon cases. The latter comprise all **169 ordered pairs** and 54 focused cases. Local execution used two complementary **PRECON_SHARD=0/2** and **1/2** processes, each with one worker; the ordinary suite used two workers; the workflow below uses three shards of the same unchanged pair list. The repeated focused cases count once in either partition.
 
