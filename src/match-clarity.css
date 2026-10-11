@@ -1,0 +1,761 @@
+/* Decision and card readability, shared by the desktop and touch tables. */
+.reaction-threat {
+  display: grid;
+  gap: 3px;
+  margin-top: 5px;
+  padding-left: 8px;
+  border-left: 2px solid #e2bb70;
+  color: #f0d6a4;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.reaction-effect {
+  color: #cfdae0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.decision-copy:has(.reaction-effect) > p {
+  display: none;
+}
+.reaction-responses {
+  min-width: 0;
+  flex: 1 1 0;
+}
+.reaction-responses-label {
+  display: block;
+  margin-bottom: 5px;
+  color: #9cddc8;
+  font-size: 11px;
+}
+.reaction-responses > div {
+  display: flex;
+  gap: 6px;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.reaction-response {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 8px;
+  min-height: 52px;
+  padding: 6px 12px 6px 6px;
+  border: 1px solid #84dcc0;
+  border-radius: 7px;
+  background: #204c46;
+  color: #f1f7ec;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+}
+.reaction-response:hover {
+  background: #2c6055;
+}
+.reaction-response:focus-visible {
+  outline: 2px solid #f6d998;
+  outline-offset: -3px;
+}
+.reaction-response img {
+  width: 28px;
+  height: 39px;
+  border-radius: 3px;
+  object-fit: cover;
+}
+.reaction-response small {
+  display: block;
+  margin-top: 3px;
+  color: #b2e1d0;
+  font-size: 10px;
+  font-weight: 400;
+}
+.app.is-game .visual-controls .gold-button.secondary-ending {
+  color: #c8d5d9;
+  background: #132a35;
+  border: 1px solid #637d89;
+  box-shadow: none;
+}
+.app.is-game .visual-controls .decision-payment {
+  display: grid;
+  gap: 2px;
+  margin-top: 6px;
+  padding-top: 5px;
+  border-top: 1px solid #8bcdbb35;
+  color: #b9dbd0;
+  font-size: 11px;
+  line-height: 1.35;
+  white-space: normal;
+}
+.decision-payment-cost {
+  color: #f6e3b1;
+  font-weight: 600;
+}
+.decision-payment-pool {
+  color: #b5cbd6;
+}
+.app.is-game .unit-wrap .game-card.exhausted > img {
+  filter: saturate(0.65) brightness(0.82);
+}
+.app.is-game .unit-wrap .game-card.exhausted:is(.selected, .playable) > img {
+  filter: saturate(0.9) brightness(0.94);
+}
+.unit-assignment {
+  position: absolute;
+  z-index: 5;
+  left: -4px;
+  right: -4px;
+  bottom: 0;
+  display: grid;
+  gap: 1px;
+  padding: 4px 3px;
+  border: 1px solid #b5cbd67a;
+  border-radius: 4px;
+  background: #10232cf5;
+  color: #f0e9d7;
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 600;
+  text-align: center;
+  pointer-events: none;
+}
+.unit-assignment[data-lethal="true"] {
+  border-color: #eeb87c;
+  background: #493222f5;
+  color: #ffdfad;
+}
+.unit-assignment small {
+  font-size: 10px;
+  color: #b9d4e5;
+  font-weight: 400;
+}
+.unit-assignment .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.empty-hand-label {
+  color: #a1b8c5;
+  font-size: 12px;
+}
+.app.is-game .player-cards .hand-tray.is-empty .hand-title .hand-desktop-hint {
+  display: none;
+}
+
+@media (min-width: 801px) and (min-height: 501px) {
+  /* Player scores already include the victory goal. Reclaim the duplicate rail. */
+  .app.is-game .playmat {
+    grid-template-columns: minmax(145px, 0.85fr) minmax(0, 2.5fr) minmax(
+        145px,
+        0.85fr
+      );
+    grid-template-areas:
+      "opponent opponent enemy-hand"
+      "opponent-setup enemy-base enemy-runes"
+      "fields fields fields"
+      "decisions decisions decisions"
+      "player-setup own-base runes"
+      "player player player"
+      "hand hand hand";
+    grid-template-rows:
+      26px minmax(48px, 0.8fr) minmax(0, 2.7fr) auto minmax(48px, 0.8fr)
+      24px clamp(150px, 22dvh, 226px);
+    gap: 5px 9px;
+    padding: 6px;
+  }
+  .app.is-game .victory-track {
+    display: none;
+  }
+  .app.is-game .playmat:has(.hand-tray.is-empty) {
+    grid-template-rows:
+      26px minmax(48px, 0.8fr) minmax(0, 2.7fr) auto minmax(48px, 0.8fr)
+      24px 52px;
+  }
+  .app.is-game .player-cards > .hand-tray.is-empty {
+    grid-template-rows: minmax(0, 1fr);
+    align-items: center;
+    padding-block: 3px;
+  }
+  .app.is-game .hand-tray.is-empty :is(.hand, .hand-desktop-hint, .pile-art) {
+    display: none;
+  }
+  .app.is-game .hand-tray.is-empty > .card-piles {
+    grid-area: 1 / 2;
+  }
+  .app.is-game .hand-tray.is-empty .pile-button {
+    display: flex;
+    min-height: 44px;
+  }
+  .app.is-game .player-cards > .hand-section {
+    --hand-card-height: max(72px, min(calc(100cqh - 54px), 180px));
+    grid-template-rows: 23px minmax(0, 1fr);
+    padding: 5px 12px 7px;
+  }
+  .app.is-game .player-cards .hand {
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    justify-content: safe center;
+    padding: 4px 4px 0;
+    align-items: flex-start;
+  }
+  .app.is-game .player-cards .hand-card-wrap {
+    flex: 0 0 calc(var(--hand-card-height) * 0.716);
+    width: calc(var(--hand-card-height) * 0.716);
+    max-width: none;
+    height: calc(var(--hand-card-height) + 24px);
+    margin: 0;
+  }
+  .app.is-game .hand .game-card:is(:hover, .selected) {
+    transform: translateY(-3px);
+  }
+  .app.is-game .hand-mobile-name {
+    display: block;
+    position: static;
+    padding: 5px 1px 0;
+    color: #f1e6cd;
+    font-size: 11px;
+    line-height: 14px;
+    text-align: center;
+    pointer-events: none;
+  }
+  .app.is-game .hand-mobile-name strong {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .app.is-game .hand-mobile-cost {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    top: 3px;
+    left: 3px;
+    padding: 4px 5px;
+    border: 1px solid #c8bb8880;
+    border-radius: 4px;
+    background: #0b172cf2;
+    color: #ffe4a5;
+    font-size: 12px;
+    font-weight: 600;
+    pointer-events: none;
+  }
+  .hand-mobile-cost span {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .app.is-game .hand-replace-badge {
+    position: absolute;
+    top: 45%;
+    left: 5px;
+    right: 5px;
+    padding: 6px 3px;
+    background: #153d34f5;
+    border: 1px solid #8ee9c8;
+    border-radius: 4px;
+    color: #c7ffe7;
+    font-size: 12px;
+  }
+  .app.is-game .hand .card-info-button {
+    bottom: 26px;
+    width: 28px;
+    height: 28px;
+  }
+  .app.is-game .hand-title {
+    font-size: 11px;
+    line-height: 23px;
+  }
+  .app.is-game .player-cards .hand-title .hand-desktop-hint {
+    display: block;
+    color: #acbfcb;
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+  .app.is-game .hand-section .pile-art {
+    height: min(var(--hand-card-height), 110px);
+    width: auto;
+    aspect-ratio: 744/1039;
+  }
+  .app.is-game .hand-section .pile-button {
+    width: 80px;
+  }
+  .app.is-game .rune-zone-heading small,
+  .app.is-game .player-cards > .rune-zone .rune-zone-heading small {
+    font-size: 10px;
+    line-height: 1.35;
+  }
+  .rune-ready-summary {
+    color: #b5ecd3;
+    font-weight: 600;
+  }
+  .app.is-game .playmat > .visual-controls,
+  .app.is-game .playmat > .visual-controls.has-source {
+    grid-template-columns: minmax(240px, 1fr) minmax(0, 1.9fr);
+    padding: 9px 12px;
+    min-height: 86px;
+  }
+  .app.is-game .visual-controls > .decision-actions {
+    justify-content: flex-end;
+  }
+  .app.is-game .visual-controls .decision-copy > strong {
+    font-size: 16px;
+    line-height: 1.2;
+  }
+  .app.is-game .visual-controls .decision-copy p {
+    font-size: 12px;
+    line-height: 1.4;
+    -webkit-line-clamp: 3;
+  }
+  .app.is-game .visual-controls .card-cost-note {
+    font-size: 11px;
+  }
+  .app.is-game .visual-controls .context-actions {
+    flex: 1 1 auto;
+  }
+  .app.is-game .visual-controls .context-action {
+    flex: 1 1 170px;
+    max-width: 250px;
+    height: auto;
+    min-height: 64px;
+  }
+  .app.is-game .visual-controls .context-action strong {
+    font-size: 12px;
+  }
+  .app.is-game .visual-controls .context-action small {
+    font-size: 11px;
+  }
+  .app.is-game .visual-controls.has-hidden-modes > .hidden-play-modes {
+    grid-area: 2 / 1;
+    justify-self: start;
+  }
+  .app.is-game .visual-controls.has-hidden-modes > .decision-actions {
+    grid-area: 1 / 2 / 3 / 3;
+  }
+  .app.is-game .visual-controls .decision-action-label {
+    font-size: 11px;
+  }
+  .app.is-game .visual-controls .context-action .decision-target-location {
+    font-size: 11px;
+  }
+
+  /* Opening-hand decisions get the table, before any battlefield play exists. */
+  .app.is-game .playmat:has(.hand-tray.is-opening) {
+    grid-template-rows: 30px minmax(0, 1fr) auto;
+    grid-template-areas: "opponent player enemy-hand" "hand hand hand" "decisions decisions decisions";
+    gap: 12px;
+  }
+  .app.is-game
+    .playmat:has(.hand-tray.is-opening)
+    :is(.battlefields, .base-zone, .champion-zone, .rune-zone) {
+    display: none;
+  }
+  .app.is-game .player-cards > .hand-tray.is-opening {
+    --hand-card-height: min(calc(100cqh - 100px), clamp(180px, 21vw, 350px));
+    grid-template-rows: 40px minmax(0, 1fr);
+    padding: 18px 22px;
+    background:
+      radial-gradient(ellipse at 50% 60%, #254a526e, transparent 70%), #102530df;
+  }
+  .app.is-game .hand-tray.is-opening .hand {
+    align-items: center;
+    gap: clamp(12px, 2vw, 32px);
+  }
+  .app.is-game .hand-tray.is-opening .hand-mobile-name {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .app.is-game .hand-tray.is-opening .hand-title {
+    font-size: 13px;
+  }
+  .app.is-game .hand-tray.is-opening .card-piles {
+    align-self: end;
+    height: 160px;
+  }
+  .app.is-game .hand-tray.is-opening .hand-mobile-cost {
+    font-size: 15px;
+    padding: 6px 9px;
+  }
+}
+
+@media (max-width: 800px), (max-width: 1000px) and (max-height: 500px) {
+  .app.is-game .mobile-resource-count {
+    display: grid;
+    gap: 2px;
+    font-size: 9px;
+    line-height: 1.2;
+    white-space: normal;
+    min-width: 0;
+  }
+  .app.is-game .mobile-resource-count small {
+    font-size: 8px;
+    color: #b7cad5;
+    white-space: nowrap;
+  }
+  .app.is-game .visual-controls .reaction-threat {
+    font-size: 11px;
+  }
+  .app.is-game .visual-controls .reaction-responses {
+    flex: 1 1 100%;
+  }
+  .app.is-game .reaction-response {
+    flex: 1 0 auto;
+  }
+  .app.is-game .visual-controls .decision-payment {
+    font-size: 10px;
+  }
+  .app.is-game .visual-controls.paired-targets .context-action.has-target {
+    flex: 1 1 0;
+    padding: 7px;
+    gap: 5px;
+  }
+  .app.is-game .visual-controls.paired-targets .decision-option-art {
+    display: none;
+  }
+  .app.is-game
+    .visual-controls.paired-targets
+    .context-action
+    .decision-target
+    strong {
+    font-size: 12px;
+  }
+  .app.is-game .unit-wrap.has-assignment .mobile-unit-name {
+    bottom: 39px;
+  }
+  .app.is-game .unit-wrap .mobile-unit-name {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+  .app.is-game .unit-wrap .card-status-tokens {
+    top: 3px;
+    bottom: auto;
+    left: 3px;
+    right: auto;
+    max-width: calc(100% - 24px);
+  }
+  .app.is-game .player-cards > .hand-tray.is-empty {
+    grid-template-rows: 44px;
+    padding: 0 6px;
+  }
+  .app.is-game .hand-tray.is-empty .hand-title {
+    display: flex;
+  }
+  .app.is-game .hand-tray.is-empty .hand {
+    display: none;
+  }
+}
+
+@media (max-width: 800px) and (min-height: 501px) {
+  .app.is-game .playmat:has(.hand-tray.is-empty) {
+    grid-template-rows: 44px 64px auto minmax(0, 1fr) 44px auto;
+  }
+  .app.is-game .playmat:has(.hand-tray.is-opening) {
+    grid-template-rows: 44px minmax(0, 1fr) auto;
+    grid-template-areas: "opponent player" "hand hand" "decisions decisions";
+  }
+  .app.is-game
+    .playmat:has(.hand-tray.is-opening)
+    :is(
+      .mobile-board-nav,
+      .mobile-duel-chain,
+      .battlefields,
+      .mobile-base-panel
+    ) {
+    display: none;
+  }
+  .app.is-game .playmat:has(.hand-tray.is-opening) .own-base-panel {
+    display: contents;
+  }
+  .app.is-game
+    .playmat:has(.hand-tray.is-opening)
+    .own-base-panel
+    > :not(.hand-tray, .player-bar) {
+    display: none;
+  }
+  .app.is-game .player-cards > .hand-tray.is-opening {
+    --hand-card-height: max(80px, min(calc((100cqh - 70px) / 2), 210px));
+  }
+  .app.is-game .hand-tray.is-opening .hand {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    align-items: center;
+    justify-items: center;
+    overflow: auto;
+    gap: 8px;
+  }
+  .app.is-game
+    .hand-tray.is-opening
+    :is(.hand-scroll-button, .hand-visible-range) {
+    display: none;
+  }
+  .app.is-game .hand-tray.is-opening .hand-card-wrap {
+    width: calc(var(--hand-card-height) * 0.716);
+    height: var(--hand-card-height);
+  }
+}
+
+/* Short, wide windows keep the battlefield tall beside a hand/decision rail. */
+@media (min-width: 1001px) and (min-height: 501px) and (max-height: 699px) {
+  .app.is-game .playmat:not(:has(.hand-tray.is-opening)) {
+    --short-dock-height: 286px;
+    position: relative;
+    padding-right: 356px;
+    grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1.8fr) minmax(
+        120px,
+        0.8fr
+      );
+    grid-template-rows:
+      26px minmax(48px, 0.7fr) minmax(140px, 2.4fr) minmax(48px, 0.7fr)
+      24px;
+    grid-template-areas: "opponent opponent enemy-hand" "opponent-setup enemy-base enemy-runes" "fields fields fields" "player-setup own-base runes" "player player player";
+  }
+  .app.is-game .playmat:not(:has(.hand-tray.is-opening)) .hand-tray {
+    position: absolute;
+    grid-area: auto;
+    top: 6px;
+    right: 6px;
+    width: 338px;
+    height: calc(100% - var(--short-dock-height) - 18px);
+    min-height: 104px;
+    padding: 4px 6px;
+    grid-template-rows: 24px minmax(0, 1fr);
+    --hand-card-height: max(44px, min(calc(100cqh - 56px), 160px));
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .hand-tray
+    :is(.hand-desktop-hint, .pile-art) {
+    display: none;
+  }
+  .app.is-game .playmat:not(:has(.hand-tray.is-opening)) .hand-tray .hand {
+    grid-area: 2 / 1 / 3 / -1;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .hand-tray
+    > .card-piles {
+    grid-area: 1 / 2;
+    padding: 0;
+    border: 0;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .hand-tray
+    .pile-button {
+    width: 54px;
+    display: flex;
+    min-height: 24px;
+  }
+  .app.is-game .playmat:not(:has(.hand-tray.is-opening)) .hand-tray.is-empty {
+    height: 52px;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .app.is-game .playmat:not(:has(.hand-tray.is-opening)) > .visual-controls {
+    position: absolute;
+    grid-area: auto;
+    right: 6px;
+    bottom: 6px;
+    width: 338px;
+    height: var(--short-dock-height);
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    padding: 8px;
+    gap: 6px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    > .decision-context {
+    grid-area: 1 / 1;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    > .decision-actions {
+    grid-area: 2 / 1;
+    align-self: start;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .decision-context
+    > .decision-copy
+    p {
+    -webkit-line-clamp: 1;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .card-cost-note {
+    display: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .context-actions {
+    flex: 1 1 100%;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .context-action {
+    max-width: none;
+    min-width: 0;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .cancel-selection {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .decision-copy {
+    padding-right: 30px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .decision-action-label {
+    display: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .decision-option-details:has(.decision-payment)
+    > small {
+    display: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls.has-hidden-modes {
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls.has-hidden-modes
+    > .hidden-play-modes {
+    grid-area: 2 / 1;
+    width: 100%;
+    max-width: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls.has-hidden-modes
+    > .decision-actions {
+    grid-area: 3 / 1;
+  }
+}
+
+@media (max-width: 1000px) and (max-height: 500px) and (min-aspect-ratio: 3/2) {
+  .app.is-game .playmat,
+  .app.is-game .playmat:has(.visual-controls.has-hidden-modes) {
+    grid-template-columns: 72px minmax(0, 1fr) minmax(0, 1fr) minmax(
+        310px,
+        1.1fr
+      );
+  }
+  .app.is-game .player-cards > .hand-section {
+    --hand-card-height: max(44px, min(calc(100cqh - 48px), 132px));
+    grid-template-rows: 44px minmax(0, 1fr);
+    padding-bottom: 0;
+  }
+  .app.is-game .hand-tray:not(.is-empty) .hand-title-name {
+    display: none;
+  }
+  .app.is-game .hand-mobile-tools {
+    grid-area: 1 / 1;
+  }
+  .app.is-game .player-cards .hand-tray .hand {
+    grid-area: 2 / 1 / 3 / -1;
+    overflow-y: auto;
+  }
+  .app.is-game
+    .visual-controls
+    .context-action.has-target
+    .decision-action-label {
+    display: none;
+  }
+  .app.is-game .visual-controls .decision-copy:has(.reaction-threat) > p {
+    display: none;
+  }
+  .app.is-game .playmat > .visual-controls {
+    max-height: calc(100dvh - 160px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .app.is-game .visual-controls .gold-button,
+  .app.is-game .visual-controls .secondary-decision {
+    min-height: 44px;
+    padding-block: 5px;
+  }
+  .app.is-game .visual-controls .reaction-responses-label {
+    margin-bottom: 3px;
+  }
+  .app.is-game .visual-controls .reaction-response {
+    min-height: 48px;
+  }
+  .app.is-game
+    .visual-controls.has-hidden-modes
+    .decision-option-details:has(.decision-payment)
+    > small:not(.hidden-action-cost) {
+    display: none;
+  }
+}
+
+/* On short phones the selected response and threat are already in the dock.
+   Keep the hand browser accessible and give the repeated chain lane to the board. */
+@media (max-width: 800px) and (min-height: 501px) and (max-height: 700px) {
+  .app.is-game .playmat:has(.window-reaction.has-source.has-target-options) {
+    grid-template-rows: 44px 64px auto minmax(0, 1fr) 44px auto;
+  }
+  .app.is-game
+    .playmat:has(.window-reaction.has-source.has-target-options)
+    :is(.mobile-duel-chain, .hand-tray .hand) {
+    display: none;
+  }
+  .app.is-game
+    .playmat:has(.window-reaction.has-source.has-target-options)
+    .hand-tray {
+    grid-template-rows: 44px;
+    padding-bottom: 0;
+  }
+  .app.is-game
+    .window-reaction.has-source.has-target-options
+    .decision-copy
+    > p,
+  .app.is-game
+    .window-reaction.has-source.has-target-options
+    .context-action.has-target
+    .decision-action-label {
+    display: none;
+  }
+  .app.is-game
+    .playmat:has(.window-reaction.has-source.has-target-options)
+    .battlefields
+    > .battlefield[data-mobile-active="true"]:has(.enemy-side:empty) {
+    min-height: 0;
+    grid-template-rows: 26px 0 30px minmax(0, 1fr);
+  }
+  .app.is-game
+    .playmat:has(.window-reaction.has-source.has-target-options)
+    .battlefield
+    > .enemy-side:empty {
+    padding: 0;
+  }
+}

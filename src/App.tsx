@@ -60,12 +60,14 @@ import { RuneCard } from "./components/RuneCard";
 import { GearRow } from "./components/GearRow";
 import { CardSleeve } from "./components/CardSleeve";
 import { CombatPanel } from "./components/CombatPanel";
+import { CombatAssignment } from "./components/CombatAssignment";
 import { ChampionZone } from "./components/ChampionZone";
 import {
   createGame,
   getLegalActions,
   applyActionStepped,
   getMight,
+  getCombatPreview,
 } from "./game/engine";
 import { isMovementSelection, sourceActions } from "./game/flow";
 import {
@@ -627,6 +629,24 @@ export default function App() {
       doAction(candidates[0]);
     else if (candidates.length) setTarget(id);
   };
+  // Source shortcuts must never be interpreted as choosing another action's target.
+  const selectSource = (source: string) => {
+    if (!game || review || thinking || paused) return;
+    setTarget(null);
+    setHiddenPlayMode("hide");
+    if (compactTable) {
+      const zone = soleMobileTargetZone(
+        game,
+        sourceActions(
+          game,
+          filterHiddenPlayMode(game, legal, source, "hide"),
+          source,
+        ),
+      );
+      if (zone) setMobileZone(zone);
+    }
+    setSelected((current) => (current === source ? null : source));
+  };
   const selectCard = (source: string) => {
     if (!game || review || thinking || paused) return;
     if (game.phase === "mulligan") {
@@ -655,20 +675,7 @@ export default function App() {
       }
       return;
     }
-    setTarget(null);
-    setHiddenPlayMode("hide");
-    if (compactTable) {
-      const zone = soleMobileTargetZone(
-        game,
-        sourceActions(
-          game,
-          filterHiddenPlayMode(game, legal, source, "hide"),
-          source,
-        ),
-      );
-      if (zone) setMobileZone(zone);
-    }
-    setSelected((current) => (current === source ? null : source));
+    selectSource(source);
   };
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
@@ -1503,6 +1510,7 @@ export default function App() {
                     game={game}
                     legal={legal}
                     selected={selected}
+                    selectSource={selectSource}
                     target={target}
                     hiddenPlayMode={hiddenPlayMode}
                     setHiddenPlayMode={(mode) => {
@@ -1564,29 +1572,7 @@ export default function App() {
                       mulligan={mulligan}
                       select={(source) => {
                         if (game.phase === "mulligan") selectCard(source);
-                        else if (!review && !thinking && !paused) {
-                          setTarget(null);
-                          setHiddenPlayMode("hide");
-                          if (compactTable) {
-                            const zone = soleMobileTargetZone(
-                              game,
-                              sourceActions(
-                                game,
-                                filterHiddenPlayMode(
-                                  game,
-                                  legal,
-                                  source,
-                                  "hide",
-                                ),
-                                source,
-                              ),
-                            );
-                            if (zone) setMobileZone(zone);
-                          }
-                          setSelected((current) =>
-                            current === source ? null : source,
-                          );
-                        }
+                        else selectSource(source);
                       }}
                       inspect={setInspected}
                       openPile={setPileView}
@@ -2016,8 +2002,14 @@ function PlayerBar({
           energy: p.energy,
         })}
       >
-        <Zap size={12} /> {p.runes.filter((rune) => rune.ready).length}
-        {p.energy > 0 && <small>+{p.energy}</small>}
+        <span>
+          {t("{count} ready runes", {
+            count: p.runes.filter((rune) => rune.ready).length,
+          })}
+        </span>
+        {p.energy > 0 && (
+          <small>{t("{count} Energy", { count: p.energy })}</small>
+        )}
       </span>
       <div className="score">
         {highlights.playerEvents.has(player) && (
@@ -2089,8 +2081,15 @@ function RuneZone({
           </div>
         ) : (
           <small>
-            {p.runes.filter((r) => r.ready).length} {t("spremnih ·")} {p.energy}{" "}
-            {t("energije ·")} {p.runeDeck.length} {t("u špilu")}{" "}
+            <span className="rune-ready-summary">
+              {t("{count} ready runes", {
+                count: p.runes.filter((r) => r.ready).length,
+              })}
+            </span>
+            {" · "}
+            {t("{count} stored Energy", { count: p.energy })}
+            {" · "}
+            {p.runeDeck.length} {t("u špilu")}{" "}
             {p.power
               ? t(" · {count} univerzalne moći", { count: p.power })
               : ""}
@@ -2151,16 +2150,21 @@ function UnitRow({
   const { t } = useI18n();
   const h = useHighlights();
   const interaction = useContext(BoardInteraction);
+  const combat = interaction.game ? getCombatPreview(interaction.game) : null;
   return (
     <>
       {units.map((u) => {
         const c = findCard(u.cardId);
+        const assignment =
+          combat?.stage === "assign"
+            ? combat.units.find((entry) => entry.unit.id === u.id)
+            : undefined;
         const might = interaction.game
           ? getMight(interaction.game, u)
           : (c?.might || 0) + u.buff + u.temporaryMight;
         return c ? (
           <div
-            className={`unit-wrap ${h.units.has(u.id) ? "event-highlight" : ""}`}
+            className={`unit-wrap ${assignment ? "has-assignment" : ""} ${h.units.has(u.id) ? "event-highlight" : ""}`}
             data-unit-id={u.id}
             data-effect-tone={h.unitTones.get(u.id)}
             data-event={
@@ -2194,6 +2198,7 @@ function UnitRow({
             <span className="mobile-unit-name" aria-hidden="true">
               {c.name}
             </span>
+            {assignment && <CombatAssignment entry={assignment} />}
             {interaction.game?.pendingMove?.player === 0 &&
               interaction.game.pendingMove.unitIds.includes(u.id) && (
                 <span

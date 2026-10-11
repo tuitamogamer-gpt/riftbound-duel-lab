@@ -398,7 +398,7 @@ describe("specific decision guidance", () => {
     game.players[0].hand = ["ogn-009-298"];
     game.players[0].energy = game.players[0].power = 20;
     expect(decisionReason(game, getLegalActions(game, 0), "hand:0")).toBe(
-      "This card has no legal target, destination or available effect in this position.",
+      "No units on battlefields. This spell needs a battlefield unit.",
     );
     game.units = [combatUnit("target", 1)];
     expect(

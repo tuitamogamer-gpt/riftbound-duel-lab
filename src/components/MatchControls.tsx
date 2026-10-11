@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { findCard, type CatalogCard } from "../catalog";
 import { cardArtUrl } from "../data/art";
 import { Card } from "./Card";
+import { DecisionPayment } from "./DecisionPayment";
+import { reactionSources } from "../game/reaction-presentation";
 import { useCompactTable } from "../hooks/useCompactTable";
 import {
   cardEffectSummary,
@@ -51,6 +53,7 @@ export function MatchControls({
   step,
   mulligan,
   inspect,
+  selectSource,
 }: {
   game: GameState;
   legal: GameAction[];
@@ -69,13 +72,20 @@ export function MatchControls({
   step?: (direction: -1 | 1) => void;
   mulligan: number[];
   inspect: (card: CatalogCard) => void;
+  selectSource?: (source: string) => void;
 }) {
   const { t } = useI18n();
+  const detailsId = useId();
   const compact = useCompactTable();
   const dispatch = requestAction ?? act;
   const damageSummary =
     !review && game.phase === "damage" ? damageAssignmentSummary(game) : null;
   const window = priorityWindow(game);
+  const responses = useMemo(() => reactionSources(game, legal), [game, legal]);
+  const canRespond = window === "reaction" && !review && !busy && !paused;
+  const pendingEffect = canRespond ? game.stack.at(-1) : undefined;
+  const pendingCard = findCard(pendingEffect?.cardId);
+  const pendingTargets = publicActionTargets(game, pendingEffect ?? {});
   const modeLegal = filterHiddenPlayMode(game, legal, selected, hiddenPlayMode);
   const hiddenSetup =
     !review && !busy && !paused
@@ -143,7 +153,12 @@ export function MatchControls({
   const hasTargetOptions = actions.some(
     (action) => publicActionTargets(game, action).length,
   );
-  const pageSize = compact && hasTargetOptions ? 1 : 3;
+  const pageSize =
+    compact && hasTargetOptions
+      ? actions.length === 2 && !game.players[0].hand.length && !hiddenSetup
+        ? 2
+        : 1
+      : 3;
   const movement =
     game.phase === "move" && game.pendingMove?.player === 0
       ? game.pendingMove
@@ -235,7 +250,7 @@ export function MatchControls({
                         : "Click a glowing card to play it, or a ready unit to move. End your turn when finished.";
   return (
     <section
-      className={`match-controls visual-controls window-${window} ${sourceCard ? "has-source" : ""} ${hasTargetOptions ? "has-target-options" : ""} ${hiddenSetup ? "has-hidden-modes" : ""} ${review || busy ? "is-busy" : ""}`}
+      className={`match-controls visual-controls window-${window} ${sourceCard ? "has-source" : ""} ${hasTargetOptions ? "has-target-options" : ""} ${pageSize === 2 ? "paired-targets" : ""} ${hiddenSetup ? "has-hidden-modes" : ""} ${review || busy ? "is-busy" : ""}`}
       aria-label={t("Game controls")}
     >
       <div className="decision-context">
@@ -293,6 +308,20 @@ export function MatchControls({
               </span>
             )}
           </strong>
+          {pendingCard && (
+            <div className="reaction-threat">
+              <span>
+                {t("On the chain: {card}", { card: pendingCard.name })}
+                {pendingTargets.length > 0 &&
+                  ` → ${pendingTargets.map((item) => item.card.name).join(" + ")}`}
+              </span>
+              {!selected && (
+                <span className="reaction-effect">
+                  {cardEffectSummary(pendingCard.text)}
+                </span>
+              )}
+            </div>
+          )}
           {shownTargets.length > 0 && (
             <div className="decision-target-summary">
               <ArrowRight size={14} aria-hidden="true" />
@@ -444,6 +473,37 @@ export function MatchControls({
           </button>
         ) : (
           <>
+            {canRespond && !selected && selectSource && responses.size > 0 && (
+              <div
+                className="reaction-responses"
+                role="group"
+                aria-label={t("Available responses")}
+              >
+                <span className="reaction-responses-label">
+                  {t("Choose a response")}
+                </span>
+                <div>
+                  {[...responses].map(([source, response]) => (
+                    <button
+                      type="button"
+                      className="reaction-response"
+                      key={source}
+                      data-response-source={source}
+                      aria-label={t("Select {card} to respond", {
+                        card: response.name,
+                      })}
+                      onClick={() => selectSource(source)}
+                    >
+                      <img src={cardArtUrl(response)} alt="" />
+                      <span>
+                        {response.name}
+                        <small>{t("Select response")}</small>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="context-actions">
               {namingSpell && !actions.length && (
                 <span>{t("No matching spells")}</span>
@@ -461,6 +521,7 @@ export function MatchControls({
                       className={`context-action ${targets.length ? "has-target" : ""}`}
                       data-action-id={action.id}
                       data-target-id={action.targetId}
+                      aria-describedby={`${detailsId}-${action.id}`}
                       aria-label={
                         t(action.label) +
                         (targets.length
@@ -508,17 +569,23 @@ export function MatchControls({
                         ) : (
                           <strong>{t(action.label)}</strong>
                         )}
-                        {action.id.startsWith("hide:") && hiddenSetup ? (
-                          <small className="hidden-action-cost">
-                            {t(
-                              action.id.endsWith(":energy")
-                                ? "Hide · 1 Energy"
-                                : hiddenSetup.costLabel,
-                            )}
-                          </small>
-                        ) : (
-                          action.detail && <small>{t(action.detail)}</small>
-                        )}
+                        <span
+                          id={`${detailsId}-${action.id}`}
+                          className="decision-option-details"
+                        >
+                          {action.id.startsWith("hide:") && hiddenSetup ? (
+                            <small className="hidden-action-cost">
+                              {t(
+                                action.id.endsWith(":energy")
+                                  ? "Hide · 1 Energy"
+                                  : hiddenSetup.costLabel,
+                              )}
+                            </small>
+                          ) : (
+                            action.detail && <small>{t(action.detail)}</small>
+                          )}
+                          <DecisionPayment game={game} action={action} />
+                        </span>
                       </span>
                     </button>
                   );
@@ -571,7 +638,7 @@ export function MatchControls({
             )}
             {ending && !(hiddenSetup && actions.length) && (
               <button
-                className={`gold-button end-turn ${selected && actions.length ? "secondary-ending" : ""}`}
+                className={`gold-button end-turn ${(selected && actions.length) || (canRespond && responses.size > 0) ? "secondary-ending" : ""}`}
                 onClick={() => dispatch(ending)}
               >
                 {t(

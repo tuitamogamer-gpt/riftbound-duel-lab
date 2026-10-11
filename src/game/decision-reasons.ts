@@ -1,6 +1,7 @@
 import { getCombatPreview, iterateLegalActions } from "./engine";
 import { selectedCardId } from "./flow";
 import { getScript } from "./scripts";
+import { findCard } from "../catalog";
 import type { GameAction, GameState, PlayerId } from "./types";
 
 /** Assignment arithmetic is public. Lethal assignment is not a promise about
@@ -98,6 +99,13 @@ export function decisionReason(
       return "Only Reactions can be played while an effect is on the chain.";
     if (game.phase === "showdown" && !script?.action && !script?.reaction)
       return "This card must wait for your main phase.";
+    if (
+      findCard(selectedCardId(game, selected))?.type === "Spell" &&
+      script?.spell?.length === 1 &&
+      script.spell[0].target === "unitAtBattlefield" &&
+      !game.units.some((entry) => entry.location.startsWith("field:"))
+    )
+      return "No units on battlefields. This spell needs a battlefield unit.";
   }
   return "This card has no legal target, destination or available effect in this position.";
 }

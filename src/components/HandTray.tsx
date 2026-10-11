@@ -178,57 +178,65 @@ export function HandTray({
   };
 
   return (
-    <section className="hand-section hand-tray">
+    <section
+      className={`hand-section hand-tray ${opening ? "is-opening" : ""} ${!hand.length ? "is-empty" : ""}`}
+    >
       <div className="hand-title">
         <span className="hand-title-name">
           {t("TVOJA RUKA")} <b>{hand.length}</b>
         </span>
         <span className="hand-desktop-hint">
-          {t("Click a card · choose a move in the center")}
+          {opening
+            ? t("Choose up to 2 to replace · {count} selected", {
+                count: mulligan.length,
+              })
+            : t("Click a card · choose a move in the center")}
         </span>
-        <div className="hand-mobile-tools">
-          <button
-            type="button"
-            className="hand-scroll-button"
-            aria-label={t("Previous hand cards")}
-            aria-controls={handId}
-            disabled={!range.previous}
-            onClick={() => scrollHand(-1)}
-          >
-            <ChevronLeft size={17} />
-          </button>
-          <span
-            className="hand-visible-range"
-            aria-label={t("Cards {first}–{last} of {count}", {
-              first: range.first,
-              last: range.last,
-              count: hand.length,
-            })}
-          >
-            {range.first}–{range.last}
-          </span>
-          <button
-            type="button"
-            className="hand-scroll-button"
-            aria-label={t("Next hand cards")}
-            aria-controls={handId}
-            disabled={!range.next}
-            onClick={() => scrollHand(1)}
-          >
-            <ChevronRight size={17} />
-          </button>
-          <button
-            ref={openButton}
-            type="button"
-            className="hand-expand-button"
-            onClick={() => onExpandedChange(true)}
-            aria-label={t("Browse hand")}
-            aria-haspopup="dialog"
-            aria-expanded={expanded}
-          >
-            <Expand size={18} />
-          </button>
-        </div>
+        {hand.length > 0 && (
+          <div className="hand-mobile-tools">
+            <button
+              type="button"
+              className="hand-scroll-button"
+              aria-label={t("Previous hand cards")}
+              aria-controls={handId}
+              disabled={!range.previous}
+              onClick={() => scrollHand(-1)}
+            >
+              <ChevronLeft size={17} />
+            </button>
+            <span
+              className="hand-visible-range"
+              aria-label={t("Cards {first}–{last} of {count}", {
+                first: range.first,
+                last: range.last,
+                count: hand.length,
+              })}
+            >
+              {range.first}–{range.last}
+            </span>
+            <button
+              type="button"
+              className="hand-scroll-button"
+              aria-label={t("Next hand cards")}
+              aria-controls={handId}
+              disabled={!range.next}
+              onClick={() => scrollHand(1)}
+            >
+              <ChevronRight size={17} />
+            </button>
+            <button
+              ref={openButton}
+              type="button"
+              className="hand-expand-button"
+              onClick={() => onExpandedChange(true)}
+              aria-label={t("Browse hand")}
+              aria-haspopup="dialog"
+              aria-expanded={expanded}
+            >
+              <Expand size={18} />
+            </button>
+          </div>
+        )}
       </div>
       <div
         ref={scroll}
@@ -236,6 +244,9 @@ export function HandTray({
         className="hand"
         style={{ "--hand-count": Math.max(1, hand.length) } as CSSProperties}
       >
+        {!hand.length && (
+          <span className="empty-hand-label">{t("No cards in hand")}</span>
+        )}
         {hand.map((id, index) => {
           const card = findCard(id);
           if (!card) return null;

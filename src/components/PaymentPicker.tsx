@@ -5,22 +5,12 @@ import { domainColors } from "../catalog";
 import {
   getPaymentPreview,
   withPaymentRuneOrder,
-  type PaymentPool,
+  paymentPoolLabel,
 } from "../game/payment-presentation";
 import type { GameAction, GameState } from "../game/types";
 import { useDialogFocus } from "../hooks/useDialogFocus";
 import { useI18n } from "../i18n";
 import "./PaymentPicker.css";
-
-const poolLabels: Partial<Record<PaymentPool["key"], string>> = {
-  energy: "Stored Energy",
-  power: "Universal Power",
-  showdownEnergy: "Showdown Energy",
-  unitEnergy: "Unit Energy",
-  spellEnergy: "Spell Energy",
-  spellPower: "Spell Power",
-  gearPower: "Gear Power",
-};
 
 export function PaymentPicker({
   game,
@@ -188,7 +178,7 @@ export function PaymentPicker({
                     <dt>
                       {pool.key.startsWith("typed:")
                         ? t("{domain} Power", { domain: t(pool.key.slice(6)) })
-                        : t(poolLabels[pool.key] ?? pool.key)}
+                        : t(paymentPoolLabel(pool.key))}
                     </dt>
                     <dd>
                       {pool.before} → {pool.after}

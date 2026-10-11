@@ -28,6 +28,7 @@ import "./desktop-table.css";
 import "./components/PlaybackSpeed.css";
 import "./mobile-table.css";
 import "./components/CardDetail.css";
+import "./match-clarity.css";
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   void navigator.serviceWorker.register("/sw.js").catch(() => {
     // Online play and browser saves remain available if offline setup fails.

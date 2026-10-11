@@ -69,6 +69,7 @@ export function readableText(text: string): string {
     .replace(/:rb_might:/g, "Might")
     .replace(/:rb_exhaust:/g, "Exhaust")
     .replace(/:rb_([^:]+):/g, "$1")
+    .replace(/([)\]])(?=[A-Za-z\[])/g, "$1 ")
     .replace(/\s+/g, " ")
     .trim();
 }

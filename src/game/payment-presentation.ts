@@ -20,6 +20,21 @@ export interface PaymentPreview {
   pools: PaymentPool[];
 }
 
+const poolLabels: Partial<Record<PaymentPool["key"], string>> = {
+  energy: "Stored Energy",
+  power: "Universal Power",
+  showdownEnergy: "Showdown Energy",
+  unitEnergy: "Unit Energy",
+  spellEnergy: "Spell Energy",
+  spellPower: "Spell Power",
+  gearPower: "Gear Power",
+};
+export function paymentPoolLabel(key: PaymentPool["key"]) {
+  return key.startsWith("typed:")
+    ? `${key.slice(6)} Power`
+    : (poolLabels[key] ?? key);
+}
+
 /** A complete permutation is a preference, never permission to bypass payment. */
 export function withPaymentRuneOrder(
   game: GameState,
