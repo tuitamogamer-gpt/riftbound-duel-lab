@@ -13,7 +13,7 @@ export type Profile =
   | "xp"
   | "tokens"
   | "recursion";
-export const BOT_VERSION = "battlefield-planner-3";
+export const BOT_VERSION = "battlefield-planner-4";
 /** Initial measured/tunable limits, not claims of optimal strength. */
 export const DIFFICULTIES = {
   beginner: {

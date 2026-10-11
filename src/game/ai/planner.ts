@@ -577,6 +577,23 @@ export function chooseDecision(
             finalists.sort((a, b) => compare(b.evaluation, a.evaluation));
             best = finalists[0] ?? best;
           }
+          // Beginner variety only among near-equal, nonterminal, nonurgent lines.
+          if (
+            difficulty === "beginner" &&
+            best &&
+            !urgent &&
+            best.evaluation.terminal === 0
+          ) {
+            const close = alternatives.filter(
+              (a) =>
+                a.evaluation.terminal === 0 &&
+                best!.evaluation.utility - a.evaluation.utility <= 1,
+            );
+            if (close.length)
+              best = close[Math.floor(botRandom(knownSeed)() * close.length)];
+          }
+          // Apply conservation after variety, so a beginner cannot reselect a
+          // temporary effect whose only benefit disappears before it can matter.
           // A static position is not a legal alternative to ending the turn.
           // Use it only to reject moves with no strategic progress; otherwise the
           // loss of immediately playable hand options can suppress useful development.
@@ -602,21 +619,6 @@ export function chooseDecision(
               depth: 0,
               confirmed: false,
             };
-          }
-          // Beginner variety only among near-equal, nonterminal, nonurgent lines.
-          if (
-            difficulty === "beginner" &&
-            best &&
-            !urgent &&
-            best.evaluation.terminal === 0
-          ) {
-            const close = alternatives.filter(
-              (a) =>
-                a.evaluation.terminal === 0 &&
-                best!.evaluation.utility - a.evaluation.utility <= 1,
-            );
-            if (close.length)
-              best = close[Math.floor(botRandom(knownSeed)() * close.length)];
           }
         }
         if (best) {

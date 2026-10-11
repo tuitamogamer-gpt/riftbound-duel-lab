@@ -12,7 +12,7 @@ import { createCombatFixture, combatUnit } from "./fixtures/combat";
 
 const options = { difficulty: "expert" as const, seed: 321 };
 describe("worker-independent prepared legal recovery", () => {
-  it("replays recorded v1 and v2 actions with v3 while rejecting unknown replay versions", () => {
+  it("replays recorded v1, v2 and v3 actions with v4 while rejecting unknown replay versions", () => {
     const game = createGame({ seed: 44 });
     const action = getLegalActions(game, 0).find(
       (candidate) => candidate.id === "mulligan:0,1",
@@ -22,11 +22,12 @@ describe("worker-independent prepared legal recovery", () => {
     for (const version of [
       "battlefield-planner-1",
       "battlefield-planner-2",
+      "battlefield-planner-3",
     ] as const) {
       replay.version = version;
       expect(replayMatch(replay)).toEqual(applyAction(game, action));
     }
-    expect(createReplay(game).version).toBe("battlefield-planner-3");
+    expect(createReplay(game).version).toBe("battlefield-planner-4");
     expect(() =>
       replayMatch({
         ...replay,

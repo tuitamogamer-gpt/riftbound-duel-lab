@@ -58,6 +58,8 @@ jobs:
           tests/replay-navigation.test.ts
           tests/replay-bookmarks.test.ts
           tests/ai-profiles.test.ts
+          tests/ai-temporary-debuff.test.ts
+          tests/bot-debuff-reference.test.ts
           tests/ai-prepared-fallback.test.ts
           tests/ai-inspection-ownership.test.ts
           tests/ai-authorized-knowledge.test.ts

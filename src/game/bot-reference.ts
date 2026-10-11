@@ -9,6 +9,7 @@ import {
 } from "./engine";
 import { getScript } from "./scripts";
 import { battleBalance, damageScores, planAttack } from "./bot-tactics";
+import { changeMight } from "./card-wave19";
 import type { Effect, GameAction, GameState, PlayerId, Unit } from "./types";
 /** Uses public board state, own hand, and only the top card explicitly revealed by a Predict choice. */
 export function getReferenceAction(
@@ -25,6 +26,55 @@ export function getReferenceAction(
     getMight(s, u) +
     (getCard(u.cardId).energy ?? 0) * 0.25 +
     (u.cardId.startsWith("ogs-00") ? 1 : 0);
+  const negativeMightValue = (effect: Effect, target?: Unit): number => {
+    if (!target || target.owner !== opponent) return -50;
+    const beforeMight = getMight(s, target);
+    const amount =
+      effect.minMight !== undefined
+        ? Math.min(
+            0,
+            Math.max(effect.amount ?? -1, effect.minMight - beforeMight),
+          )
+        : (effect.amount ?? -1);
+    const reduced = { ...target };
+    const changed = {
+      ...s,
+      units: s.units.map((u) => (u.id === target.id ? reduced : u)),
+    };
+    // Use the engine's chosen-Might modifiers as well as the printed minimum.
+    changeMight(changed, player, reduced, amount, Boolean(effect.target));
+    const afterMight = getMight(changed, reduced);
+    if (afterMight >= beforeMight) return -10;
+    if (target.damage > 0 && target.damage >= afterMight)
+      return 38 + value(target);
+
+    const pendingDamage = s.stack
+      .filter((item) => item.player === player && item.targetId === target.id)
+      .flatMap((item) => item.effects)
+      .filter((e) => e.type === "damage")
+      .reduce((sum, e) => sum + (e.amount ?? 0), 0);
+    const health = beforeMight - target.damage + (target.preventDamage ?? 0);
+    if (
+      pendingDamage < health &&
+      pendingDamage >=
+        afterMight - target.damage + (target.preventDamage ?? 0) &&
+      target.preventNextDamageTurn !== s.turn &&
+      s.preventEffectDamageTurn !== s.turn &&
+      !getKeywords(s, target).includes("Prevent all damage")
+    )
+      return 38 + value(target);
+
+    // A temporary debuff in reserve expires without affecting this combat.
+    if (
+      !s.combat?.engaged ||
+      s.combat.stage !== "priority" ||
+      target.location !== s.combat.fieldId
+    )
+      return -8;
+    const before = battleBalance(s, player, s.combat.fieldId);
+    const after = battleBalance(changed, player, s.combat.fieldId);
+    return !before.wins && after.wins ? 48 : -8;
+  };
   const cardValue = (id: string): number => {
     const c = getCard(id),
       sc = getScript(id);
@@ -62,6 +112,8 @@ export function getReferenceAction(
       return target?.owner === opponent && !target.stunned
         ? 18 + value(target)
         : -25;
+    if (effect.type === "might" && (effect.amount ?? 1) < 0)
+      return negativeMightValue(effect, target);
     if (
       ["damage", "kill", "bounce"].some((type) => isCardType(effect, type)) ||
       /(?:banish|wind-ghosts|lacerate|morgana)/.test(custom)
@@ -301,6 +353,8 @@ export function getReferenceAction(
                 : 1),
           1,
         );
+      if (e?.type === "might" && (e.amount ?? 1) < 0)
+        return negativeMightValue(e, u);
       if (e?.type === "might")
         return (u.owner === player ? 1 : -1) * (e.amount ?? 1) * 10;
       if (e?.type === "ready")
@@ -439,6 +493,8 @@ export function getReferenceAction(
           : -10;
       }
       if (["might", "assault"].includes(effect?.type ?? "")) {
+        if (effect.type === "might" && (effect.amount ?? 1) < 0)
+          return negativeMightValue(effect, target);
         if (target?.owner !== player) return -50;
         if (!s.combat || target.location !== s.combat.fieldId) return -5;
         const before = battleBalance(s, player, s.combat.fieldId);

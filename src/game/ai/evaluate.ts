@@ -7,7 +7,7 @@ import {
   iterateLegalActions,
 } from "../engine";
 import { getScript } from "../scripts";
-import type { Effect, GameState, PlayerId } from "../types";
+import type { Effect, GameState, PlayerId, Unit } from "../types";
 import { cardStrategy, type Profile } from "./config";
 export interface Evaluation {
   terminal: -1 | 0 | 1;
@@ -26,22 +26,20 @@ export function evaluate(
 ): Evaluation {
   const q = (1 - p) as PlayerId,
     target = getVictoryScore(s);
+  const durableMight = (u: Unit) =>
+    getMight(s, {
+      ...u,
+      temporaryMight: 0,
+      temporaryAssault: 0,
+      combatShield: 0,
+    });
   const board = (actor: PlayerId) =>
     s.units
       .filter((u) => u.owner === actor)
       .reduce((n, u) => {
         const sc = getScript(u.cardId),
-          m = getMight(
-            s,
-            s.combat
-              ? u
-              : {
-                  ...u,
-                  temporaryMight: 0,
-                  temporaryAssault: 0,
-                  combatShield: 0,
-                },
-          );
+          m =
+            s.combat?.fieldId === u.location ? getMight(s, u) : durableMight(u);
         return (
           n +
           2 +
@@ -109,7 +107,12 @@ export function evaluate(
       // A forecast, never a point awarded outside the resolver. No separate control bonus.
       const durable = occupants.some((u) => !u.temporary);
       if (!durable) return n + 0.05;
-      const defenders = occupants.reduce((sum, u) => sum + getMight(s, u), 0);
+      // On the holder's turn, the next attack opportunity comes after turn-end
+      // cleanup. A temporary debuff on an enemy reserve cannot protect that Hold.
+      // During the opponent's turn, current Might still matters for attacks now.
+      const forecastMight =
+        s.currentPlayer === actor ? durableMight : (u: Unit) => getMight(s, u);
+      const defenders = occupants.reduce((sum, u) => sum + forecastMight(u), 0);
       const pressure = s.units
         .filter(
           (u) =>
@@ -118,7 +121,7 @@ export function evaluate(
             (u.location === `base:${u.owner}` ||
               (u.location !== f.id && getKeywords(s, u).includes("Ganking"))),
         )
-        .reduce((sum, u) => sum + getMight(s, u), 0);
+        .reduce((sum, u) => sum + forecastMight(u), 0);
       // Visible mobility can contest a thin garrison before its next Hold.
       // This is uncertainty in the forecast, never a replacement combat result.
       return (

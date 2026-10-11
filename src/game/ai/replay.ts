@@ -6,6 +6,7 @@ export const BOT_AUDIT_KEY = "riftbound-bot-audit-v1";
 export const BOT_REPLAY_VERSIONS = [
   "battlefield-planner-1",
   "battlefield-planner-2",
+  "battlefield-planner-3",
   BOT_VERSION,
 ] as const;
 export interface BotReplay {
