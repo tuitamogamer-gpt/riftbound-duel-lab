@@ -1,0 +1,115 @@
+/* Give the active decision more room while keeping every card reachable. */
+.hand-focus-label {
+  display: none;
+}
+.guide-trigger {
+  color: #eed08c;
+}
+
+@media (min-width: 801px) and (min-height: 700px) {
+  .app.is-game .playmat[data-table-focus="hand"] {
+    grid-template-rows:
+      26px minmax(48px, 0.8fr) minmax(0, 2.7fr) auto minmax(48px, 0.8fr)
+      24px clamp(180px, 26dvh, 245px);
+  }
+  .app.is-game .playmat[data-table-focus="board"] {
+    grid-template-rows:
+      26px minmax(48px, 0.8fr) minmax(0, 2.7fr) auto minmax(48px, 0.8fr)
+      24px 52px;
+  }
+}
+
+@media (max-width: 800px) and (min-height: 701px) {
+  .app.is-game .playmat[data-table-focus="hand"] {
+    grid-template-rows:
+      44px 64px auto minmax(0, 1fr) clamp(180px, 26dvh, 230px)
+      auto;
+  }
+}
+
+@media (max-width: 800px) and (min-height: 501px) {
+  .app.is-game .playmat[data-table-focus="board"] {
+    grid-template-rows: 44px 64px auto minmax(0, 1fr) 44px auto;
+  }
+}
+
+@media (min-width: 801px) and (min-height: 700px),
+  (max-width: 800px) and (min-height: 501px) {
+  .app.is-game .playmat[data-table-focus="board"] .player-cards > .hand-tray {
+    grid-template-rows: minmax(0, 1fr);
+    align-items: center;
+    padding-block: 0;
+  }
+  .app.is-game
+    .playmat[data-table-focus="board"]
+    .hand-tray
+    :is(
+      .hand,
+      .hand-desktop-hint,
+      .hand-scroll-button,
+      .hand-visible-range,
+      .pile-art
+    ) {
+    display: none;
+  }
+  .app.is-game .playmat[data-table-focus="board"] .hand-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .app.is-game .playmat[data-table-focus="board"] .hand-mobile-tools {
+    display: flex;
+    margin-left: auto;
+    align-items: center;
+  }
+  .app.is-game .playmat[data-table-focus="board"] .hand-focus-label {
+    display: inline;
+    font-size: 10px;
+    color: #aad6ca;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .app.is-game
+    .playmat[data-table-focus="board"]
+    .hand-title
+    .hand-expand-button
+    .hand-focus-label {
+    display: inline;
+    font-size: 11px;
+  }
+  .app.is-game .playmat[data-table-focus="board"] .hand-expand-button {
+    width: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 44px;
+    min-height: 40px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #6fa596;
+    background: #173b37;
+    color: #d0f2e5;
+  }
+  .app.is-game .playmat[data-table-focus="board"] .hand-tray > .card-piles {
+    grid-area: 1 / 2;
+  }
+  .app.is-game .playmat[data-table-focus="board"] .hand-tray .pile-button {
+    display: flex;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 800px) and (min-height: 501px) {
+  .app.is-game
+    .playmat[data-table-focus="board"]
+    .hand-title
+    > .hand-focus-label {
+    display: none;
+  }
+}
+
+@media (max-width: 360px) and (min-height: 501px) {
+  .app.is-game .guide-trigger + .bot-explanation {
+    display: none;
+  }
+}

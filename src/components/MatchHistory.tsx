@@ -15,6 +15,7 @@ import {
 import { findCard } from "../catalog";
 import { useI18n } from "../i18n";
 import { Card } from "./Card";
+import { MatchDebrief } from "./MatchDebrief";
 import {
   buildMatchTimeline,
   clearMatchHistory,
@@ -57,10 +58,18 @@ function download(value: string, filename: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export function MatchHistory({ onBack }: { onBack: () => void }) {
+export function MatchHistory({
+  onBack,
+  initialMatchId,
+}: {
+  onBack: () => void;
+  initialMatchId?: string | null;
+}) {
   const { t, locale } = useI18n();
   const [archive, setArchive] = useState(readMatchHistory);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    initialMatchId ?? null,
+  );
   const [index, setIndex] = useState(0);
   const [viewer, setViewer] = useState<PlayerId>(0);
   const [playing, setPlaying] = useState(false);
@@ -610,6 +619,19 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
             )}
             {frame && view && (
               <>
+                <MatchDebrief
+                  frames={timeline.frames}
+                  viewer={viewer}
+                  seek={(next) => {
+                    seek(next);
+                    requestAnimationFrame(() => {
+                      const board =
+                        document.querySelector<HTMLElement>(".history-board");
+                      board?.scrollIntoView({ block: "start" });
+                      board?.focus({ preventScroll: true });
+                    });
+                  }}
+                />
                 <div className="history-playback">
                   <button
                     className="history-button"
@@ -1000,7 +1022,11 @@ export function MatchHistory({ onBack }: { onBack: () => void }) {
                     ))}
                   </div>
                 )}
-                <div className="history-board">
+                <div
+                  className="history-board"
+                  tabIndex={-1}
+                  aria-label={t("Replay board")}
+                >
                   {zones.map((zone) => (
                     <section key={zone.id} className="history-zone">
                       <h3>

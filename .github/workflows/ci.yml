@@ -46,6 +46,7 @@ jobs:
           tests/session-storage.test.ts
           tests/payment-decisions.test.ts
           tests/match-clarity.test.ts
+          tests/duel-experience.test.ts
           tests/hidden-play-modes.test.ts
           tests/hidden-flow.test.ts
           tests/hidden-card-view.test.ts

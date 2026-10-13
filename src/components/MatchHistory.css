@@ -1,4 +1,5 @@
 .match-history {
+  width: 100%;
   --history-ink: #172c35;
   --history-muted: #5b6b6f;
   --history-line: #172c352b;

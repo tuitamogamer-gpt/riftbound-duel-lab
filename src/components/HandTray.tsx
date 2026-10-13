@@ -15,6 +15,7 @@ import { CardPiles, type PileView } from "./CardPiles";
 import { EquipmentRules } from "./EquipmentRules";
 import { RulesErrata } from "./RulesErrata";
 import type { Review } from "./StepFlow";
+import type { TableFocus } from "../game/table-focus";
 import "./HandTray.css";
 
 type HandTrayProps = {
@@ -30,6 +31,7 @@ type HandTrayProps = {
   expanded: boolean;
   onExpandedChange: (open: boolean) => void;
   interactive: boolean;
+  focus?: TableFocus;
 };
 
 /** Selection stays separate from committing a move in the decision bar. */
@@ -46,6 +48,7 @@ export function HandTray({
   expanded,
   onExpandedChange,
   interactive,
+  focus = "balanced",
 }: HandTrayProps) {
   const { t } = useI18n();
   const titleId = useId();
@@ -185,6 +188,9 @@ export function HandTray({
         <span className="hand-title-name">
           {t("TVOJA RUKA")} <b>{hand.length}</b>
         </span>
+        {focus === "board" && (
+          <span className="hand-focus-label">{t("Board focus")}</span>
+        )}
         <span className="hand-desktop-hint">
           {opening
             ? t("Choose up to 2 to replace · {count} selected", {
@@ -234,6 +240,9 @@ export function HandTray({
               aria-expanded={expanded}
             >
               <Expand size={18} />
+              {focus === "board" && (
+                <span className="hand-focus-label">{t("Browse hand")}</span>
+              )}
             </button>
           </div>
         )}

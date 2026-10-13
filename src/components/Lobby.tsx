@@ -47,6 +47,7 @@ type Props = {
   onBot: (id: string) => void;
   onDifficulty: (style: string) => void;
   onStart: () => void;
+  onGuidedStart?: () => void;
   onResume: () => void;
   onImport: () => void;
   onDetails: (deck: StarterDeck) => void;
@@ -667,6 +668,23 @@ export function Lobby(p: Props) {
             <p className="rift-save-note">
               <Shield size={13} /> {t("Tvoj napredak se automatski čuva.")}
             </p>
+            {p.onGuidedStart && (
+              <div className="rift-guided-start">
+                <button
+                  className="outline-button"
+                  disabled={!p.ready}
+                  onClick={p.onGuidedStart}
+                >
+                  <BookOpen size={17} />
+                  {t("Play with a guide")}
+                </button>
+                <small>
+                  {t(
+                    "A single duel with your selected decks. You start against Beginner AI, with tips as you play.",
+                  )}
+                </small>
+              </div>
+            )}
           </aside>
         </div>
       </section>

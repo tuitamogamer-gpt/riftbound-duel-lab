@@ -56,6 +56,9 @@ import { Card, CardDetail } from "./components/Card";
 import { AppDialog } from "./components/AppDialog";
 import { RouteBoundary } from "./components/RouteBoundary";
 import { MatchResultPanel } from "./components/MatchResultPanel";
+import { DuelGuide } from "./components/DuelGuide";
+import { useDuelGuide } from "./hooks/useDuelGuide";
+import { tableFocus } from "./game/table-focus";
 import { RuneCard } from "./components/RuneCard";
 import { GearRow } from "./components/GearRow";
 import { CardSleeve } from "./components/CardSleeve";
@@ -278,6 +281,10 @@ export default function App() {
   const audit = useRef<BotReplay | null>(null);
   const archiveAttempt = useRef("");
   const [historySaveError, setHistorySaveError] = useState(false);
+  const [completedHistoryId, setCompletedHistoryId] = useState<string | null>(
+    null,
+  );
+  const [historyFocusId, setHistoryFocusId] = useState<string | null>(null);
   const pendingBotTrace = useRef<BotTrace | undefined>(undefined);
   useEffect(() => {
     try {
@@ -391,6 +398,8 @@ export default function App() {
           opponentDeckName: names[1]?.name,
         });
         setHistorySaveError(!result.saved);
+        if (archiveAttempt.current === key && result.entry)
+          setCompletedHistoryId(result.entry.id);
       })
       .catch(() => setHistorySaveError(true));
   }, [match, review, allDecks, series]);
@@ -438,6 +447,7 @@ export default function App() {
   >("random");
   const [botReason, setBotReason] = useState("");
   const [confirmNew, setConfirmNew] = useState(false);
+  const [pendingGuidedStart, setPendingGuidedStart] = useState(false);
   const legal = useMemo(
     () =>
       match && !review && !paused
@@ -445,6 +455,23 @@ export default function App() {
         : [],
     [match, review, paused],
   );
+  const guideAvailable =
+    screen === "game" &&
+    !review &&
+    !paused &&
+    !thinking &&
+    !previewActive &&
+    visible &&
+    !help &&
+    !inspected &&
+    !pileView &&
+    !handExpanded &&
+    !mobileMenuOpen &&
+    !sessionManagerOpen &&
+    !paymentAction &&
+    !confirmNew &&
+    !logOpen;
+  const guide = useDuelGuide(match, legal, guideAvailable);
   useEffect(() => {
     if (match && audit.current)
       try {
@@ -525,6 +552,7 @@ export default function App() {
     !mobileMenuOpen &&
     !sessionManagerOpen &&
     !paymentAction &&
+    !guide.blocking &&
     !confirmNew &&
     !logOpen;
   const bot = useBotDecision(match, botEnabled);
@@ -551,6 +579,7 @@ export default function App() {
       mobileMenuOpen ||
       sessionManagerOpen ||
       paymentAction ||
+      guide.blocking ||
       confirmNew ||
       logOpen
     )
@@ -599,6 +628,7 @@ export default function App() {
     mobileMenuOpen,
     sessionManagerOpen,
     paymentAction,
+    guide.blocking,
     confirmNew,
     logOpen,
     difficulty,
@@ -614,6 +644,9 @@ export default function App() {
         selected,
       )
     : [];
+  const decisionFocus = game
+    ? tableFocus(game, currentActions, selected, !!review)
+    : "balanced";
   const chooseTarget = (id: string) => {
     const candidates = currentActions.filter(
       (action) =>
@@ -763,8 +796,13 @@ export default function App() {
     setScreen("lobby");
     return true;
   };
-  const launchGame = (options: GameOptions, nextSeries: MatchSeries | null) => {
+  const launchGame = (
+    options: GameOptions,
+    nextSeries: MatchSeries | null,
+    guided = false,
+  ) => {
     const nextGame = createGame(options);
+    guide.start(nextGame, guided);
     setGame(nextGame);
     setSeries(nextSeries);
     if (!nextSeries) {
@@ -774,6 +812,7 @@ export default function App() {
     audit.current = createReplay(nextGame);
     archiveAttempt.current = "";
     setHistorySaveError(false);
+    setCompletedHistoryId(null);
     pendingBotTrace.current = undefined;
     setReview(null);
     setBotReason("");
@@ -799,7 +838,7 @@ export default function App() {
     else if (match && seriesMatchesGame(series, match)) setScreen("game");
     else startSeriesGame(series);
   };
-  const start = () => {
+  const start = (guided = false) => {
     try {
       if (!matchReady)
         throw new Error(
@@ -807,7 +846,7 @@ export default function App() {
         );
       const options: GameOptions = {
         firstPlayer:
-          firstPlayerChoice === "you"
+          guided || firstPlayerChoice === "you"
             ? 0
             : firstPlayerChoice === "bot"
               ? 1
@@ -821,11 +860,11 @@ export default function App() {
         playerBattlefieldId: playerBattlefield,
         botBattlefieldId: botBattlefield,
         seed: Math.floor(Math.random() * 2147483646) + 1,
-        botDifficulty: difficulty,
+        botDifficulty: guided ? "beginner" : difficulty,
         botSeed: Math.floor(Math.random() * 2147483646) + 1,
       };
       const nextSeries =
-        matchFormat === "bo3"
+        !guided && matchFormat === "bo3"
           ? createSeries({
               ...options,
               playerDeck: selectedPlayerDeck!,
@@ -835,6 +874,7 @@ export default function App() {
       launchGame(
         nextSeries ? seriesGameOptions(nextSeries) : options,
         nextSeries,
+        guided,
       );
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -842,9 +882,16 @@ export default function App() {
   };
   const unfinishedSeries = Boolean(series && series.phase !== "complete");
   const requestNewGame = () => {
+    setPendingGuidedStart(false);
     if ((match && (review || match.winner === null)) || unfinishedSeries)
       setConfirmNew(true);
     else start();
+  };
+  const requestGuidedGame = () => {
+    setPendingGuidedStart(true);
+    if ((match && (review || match.winner === null)) || unfinishedSeries)
+      setConfirmNew(true);
+    else start(true);
   };
   const continueCurrent = () => {
     setConfirmNew(false);
@@ -881,6 +928,7 @@ export default function App() {
     setPaymentAction(null);
     pendingBotTrace.current = undefined;
     audit.current = null;
+    setCompletedHistoryId(null);
     setError("");
     setScreen("game");
   };
@@ -894,6 +942,7 @@ export default function App() {
     mobileMenuOpen ||
     sessionManagerOpen ||
     !!paymentAction ||
+    guide.blocking ||
     help ||
     logOpen ||
     confirmNew;
@@ -990,6 +1039,7 @@ export default function App() {
               onBot={setBotDeck}
               onDifficulty={(value) => setDifficulty(value as Difficulty)}
               onStart={requestNewGame}
+              onGuidedStart={requestGuidedGame}
               onResume={() => setScreen("game")}
               onImport={() => setImportOpen(true)}
               onDetails={setDeckDetails}
@@ -1152,7 +1202,13 @@ export default function App() {
                   </p>
                 }
               >
-                <MatchHistory onBack={() => setScreen("lobby")} />
+                <MatchHistory
+                  initialMatchId={historyFocusId}
+                  onBack={() => {
+                    setHistoryFocusId(null);
+                    setScreen("lobby");
+                  }}
+                />
               </Suspense>
             </div>
           )}
@@ -1210,6 +1266,17 @@ export default function App() {
                 </small>
                 {t(status?.label)}
               </div>
+              {guide.enabled && (
+                <button
+                  className="icon-button guide-trigger"
+                  aria-label={t("Duel guide")}
+                  title={t("Duel guide")}
+                  disabled={!guideAvailable}
+                  onClick={guide.open}
+                >
+                  <BookOpen size={18} />
+                </button>
+              )}
               <details className="bot-explanation">
                 <summary
                   aria-label={`${t(DIFFICULTIES[game.botSettings?.difficulty ?? "normal"].label)} AI`}
@@ -1329,7 +1396,11 @@ export default function App() {
               }}
             >
               <div className="match-content">
-                <div className="playmat" data-mobile-zone={mobileZone}>
+                <div
+                  className="playmat"
+                  data-mobile-zone={mobileZone}
+                  data-table-focus={decisionFocus}
+                >
                   <MobileBoardNav
                     game={game}
                     zone={mobileZone}
@@ -1566,6 +1637,7 @@ export default function App() {
                   <PlayerBar game={game} player={0} inspect={setInspected} />
                   <div className="player-cards">
                     <HandTray
+                      focus={decisionFocus}
                       game={game}
                       legal={legal}
                       selected={selected}
@@ -1693,6 +1765,18 @@ export default function App() {
                 <button className="gold-button" onClick={requestNewGame}>
                   {t("Novi duel")} <RotateCcw size={17} />
                 </button>
+                {completedHistoryId && (
+                  <button
+                    className="gold-button"
+                    onClick={() => {
+                      setHistoryFocusId(completedHistoryId);
+                      setScreen("history");
+                    }}
+                  >
+                    <BookOpen size={17} />
+                    {t("Review key moments")}
+                  </button>
+                )}
                 <button
                   className="outline-button"
                   onClick={() => setScreen("history")}
@@ -1716,6 +1800,24 @@ export default function App() {
               </MatchResultPanel>
             )}
           </main>
+        )}
+        {screen === "game" && guide.enabled && guide.lesson && (
+          <DuelGuide
+            lesson={guide.lesson}
+            seen={guide.seen}
+            close={guide.close}
+            disable={guide.disable}
+            select={(source) => {
+              selectSource(source);
+              requestAnimationFrame(() =>
+                document
+                  .querySelector<HTMLButtonElement>(
+                    ".visual-controls .context-action",
+                  )
+                  ?.focus({ preventScroll: true }),
+              );
+            }}
+          />
         )}
         {importOpen && (
           <DeckImport
@@ -1941,7 +2043,10 @@ export default function App() {
                 )}
               </p>
             )}
-            <button className="gold-button" onClick={start}>
+            <button
+              className="gold-button"
+              onClick={() => start(pendingGuidedStart)}
+            >
               {t("Započni novi duel")}{" "}
             </button>
             <button className="outline-button" onClick={continueCurrent}>

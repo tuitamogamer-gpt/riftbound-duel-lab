@@ -1,0 +1,128 @@
+.match-debrief {
+  margin: 20px 0;
+  padding: 22px;
+  border: 1px solid #527c83;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #18343e, #0c212b);
+  color: #d5e5e8;
+}
+.debrief-heading h3 {
+  margin: 6px 0;
+  font-size: 24px;
+  line-height: 1.2;
+  color: #f0d08a;
+}
+.match-debrief .debrief-heading p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #a5bdc7;
+}
+.match-debrief .history-eyebrow {
+  color: #e0c17c;
+}
+.match-debrief .debrief-action {
+  color: #c5e6dc;
+}
+.debrief-scoring {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 16px 0;
+}
+.debrief-scoring > div {
+  padding: 12px;
+  background: #76cbb80c;
+  border: 1px solid #84c4b633;
+  border-radius: 8px;
+}
+.debrief-scoring strong {
+  display: block;
+  font-size: 26px;
+  line-height: 1.3;
+  color: #98e4cd;
+}
+.debrief-scoring span {
+  color: #b9ccd3;
+  font-size: 12px;
+}
+.debrief-moments {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 9px;
+}
+.debrief-moments button {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #43616e;
+  border-radius: 8px;
+  text-align: left;
+  color: inherit;
+  background: #102731;
+  cursor: pointer;
+}
+.debrief-moments button:hover {
+  background: #1c3b44;
+  border-color: #8ed6c4;
+}
+.debrief-moments button:focus-visible {
+  outline: 2px solid #f0d08a;
+  outline-offset: 3px;
+}
+.debrief-icon {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  background: #ddc17c19;
+  border-radius: 7px;
+  color: #edcd85;
+}
+.debrief-copy {
+  display: grid;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.debrief-copy small {
+  color: #91b2bd;
+  font-size: 11px;
+}
+.debrief-copy strong {
+  color: #f0f4eb;
+  font-size: 15px;
+}
+.debrief-copy > span {
+  font-size: 12px;
+}
+.debrief-copy .debrief-lesson {
+  color: #9db8c2;
+}
+.debrief-arrow {
+  flex: none;
+  align-self: center;
+  color: #8ed6c4;
+}
+@media (max-width: 560px) {
+  .match-debrief {
+    padding: 14px;
+  }
+  .debrief-scoring > div {
+    padding: 8px;
+  }
+  .debrief-moments button {
+    padding: 10px;
+    gap: 8px;
+  }
+  .debrief-icon {
+    width: 25px;
+    height: 28px;
+  }
+}
