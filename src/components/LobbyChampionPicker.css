@@ -1,0 +1,49 @@
+.rift-champion-disclosure {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: 15px;
+}
+
+.rift-champion-disclosure > span {
+  color: #536770;
+  font-size: 11px;
+}
+
+.rift-champion-disclosure > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 13px;
+  border: 1px solid #087b8360;
+  border-radius: 4px;
+  background: #e8f1ed;
+  color: #075b61;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rift-champion-disclosure > button:hover {
+  background: #d7e8e2;
+  border-color: #087b83;
+}
+
+.rift-champion-disclosure > button:focus-visible {
+  outline: 2px solid #087b83;
+  outline-offset: 3px;
+}
+
+@media (max-width: 560px) {
+  .rift-lobby .rift-champions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rift-lobby .rift-champion {
+    height: clamp(188px, 58vw, 232px);
+  }
+}

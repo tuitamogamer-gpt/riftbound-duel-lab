@@ -173,6 +173,13 @@ export function MatchControls({
     ? findCard(game.fields.find((field) => field.id === movement.to)?.cardId)
         ?.name
     : t("Tvoja baza");
+  const confirmationLabel = movement
+    ? movement.unitIds.length === 1
+      ? t("Move 1 unit")
+      : t("Move {count} units", { count: movement.unitIds.length })
+    : confirm
+      ? t(confirm.label)
+      : "";
   const ending = legal.find((action) =>
     ["pass", "end"].includes(action.category),
   );
@@ -625,15 +632,20 @@ export function MatchControls({
                 className="gold-button confirm-decision"
                 disabled={!confirm}
                 onClick={() => confirm && dispatch(confirm)}
+                aria-label={confirmationLabel}
+                aria-describedby={
+                  confirm ? `${detailsId}-confirmation-payment` : undefined
+                }
               >
-                {movement
-                  ? movement.unitIds.length === 1
-                    ? t("Move 1 unit")
-                    : t("Move {count} units", {
-                        count: movement.unitIds.length,
-                      })
-                  : t(confirm!.label)}{" "}
-                <ArrowRight size={17} />
+                <span className="confirm-decision-label">
+                  {confirmationLabel}{" "}
+                  <ArrowRight size={17} aria-hidden="true" />
+                </span>
+                {confirm && (
+                  <span id={`${detailsId}-confirmation-payment`}>
+                    <DecisionPayment game={game} action={confirm} />
+                  </span>
+                )}
               </button>
             )}
             {ending && !(hiddenSetup && actions.length) && (

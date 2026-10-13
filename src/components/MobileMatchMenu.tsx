@@ -1,9 +1,8 @@
-import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, BookOpen, History, Settings2, X } from "lucide-react";
 import { LanguageSelector, useI18n } from "../i18n";
-import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
+import { useDialogFocus } from "../hooks/useDialogFocus";
 import type { PlaybackSpeed as Speed } from "../game/playback";
 import { PlaybackSpeed } from "./PlaybackSpeed";
 import "./MobileMatchMenu.css";
@@ -36,45 +35,7 @@ export function MobileMatchMenu({
   onManualPaymentChange?: (manual: boolean) => void;
 }) {
   const { t } = useI18n();
-  const dialog = useRef<HTMLElement>(null);
-  const closeRef = useRef(close);
-  closeRef.current = close;
-  useBodyScrollLock(open);
-  useEffect(() => {
-    if (!open) return;
-    const previous = document.activeElement as HTMLElement | null;
-    const panel = dialog.current;
-    const focusables = () =>
-      Array.from(
-        panel?.querySelectorAll<HTMLElement>(
-          "button:not(:disabled), select:not(:disabled), a[href], summary, [tabindex='0']",
-        ) ?? [],
-      ).filter((element) => element.getClientRects().length > 0);
-    focusables()[0]?.focus({ preventScroll: true });
-    const key = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        closeRef.current();
-      }
-      if (event.key === "Tab") {
-        const items = focusables();
-        const first = items[0];
-        const last = items.at(-1);
-        if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault();
-          last?.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault();
-          first?.focus();
-        }
-      }
-    };
-    document.addEventListener("keydown", key);
-    return () => {
-      document.removeEventListener("keydown", key);
-      previous?.isConnected && previous.focus({ preventScroll: true });
-    };
-  }, [open]);
+  const dialog = useDialogFocus(close, open);
   if (!open) return null;
   const navigate = (action: () => void) => {
     close();
@@ -88,6 +49,7 @@ export function MobileMatchMenu({
         role="dialog"
         aria-modal="true"
         aria-label={t("Duel menu")}
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
         <header>

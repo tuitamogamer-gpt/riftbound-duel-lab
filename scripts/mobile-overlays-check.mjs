@@ -287,6 +287,74 @@ for (const [engine, type, options] of engines) {
         record.checks.push(
           "completed replay first/next/previous/restart/range/play/pause/bookmark; back to original duel unchanged",
         );
+        step = "menu preserves selected move";
+        await page.goto(
+          `${origin}/tests/mobile-table-preview.html?mode=main&paused=false`,
+        );
+        await page
+          .getByRole("button", { name: "Resume duel", exact: true })
+          .tap();
+        const selectedCard = page.locator(".hand-card-wrap .game-card").first();
+        await selectedCard.tap();
+        await page.waitForFunction(
+          () =>
+            document
+              .querySelector(".hand-card-wrap .game-card")
+              ?.getAttribute("aria-pressed") === "true",
+        );
+        const selectedPosition = await saved();
+        const menuTrigger = page.getByRole("button", {
+          name: "Duel menu",
+          exact: true,
+        });
+        await menuTrigger.focus();
+        await openMenu();
+        const menuClose = menu.getByRole("button", {
+          name: "Close",
+          exact: true,
+        });
+        assert.equal(
+          await menuClose.evaluate(
+            (element) => element === document.activeElement,
+          ),
+          true,
+        );
+        await page.keyboard.press("Shift+Tab");
+        assert.equal(
+          await menu
+            .locator("summary")
+            .evaluate((element) => element === document.activeElement),
+          true,
+        );
+        await page.keyboard.press("Tab");
+        assert.equal(
+          await menuClose.evaluate(
+            (element) => element === document.activeElement,
+          ),
+          true,
+        );
+        await menu.getByLabel(/Rune payment mode/).selectOption("auto");
+        await page.keyboard.press("Escape");
+        await menu.waitFor({ state: "detached" });
+        assert.equal(await selectedCard.getAttribute("aria-pressed"), "true");
+        assert.equal(
+          await menuTrigger.evaluate(
+            (element) => element === document.activeElement,
+          ),
+          true,
+        );
+        assert.deepEqual(await saved(), selectedPosition);
+        // Once the menu is closed, Escape still cancels the table selection.
+        await page.keyboard.press("Escape");
+        await page.waitForFunction(
+          () =>
+            document
+              .querySelector(".hand-card-wrap .game-card")
+              ?.getAttribute("aria-pressed") === "false",
+        );
+        record.checks.push(
+          "menu traps Tab both ways; Escape restores focus and preserves the selected move; table Escape still cancels selection without playing a card",
+        );
         assert.deepEqual(errors, []);
         record.status = "passed";
         console.log(

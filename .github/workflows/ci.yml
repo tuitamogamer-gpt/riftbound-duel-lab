@@ -45,6 +45,7 @@ jobs:
           tests/match-setup.test.ts
           tests/session-storage.test.ts
           tests/payment-decisions.test.ts
+          tests/match-clarity.test.ts
           tests/hidden-play-modes.test.ts
           tests/hidden-flow.test.ts
           tests/hidden-card-view.test.ts
@@ -67,6 +68,10 @@ jobs:
           tests/online-rooms.test.ts
           tests/online-client.test.ts
           tests/service-worker.test.ts
+          tests/offline-registration.test.ts
+          tests/art-runtime-index.test.ts
+          tests/reduced-motion-loading.test.tsx
+          tests/i18n.test.ts
           tests/body-scroll-lock.test.ts
           tests/online-api.test.ts
           tests/online-mulligan.test.ts

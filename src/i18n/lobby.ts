@@ -1,5 +1,20 @@
 // UI copy and deck metadata. Product and card names retain their canonical names.
 export const lobbyMessages: Record<string, [string, string, string]> = {
+  "{count} of {total} decks": [
+    "{count} of {total} decks",
+    "{count} od {total} špilova",
+    "{count} di {total} mazzi",
+  ],
+  "Show all {count} decks": [
+    "Show all {count} decks",
+    "Prikaži svih {count} špilova",
+    "Mostra tutti i {count} mazzi",
+  ],
+  "Show fewer decks": [
+    "Show fewer decks",
+    "Prikaži manje špilova",
+    "Mostra meno mazzi",
+  ],
   "Precon battlefields": [
     "Precon battlefields",
     "Bojišta iz precona",

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Crown, Flag, ShieldX, Swords, Trophy } from "lucide-react";
 import type { PlaybackSpeed } from "../game/playback";
 import type { SignificantMomentKind } from "./significant-events";
+import { useReducedMotion } from "./useReducedMotion";
 import "./MomentMotion.css";
 
 const RemotionMoment = lazy(() => import("./RemotionMoment"));
@@ -30,6 +31,7 @@ class MotionBoundary extends Component<
 
 /** Decorative lazy players cannot own focus, delay a decision or announce twice. */
 export function MomentMotion(props: MomentMotionProps) {
+  const reduced = useReducedMotion();
   const cinematic = props.kind === "champion" || props.kind === "victory";
   const Icon =
     props.kind === "champion"
@@ -48,18 +50,24 @@ export function MomentMotion(props: MomentMotionProps) {
       aria-hidden="true"
       inert
       data-motion-kind={props.kind}
-      data-motion-engine={cinematic ? "remotion" : "hyperframes"}
+      data-motion-engine={
+        reduced ? "static" : cinematic ? "remotion" : "hyperframes"
+      }
       data-motion-paused={props.paused}
     >
-      <MotionBoundary fallback={fallback}>
-        <Suspense fallback={fallback}>
-          {cinematic ? (
-            <RemotionMoment {...props} />
-          ) : (
-            <TacticalMoment {...props} />
-          )}
-        </Suspense>
-      </MotionBoundary>
+      {reduced ? (
+        fallback
+      ) : (
+        <MotionBoundary fallback={fallback}>
+          <Suspense fallback={fallback}>
+            {cinematic ? (
+              <RemotionMoment {...props} />
+            ) : (
+              <TacticalMoment {...props} />
+            )}
+          </Suspense>
+        </MotionBoundary>
+      )}
     </span>
   );
 }

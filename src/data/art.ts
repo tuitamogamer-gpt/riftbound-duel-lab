@@ -1,15 +1,15 @@
-import manifest from './card-art-manifest.json';
+import manifest from "./card-art-paths.json";
 
 interface ArtCard {
   id: string;
   image: string;
 }
 
-const localArt: Record<string, { path: string }> = manifest.cards;
+const localArt: Record<string, string> = manifest.cards;
 
 /** Practice decks and the engine's Recruit token work without external requests. */
 export function cardArtUrl(card: ArtCard): string {
-  return localArt[card.id]?.path ?? card.image;
+  return localArt[card.id] ?? card.image;
 }
 
 export function hasLocalCardArt(cardId: string): boolean {

@@ -1,10 +1,12 @@
 import { DIFFICULTIES, type Difficulty } from "../game/ai/config";
-import { useRef } from "react";
+import { useId, useRef, useState } from "react";
 import { useI18n } from "../i18n";
 import {
   ArrowRight,
   BookOpen,
   Check,
+  ChevronDown,
+  ChevronUp,
   Crosshair,
   Download,
   Flag,
@@ -21,6 +23,8 @@ import { championArt } from "../data/champion-art";
 import { decks, type StarterDeck } from "../data/decks";
 import { getDeckScriptCoverage } from "../game/deck-import";
 import "./LobbyStartingPair.css";
+import "./LobbyChampionPicker.css";
+import { useCompactTable } from "../hooks/useCompactTable";
 import { BattlefieldPicker } from "./BattlefieldPicker";
 import { defaultBattlefield } from "../game/battlefield-selection";
 import type { CatalogCard } from "../catalog";
@@ -144,6 +148,20 @@ function StartingCardPair({
 export function Lobby(p: Props) {
   const { t } = useI18n();
   const setup = useRef<HTMLElement>(null);
+  const championsId = useId();
+  const compact = useCompactTable();
+  const [expanded, setExpanded] = useState(false);
+  const canExpand = compact && p.visibleDecks.length > 4;
+  const championChoices = p.visibleDecks.slice(0, 4);
+  // Keep a dropdown selection visible without making the whole gallery longer.
+  if (
+    p.playerDeck &&
+    p.visibleDecks.some((deck) => deck.id === p.playerDeck?.id) &&
+    !championChoices.some((deck) => deck.id === p.playerDeck?.id)
+  ) {
+    championChoices[championChoices.length - 1] = p.playerDeck;
+  }
+  const shownDecks = canExpand && !expanded ? championChoices : p.visibleDecks;
   const champion = p.playerDeck && findCard(p.playerDeck.championId);
   const available = p.allDecks.filter(
     (deck) => getDeckScriptCoverage(deck).complete,
@@ -271,7 +289,10 @@ export function Lobby(p: Props) {
               <select
                 aria-label={t("Tvoj špil")}
                 value={p.playerDeck?.id || ""}
-                onChange={(event) => p.onPlayer(event.target.value)}
+                onChange={(event) => {
+                  setExpanded(false);
+                  p.onPlayer(event.target.value);
+                }}
               >
                 <DeckOptions choices={p.allDecks} />
               </select>
@@ -294,7 +315,10 @@ export function Lobby(p: Props) {
                 <button
                   key={group}
                   aria-pressed={p.deckGroup === group}
-                  onClick={() => p.onGroup(group)}
+                  onClick={() => {
+                    setExpanded(false);
+                    p.onGroup(group);
+                  }}
                 >
                   {group === "Precon"
                     ? t("Svi preconi")
@@ -304,8 +328,8 @@ export function Lobby(p: Props) {
                 </button>
               ))}
             </div>
-            <div className="rift-champions">
-              {p.visibleDecks.map((deck) => (
+            <div className="rift-champions" id={championsId}>
+              {shownDecks.map((deck) => (
                 <button
                   key={deck.id}
                   aria-pressed={p.playerDeck?.id === deck.id}
@@ -335,6 +359,33 @@ export function Lobby(p: Props) {
                 </button>
               ))}
             </div>
+            {canExpand && (
+              <div className="rift-champion-disclosure">
+                <span aria-live="polite">
+                  {t("{count} of {total} decks", {
+                    count: shownDecks.length,
+                    total: p.visibleDecks.length,
+                  })}
+                </span>
+                <button
+                  type="button"
+                  aria-expanded={expanded}
+                  aria-controls={championsId}
+                  onClick={() => setExpanded(!expanded)}
+                >
+                  {expanded
+                    ? t("Show fewer decks")
+                    : t("Show all {count} decks", {
+                        count: p.visibleDecks.length,
+                      })}
+                  {expanded ? (
+                    <ChevronUp size={17} />
+                  ) : (
+                    <ChevronDown size={17} />
+                  )}
+                </button>
+              </div>
+            )}
             {!p.visibleDecks.length && (
               <div className="rift-empty">
                 <Layers3 size={28} />

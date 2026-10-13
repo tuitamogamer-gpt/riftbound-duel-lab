@@ -37,15 +37,22 @@ self.addEventListener("fetch", (event) => {
   if (request.mode === "navigate" && url.origin === self.location.origin) {
     event.respondWith(
       (async () => {
+        let response;
         try {
           // Keep the install-time shell paired with this worker's complete cache.
-          return await fetch(request);
+          response = await fetch(request);
+          // An installed game remains available during a temporary server failure.
+          // Preserve redirects, authentication failures and missing-page responses.
+          if (response.status < 500) return response;
         } catch {
-          try {
-            return (await caches.match("/index.html")) || Response.error();
-          } catch {
-            return Response.error();
-          }
+          // Network failures use the same recovery shell as server outages.
+        }
+        try {
+          return (
+            (await caches.match("/index.html")) || response || Response.error()
+          );
+        } catch {
+          return response || Response.error();
         }
       })(),
     );

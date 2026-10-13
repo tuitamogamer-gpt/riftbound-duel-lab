@@ -106,6 +106,45 @@ describe("offline service-worker failures", () => {
     expect(await response.text()).toBe("cached shell");
     expect(sw.caches.match).toHaveBeenCalledWith("/index.html");
   });
+  it.each([500, 502, 503, 504])(
+    "keeps installed practice available when navigation returns HTTP %s",
+    async (status) => {
+      const sw = worker();
+      sw.fetcher.mockResolvedValue(
+        new Response("Server unavailable", { status }),
+      );
+      sw.caches.match.mockResolvedValue(new Response("cached shell"));
+      const response = (await sw.request("https://game.test/", true))!;
+      expect(response.status).toBe(200);
+      expect(await response.text()).toBe("cached shell");
+    },
+  );
+  it.each(["missing", "unavailable"])(
+    "preserves a server error when the recovery shell is %s",
+    async (cacheStatus) => {
+      const sw = worker();
+      sw.fetcher.mockResolvedValue(
+        new Response("Server unavailable", { status: 503 }),
+      );
+      if (cacheStatus === "unavailable")
+        sw.caches.match.mockRejectedValue(new Error("Storage disabled"));
+      const response = (await sw.request("https://game.test/", true))!;
+      expect(response.status).toBe(503);
+      expect(await response.text()).toBe("Server unavailable");
+    },
+  );
+  it.each([200, 302, 401, 403, 404])(
+    "preserves HTTP %s navigation instead of masking it with the offline shell",
+    async (status) => {
+      const sw = worker();
+      sw.fetcher.mockResolvedValue(new Response("Server response", { status }));
+      sw.caches.match.mockResolvedValue(new Response("cached shell"));
+      const response = (await sw.request("https://game.test/", true))!;
+      expect(response.status).toBe(status);
+      expect(await response.text()).toBe("Server response");
+      expect(sw.caches.match).not.toHaveBeenCalled();
+    },
+  );
   it("returns a navigation error without another rejected promise when both network and storage are unavailable", async () => {
     const sw = worker();
     sw.fetcher.mockRejectedValue(new TypeError("Offline"));

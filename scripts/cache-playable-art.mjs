@@ -19,6 +19,7 @@ import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { build } from "esbuild";
+import { writeArtRuntimeIndex } from "./art-runtime-index.mjs";
 
 const run = promisify(execFile);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -205,6 +206,10 @@ try {
     cards: ordered,
   };
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  await writeArtRuntimeIndex(
+    manifest,
+    join(root, "src/data/card-art-paths.json"),
+  );
   console.log(
     `Done: ${cardIds.length} local WebP images, ${(bytes / 1024 / 1024).toFixed(2)} MiB; manifest ${manifestPath}`,
   );

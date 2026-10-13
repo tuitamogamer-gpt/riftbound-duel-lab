@@ -16,6 +16,7 @@ import { createTrainingPosition } from "../src/game/training";
 import { fixture, ogn } from "./fixtures/cards";
 import type { Review } from "../src/components/StepFlow";
 import type { GameState } from "../src/game/types";
+import { combatUnit, createCombatFixture } from "./fixtures/combat";
 
 const renderControls = (game: GameState, review: Review | null = null) =>
   renderToStaticMarkup(
@@ -37,6 +38,43 @@ const renderControls = (game: GameState, review: Review | null = null) =>
   );
 
 describe("readable decisions without predicting hidden outcomes", () => {
+  it("shows the movement tax on confirmation, without paying while selecting the group", () => {
+    let game = createCombatFixture();
+    game.phase = "main";
+    game.turnStep = "main";
+    game.combat = null;
+    game.players[0].runes = [
+      { id: "mind", domain: "Mind", ready: false },
+      { id: "order", domain: "Order", ready: false },
+    ];
+    game.units = [
+      { ...combatUnit("mover", 0), location: "base:0", ready: true },
+      { ...combatUnit("second", 0), location: "base:0", ready: true },
+      combatUnit("tax", 1, 4, "unl-163-219"),
+    ];
+    const start = getLegalActions(game, 0).find((action) =>
+      action.id.startsWith("move-start:mover:field:0"),
+    )!;
+    expect(start).toBeDefined();
+    game = applyAction(game, start);
+    game = applyAction(game, "move-toggle:second");
+    const before = structuredClone(game);
+    const html = renderControls(game);
+    const confirm = html.match(
+      /<button[^>]*class="gold-button confirm-decision"[\s\S]*?<\/button>/,
+    )?.[0];
+    expect(confirm).toContain("Move 2 units");
+    expect(confirm).toContain("Pay 0 Energy · 1 Power");
+    expect(confirm).toContain("After payment: 0 ready / 1 runes");
+    expect(confirm).toContain("aria-describedby=");
+    expect(game).toEqual(before);
+    const committed = applyAction(game, "move-confirm");
+    expect(committed.players[0].runes).toHaveLength(1);
+    expect(committed.units.find((unit) => unit.id === "mover")?.location).toBe(
+      "field:0",
+    );
+  });
+
   it("surfaces the legal reaction source and pending target before selecting a card", () => {
     const game = createTrainingPosition("reaction");
     const before = structuredClone(game);

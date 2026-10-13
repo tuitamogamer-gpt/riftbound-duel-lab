@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movement payment QA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Isolated local fixture; it never touches production storage.
+      import { createCombatFixture, combatUnit } from "./fixtures/combat.ts";
+      import { getLegalActions, applyAction } from "/src/game/engine.ts";
+      import { SAVE_KEY } from "/src/persistence.ts";
+      let match = createCombatFixture();
+      match.phase = "main";
+      match.turnStep = "main";
+      match.combat = null;
+      match.players[0].runes = [
+        { id: "mind", domain: "Mind", ready: false },
+        { id: "order", domain: "Order", ready: false },
+      ];
+      match.units = [
+        { ...combatUnit("mover", 0), location: "base:0", ready: true },
+        { ...combatUnit("second", 0), location: "base:0", ready: true },
+        combatUnit("tax", 1, 4, "unl-163-219"),
+      ];
+      const action = getLegalActions(match, 0).find((action) =>
+        action.id.startsWith("move-start:mover:field:0"),
+      );
+      match = applyAction(match, action);
+      match = applyAction(match, "move-toggle:second");
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ match, review: null }));
+      localStorage.setItem("riftbound-duel-language", "en");
+      localStorage.setItem("riftbound-duel-playback-speed", "2");
+      await import("/src/main.tsx");
+    </script>
+  </body>
+</html>

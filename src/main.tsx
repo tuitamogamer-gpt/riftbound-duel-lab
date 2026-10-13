@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { LanguageProvider } from "./i18n";
 import { CardPreviewProvider } from "./components/CardPreview";
+import { registerOfflineWhenIdle } from "./offline-registration";
 import "@fontsource/cinzel/latin-600.css";
 import "@fontsource/cinzel/latin-ext-600.css";
 import "@fontsource/dm-sans/latin-400.css";
@@ -29,11 +30,7 @@ import "./components/PlaybackSpeed.css";
 import "./mobile-table.css";
 import "./components/CardDetail.css";
 import "./match-clarity.css";
-if (import.meta.env.PROD && "serviceWorker" in navigator) {
-  void navigator.serviceWorker.register("/sw.js").catch(() => {
-    // Online play and browser saves remain available if offline setup fails.
-  });
-}
+if (import.meta.env.PROD) registerOfflineWhenIdle();
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <LanguageProvider>
