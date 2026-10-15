@@ -59,6 +59,10 @@ import { MatchResultPanel } from "./components/MatchResultPanel";
 import { DuelGuide } from "./components/DuelGuide";
 import { useDuelGuide } from "./hooks/useDuelGuide";
 import { tableFocus } from "./game/table-focus";
+import {
+  readLobbyPreferences,
+  saveLobbyPreferences,
+} from "./game/lobby-preferences";
 import { RuneCard } from "./components/RuneCard";
 import { GearRow } from "./components/GearRow";
 import { CardSleeve } from "./components/CardSleeve";
@@ -261,7 +265,19 @@ export default function App() {
   const [builderDeck, setBuilderDeck] = useState<StarterDeck | undefined>();
   const [series, setSeries] = useState(loadMatchSeries);
   const [seriesSaveError, setSeriesSaveError] = useState(false);
-  const [matchFormat, setMatchFormat] = useState<"single" | "bo3">("single");
+  const [stored] = useState(readStoredSession);
+  const saved = stored.session;
+  const [importedDecks, setImportedDecks] = useState<StarterDeck[]>(() =>
+    loadImportedDecks(),
+  );
+  const allDecks = useMemo(() => [...decks, ...importedDecks], [importedDecks]);
+  const [initialSetup] = useState(() =>
+    readLobbyPreferences(allDecks, saved.match),
+  );
+  const [setupSaved, setSetupSaved] = useState(true);
+  const [matchFormat, setMatchFormat] = useState<"single" | "bo3">(
+    initialSetup.matchFormat,
+  );
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
     setHandExpanded(false);
@@ -274,8 +290,6 @@ export default function App() {
       setMobileMenuOpen(false);
     }
   }, [compactTable]);
-  const [stored] = useState(readStoredSession);
-  const saved = stored.session;
   const [match, setGame] = useState<GameState | null>(saved.match);
   const [review, setReview] = useState<Review | null>(saved.review);
   const audit = useRef<BotReplay | null>(null);
@@ -367,10 +381,6 @@ export default function App() {
     };
   }, [screen, game, review, paused, previewActive]);
   const highlights = useMemo(() => getHighlights(review), [review]);
-  const [importedDecks, setImportedDecks] = useState<StarterDeck[]>(() =>
-    loadImportedDecks(),
-  );
-  const allDecks = useMemo(() => [...decks, ...importedDecks], [importedDecks]);
   useEffect(() => {
     if (
       !match ||
@@ -403,12 +413,23 @@ export default function App() {
       })
       .catch(() => setHistorySaveError(true));
   }, [match, review, allDecks, series]);
-  const [deckGroup, setDeckGroup] = useState("Precon");
+  const [deckGroup, setDeckGroup] = useState(() => {
+    const source = allDecks.find(
+      (deck) => deck.id === initialSetup.playerDeck,
+    )?.source;
+    return source === "Imported deck"
+      ? "Moji"
+      : source === "Curated practice deck"
+        ? "Trening"
+        : "Precon";
+  });
   const [importOpen, setImportOpen] = useState(false);
   const [deckDetails, setDeckDetails] = useState<StarterDeck | null>(null);
-  const [playerDeck, setPlayerDeck] = useState(decks[0]?.id || "");
-  const [botDeck, setBotDeck] = useState(decks[1]?.id || decks[0]?.id || "");
-  const [fieldChoices, setFieldChoices] = useState<Record<string, string>>({});
+  const [playerDeck, setPlayerDeck] = useState(initialSetup.playerDeck);
+  const [botDeck, setBotDeck] = useState(initialSetup.botDeck);
+  const [fieldChoices, setFieldChoices] = useState<Record<string, string>>(
+    initialSetup.fieldChoices,
+  );
   const [inspection, setInspection] = useState<{
     card: CatalogCard;
     sourceId?: string;
@@ -440,11 +461,31 @@ export default function App() {
   );
   const [logOpen, setLogOpen] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>(
-    saved.match?.botSettings?.difficulty ?? "normal",
+    initialSetup.difficulty,
   );
   const [firstPlayerChoice, setFirstPlayerChoice] = useState<
     "random" | "you" | "bot"
-  >("random");
+  >(initialSetup.firstPlayerChoice);
+  useEffect(() => {
+    setSetupSaved(
+      saveLobbyPreferences({
+        version: 1,
+        playerDeck,
+        botDeck,
+        fieldChoices,
+        difficulty,
+        firstPlayerChoice,
+        matchFormat,
+      }),
+    );
+  }, [
+    playerDeck,
+    botDeck,
+    fieldChoices,
+    difficulty,
+    firstPlayerChoice,
+    matchFormat,
+  ]);
   const [botReason, setBotReason] = useState("");
   const [confirmNew, setConfirmNew] = useState(false);
   const [pendingGuidedStart, setPendingGuidedStart] = useState(false);
@@ -1040,6 +1081,28 @@ export default function App() {
               onDifficulty={(value) => setDifficulty(value as Difficulty)}
               onStart={requestNewGame}
               onGuidedStart={requestGuidedGame}
+              setupSaved={setupSaved}
+              resumeSummary={
+                game
+                  ? {
+                      player:
+                        allDecks.find(
+                          (deck) => deck.id === game.players[0].deckId,
+                        )?.name ??
+                        findCard(game.players[0].championId)?.name ??
+                        t("You"),
+                      opponent:
+                        allDecks.find(
+                          (deck) => deck.id === game.players[1].deckId,
+                        )?.name ??
+                        findCard(game.players[1].championId)?.name ??
+                        t("Opponent"),
+                      turn: game.turn,
+                      points: [game.players[0].points, game.players[1].points],
+                      status: status?.label ?? "",
+                    }
+                  : undefined
+              }
               onResume={() => setScreen("game")}
               onImport={() => setImportOpen(true)}
               onDetails={setDeckDetails}
@@ -1266,11 +1329,12 @@ export default function App() {
                 </small>
                 {t(status?.label)}
               </div>
-              {guide.enabled && (
+              {game.winner === null && (
                 <button
                   className="icon-button guide-trigger"
                   aria-label={t("Duel guide")}
                   title={t("Duel guide")}
+                  aria-haspopup="dialog"
                   disabled={!guideAvailable}
                   onClick={guide.open}
                 >

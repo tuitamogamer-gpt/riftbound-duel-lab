@@ -19,7 +19,7 @@ export interface DuelGuideState {
   seen: GuideTopic[];
 }
 export interface GuideLesson {
-  id: GuideTopic;
+  id: GuideTopic | "overview";
   title: string;
   body: string;
   goal: string;

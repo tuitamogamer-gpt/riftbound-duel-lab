@@ -24,6 +24,7 @@ import { decks, type StarterDeck } from "../data/decks";
 import { getDeckScriptCoverage } from "../game/deck-import";
 import "./LobbyStartingPair.css";
 import "./LobbyChampionPicker.css";
+import "./LobbyResume.css";
 import { useCompactTable } from "../hooks/useCompactTable";
 import { BattlefieldPicker } from "./BattlefieldPicker";
 import { defaultBattlefield } from "../game/battlefield-selection";
@@ -48,6 +49,14 @@ type Props = {
   onDifficulty: (style: string) => void;
   onStart: () => void;
   onGuidedStart?: () => void;
+  setupSaved?: boolean;
+  resumeSummary?: {
+    player: string;
+    opponent: string;
+    turn: number;
+    points: [number, number];
+    status: string;
+  };
   onResume: () => void;
   onImport: () => void;
   onDetails: (deck: StarterDeck) => void;
@@ -193,7 +202,10 @@ export function Lobby(p: Props) {
         </span>
         <span>{t("LEAGUE OF LEGENDS · THE CARD GAME")}</span>
       </div>
-      <section className="rift-hero" aria-labelledby="hero-title">
+      <section
+        className={`rift-hero ${p.hasMatch ? "has-saved-duel" : ""}`}
+        aria-labelledby="hero-title"
+      >
         <img
           className="rift-hero-image"
           src={championArt("Jinx")}
@@ -221,15 +233,42 @@ export function Lobby(p: Props) {
               <ArrowRight size={20} />
             </button>
             <button
-              className="rift-link"
+              className={`rift-link ${p.hasMatch && p.resumeSummary ? "rift-resume-link" : ""}`}
               onClick={p.hasMatch ? p.onResume : p.onHelp}
+              aria-label={
+                p.hasMatch
+                  ? t(p.matchEnded ? "Pregledaj meč" : "Nastavi duel")
+                  : t("Tvoj prvi duel")
+              }
             >
               {p.hasMatch ? <Swords size={17} /> : <BookOpen size={17} />}
-              {p.hasMatch
-                ? p.matchEnded
-                  ? t("Pregledaj meč")
-                  : t("Nastavi duel")
-                : t("Tvoj prvi duel")}
+              <span className="rift-resume-copy">
+                <strong>
+                  {p.hasMatch
+                    ? p.matchEnded
+                      ? t("Pregledaj meč")
+                      : t("Nastavi duel")
+                    : t("Tvoj prvi duel")}
+                </strong>
+                {p.hasMatch && p.resumeSummary && (
+                  <>
+                    <span className="rift-resume-matchup">
+                      {t(p.resumeSummary.player)} <i>vs</i>{" "}
+                      {t(p.resumeSummary.opponent)}
+                    </span>
+                    <span className="rift-resume-state">
+                      {p.resumeSummary.turn > 0 && (
+                        <>
+                          {t("Turn {turn}", { turn: p.resumeSummary.turn })}{" "}
+                          ·{" "}
+                        </>
+                      )}
+                      {p.resumeSummary.points.join("–")} ·{" "}
+                      {t(p.resumeSummary.status)}
+                    </span>
+                  </>
+                )}
+              </span>
             </button>
           </div>
           <div className="rift-hero-facts">
@@ -667,6 +706,16 @@ export function Lobby(p: Props) {
             )}
             <p className="rift-save-note">
               <Shield size={13} /> {t("Tvoj napredak se automatski čuva.")}
+            </p>
+            <p
+              className={`rift-setup-memory ${p.setupSaved === false ? "is-error" : ""}`}
+              role={p.setupSaved === false ? "status" : undefined}
+            >
+              {t(
+                p.setupSaved === false
+                  ? "Setup could not be saved. Your choices work until you close this page."
+                  : "Your decks and duel settings are remembered in this browser.",
+              )}
             </p>
             {p.onGuidedStart && (
               <div className="rift-guided-start">

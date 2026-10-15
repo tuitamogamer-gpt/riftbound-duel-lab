@@ -3,6 +3,8 @@ import {
   duelGuideLesson,
   readDuelGuide,
   saveDuelGuide,
+  guideTopics,
+  type GuideTopic,
   type GuideLesson,
 } from "../game/duel-guide";
 import type { GameAction, GameState } from "../game/types";
@@ -38,12 +40,12 @@ export function useDuelGuide(
     }
   }, [game, legal, active, enabled, state, lesson]);
   const close = () => {
-    if (lesson)
+    if (lesson && guideTopics.includes(lesson.id as GuideTopic))
       setState(
         (current) =>
           current && {
             ...current,
-            seen: [...new Set([...current.seen, lesson.id])],
+            seen: [...new Set([...current.seen, lesson.id as GuideTopic])],
           },
       );
     setLesson(null);
@@ -51,7 +53,7 @@ export function useDuelGuide(
   return {
     enabled,
     lesson,
-    blocking: !!lesson || !!pending,
+    blocking: !!enabled && (!!lesson || !!pending),
     seen: state?.seen ?? [],
     start(next: GameState, guided: boolean) {
       setState({ version: 1, seed: next.seed, enabled: guided, seen: [] });
@@ -65,10 +67,16 @@ export function useDuelGuide(
     },
     open() {
       if (!game) return;
+      setState((current) => ({
+        version: 1,
+        seed: game.seed,
+        enabled: true,
+        seen: current?.seed === game.seed ? current.seen : [],
+      }));
       prompted.current = `${game.seed}:${game.revision}`;
       setLesson(
         duelGuideLesson(game, legal) ?? {
-          id: "scoring",
+          id: "overview",
           title: "Your next decision",
           body: "Select a card or unit to see its legal actions. Read the cost and target before confirming. You can inspect any public card without playing it.",
           goal: "Use the decision bar to confirm your move.",

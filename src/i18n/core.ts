@@ -16,6 +16,7 @@ import { historyMessages } from "./history";
 import { onlineMessages } from "./online";
 import { clarityMessages } from "./clarity";
 import { experienceMessages } from "./experience";
+import { returningMessages } from "./returning";
 
 export const locales = ["en", "sr", "it"] as const;
 export type Locale = (typeof locales)[number];
@@ -40,6 +41,7 @@ export const messages: Record<string, [string, string, string]> = {
   ...onlineMessages,
   ...clarityMessages,
   ...experienceMessages,
+  ...returningMessages,
 };
 const localeIndex = { en: 0, sr: 1, it: 2 } as const;
 export const isLocale = (value: unknown): value is Locale =>

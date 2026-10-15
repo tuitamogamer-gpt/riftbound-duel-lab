@@ -17,6 +17,11 @@ import { useI18n } from "../i18n";
 import { Card } from "./Card";
 import { MatchDebrief } from "./MatchDebrief";
 import {
+  defaultHistoryFilters,
+  filterMatchHistory,
+} from "../game/history-search";
+import type { HistoryFilters } from "../game/history-search";
+import {
   buildMatchTimeline,
   clearMatchHistory,
   deleteCompletedMatch,
@@ -67,6 +72,14 @@ export function MatchHistory({
 }) {
   const { t, locale } = useI18n();
   const [archive, setArchive] = useState(readMatchHistory);
+  const [filters, setFilters] = useState(defaultHistoryFilters);
+  const visibleMatches = useMemo(
+    () => filterMatchHistory(archive.entries, filters),
+    [archive.entries, filters],
+  );
+  const search = useRef<HTMLInputElement>(null);
+  const matchList = useRef<HTMLElement>(null);
+  const replayPanel = useRef<HTMLElement>(null);
   const [selectedId, setSelectedId] = useState<string | null>(
     initialMatchId ?? null,
   );
@@ -90,6 +103,14 @@ export function MatchHistory({
   const [confirmBookmarkReset, setConfirmBookmarkReset] = useState(false);
   const file = useRef<HTMLInputElement>(null);
   const selected = archive.entries.find((entry) => entry.id === selectedId);
+  useEffect(() => {
+    if (!selectedId) return;
+    const frame = requestAnimationFrame(() => {
+      replayPanel.current?.scrollIntoView({ block: "start" });
+      replayPanel.current?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [selectedId]);
   const timeline = useMemo(() => {
     if (!selected) return { frames: [] };
     try {
@@ -520,9 +541,93 @@ export function MatchHistory({
           </p>
         </section>
       )}
+      {archive.entries.length > 0 && (
+        <section
+          className="history-filters"
+          aria-label={t("Find a saved match")}
+        >
+          <label className="history-match-search">
+            {t("Search matches")}
+            <input
+              ref={search}
+              type="search"
+              value={filters.query}
+              placeholder={t("Deck or opponent name")}
+              onChange={(event) =>
+                setFilters((current) => ({
+                  ...current,
+                  query: event.target.value,
+                }))
+              }
+            />
+          </label>
+          <label>
+            {t("Match result")}
+            <select
+              value={filters.result}
+              onChange={(event) =>
+                setFilters((current) => ({
+                  ...current,
+                  result: event.target.value as HistoryFilters["result"],
+                }))
+              }
+            >
+              <option value="all">{t("All results")}</option>
+              <option value="wins">{t("Victories")}</option>
+              <option value="losses">{t("Defeats")}</option>
+            </select>
+          </label>
+          <label>
+            {t("Sort matches")}
+            <select
+              value={filters.order}
+              onChange={(event) =>
+                setFilters((current) => ({
+                  ...current,
+                  order: event.target.value as HistoryFilters["order"],
+                }))
+              }
+            >
+              <option value="newest">{t("Newest first")}</option>
+              <option value="oldest">{t("Oldest first")}</option>
+              <option value="shortest">{t("Fewest turns")}</option>
+            </select>
+          </label>
+          <div className="history-filter-summary">
+            <span role="status">
+              {t("{shown} of {total} matches", {
+                shown: visibleMatches.length,
+                total: archive.entries.length,
+              })}
+            </span>
+            <button
+              className="history-button"
+              onClick={() => setFilters(defaultHistoryFilters)}
+              disabled={
+                !filters.query &&
+                filters.result === "all" &&
+                filters.order === "newest"
+              }
+            >
+              {t("Reset filters")}
+            </button>
+          </div>
+        </section>
+      )}
+      {archive.entries.length > 0 && !visibleMatches.length && (
+        <p className="history-empty" role="status">
+          {t(
+            "No matches fit these filters. Try another deck name or reset the filters.",
+          )}
+        </p>
+      )}
       <div className="history-layout">
-        <section className="history-list" aria-label={t("Saved matches")}>
-          {archive.entries.map((entry) => (
+        <section
+          ref={matchList}
+          className="history-list"
+          aria-label={t("Saved matches")}
+        >
+          {visibleMatches.map((entry) => (
             <article
               key={entry.id}
               className={selectedId === entry.id ? "selected" : ""}
@@ -578,7 +683,32 @@ export function MatchHistory({
           ))}
         </section>
         {selected && (
-          <section className="history-replay" aria-label={t("Visual replay")}>
+          <section
+            ref={replayPanel}
+            tabIndex={-1}
+            className="history-replay"
+            aria-label={t("Visual replay")}
+          >
+            <button
+              className="history-button history-back-to-matches"
+              onClick={() => {
+                setPlaying(false);
+                const destination =
+                  matchList.current?.querySelector<HTMLButtonElement>(
+                    '[aria-pressed="true"]',
+                  ) ?? search.current;
+                destination?.scrollIntoView({ block: "center" });
+                destination?.focus({ preventScroll: true });
+              }}
+            >
+              <ArrowLeft size={16} />
+              {t("Back to saved matches")}
+            </button>
+            {!visibleMatches.some((entry) => entry.id === selectedId) && (
+              <p className="history-notice">
+                {t("The open replay is outside the current filters.")}
+              </p>
+            )}
             <div className="history-replay-title">
               <div>
                 <span className="history-eyebrow">
