@@ -597,7 +597,7 @@ for (const browserName of browsers) {
       },
     );
     await check(
-      `${browserName} large preview focus hover Escape and playback pause`,
+      `${browserName} compact preview focus hover Escape and playback pause`,
       async () => {
         const { context, page } = await fixture(
           browser,
@@ -620,15 +620,17 @@ for (const browserName of browsers) {
           );
           const preview = await page.locator(".card-preview").boundingBox();
           assert.ok(
-            preview.width >= 700 &&
+            preview.width >= 360 &&
+              preview.width <= 420 &&
+              preview.height <= 440 &&
               preview.x >= 0 &&
               preview.y >= 0 &&
               preview.x + preview.width <= 1441 &&
               preview.y + preview.height <= 901,
-            "Large art/rules preview escapes viewport or is too small",
+            "Compact art/rules preview escapes viewport or obscures too much of the board",
           );
           await page.screenshot({
-            path: path.join(out, `${browserName}-large-preview.png`),
+            path: path.join(out, `${browserName}-compact-preview.png`),
             animations: "disabled",
             fullPage: true,
           });

@@ -368,10 +368,14 @@ export function PreviewPanel({
       const topEdge = (viewport?.offsetTop || 0) + 12;
       const rightEdge = leftEdge + viewportWidth - 24;
       const bottomEdge = topEdge + viewportHeight - 24;
-      const gap = 14;
+      const gap = 10;
       let left: number;
       let top: number;
-      if (rect.right + gap + width <= rightEdge) {
+      // Keep neighboring hand cards available while reading a card's rules.
+      if (anchor.closest(".hand-tray") && rect.top - height - gap >= topEdge) {
+        left = rect.left + (rect.width - width) / 2;
+        top = rect.top - height - gap;
+      } else if (rect.right + gap + width <= rightEdge) {
         left = rect.right + gap;
         top = rect.top + (rect.height - height) / 2;
       } else if (rect.left - gap - width >= leftEdge) {
@@ -395,11 +399,13 @@ export function PreviewPanel({
     window.addEventListener("resize", place);
     window.addEventListener("scroll", place, true);
     window.visualViewport?.addEventListener("resize", place);
+    window.visualViewport?.addEventListener("scroll", place);
     return () => {
       observer.disconnect();
       window.removeEventListener("resize", place);
       window.removeEventListener("scroll", place, true);
       window.visualViewport?.removeEventListener("resize", place);
+      window.visualViewport?.removeEventListener("scroll", place);
     };
   }, [preview, anchor]);
 

@@ -1,0 +1,404 @@
+/* Desktop table geometry. Keep resources beside the hand and give both bases
+   the same usable card height as the battlefields. Mobile keeps its zone view. */
+@media (min-width: 1100px) and (min-height: 650px) {
+  .app.is-game
+    .game-layout
+    .match-content
+    > .playmat:not(:has(.hand-tray.is-opening)) {
+    grid-template-columns:
+      clamp(160px, 13vw, 240px) clamp(240px, 23vw, 480px)
+      minmax(0, 1fr) clamp(240px, 20vw, 340px);
+    grid-template-rows: 64px repeat(2, minmax(0, 1fr)) 28px clamp(
+        156px,
+        23dvh,
+        310px
+      );
+    grid-template-areas:
+      "enemy-runes enemy-runes opponent enemy-hand"
+      "opponent-setup enemy-base fields fields"
+      "player-setup own-base fields fields"
+      "player player player player"
+      "runes hand hand decisions";
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .app.is-game .playmat:not(:has(.hand-tray.is-opening)) .battlefields {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    align-items: stretch;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .battlefields:has(> .action-stack) {
+    grid-template-columns: minmax(0, 1fr) clamp(88px, 8vw, 132px) minmax(0, 1fr);
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .battlefields
+    > .battlefield {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    grid-column: 1;
+    justify-self: stretch;
+    grid-template-rows: 34px minmax(0, 1fr) 34px minmax(0, 1fr);
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .battlefields
+    > .battlefield:last-child {
+    grid-column: 2;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .battlefields:has(> .action-stack)
+    > .battlefield:last-child {
+    grid-column: 3;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .battlefields
+    > .battlefield.in-combat {
+    grid-template-rows: 34px minmax(0, 1fr) 50px minmax(0, 1fr);
+  }
+  .app.is-game .battlefield > .field-half {
+    --unit-card-height: min(calc(100cqh - 6px), clamp(140px, 20dvh, 290px));
+    padding: 4px 10px 12px;
+    gap: 8px;
+  }
+  .app.is-game .base-zone {
+    padding: 27px 12px 10px;
+    border-radius: 8px;
+  }
+  .app.is-game .base-units {
+    --unit-card-height: min(calc(100cqh - 4px), clamp(140px, 20dvh, 290px));
+    align-items: center;
+    justify-content: safe center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    padding: 2px 4px 6px;
+  }
+  .app.is-game .base-units > .unit-wrap {
+    flex-shrink: 0;
+  }
+  .app.is-game .base-units > .unit-wrap:not(:last-of-type) {
+    margin-right: 10px;
+  }
+  .app.is-game .zone-label {
+    top: 9px;
+    left: 12px;
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+  .app.is-game .empty-base,
+  .app.is-game .empty-field {
+    font-size: 11px;
+    max-width: 28ch;
+  }
+  .app.is-game .field-heading button {
+    font-size: clamp(12px, 1.05vw, 19px);
+  }
+  .app.is-game .control-badge {
+    font-size: 8px;
+  }
+  .app.is-game .battlefield .field-art {
+    background-size: auto 340%;
+    background-position: center 36%;
+    filter: saturate(0.7) brightness(0.42);
+  }
+  .app.is-game .player-bar.player-1,
+  .app.is-game .opponent-hand-section > .enemy-hand {
+    height: 30px;
+    align-self: center;
+  }
+
+  /* The setup rail has two readable card slots rather than wide empty strips. */
+  .app.is-game .player-cards > .champion-zone {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin: 0;
+  }
+  .app.is-game .player-cards .setup-card {
+    container-type: size;
+    min-height: 0;
+    flex-direction: row;
+    padding: 6px;
+    gap: 8px;
+  }
+  .app.is-game .player-cards .champion-zone .game-card.small,
+  .app.is-game .player-cards .setup-empty-art {
+    height: min(calc(100cqh - 14px), 128px);
+    max-width: 48%;
+  }
+  .app.is-game .setup-card-heading,
+  .app.is-game .setup-status {
+    font-size: 9px;
+  }
+  .app.is-game .setup-card-name {
+    font-size: 11px;
+  }
+  .app.is-game .player-name strong {
+    font-size: 12px;
+  }
+  .app.is-game .player-name small {
+    font-size: 10px;
+  }
+
+  /* The player's runes stay in the lower-left corner next to their hand. */
+  .app.is-game .player-cards > .rune-zone {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    padding: 9px;
+    gap: 8px;
+  }
+  .app.is-game .player-cards > .rune-zone .rune-zone-heading {
+    flex-direction: column;
+    gap: 3px;
+  }
+  .app.is-game .player-cards > .rune-zone .rune-zone-heading > span {
+    font-size: 11px;
+  }
+  .app.is-game .player-cards > .rune-zone .rune-zone-heading small {
+    font-size: 10px;
+    line-height: 1.4;
+  }
+  .app.is-game .player-cards > .rune-zone .rune-orbs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: minmax(0, 1fr);
+    align-content: center;
+    align-items: center;
+    gap: 6px 3px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  .app.is-game .player-cards > .rune-zone .rune-card {
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    max-height: 64px;
+    justify-self: center;
+    min-height: 0;
+    aspect-ratio: 744 / 1039;
+    margin: 0;
+  }
+  .app.is-game .player-cards > .rune-zone .rune-card-art {
+    width: 100%;
+    height: 100%;
+  }
+  .app.is-game .opponent-hand-section > .rune-zone {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 18px minmax(0, 1fr);
+    padding: 4px 6px;
+    gap: 3px;
+  }
+  .app.is-game .opponent-hand-section .rune-card {
+    height: 30px;
+    flex: 0 1 22px;
+    margin: 0;
+  }
+  .app.is-game .opponent-hand-section .rune-card-art {
+    width: 22px;
+  }
+  .app.is-game .opponent-hand-section .rune-orbs {
+    overflow: hidden;
+  }
+  .app.is-game .opponent-hand-section .rune-zone-heading small {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Keep a visible, stable hand during movement and reactions. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .player-cards
+    > .hand-tray {
+    position: relative;
+    inset: auto;
+    grid-area: hand;
+    width: auto;
+    height: 100%;
+    min-height: 0;
+    --hand-card-height: min(calc(100cqh - 58px), 240px);
+    grid-template-columns: minmax(0, 1fr) 64px;
+    grid-template-rows: 24px minmax(0, 1fr);
+    padding: 6px 9px;
+    column-gap: 9px;
+    align-items: stretch;
+  }
+  .app.is-game .playmat:not(:has(.hand-tray.is-opening)) .hand-tray .hand {
+    grid-area: 2 / 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding-top: 4px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .hand-tray
+    .hand-title {
+    display: flex;
+    align-items: center;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .hand-tray
+    .hand-desktop-hint,
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .hand-tray
+    .hand-focus-label {
+    display: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .hand-tray
+    > .card-piles {
+    grid-area: 1 / 2 / 3 / 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 0 0 7px;
+  }
+  .app.is-game .playmat:not(:has(.hand-tray.is-opening)) .hand-tray .pile-art {
+    display: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .hand-tray
+    .pile-button {
+    display: flex;
+    width: 100%;
+    min-height: 48px;
+  }
+
+  /* A compact command dock sits next to the hand, never between the two armies. */
+  .app.is-game .playmat:not(:has(.hand-tray.is-opening)) > .visual-controls {
+    position: relative;
+    inset: auto;
+    grid-area: decisions;
+    width: auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 8px;
+    min-height: 0;
+    padding: 12px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    > .decision-context {
+    flex: 0 0 auto;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls.has-source
+    > .decision-context {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+  .app.is-game .visual-controls .decision-source .game-card {
+    max-height: 56px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    > .decision-actions {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    padding: 0;
+    gap: 6px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .context-actions {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    flex: 0 0 auto;
+    max-width: 100%;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .context-action {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 48px;
+    padding: 6px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .gold-button {
+    width: 100%;
+    min-height: 44px;
+  }
+  .app.is-game .visual-controls .cancel-selection {
+    right: 6px;
+    top: 6px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    > .hidden-play-modes {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (min-width: 1100px) and (min-height: 650px) and (max-height: 749px) {
+  .app.is-game
+    .game-layout
+    .match-content
+    > .playmat:not(:has(.hand-tray.is-opening)) {
+    grid-template-rows: 48px repeat(2, minmax(0, 1fr)) 24px 140px;
+    gap: 6px;
+    padding: 6px;
+  }
+  .app.is-game .opponent-hand-section > .rune-zone {
+    grid-template-rows: 12px minmax(0, 1fr);
+    padding-block: 2px;
+  }
+  .app.is-game .opponent-hand-section .rune-card {
+    height: 24px;
+    flex-basis: 18px;
+  }
+  .app.is-game .opponent-hand-section .rune-card-art {
+    width: 18px;
+  }
+  .app.is-game .player-cards > .rune-zone .rune-orbs {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .app.is-game .setup-status {
+    display: none;
+  }
+  .app.is-game .setup-card-name {
+    font-size: 10px;
+  }
+  .app.is-game .player-cards .setup-card {
+    padding: 4px;
+  }
+  .app.is-game .player-cards .champion-zone .game-card.small,
+  .app.is-game .player-cards .setup-empty-art {
+    height: calc(100cqh - 4px);
+  }
+}

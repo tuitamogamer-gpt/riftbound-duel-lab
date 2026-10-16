@@ -31,6 +31,7 @@ import "./mobile-table.css";
 import "./components/CardDetail.css";
 import "./match-clarity.css";
 import "./decision-table.css";
+import "./native-table.css";
 if (import.meta.env.PROD) registerOfflineWhenIdle();
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
