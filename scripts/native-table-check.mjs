@@ -146,7 +146,26 @@ try {
       const preview = page.locator(".card-preview");
       await preview.waitFor();
       const hover = await preview.boundingBox();
-      assert.ok(hover.width <= 420, `Hover preview is ${hover.width}px wide`);
+      const artwork = await preview.locator("img").boundingBox();
+      assert.ok(
+        artwork.width >= 350 && artwork.width <= 360,
+        `Hover artwork is ${artwork.width}px wide`,
+      );
+      assert.ok(
+        Math.abs(artwork.width / artwork.height - 744 / 1039) < 0.01,
+        "Hover artwork does not retain the full card proportions",
+      );
+      assert.ok(hover.width <= 362, `Hover preview is ${hover.width}px wide`);
+      assert.equal(
+        await preview.innerText(),
+        "",
+        "Hover adds text outside the card",
+      );
+      assert.equal(
+        await preview.locator("img").count(),
+        1,
+        "Hover adds extra images or markers",
+      );
       assert.ok(
         hover.x >= 0 &&
           hover.y >= 0 &&

@@ -371,14 +371,20 @@ for (const browserName of browsers) {
                     preview.y + preview.height <= viewport.height + 1,
                   "Hovered spell preview escapes viewport",
                 );
-                assert.match(
-                  await page.locator(".card-preview-rules").innerText(),
-                  /Give a unit/,
+                assert.equal(
+                  await page.locator(".card-preview").innerText(),
+                  "",
+                  "Hover adds text outside the card",
+                );
+                assert.equal(
+                  await page.locator(".card-preview img").count(),
+                  1,
+                  "Hover must show only the card image",
                 );
                 await page.screenshot({
                   path: path.join(
                     out,
-                    `${browserName}-rules-preview-${viewport.width}x${viewport.height}.png`,
+                    `${browserName}-art-preview-${viewport.width}x${viewport.height}.png`,
                   ),
                   animations: "disabled",
                   fullPage: true,
@@ -597,7 +603,7 @@ for (const browserName of browsers) {
       },
     );
     await check(
-      `${browserName} compact preview focus hover Escape and playback pause`,
+      `${browserName} image-only preview focus hover Escape and playback pause`,
       async () => {
         const { context, page } = await fixture(
           browser,
@@ -619,18 +625,26 @@ for (const browserName of browsers) {
             "Playback advanced while reading card preview",
           );
           const preview = await page.locator(".card-preview").boundingBox();
+          const artwork = await page.locator(".card-preview img").boundingBox();
           assert.ok(
-            preview.width >= 360 &&
-              preview.width <= 420 &&
-              preview.height <= 440 &&
+            artwork.width >= 350 &&
+              artwork.width <= 360 &&
+              artwork.height >= 490 &&
+              preview.width <= 362 &&
               preview.x >= 0 &&
               preview.y >= 0 &&
               preview.x + preview.width <= 1441 &&
               preview.y + preview.height <= 901,
-            "Compact art/rules preview escapes viewport or obscures too much of the board",
+            "Large card artwork is too small or its preview escapes the viewport",
           );
+          assert.equal(
+            await page.locator(".card-preview").innerText(),
+            "",
+            "Hover adds text outside the card",
+          );
+          assert.equal(await page.locator(".card-preview img").count(), 1);
           await page.screenshot({
-            path: path.join(out, `${browserName}-compact-preview.png`),
+            path: path.join(out, `${browserName}-image-only-preview.png`),
             animations: "disabled",
             fullPage: true,
           });

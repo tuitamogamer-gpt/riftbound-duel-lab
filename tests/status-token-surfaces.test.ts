@@ -35,7 +35,7 @@ describe("active state on card surfaces", () => {
     },
   );
 
-  it("keeps all stacked effects readable in hover and touch details", () => {
+  it("keeps stacked effects in touch details and hover limited to card artwork", () => {
     const game = createCombatFixture();
     const unit = {
       ...game.units[0],
@@ -66,13 +66,16 @@ describe("active state on card surfaces", () => {
         onClose: vi.fn(),
       }),
     );
-    for (const html of [preview, details]) {
-      for (const status of statuses)
-        expect(html).toContain(`data-status-id="${status.id}"`);
-      expect(html).toContain("Might −2");
-      expect(html).toContain("Cannot move this turn.");
-      expect(html).toContain('aria-label="Active effects"');
-    }
+    for (const status of statuses)
+      expect(details).toContain(`data-status-id="${status.id}"`);
+    expect(details).toContain("Might −2");
+    expect(details).toContain("Cannot move this turn.");
+    expect(details).toContain('aria-label="Active effects"');
+    expect(preview).toContain("<img");
+    expect(preview).not.toContain("data-status-id=");
+    expect(preview).not.toContain("card-preview-copy");
+    expect(preview).not.toContain("card-preview-rules");
+    expect(preview).not.toContain("Cannot move this turn.");
     expect(renderToStaticMarkup(createElement(Card, { card }))).not.toContain(
       "card-status-tokens",
     );

@@ -7,19 +7,13 @@ import {
   useRef,
   useState,
 } from "react";
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Shield, Zap } from "lucide-react";
-import { domainColors, findCard } from "../catalog";
+import { findCard } from "../catalog";
 import type { CatalogCard } from "../catalog";
 import { cardArtUrl } from "../data/art";
-import { readableText } from "../data/cards";
 import "./CardPreview.css";
-import { useI18n } from "../i18n";
-import { CardStatusTokens, readCardStatuses } from "./CardStatusTokens";
-import { ExhaustedToken } from "./ExhaustedToken";
-import { RulesErrata } from "./RulesErrata";
-import { EquipmentRules } from "./EquipmentRules";
+import { readCardStatuses } from "./CardStatusTokens";
 import { CardDetail } from "./Card";
 import { scripts } from "../game/scripts";
 
@@ -351,7 +345,6 @@ export function PreviewPanel({
   id: string;
 }) {
   const { card, anchor } = preview;
-  const { t } = useI18n();
   const panel = useRef<HTMLElement>(null);
   const [failed, setFailed] = useState(false);
   const [position, setPosition] = useState({ left: 12, top: 12 });
@@ -409,105 +402,33 @@ export function PreviewPanel({
     };
   }, [preview, anchor]);
 
-  const ready = anchor.dataset.cardReady;
-  const previewReady =
-    ready === "true" ? true : ready === "false" ? false : undefined;
-  const damage = Number(anchor.dataset.cardDamage || 0);
-  const might = anchor.dataset.cardMight;
-  const footer = anchor.dataset.cardFooter;
-  const statuses = readCardStatuses(anchor.dataset.cardStatuses);
   return (
     <aside
       id={id}
       ref={panel}
       role="tooltip"
       className="card-preview"
-      style={
-        {
-          ...position,
-          "--preview-accent": domainColors[card.domains[0]] || "#ddb979",
-        } as CSSProperties
-      }
+      style={position}
     >
-      <div
-        className={`card-preview-art ${previewReady === false ? "is-exhausted" : ""}`}
-      >
+      <div className="card-preview-art">
         {!failed && card.image ? (
-          <img src={cardArtUrl(card)} alt="" onError={() => setFailed(true)} />
+          <img
+            src={cardArtUrl(card)}
+            alt={card.name}
+            width={744}
+            height={1039}
+            draggable={false}
+            onError={() => setFailed(true)}
+          />
         ) : (
-          <div className="card-preview-fallback">
-            <Zap size={36} />
-            <strong>{card.name}</strong>
-            <span>{t(card.type)}</span>
-          </div>
-        )}
-        <ExhaustedToken ready={previewReady} />
-        <CardStatusTokens statuses={statuses} />
-        <span className="card-preview-set">
-          {card.set} · {card.collectorNumber}
-        </span>
-      </div>
-      <div className="card-preview-copy">
-        <span className="card-preview-eyebrow">
-          {[card.supertype, card.type]
-            .filter((value): value is string => Boolean(value))
-            .map((value) => t(value))
-            .join(" · ")}
-        </span>
-        <h3>{card.name}</h3>
-        <div className="card-preview-domains">
-          {card.domains.map((domain) => (
-            <span key={domain} style={{ color: domainColors[domain] }}>
-              {t(domain)}
-            </span>
-          ))}
-        </div>
-        <div className="card-preview-stats">
-          {card.energy !== null && (
-            <span>
-              <Zap size={14} /> {card.energy} {t("energije")}
-            </span>
-          )}
-          {card.power !== null && (
-            <span>
-              ◈ {card.power} {t("moći")}
-            </span>
-          )}
-          {(might !== undefined || card.might !== null) && (
-            <span>
-              <Shield size={14} /> {might ?? card.might} {t("snage")}
-            </span>
-          )}
-        </div>
-        <p className="card-preview-rules">
-          {readableText(card.text) || t("Ova karta nema dodatni tekst efekta.")}
-        </p>
-        <RulesErrata name={card.name} />
-        <EquipmentRules cardId={card.id} />
-        {statuses.length > 0 && (
-          <section
-            className="card-preview-effects"
-            aria-label={t("Active effects")}
+          <div
+            className="card-preview-fallback"
+            role="img"
+            aria-label={card.name}
           >
-            <CardStatusTokens statuses={statuses} expanded />
-          </section>
-        )}
-        {(ready || damage > 0 || footer) && (
-          <div className="card-preview-state">
-            {ready && (
-              <span>{t(ready === "true" ? "Spremna" : "Iscrpljena")}</span>
-            )}
-            {damage > 0 && (
-              <span className="card-preview-damage">
-                {t("{count} primljene štete", { count: damage })}
-              </span>
-            )}
-            {footer && <span>{t(footer)}</span>}
+            <strong>{card.name}</strong>
           </div>
         )}
-        <small className="card-preview-hint">
-          {t("Esc zatvara pregled · klik zadržava radnju karte")}
-        </small>
       </div>
     </aside>
   );

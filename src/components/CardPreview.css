@@ -1,155 +1,41 @@
+/* Hover is a full-size card, without a second copy of its printed information. */
 .card-preview {
   position: fixed;
   z-index: 1000;
-  display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
-  width: min(420px, calc(100vw - 24px));
-  max-height: min(440px, calc(100dvh - 24px));
-  overflow: auto;
-  overscroll-behavior: contain;
-  padding: 12px;
-  gap: 14px;
-  color: #f5f1e9;
-  background: linear-gradient(140deg, #183640, #0c202b 65%);
-  border: 1px solid color-mix(in srgb, var(--preview-accent) 60%, #ffffff20);
-  border-radius: 10px;
-  box-shadow: 0 8px 28px #0009;
-  font-family: "DM Sans", sans-serif;
-  text-align: left;
+  display: block;
+  width: min(360px, calc(100vw - 24px), calc((100dvh - 24px) * 744 / 1039));
+  aspect-ratio: 744 / 1039;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: transparent;
+  box-shadow: 0 12px 36px #000b;
   animation: card-preview-appear 140ms ease-out both;
 }
 .card-preview-art {
-  align-self: start;
-  position: sticky;
-  top: 0;
-  overflow: hidden;
-  border-radius: 7px;
-  background: #0d1722;
-  box-shadow: 0 5px 18px #0006;
+  width: 100%;
+  height: 100%;
 }
 .card-preview-art > img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: contain;
 }
-.card-preview-art.is-exhausted > img,
-.card-preview-art.is-exhausted > .card-preview-fallback {
-  filter: none;
-}
-.card-preview-art > .exhausted-token {
-  right: 5px;
-  bottom: 25px;
-  width: 30px;
-  height: 30px;
-}
-.card-preview .card-preview-art > .card-status-tokens {
-  top: 5px;
-  left: 5px;
-  width: 24px;
-  gap: 3px;
-}
-.card-preview-effects .card-status-tokens {
-  margin-top: 8px;
-  gap: 6px;
-}
-.card-preview-effects .card-status-token {
-  width: 28px;
-}
-.card-preview-effects .status-token-copy {
-  font-size: 11px;
-}
-.card-preview-set {
-  display: block;
-  padding: 5px 6px;
-  color: #b9c5d0;
-  font-size: 9px;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-}
-.card-preview-copy {
-  min-width: 0;
-  padding: 0;
-}
-.card-preview-eyebrow {
-  color: var(--preview-accent);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-}
-.card-preview h3 {
-  margin: 4px 0 6px;
-  color: #fff8e8;
-  font-family: "Barlow Condensed", sans-serif;
-  font-size: 24px;
-  line-height: 1.1;
-}
-.card-preview-domains,
-.card-preview-stats,
-.card-preview-state {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 8px;
-  font-size: 11px;
-  line-height: 1.45;
-}
-.card-preview-stats {
-  margin-top: 8px;
-  padding: 7px 0;
-  color: #ede1c6;
-  border-block: 1px solid #ffffff18;
-  font-weight: 600;
-}
-.card-preview-stats > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.card-preview-rules {
-  margin: 9px 0;
-  white-space: pre-line;
-  overflow-wrap: anywhere;
-  color: #e8edf2;
-  font-size: 13px;
-  line-height: 1.5;
-}
-.card-preview .rules-errata {
-  padding: 8px;
-  font-size: 11px;
-  line-height: 1.45;
-}
-.card-preview-state {
-  padding: 7px 0;
-  border-top: 1px solid #ffffff18;
-  color: #a4d9b9;
-}
-.card-preview-state .card-preview-damage {
-  color: #ffaaa4;
-}
-.card-preview-hint {
-  display: block;
-  margin-top: 7px;
-  color: #9cabb9;
-  font-size: 9px;
-  line-height: 1.5;
-}
 .card-preview-fallback {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  aspect-ratio: 0.714;
-  padding: 10px;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
   text-align: center;
   background: radial-gradient(ellipse at center, #31495b, #111b2d);
-  color: var(--preview-accent);
-}
-.card-preview-fallback strong {
-  font-family: "Barlow Condensed", sans-serif;
-  font-size: 19px;
-  color: #fff;
+  color: #fff8e8;
+  font:
+    600 28px/1.2 "Barlow Condensed",
+    sans-serif;
 }
 [data-card-preview]:focus-visible {
   outline: 2px solid #edc885;
@@ -164,24 +50,6 @@
   }
   to {
     opacity: 1;
-  }
-}
-@media (max-width: 550px) {
-  .card-preview {
-    grid-template-columns: 100px minmax(0, 1fr);
-    gap: 12px;
-    padding: 8px;
-  }
-  .card-preview h3 {
-    font-size: 23px;
-  }
-  .card-preview-rules {
-    font-size: 12px;
-  }
-}
-@media (max-width: 360px) {
-  .card-preview {
-    grid-template-columns: 90px minmax(0, 1fr);
   }
 }
 @media (prefers-reduced-motion: reduce) {

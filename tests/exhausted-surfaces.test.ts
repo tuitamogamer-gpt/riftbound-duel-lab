@@ -84,13 +84,15 @@ describe("exhaustion on gear and live previews", () => {
     expect(state.gears[0].ready).toBe(true);
   });
 
-  it("shows the same marker on an exhausted preview, then removes it when its source readies", () => {
-    const exhausted = renderPreview("false");
-    expect(exhausted).toContain(tokenPath);
-    expect(exhausted).toContain('role="img" aria-label="Exhausted"');
-    expect(renderPreview("true")).not.toContain(tokenPath);
-    expect(renderPreview("true")).toContain("Ready");
-    expect(renderPreview()).not.toContain(tokenPath);
+  it("keeps hover artwork clear of exhaustion markers and readiness labels", () => {
+    for (const ready of ["false", "true", undefined]) {
+      const preview = renderPreview(ready);
+      expect(preview).toContain("<img");
+      expect(preview).not.toContain(tokenPath);
+      expect(preview).not.toContain("is-exhausted");
+      expect(preview).not.toContain("Exhausted");
+      expect(preview).not.toContain("Ready");
+    }
   });
 
   it.each([

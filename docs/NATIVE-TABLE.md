@@ -13,14 +13,16 @@ zone view. At 1440 × 900, the populated main-phase fixture's base cards grow
 from approximately 39 to 170 pixels high. At 1920 × 1080 they are 216 pixels
 high; the short 1100 × 650 layout retains approximately 103-pixel cards.
 
-Hover previews are capped at 420 pixels wide and 440 pixels high, with smaller
-art, type and shadows. Hand previews prefer the space above the hovered card.
-Keyboard focus, Escape, playback suspension and the touch reading dialog
-retain their existing behavior.
+Hover previews show only the card image, restored to its original 360-pixel
+artwork width (approximately 503 pixels high). Smaller viewports constrain the
+whole card proportionally. The repeated rules/stats column, explanatory text,
+set footer and status overlays are removed from hover. Hand previews prefer
+the space above the hovered card. Keyboard focus, Escape, playback suspension
+and the touch reading dialog retain their existing behavior.
 
 ![Desktop table with runes beside the hand](screenshots/native-table-1440.png)
 
-## Validation
+## Table layout validation (907127e)
 
 - TypeScript and the production Vite/server build passed. The existing large
   bundle advisory remains.
@@ -36,6 +38,15 @@ retain their existing behavior.
   details without playing a card; Browse hand retains all 12 cards and returns
   to the reading sheet after closing nested details. These are emulated
   viewport checks, not physical-device testing.
+
+## Image-only hover follow-up
+
+The follow-up passed the 11 status/exhaustion surface tests, all 15 native-table
+browser checks, and the focused keyboard/hover/Escape/playback-pause check.
+Separate viewport checks confirm a single 360 × 503-pixel card at 1440 × 900
+and 1100 × 650, scaled to 262 × 366 at 844 × 390. No added text or overlays
+appear in the hover, and the complete image remains inside the viewport.
+The production build passed.
 
 Run the desktop regression with a local Vite server and Playwright available:
 
