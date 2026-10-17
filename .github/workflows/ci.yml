@@ -73,6 +73,8 @@ jobs:
           tests/offline-registration.test.ts
           tests/art-runtime-index.test.ts
           tests/reduced-motion-loading.test.tsx
+          tests/interface-preferences.test.ts
+          tests/cardbacks.test.ts
           tests/i18n.test.ts
           tests/body-scroll-lock.test.ts
           tests/online-api.test.ts
