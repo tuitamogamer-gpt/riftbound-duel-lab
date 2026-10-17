@@ -1,6 +1,13 @@
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, BookOpen, History, Settings2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  History,
+  Palette,
+  Settings2,
+  X,
+} from "lucide-react";
 import { LanguageSelector, useI18n } from "../i18n";
 import { useDialogFocus } from "../hooks/useDialogFocus";
 import type { PlaybackSpeed as Speed } from "../game/playback";
@@ -14,6 +21,7 @@ export function MobileMatchMenu({
   setSpeed,
   showHistory,
   showHelp,
+  showAppearance,
   leave,
   botReason,
   showSaved,
@@ -27,6 +35,7 @@ export function MobileMatchMenu({
   setSpeed: (speed: Speed) => void;
   showHistory: () => void;
   showHelp: () => void;
+  showAppearance?: () => void;
   leave: () => void;
   botReason: string;
   showSaved?: () => void;
@@ -83,6 +92,12 @@ export function MobileMatchMenu({
           </div>
         </div>
         <div className="mobile-menu-links">
+          {showAppearance && (
+            <button onClick={() => navigate(showAppearance)}>
+              <Palette size={19} />
+              {t("Appearance")}
+            </button>
+          )}
           {showSaved && (
             <button onClick={() => navigate(showSaved)}>
               <History size={19} />

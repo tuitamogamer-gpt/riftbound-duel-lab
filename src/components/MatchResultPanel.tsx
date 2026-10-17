@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from "react";
+import "./AppDialog.css";
 
 export function MatchResultPanel({ children }: { children: ReactNode }) {
   const panel = useRef<HTMLElement>(null);
@@ -8,7 +9,7 @@ export function MatchResultPanel({ children }: { children: ReactNode }) {
   return (
     <section
       ref={panel}
-      className="result-banner"
+      className="result-banner match-result-panel"
       role="region"
       aria-labelledby="match-result-title"
       tabIndex={-1}

@@ -1,5 +1,13 @@
-import { useMemo, useState } from "react";
-import { ArrowRight, Search, X } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import {
+  ArrowRight,
+  Check,
+  ChevronDown,
+  Layers3,
+  Search,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import { useI18n } from "../i18n";
 import { catalog, type CatalogCard } from "../catalog";
 import { catalogMeta, isCardType } from "../data/cards";
@@ -26,6 +34,12 @@ export function CardLibrary({
   inspect: (c: CatalogCard) => void;
 }) {
   const { t, locale } = useI18n();
+  const searchInput = useRef<HTMLInputElement>(null);
+  const [filtersOpen, setFiltersOpen] = useState(
+    () =>
+      typeof window === "undefined" ||
+      window.matchMedia("(min-width: 701px)").matches,
+  );
   const [search, setSearch] = useState(""),
     [domain, setDomain] = useState("Sve domene"),
     [type, setType] = useState("Sve vrste"),
@@ -53,6 +67,12 @@ export function CardLibrary({
     onlyScripted ||
     sort !== "name",
   );
+  const advancedFilterCount = [
+    domain !== "Sve domene",
+    type !== "Sve vrste",
+    set !== "all",
+    sort !== "name",
+  ].filter(Boolean).length;
   const filtered = useMemo(
     () =>
       sortCatalogCards(
@@ -78,17 +98,26 @@ export function CardLibrary({
     [search, domain, type, set, baseOnly, onlyScripted, sort],
   );
   return (
-    <main className="library" id="main-content" tabIndex={-1}>
-      <div className="eyebrow"> {t("RIFTCODEX · KATALOG KARATA")} </div>
-      <h1>
-        {t("Znanje je prednost")}
-        <span>.</span>
-      </h1>
-      <p>
-        {t(
-          "Originalne karte i tekstovi efekata. Oznaka „Podržana” znači da je karta podržana u meču.",
-        )}{" "}
-      </p>
+    <main className="library card-library" id="main-content" tabIndex={-1}>
+      <header className="library-header">
+        <div>
+          <div className="eyebrow">{t("RIFTCODEX · KATALOG KARATA")}</div>
+          <h1>
+            {t("Znanje je prednost")}
+            <span>.</span>
+          </h1>
+          <p>
+            {t(
+              "Originalne karte i tekstovi efekata. Oznaka „Podržana” znači da je karta podržana u meču.",
+            )}
+          </p>
+        </div>
+        <div className="library-collection">
+          <Layers3 size={22} aria-hidden="true" />
+          <strong>{catalog.length.toLocaleString(locale)}</strong>
+          <span>{t("Karte")}</span>
+        </div>
+      </header>
       <p className="catalog-snapshot">
         {t("{printings} printings · {tokens} rules tokens · Snapshot {date}", {
           printings: catalogMeta.count,
@@ -104,10 +133,14 @@ export function CardLibrary({
           ),
         })}
       </p>
-      <div className="library-filters">
+      <section className="library-filters" aria-label={t("Pretraži karte")}>
         <div className="search-input">
-          <Search size={19} />
+          <Search size={20} aria-hidden="true" />
           <input
+            ref={searchInput}
+            type="text"
+            inputMode="search"
+            enterKeyHint="search"
             aria-label={t("Pretraži karte")}
             placeholder={t("Pretraži ime ili tekst karte…")}
             value={search}
@@ -129,120 +162,184 @@ export function CardLibrary({
             </button>
           )}
         </div>
-        <select
-          aria-label={t("Domena")}
-          value={domain}
-          onChange={(e) => {
-            setDomain(e.target.value);
-            setLimit(60);
-          }}
+        <details
+          className="library-refinement"
+          open={filtersOpen}
+          onToggle={(event) => setFiltersOpen(event.currentTarget.open)}
         >
-          {["Sve domene", "Fury", "Calm", "Mind", "Body", "Chaos", "Order"].map(
-            (d) => (
-              <option key={d} value={d}>
-                {t(d)}
-              </option>
-            ),
-          )}
-        </select>
-        <select
-          aria-label={t("Card set")}
-          value={set}
-          onChange={(e) => {
-            setSet(e.target.value);
-            setLimit(60);
-          }}
-        >
-          <option value="all">{t("All sets")}</option>
-          {catalogSets.map(([id, name]) => (
-            <option key={id} value={id}>
-              {id === "TOKEN" ? t("Rules tokens") : name}
-            </option>
-          ))}
-        </select>
-        <label className="scripted-filter">
-          <input
-            type="checkbox"
-            checked={baseOnly}
-            onChange={(e) => {
-              setBaseOnly(e.target.checked);
-              setLimit(60);
-            }}
-          />
-          {t("Base printings only")}
-        </label>
-        <select
-          aria-label={t("Vrsta karte")}
-          value={type}
-          onChange={(e) => {
-            setType(e.target.value);
-            setLimit(60);
-          }}
-        >
-          {[
-            "Sve vrste",
-            "Unit",
-            "Spell",
-            "Gear",
-            "Legend",
-            "Battlefield",
-            "Rune",
-          ].map((d) => (
-            <option key={d} value={d}>
-              {t(d)}
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label={t("Sort cards")}
-          value={sort}
-          onChange={(e) => {
-            setSort(e.target.value as CatalogSort);
-            setLimit(60);
-          }}
-        >
-          <option value="name">{t("Name · A–Z")}</option>
-          <option value="energy-asc">{t("Energy · low to high")}</option>
-          <option value="energy-desc">{t("Energy · high to low")}</option>
-          <option value="might-desc">{t("Might · high to low")}</option>
-        </select>
-        <label className="scripted-filter">
-          <input
-            type="checkbox"
-            checked={onlyScripted}
-            onChange={(e) => {
-              setOnlyScripted(e.target.checked);
-              setLimit(60);
-            }}
-          />
-          {t("Samo podržane za igranje")}{" "}
-        </label>
-      </div>
+          <summary>
+            <SlidersHorizontal size={16} aria-hidden="true" />
+            {t("Filters")}
+            {advancedFilterCount > 0 && (
+              <span
+                className="library-filter-count"
+                aria-label={t("{count} active filters", {
+                  count: advancedFilterCount,
+                })}
+              >
+                {advancedFilterCount}
+              </span>
+            )}
+            <ChevronDown size={16} aria-hidden="true" />
+          </summary>
+          <div className="library-refinement-grid">
+            <label className="library-filter-field">
+              <span>{t("Domena")}</span>
+              <select
+                aria-label={t("Domena")}
+                value={domain}
+                onChange={(e) => {
+                  setDomain(e.target.value);
+                  setLimit(60);
+                }}
+              >
+                {[
+                  "Sve domene",
+                  "Fury",
+                  "Calm",
+                  "Mind",
+                  "Body",
+                  "Chaos",
+                  "Order",
+                ].map((d) => (
+                  <option key={d} value={d}>
+                    {t(d)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="library-filter-field">
+              <span>{t("Card set")}</span>
+              <select
+                aria-label={t("Card set")}
+                value={set}
+                onChange={(e) => {
+                  setSet(e.target.value);
+                  setLimit(60);
+                }}
+              >
+                <option value="all">{t("All sets")}</option>
+                {catalogSets.map(([id, name]) => (
+                  <option key={id} value={id}>
+                    {id === "TOKEN" ? t("Rules tokens") : name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="library-filter-field">
+              <span>{t("Vrsta karte")}</span>
+              <select
+                aria-label={t("Vrsta karte")}
+                value={type}
+                onChange={(e) => {
+                  setType(e.target.value);
+                  setLimit(60);
+                }}
+              >
+                {[
+                  "Sve vrste",
+                  "Unit",
+                  "Spell",
+                  "Gear",
+                  "Legend",
+                  "Battlefield",
+                  "Rune",
+                ].map((d) => (
+                  <option key={d} value={d}>
+                    {t(d)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="library-filter-field">
+              <span>{t("Sort cards")}</span>
+              <select
+                aria-label={t("Sort cards")}
+                value={sort}
+                onChange={(e) => {
+                  setSort(e.target.value as CatalogSort);
+                  setLimit(60);
+                }}
+              >
+                <option value="name">{t("Name · A–Z")}</option>
+                <option value="energy-asc">{t("Energy · low to high")}</option>
+                <option value="energy-desc">{t("Energy · high to low")}</option>
+                <option value="might-desc">{t("Might · high to low")}</option>
+              </select>
+            </label>
+          </div>
+        </details>
+        <div className="library-filter-options">
+          <label className={`scripted-filter ${baseOnly ? "is-active" : ""}`}>
+            <input
+              type="checkbox"
+              checked={baseOnly}
+              onChange={(e) => {
+                setBaseOnly(e.target.checked);
+                setLimit(60);
+              }}
+            />
+            {t("Base printings only")}
+          </label>
+          <label
+            className={`scripted-filter ${onlyScripted ? "is-active" : ""}`}
+          >
+            <input
+              type="checkbox"
+              checked={onlyScripted}
+              onChange={(e) => {
+                setOnlyScripted(e.target.checked);
+                setLimit(60);
+              }}
+            />
+            {t("Samo podržane za igranje")}{" "}
+          </label>
+        </div>
+      </section>
       <div className="catalog-count">
-        {t("{shown} of {count} matching entries", {
-          shown: Math.min(limit, filtered.length),
-          count: filtered.length,
-        })}{" "}
-        <span> {t("Podaci su spremljeni lokalno uz aplikaciju")} </span>
-        {hasFilters && (
-          <button className="text-button" onClick={resetFilters}>
-            {t("Reset filters")}
+        <strong role="status" aria-live="polite" aria-atomic="true">
+          {t("{shown} of {count} matching entries", {
+            shown: Math.min(limit, filtered.length),
+            count: filtered.length,
+          })}
+        </strong>
+        <div className="library-result-actions">
+          <button
+            className="library-jump-search"
+            aria-label={t("Pretraži karte")}
+            title={t("Pretraži karte")}
+            onClick={() => searchInput.current?.focus()}
+          >
+            <Search size={17} aria-hidden="true" />
           </button>
-        )}
+          {hasFilters && (
+            <button className="text-button" onClick={resetFilters}>
+              <X size={15} aria-hidden="true" />
+              {t("Reset filters")}
+            </button>
+          )}
+        </div>
       </div>
       <div className="catalog-grid">
         {filtered.slice(0, limit).map((c) => (
-          <div key={c.id}>
+          <div className="catalog-entry" key={c.id}>
             <Card card={c} onClick={() => inspect(c)} />
             <div className="catalog-card-name">
-              <strong>{c.name}</strong>
+              <strong title={c.name}>{c.name}</strong>
+              <span className="catalog-card-type">
+                {t(c.type)}
+                {c.domains.length
+                  ? ` · ${c.domains.map((d) => t(d)).join(" / ")}`
+                  : ""}
+              </span>
               <small className="catalog-printing-id">
-                {c.set} · {c.id}
+                {c.set} · {c.collectorNumber}
               </small>
               <span
                 className={supported(c) ? "scripted-badge" : "catalog-badge"}
               >
-                {supported(c) ? t("● Podržana") : c.set}
+                {supported(c) && <Check size={12} aria-hidden="true" />}
+                {supported(c) ? t("● Podržana").replace(/^●\s*/, "") : c.set}
               </span>
             </div>
           </div>

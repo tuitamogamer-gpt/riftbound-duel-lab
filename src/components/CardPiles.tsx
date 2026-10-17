@@ -7,7 +7,7 @@ import type { GameAction, GameState, PlayerId } from "../game/types";
 import { useI18n } from "../i18n";
 import { Card } from "./Card";
 import { CardSleeve } from "./CardSleeve";
-import { getSignatureSleeve } from "../data/sleeves";
+import { useCardSleeve } from "./cardback-preference";
 
 export type PileView = { player: PlayerId; zone: "deck" | "trash" };
 
@@ -89,6 +89,7 @@ export function PileDialog({
     return () => previous?.focus();
   }, []);
   const player = game.players[view.player];
+  const sleeve = useCardSleeve(player);
   const isTrash = view.zone === "trash";
   const count = isTrash ? player.discard.length : player.deck.length;
   return (
@@ -216,8 +217,7 @@ export function PileDialog({
             <div>
               <strong>{t("{count} cards remaining", { count })}</strong>
               <span className="sleeve-credit">
-                {getSignatureSleeve(player).name} ·{" "}
-                {getSignatureSleeve(player).title}
+                {t(sleeve.name)} · {t(sleeve.title)}
               </span>
               <p>
                 {t("Cards in the deck stay face down. Draw them during play.")}

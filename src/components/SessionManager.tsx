@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   Check,
@@ -94,6 +94,8 @@ export function SessionManager({
       {!hideTrigger && (
         <button
           className="session-manager-trigger outline-button"
+          aria-haspopup="dialog"
+          aria-expanded={shown}
           onClick={() => change(true)}
         >
           <Save size={16} />
@@ -160,6 +162,10 @@ function SessionDialog({
 }) {
   const { t, locale } = useI18n();
   const panel = useDialogFocus(close);
+  const titleId = useId();
+  const introId = useId();
+  const recoveryId = useId();
+  const backdropPress = useRef(false);
   const input = useRef<HTMLInputElement>(null);
   const request = useRef(0);
   const [imported, setImported] = useState<ImportSessionResult | null>(null);
@@ -167,6 +173,7 @@ function SessionDialog({
   const [reading, setReading] = useState(false);
   const [fileError, setFileError] = useState("");
   const [exportError, setExportError] = useState("");
+  const [exported, setExported] = useState(false);
   useEffect(() => {
     return () => {
       request.current++;
@@ -178,30 +185,59 @@ function SessionDialog({
       timeStyle: "short",
     }).format(time);
   return (
-    <div className="modal-backdrop session-manager-backdrop" onClick={close}>
+    <div
+      className="modal-backdrop session-manager-backdrop"
+      onPointerDown={(event) => {
+        backdropPress.current = event.target === event.currentTarget;
+      }}
+      onClick={(event) => {
+        if (backdropPress.current && event.target === event.currentTarget)
+          close();
+        backdropPress.current = false;
+      }}
+    >
       <section
         className="session-manager"
         ref={panel}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="session-manager-title"
+        aria-labelledby={titleId}
+        aria-describedby={introId}
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
         <header>
           <div>
             <Save size={20} />
-            <h2 id="session-manager-title">{t("Saved duels")}</h2>
+            <h2 id={titleId}>{t("Saved duels")}</h2>
           </div>
           <button onClick={close} aria-label={t("Zatvori")}>
             <X size={20} />
           </button>
         </header>
         <SessionStatus controller={controller} />
-        <p className="session-manager-intro">
+        <p className="session-manager-intro" id={introId}>
           {t(
             "Keep a duel on this device, export it, or resume a recovery position.",
           )}
         </p>
+        {session.match ? (
+          <div className="session-current">
+            <span>{t("Current duel")}</span>
+            <strong>
+              {t("Turn {turn} · {phase}", {
+                turn: session.match.turn,
+                phase: t(phaseLabels[session.match.phase]),
+              })}
+            </strong>
+          </div>
+        ) : (
+          <div className="session-empty">
+            <Save size={26} aria-hidden="true" />
+            <h3>{t("No saved duel")}</h3>
+            <p>{t("Start a duel or import a saved file to continue.")}</p>
+          </div>
+        )}
         {controller.status === "failed" && (
           <p className="session-notice error" role="alert">
             {t(
@@ -242,6 +278,7 @@ function SessionDialog({
             disabled={!session.match}
             onClick={() => {
               setExportError("");
+              setExported(false);
               try {
                 const raw = exportSessionText(session);
                 const url = URL.createObjectURL(
@@ -251,6 +288,7 @@ function SessionDialog({
                 link.href = url;
                 link.download = `riftbound-duel-${session.match?.seed}-${session.match?.revision ?? 0}.json`;
                 link.click();
+                setExported(true);
                 // Keep the URL until the browser has started the download.
                 setTimeout(() => URL.revokeObjectURL(url), 1000);
               } catch {
@@ -274,6 +312,12 @@ function SessionDialog({
             </button>
           )}
         </div>
+        {exported && (
+          <p className="session-notice success" role="status">
+            <Check size={16} aria-hidden="true" />
+            {t("Duel export started.")}
+          </p>
+        )}
         {exportError && (
           <p className="session-notice error" role="alert">
             {t(exportError)}
@@ -330,6 +374,10 @@ function SessionDialog({
         )}
         {imported?.ok && (
           <div className="session-import-preview">
+            <p className="session-import-success" role="status">
+              <Check size={16} aria-hidden="true" />
+              {t("Duel file ready to resume.")}
+            </p>
             <strong>{fileName}</strong>
             <span>
               {t("Turn {turn} · {phase}", {
@@ -343,11 +391,8 @@ function SessionDialog({
             </button>
           </div>
         )}
-        <section
-          className="session-recovery"
-          aria-labelledby="session-recovery-title"
-        >
-          <h3 id="session-recovery-title">
+        <section className="session-recovery" aria-labelledby={recoveryId}>
+          <h3 id={recoveryId}>
             <History size={17} />
             {t("Recovery positions")}
           </h3>
@@ -357,7 +402,9 @@ function SessionDialog({
             )}
           </p>
           {controller.backups.length === 0 && (
-            <p>{t("Recovery positions appear after you make a move.")}</p>
+            <p className="session-recovery-empty">
+              {t("Recovery positions appear after you make a move.")}
+            </p>
           )}
           <div className="session-recovery-list">
             {controller.backups.map((snapshot) => (
@@ -369,7 +416,9 @@ function SessionDialog({
                       phase: t(phaseLabels[snapshot.session.match!.phase]),
                     })}
                   </strong>
-                  <span>{date(snapshot.savedAt)}</span>
+                  <time dateTime={new Date(snapshot.savedAt).toISOString()}>
+                    {date(snapshot.savedAt)}
+                  </time>
                   <CompatibilityNotice
                     value={sessionCompatibility(snapshot.session)}
                   />

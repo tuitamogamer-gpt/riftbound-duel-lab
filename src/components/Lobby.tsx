@@ -7,13 +7,15 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
-  Crosshair,
   Download,
   Flag,
   Layers3,
   Shield,
   Swords,
   Trophy,
+  Search,
+  X,
+  SlidersHorizontal,
   Upload,
   Zap,
 } from "lucide-react";
@@ -25,7 +27,9 @@ import { getDeckScriptCoverage } from "../game/deck-import";
 import "./LobbyStartingPair.css";
 import "./LobbyChampionPicker.css";
 import "./LobbyResume.css";
+import "./LobbyUpgrade.css";
 import { useCompactTable } from "../hooks/useCompactTable";
+import { useReducedMotion } from "../motion/useReducedMotion";
 import { BattlefieldPicker } from "./BattlefieldPicker";
 import { defaultBattlefield } from "../game/battlefield-selection";
 import type { CatalogCard } from "../catalog";
@@ -157,21 +161,40 @@ function StartingCardPair({
 
 export function Lobby(p: Props) {
   const { t } = useI18n();
+  const reducedMotion = useReducedMotion();
   const setup = useRef<HTMLElement>(null);
   const championsId = useId();
   const compact = useCompactTable();
   const [expanded, setExpanded] = useState(false);
-  const canExpand = compact && p.visibleDecks.length > 4;
-  const championChoices = p.visibleDecks.slice(0, 4);
-  // Keep a dropdown selection visible without making the whole gallery longer.
+  const [search, setSearch] = useState("");
+  const normalize = (value: string) =>
+    value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  const query = normalize(search.trim());
+  const filteredDecks = p.visibleDecks.filter((deck) =>
+    normalize(
+      [
+        deck.name,
+        deck.champion,
+        deck.product,
+        t(deck.archetype),
+        ...deck.domains.map((domain) => t(domain)),
+      ].join(" "),
+    ).includes(query),
+  );
+  const limit = compact ? 4 : 6;
+  const canExpand = !query && filteredDecks.length > limit;
+  const championChoices = filteredDecks.slice(0, limit);
   if (
     p.playerDeck &&
-    p.visibleDecks.some((deck) => deck.id === p.playerDeck?.id) &&
+    filteredDecks.some((deck) => deck.id === p.playerDeck?.id) &&
     !championChoices.some((deck) => deck.id === p.playerDeck?.id)
   ) {
     championChoices[championChoices.length - 1] = p.playerDeck;
   }
-  const shownDecks = canExpand && !expanded ? championChoices : p.visibleDecks;
+  const shownDecks = canExpand && !expanded ? championChoices : filteredDecks;
   const champion = p.playerDeck && findCard(p.playerDeck.championId);
   const available = p.allDecks.filter(
     (deck) => getDeckScriptCoverage(deck).complete,
@@ -185,20 +208,25 @@ export function Lobby(p: Props) {
     "Moji",
     "Sve",
   ];
+  const targetPoints =
+    8 +
+    [
+      p.playerBattlefield ?? defaultBattlefield(p.playerDeck),
+      p.botBattlefield ?? defaultBattlefield(p.botDeck),
+    ].filter((id) => id === "ogn-276-298").length;
+  const selectedDifficulty = DIFFICULTIES[p.difficulty as Difficulty];
   const scrollToSetup = () => {
     setup.current?.scrollIntoView({
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "instant"
-        : "smooth",
+      behavior: reducedMotion ? "instant" : "smooth",
       block: "start",
     });
     setup.current?.focus({ preventScroll: true });
   };
   return (
-    <main className="rift-lobby" id="main-content">
+    <main className="rift-lobby rift-lobby-upgrade" id="main-content">
       <div className="rift-kicker">
         <span>
-          <i /> {t("NOVI DUEL. NOVA LEGENDA.")}
+          <i /> {t("Ti protiv AI bota")}
         </span>
         <span>{t("LEAGUE OF LEGENDS · THE CARD GAME")}</span>
       </div>
@@ -214,86 +242,67 @@ export function Lobby(p: Props) {
         />
         <div className="rift-hero-wash" />
         <div className="rift-hero-copy">
-          <span className="rift-sticker">
-            {t("TVOJA LEGENDA POČINJE OVDJE")}
-          </span>
-          <h1 id="hero-title">
-            {t("RIFT TE")}
-            <br />
-            <em>{t("ČEKA.")}</em>
-          </h1>
-          <p>
-            {t("Veliki šampioni. Još veće odluke.")}
-            <br />
-            {t("Izaberi svoj špil. Zauzmi bojišta. Odigraj svoje.")}
-          </p>
+          <span className="rift-eyebrow">{t("A new duel starts here.")}</span>
+          <h1 id="hero-title">{t("Your next move.")}</h1>
+          <p>{t("Izaberi svoj špil. Zauzmi bojišta. Odigraj svoje.")}</p>
           <div className="rift-hero-actions">
             <button className="rift-primary" onClick={scrollToSetup}>
               {t("Izaberi svoj špil")}
-              <ArrowRight size={20} />
+              <ArrowRight size={18} />
             </button>
-            <button
-              className={`rift-link ${p.hasMatch && p.resumeSummary ? "rift-resume-link" : ""}`}
-              onClick={p.hasMatch ? p.onResume : p.onHelp}
-              aria-label={
-                p.hasMatch
-                  ? t(p.matchEnded ? "Pregledaj meč" : "Nastavi duel")
-                  : t("Tvoj prvi duel")
-              }
-            >
-              {p.hasMatch ? <Swords size={17} /> : <BookOpen size={17} />}
-              <span className="rift-resume-copy">
-                <strong>
-                  {p.hasMatch
-                    ? p.matchEnded
-                      ? t("Pregledaj meč")
-                      : t("Nastavi duel")
-                    : t("Tvoj prvi duel")}
-                </strong>
-                {p.hasMatch && p.resumeSummary && (
-                  <>
-                    <span className="rift-resume-matchup">
-                      {t(p.resumeSummary.player)} <i>vs</i>{" "}
-                      {t(p.resumeSummary.opponent)}
-                    </span>
-                    <span className="rift-resume-state">
-                      {p.resumeSummary.turn > 0 && (
-                        <>
-                          {t("Turn {turn}", { turn: p.resumeSummary.turn })}{" "}
-                          ·{" "}
-                        </>
-                      )}
-                      {p.resumeSummary.points.join("–")} ·{" "}
-                      {t(p.resumeSummary.status)}
-                    </span>
-                  </>
-                )}
-              </span>
-            </button>
+            {!p.hasMatch && (
+              <button className="rift-link" onClick={p.onHelp}>
+                <BookOpen size={17} />
+                {t("Tvoj prvi duel")}
+              </button>
+            )}
           </div>
           <div className="rift-hero-facts">
             <span>
-              <Swords size={15} /> {t("Ti protiv AI bota")}
-            </span>
-            <span>
-              <Shield size={15} />{" "}
+              <Shield size={14} />
               {t("{count} šampiona", {
                 count: new Set(decks.map((d) => d.champion)).size,
               })}
             </span>
             <span>
-              <Flag size={15} /> {t("Dva bojišta. Jedan pobjednik.")}
+              <Flag size={14} />
+              {t("Dva bojišta. Jedan pobjednik.")}
             </span>
           </div>
         </div>
-        <span className="rift-hero-stamp">
-          {t("MALA KARTA.")}
-          <br />
-          <strong>{t("VELIKI POTEZ.")}</strong>
-        </span>
-        <span className="rift-hero-index">{t("01 / DOBRO DOŠAO U RIFT")}</span>
+        <span className="rift-hero-index">RIFTBOUND / DUEL LAB</span>
       </section>
-
+      {p.hasMatch && (
+        <button
+          className="rift-return-card rift-resume-link"
+          onClick={p.onResume}
+          aria-label={t(p.matchEnded ? "Pregledaj meč" : "Nastavi duel")}
+        >
+          <span className="rift-return-icon">
+            <Swords size={21} />
+          </span>
+          <span className="rift-resume-copy">
+            <strong>
+              {t(p.matchEnded ? "Pregledaj meč" : "Nastavi duel")}
+            </strong>
+            {p.resumeSummary && (
+              <span className="rift-resume-matchup">
+                {t(p.resumeSummary.player)} <i>vs</i>{" "}
+                {t(p.resumeSummary.opponent)}
+              </span>
+            )}
+          </span>
+          {p.resumeSummary && (
+            <span className="rift-resume-state">
+              {p.resumeSummary.turn > 0 && (
+                <>{t("Turn {turn}", { turn: p.resumeSummary.turn })} · </>
+              )}
+              {p.resumeSummary.points.join("–")} · {t(p.resumeSummary.status)}
+            </span>
+          )}
+          <ArrowRight size={19} />
+        </button>
+      )}
       <section
         ref={setup}
         tabIndex={-1}
@@ -303,87 +312,89 @@ export function Lobby(p: Props) {
         <div className="rift-section-heading">
           <div>
             <span className="rift-eyebrow">{t("PRIPREMI SE ZA DUEL")}</span>
-            <h2 id="setup-title">{t("SASTAVI SVOJU PRIČU.")}</h2>
+            <h2 id="setup-title">{t("Set up your duel")}</h2>
           </div>
-          <p>{t("Tvoj šampion. Tvoj stil. Tvoj potez.")}</p>
-        </div>
-        <div className="rift-mission-strip">
-          <div className="rift-mission-icon">
-            <Swords size={23} />
-          </div>
-          <div>
-            <strong>{t("JEDAN NA JEDAN. SVE JE NA TEBI.")}</strong>
-            <p>{t("Pravi špilovi. Protivnik spreman. Igraj svojim tempom.")}</p>
-          </div>
-          <span className="rift-mode-badge">{t("1 IGRAČ + AI")}</span>
+          <p>{t("Choose a deck, tune your challenge, and enter the Rift.")}</p>
         </div>
         <div className="rift-setup-grid">
           <div className="rift-champion-column">
             <div className="rift-step-heading">
               <span>01</span>
-              <h3>{t("IZABERI ŠAMPIONA")}</h3>
-              <small>{t("Pronađi svoju prednost.")}</small>
+              <h3>{t("Izaberi svoj špil")}</h3>
+              <small>
+                {t("{count} of {total} decks", {
+                  count: shownDecks.length,
+                  total: filteredDecks.length,
+                })}
+              </small>
             </div>
-            <label className="rift-player-select">
-              <span>{t("Tvoj špil")}</span>
-              <select
-                aria-label={t("Tvoj špil")}
-                value={p.playerDeck?.id || ""}
-                onChange={(event) => {
-                  setExpanded(false);
-                  p.onPlayer(event.target.value);
-                }}
-              >
-                <DeckOptions choices={p.allDecks} />
-              </select>
-            </label>
-            <p className="rift-deck-selection-note">
-              {t(
-                "{count} precona iz svih izdanja. Izaberi špil iz liste ili karticu ispod.",
-                {
-                  count: p.allDecks.filter(
-                    (deck) => deck.source === "Official preconstructed deck",
-                  ).length,
-                },
-              )}
-            </p>
-            <div
-              className="rift-collections"
-              aria-label={t("Kolekcija špilova")}
-            >
-              {groups.map((group) => (
-                <button
-                  key={group}
-                  aria-pressed={p.deckGroup === group}
-                  onClick={() => {
+            <div className="rift-deck-browser">
+              <div className="rift-deck-search" role="search">
+                <Search size={18} aria-hidden="true" />
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(event) => {
+                    setSearch(event.target.value);
                     setExpanded(false);
-                    p.onGroup(group);
+                  }}
+                  placeholder={t("Search champions or decks")}
+                  aria-label={t("Search champions or decks")}
+                />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    aria-label={t("Clear search")}
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+              <label className="rift-collection-select">
+                <span className="rift-visually-hidden">
+                  {t("Kolekcija špilova")}
+                </span>
+                <select
+                  aria-label={t("Kolekcija špilova")}
+                  value={p.deckGroup}
+                  onChange={(event) => {
+                    setExpanded(false);
+                    p.onGroup(event.target.value);
                   }}
                 >
-                  {group === "Precon"
-                    ? t("Svi preconi")
-                    : group === "Moji"
-                      ? t("Moji ({count})", { count: p.importedCount })
-                      : t(group)}
-                </button>
-              ))}
+                  {groups.map((group) => (
+                    <option value={group} key={group}>
+                      {group === "Precon"
+                        ? t("Svi preconi")
+                        : group === "Moji"
+                          ? t("Moji ({count})", { count: p.importedCount })
+                          : t(group)}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
-            <div className="rift-champions" id={championsId}>
+            <div
+              className="rift-champions"
+              id={championsId}
+              role="group"
+              aria-label={t("Deck selection")}
+            >
               {shownDecks.map((deck) => (
                 <button
                   key={deck.id}
                   aria-pressed={p.playerDeck?.id === deck.id}
                   aria-label={t("Odaberi {name}", { name: t(deck.name) })}
-                  data-card-preview={deck.championId}
                   className={`rift-champion ${p.playerDeck?.id === deck.id ? "is-selected" : ""}`}
                   onClick={() => p.onPlayer(deck.id)}
                 >
                   <img src={deckArt(deck)} alt="" loading="lazy" />
                   <span className="rift-selection-check">
-                    <Check size={15} />
+                    <Check size={14} />
                   </span>
-                  <div className="rift-champion-label">
-                    <h4>{deck.champion}</h4>
+                  <span className="rift-champion-label">
+                    <strong>{deck.champion}</strong>
                     <span>
                       {t(
                         deck.product ||
@@ -395,16 +406,24 @@ export function Lobby(p: Props) {
                     <small>
                       {deck.domains.map((domain) => t(domain)).join(" · ")}
                     </small>
-                  </div>
+                  </span>
                 </button>
               ))}
             </div>
+            {query && (
+              <span className="rift-visually-hidden" role="status">
+                {t("{count} of {total} decks", {
+                  count: shownDecks.length,
+                  total: p.visibleDecks.length,
+                })}
+              </span>
+            )}
             {canExpand && (
               <div className="rift-champion-disclosure">
-                <span aria-live="polite">
+                <span>
                   {t("{count} of {total} decks", {
                     count: shownDecks.length,
-                    total: p.visibleDecks.length,
+                    total: filteredDecks.length,
                   })}
                 </span>
                 <button
@@ -416,285 +435,267 @@ export function Lobby(p: Props) {
                   {expanded
                     ? t("Show fewer decks")
                     : t("Show all {count} decks", {
-                        count: p.visibleDecks.length,
+                        count: filteredDecks.length,
                       })}
                   {expanded ? (
-                    <ChevronUp size={17} />
+                    <ChevronUp size={16} />
                   ) : (
-                    <ChevronDown size={17} />
+                    <ChevronDown size={16} />
                   )}
                 </button>
               </div>
             )}
-            {!p.visibleDecks.length && (
+            {!filteredDecks.length && (
               <div className="rift-empty">
-                <Layers3 size={28} />
-                <p>{t("Ovdje počinje tvoja kolekcija.")}</p>
-                <button className="rift-secondary" onClick={p.onImport}>
-                  {t("Uvezi prvi špil")}
-                  <Upload size={16} />
+                <Layers3 size={27} />
+                <p>
+                  {t(
+                    query
+                      ? "No decks match your search."
+                      : "Ovdje počinje tvoja kolekcija.",
+                  )}
+                </p>
+                <button
+                  className="rift-secondary"
+                  onClick={query ? () => setSearch("") : p.onImport}
+                >
+                  {t(query ? "Clear search" : "Uvezi prvi špil")}
+                  {query ? <X size={16} /> : <Upload size={16} />}
                 </button>
               </div>
             )}
-            {p.playerDeck && (
-              <div className="rift-champion-detail">
-                <div>
-                  <span className="rift-eyebrow">{t("TVOJ IZBOR")}</span>
-                  <h3 data-card-preview={p.playerDeck.championId} tabIndex={0}>
-                    {p.playerDeck.champion}
-                  </h3>
-                  <p>
-                    {p.playerDeck.source === "Official preconstructed deck"
-                      ? t("Originalni špil · {product}", {
-                          product: t(p.playerDeck.product || ""),
-                        })
-                      : t(p.playerDeck.archetype)}
-                  </p>
-                  <span className="rift-domain-list">
-                    {p.playerDeck.domains.map((domain) => (
-                      <span key={domain}>{t(domain)}</span>
-                    ))}
+            <div className="rift-selected-deck">
+              <label className="rift-player-select">
+                <span>
+                  <Check size={14} />
+                  {t("Tvoj špil")}
+                </span>
+                <select
+                  aria-label={t("Tvoj špil")}
+                  value={p.playerDeck?.id || ""}
+                  onChange={(event) => p.onPlayer(event.target.value)}
+                >
+                  <DeckOptions choices={p.allDecks} />
+                </select>
+              </label>
+              {p.playerDeck && (
+                <div className="rift-selected-meta">
+                  <span>
+                    {p.playerDeck.domains
+                      .map((domain) => t(domain))
+                      .join(" · ")}
                   </span>
+                  <button
+                    className="rift-link"
+                    onClick={() => p.onDetails(p.playerDeck!)}
+                  >
+                    {t("Pogledaj sastav")}
+                    <ArrowRight size={15} />
+                  </button>
                 </div>
-                <div className="rift-champion-stats">
-                  <span>
-                    <b>{champion?.energy ?? "—"}</b>
-                    {t("ENERGIJA")}
-                  </span>
-                  <span>
-                    <b>{champion?.might ?? "—"}</b>
-                    {t("SNAGA")}
-                  </span>
-                  <span>
-                    <b>
-                      {1 +
-                        p.playerDeck.main.reduce(
-                          (n, entry) => n + entry.count,
-                          0,
-                        )}
-                    </b>
-                    {t("KARATA")}
-                  </span>
-                </div>
-              </div>
-            )}
-            {p.playerDeck && (
-              <StartingCardPair deck={p.playerDeck} onDetails={p.onDetails} />
-            )}
+              )}
+            </div>
             <BattlefieldPicker
               deck={p.playerDeck}
               value={p.playerBattlefield ?? defaultBattlefield(p.playerDeck)}
               onChange={p.onPlayerBattlefield ?? (() => {})}
               inspect={p.onInspect ?? (() => {})}
             />
-            <div className="rift-step-heading rift-deck-heading">
-              <span>02</span>
-              <h3>{t("TVOJ ŠPIL. TVOJ STIL.")}</h3>
-            </div>
-            <div className="rift-deck-panel">
-              <div className="rift-deck-panel-title">
-                <Layers3 size={24} />
-                <div>
-                  <strong>
-                    {t(p.playerDeck?.name || "Izaberi svoj špil")}
-                  </strong>
-                  <p>
-                    {p.playerDeck?.source === "Official preconstructed deck"
-                      ? t("Originalni precon, spreman za tvoj sljedeći duel.")
-                      : t(p.playerDeck?.description || "")}
-                  </p>
-                </div>
-              </div>
-              <div className="rift-deck-panel-actions">
-                <div>
-                  <span>
-                    <Check size={14} />{" "}
-                    {t("{count} cards", {
-                      count:
-                        1 +
-                        (p.playerDeck?.main.reduce(
-                          (n, entry) => n + entry.count,
-                          0,
-                        ) ?? 39),
-                    })}
-                  </span>
-                  <span>
-                    <Zap size={14} /> {t("12 runa")}
-                  </span>
-                  <span>
-                    <Shield size={14} /> {t("1 Legend")}
-                  </span>
-                </div>
+            <details className="rift-setup-disclosure rift-deck-disclosure">
+              <summary>
+                <Layers3 size={18} />
+                <span>{t("Deck & starting cards")}</span>
+                <ChevronDown size={17} />
+              </summary>
+              <div className="rift-disclosure-body">
                 {p.playerDeck && (
-                  <button
-                    className="rift-link"
-                    onClick={() => p.onDetails(p.playerDeck!)}
-                  >
-                    {t("Pogledaj sastav")}
-                    <ArrowRight size={16} />
-                  </button>
+                  <>
+                    <div className="rift-champion-detail">
+                      <div>
+                        <span className="rift-eyebrow">{t("TVOJ IZBOR")}</span>
+                        <h3>{p.playerDeck.champion}</h3>
+                        <p>{t(p.playerDeck.archetype)}</p>
+                      </div>
+                      <div className="rift-champion-stats">
+                        <span>
+                          <b>{champion?.energy ?? "—"}</b>
+                          {t("ENERGIJA")}
+                        </span>
+                        <span>
+                          <b>{champion?.might ?? "—"}</b>
+                          {t("SNAGA")}
+                        </span>
+                        <span>
+                          <b>
+                            {1 +
+                              p.playerDeck.main.reduce(
+                                (n, entry) => n + entry.count,
+                                0,
+                              )}
+                          </b>
+                          {t("KARATA")}
+                        </span>
+                      </div>
+                    </div>
+                    <StartingCardPair
+                      deck={p.playerDeck}
+                      onDetails={p.onDetails}
+                    />
+                  </>
                 )}
+                <div className="rift-deck-panel">
+                  <div className="rift-deck-panel-title">
+                    <Layers3 size={21} />
+                    <div>
+                      <strong>
+                        {t(p.playerDeck?.name || "Izaberi svoj špil")}
+                      </strong>
+                      <p>
+                        {p.playerDeck?.source === "Official preconstructed deck"
+                          ? t(
+                              "Originalni precon, spreman za tvoj sljedeći duel.",
+                            )
+                          : t(p.playerDeck?.description || "")}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="rift-deck-panel-actions">
+                    <div>
+                      <span>
+                        <Check size={14} />
+                        {t("{count} cards", {
+                          count:
+                            1 +
+                            (p.playerDeck?.main.reduce(
+                              (n, entry) => n + entry.count,
+                              0,
+                            ) ?? 39),
+                        })}
+                      </span>
+                      <span>
+                        <Zap size={14} />
+                        {t("12 runa")}
+                      </span>
+                      <span>
+                        <Shield size={14} />
+                        {t("1 Legend")}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="rift-deck-utilities">
+                    {p.onBuildDeck && (
+                      <button onClick={p.onBuildDeck}>
+                        <Layers3 size={15} />
+                        {t("Build a deck")}
+                      </button>
+                    )}
+                    <button onClick={p.onImport}>
+                      <Upload size={15} />
+                      {t("Uvezi špil")}
+                    </button>
+                    {p.playerDeck && (
+                      <button onClick={() => p.onExport(p.playerDeck!)}>
+                        <Download size={15} />
+                        {t("Izvezi .txt")}
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <p className="rift-precon-note">
+                  {t(
+                    "Precon špilovi zadržavaju originalni sastav izdanja. Turnirske zabrane prikazuju se pri uvozu špila.",
+                  )}
+                </p>
               </div>
-              <div className="rift-deck-utilities">
-                {p.onBuildDeck && (
-                  <button onClick={p.onBuildDeck}>
-                    <Layers3 size={15} />
-                    {t("Build a deck")}
-                  </button>
-                )}
-                <button onClick={p.onImport}>
-                  <Upload size={15} /> {t("Uvezi špil")}
-                </button>
-                {p.playerDeck && (
-                  <button onClick={() => p.onExport(p.playerDeck!)}>
-                    <Download size={15} /> {t("Izvezi .txt")}
-                  </button>
-                )}
-                <span>{t("Sačuvano na tvom uređaju")}</span>
-              </div>
-            </div>
-            <p className="rift-precon-note">
-              {t(
-                "Precon špilovi zadržavaju originalni sastav izdanja. Turnirske zabrane prikazuju se pri uvozu špila.",
-              )}
-            </p>
+            </details>
           </div>
           <aside className="rift-opponent" aria-label={t("Postavke duela")}>
             <div className="rift-step-heading">
-              <span>03</span>
-              <h3>{t("TVOG RIVALA BIRAŠ TI.")}</h3>
+              <span>02</span>
+              <h3>{t("Choose your opponent")}</h3>
+            </div>
+            <div
+              className="rift-duel-preview"
+              aria-label={t("TVOJ SLJEDEĆI DUEL")}
+            >
+              <div className="rift-duelist is-player">
+                <img src={deckArt(p.playerDeck)} alt="" />
+                <span>
+                  <small>{t("Ti")}</small>
+                  <strong>{p.playerDeck?.champion || t("Tvoj šampion")}</strong>
+                </span>
+              </div>
+              <span className="rift-versus">VS</span>
+              <div className="rift-duelist is-rival">
+                <img src={deckArt(p.botDeck)} alt="" />
+                <span>
+                  <small>{t("AI")}</small>
+                  <strong>{p.botDeck?.champion || t("Protivnik")}</strong>
+                </span>
+              </div>
             </div>
             <label className="rift-opponent-select">
-              {t("ŠPIL PROTIVNIKA")}
+              {t("Špil protivnika")}
               <select
                 aria-label={t("Špil protivnika")}
                 value={p.botDeck?.id || ""}
-                onChange={(e) => p.onBot(e.target.value)}
+                onChange={(event) => p.onBot(event.target.value)}
               >
                 <DeckOptions choices={available} />
-              </select>
-            </label>
-            <div
-              className="rift-rival-art"
-              data-card-preview={p.botDeck?.championId}
-              tabIndex={0}
-              aria-label={t("Karta protivničkog šampiona: {champion}", {
-                champion: p.botDeck?.champion || t("Protivnik"),
-              })}
-            >
-              <img
-                src={deckArt(p.botDeck)}
-                alt={p.botDeck?.champion || t("Protivnik")}
-              />
-              <div>
-                <span>{t("TAKTIČKI PROTIVNIK")}</span>
-                <h4>{p.botDeck?.champion}</h4>
-                <p>
-                  {p.botDeck?.domains.map((domain) => t(domain)).join(" · ")}
-                </p>
-              </div>
-              <span className="rift-rival-tag">
-                <Crosshair size={13} /> {t("AI")}
-              </span>
-            </div>
-            {p.botDeck && (
-              <StartingCardPair deck={p.botDeck} onDetails={p.onDetails} />
-            )}
-            <BattlefieldPicker
-              opponent
-              deck={p.botDeck}
-              value={p.botBattlefield ?? defaultBattlefield(p.botDeck)}
-              onChange={p.onBotBattlefield ?? (() => {})}
-              inspect={p.onInspect ?? (() => {})}
-            />
-            <label className="rift-first-player">
-              <span>{t("Match format")}</span>
-              <select
-                value={p.matchFormat ?? "single"}
-                onChange={(event) =>
-                  p.onMatchFormat?.(event.target.value as "single" | "bo3")
-                }
-              >
-                <option value="single">{t("Single duel")}</option>
-                <option value="bo3">{t("Best of three")}</option>
-              </select>
-            </label>
-            <label className="rift-first-player">
-              <span>{t("Starting player")}</span>
-              <select
-                value={p.firstPlayerChoice ?? "random"}
-                onChange={(event) =>
-                  p.onFirstPlayerChoice?.(
-                    event.target.value as "random" | "you" | "bot",
-                  )
-                }
-              >
-                <option value="random">{t("Random starting player")}</option>
-                <option value="you">{t("You start")}</option>
-                <option value="bot">{t("Opponent starts")}</option>
               </select>
             </label>
             <fieldset className="rift-difficulty">
               <legend>{t("TEMPO TVOG IZAZOVA")}</legend>
               <div>
-                {(Object.keys(DIFFICULTIES) as Difficulty[]).map((style) => (
-                  <label key={style}>
-                    <input
-                      type="radio"
-                      name="difficulty"
-                      value={style}
-                      checked={p.difficulty === style}
-                      onChange={() => p.onDifficulty(style)}
-                    />
-                    <span>
-                      {style === "hard" || style === "expert" ? (
-                        <Swords size={15} />
-                      ) : (
-                        <Shield size={15} />
-                      )}
-                      {t(DIFFICULTIES[style].label)}
-                    </span>
-                  </label>
-                ))}
-              </div>
-              <p>
-                {t(
-                  "Four difficulty levels. The same rules and hidden-information limits.",
+                {(Object.keys(DIFFICULTIES) as Difficulty[]).map(
+                  (style, index) => (
+                    <label key={style}>
+                      <input
+                        type="radio"
+                        name="difficulty"
+                        value={style}
+                        checked={p.difficulty === style}
+                        onChange={() => p.onDifficulty(style)}
+                      />
+                      <span>
+                        <span
+                          className="rift-difficulty-level"
+                          aria-hidden="true"
+                        >
+                          {[0, 1, 2, 3].map((level) => (
+                            <i
+                              key={level}
+                              className={level <= index ? "is-active" : ""}
+                            />
+                          ))}
+                        </span>
+                        {t(DIFFICULTIES[style].label)}
+                      </span>
+                    </label>
+                  ),
                 )}
-              </p>
-            </fieldset>
-            {p.onTraining && (
-              <button className="outline-button" onClick={p.onTraining}>
-                <BookOpen size={16} />
-                {t("Training lab")}
-              </button>
-            )}
-            <div className="rift-match-preview">
-              <span>{t("TVOJ SLJEDEĆI DUEL")}</span>
-              <div>
-                <strong>{p.playerDeck?.champion || t("Tvoj šampion")}</strong>
-                <i>{t("VS.")}</i>
-                <strong>{p.botDeck?.champion}</strong>
               </div>
-              <p>
-                <Flag size={13} /> {t("2 bojišta")}
-                <span /> <Trophy size={13} />{" "}
-                {t("First to {count} points", {
-                  count:
-                    8 +
-                    [
-                      p.playerBattlefield ?? defaultBattlefield(p.playerDeck),
-                      p.botBattlefield ?? defaultBattlefield(p.botDeck),
-                    ].filter((id) => id === "ogn-276-298").length,
-                })}
-              </p>
+            </fieldset>
+            <div className="rift-duel-summary">
+              <span>
+                <Flag size={14} />
+                {t("2 bojišta")}
+              </span>
+              <span>
+                <Trophy size={14} />
+                {t("First to {count} points", { count: targetPoints })}
+              </span>
+              <span>
+                {t(p.matchFormat === "bo3" ? "Best of three" : "Single duel")}
+              </span>
             </div>
             <button
               className="rift-primary rift-start"
               disabled={!p.ready}
               onClick={p.onStart}
             >
-              <Swords size={18} /> {t("ZAPOČNI DUEL")}
+              <Swords size={18} />
+              {t("ZAPOČNI DUEL")}
               <ArrowRight size={18} />
             </button>
             {!p.ready && (
@@ -704,27 +705,14 @@ export function Lobby(p: Props) {
                 )}
               </p>
             )}
-            <p className="rift-save-note">
-              <Shield size={13} /> {t("Tvoj napredak se automatski čuva.")}
-            </p>
-            <p
-              className={`rift-setup-memory ${p.setupSaved === false ? "is-error" : ""}`}
-              role={p.setupSaved === false ? "status" : undefined}
-            >
-              {t(
-                p.setupSaved === false
-                  ? "Setup could not be saved. Your choices work until you close this page."
-                  : "Your decks and duel settings are remembered in this browser.",
-              )}
-            </p>
             {p.onGuidedStart && (
               <div className="rift-guided-start">
                 <button
-                  className="outline-button"
+                  className="rift-link"
                   disabled={!p.ready}
                   onClick={p.onGuidedStart}
                 >
-                  <BookOpen size={17} />
+                  <BookOpen size={16} />
                   {t("Play with a guide")}
                 </button>
                 <small>
@@ -734,6 +722,93 @@ export function Lobby(p: Props) {
                 </small>
               </div>
             )}
+            <div className="rift-opponent-settings">
+              <BattlefieldPicker
+                opponent
+                deck={p.botDeck}
+                value={p.botBattlefield ?? defaultBattlefield(p.botDeck)}
+                onChange={p.onBotBattlefield ?? (() => {})}
+                inspect={p.onInspect ?? (() => {})}
+              />
+              <details className="rift-setup-disclosure">
+                <summary>
+                  <SlidersHorizontal size={17} />
+                  <span>{t("Duel rules")}</span>
+                  <ChevronDown size={17} />
+                </summary>
+                <div className="rift-disclosure-body">
+                  <label className="rift-first-player">
+                    <span>{t("Match format")}</span>
+                    <select
+                      value={p.matchFormat ?? "single"}
+                      onChange={(event) =>
+                        p.onMatchFormat?.(
+                          event.target.value as "single" | "bo3",
+                        )
+                      }
+                    >
+                      <option value="single">{t("Single duel")}</option>
+                      <option value="bo3">{t("Best of three")}</option>
+                    </select>
+                  </label>
+                  <label className="rift-first-player">
+                    <span>{t("Starting player")}</span>
+                    <select
+                      value={p.firstPlayerChoice ?? "random"}
+                      onChange={(event) =>
+                        p.onFirstPlayerChoice?.(
+                          event.target.value as "random" | "you" | "bot",
+                        )
+                      }
+                    >
+                      <option value="random">
+                        {t("Random starting player")}
+                      </option>
+                      <option value="you">{t("You start")}</option>
+                      <option value="bot">{t("Opponent starts")}</option>
+                    </select>
+                  </label>
+                  <p className="rift-rules-note">
+                    {t(
+                      "Four difficulty levels. The same rules and hidden-information limits.",
+                    )}
+                  </p>
+                </div>
+              </details>
+              {p.botDeck && (
+                <details className="rift-setup-disclosure">
+                  <summary>
+                    <Layers3 size={17} />
+                    <span>{t("Starting cards")}</span>
+                    <ChevronDown size={17} />
+                  </summary>
+                  <div className="rift-disclosure-body">
+                    <StartingCardPair
+                      deck={p.botDeck}
+                      onDetails={p.onDetails}
+                    />
+                    <button
+                      className="rift-link"
+                      onClick={() => p.onDetails(p.botDeck!)}
+                    >
+                      {t("Pogledaj sastav")}
+                      <ArrowRight size={15} />
+                    </button>
+                  </div>
+                </details>
+              )}
+            </div>
+            <p
+              className={`rift-setup-memory ${p.setupSaved === false ? "is-error" : ""}`}
+              role={p.setupSaved === false ? "status" : undefined}
+            >
+              <Shield size={13} />
+              {t(
+                p.setupSaved === false
+                  ? "Setup could not be saved. Your choices work until you close this page."
+                  : "Your decks and duel settings are remembered in this browser.",
+              )}
+            </p>
           </aside>
         </div>
       </section>
@@ -752,7 +827,7 @@ export function Lobby(p: Props) {
         </div>
         <div className="rift-guide-grid">
           <article>
-            <Flag size={28} />
+            <Flag size={24} />
             <h3>{t("OSVOJI BOJIŠTE.")}</h3>
             <p>
               {t(
@@ -761,16 +836,22 @@ export function Lobby(p: Props) {
             </p>
           </article>
           <article>
-            <Zap size={28} />
-            <h3>{t("ODIGRAJ PRAVI TRENUTAK.")}</h3>
+            <BookOpen size={24} />
+            <h3>{t("Training lab")}</h3>
             <p>
               {t(
                 "Čuvaj rune za odgovor. Jedna dobro tempirana čarolija može promijeniti cijeli duel.",
               )}
             </p>
+            {p.onTraining && (
+              <button className="rift-link" onClick={p.onTraining}>
+                {t("Training lab")}
+                <ArrowRight size={15} />
+              </button>
+            )}
           </article>
           <article>
-            <Layers3 size={28} />
+            <Layers3 size={24} />
             <h3>{t("UPOZNAJ SVOJE KARTE.")}</h3>
             <p>
               {t(
@@ -784,6 +865,25 @@ export function Lobby(p: Props) {
           </article>
         </div>
       </section>
+      <div className="rift-mobile-launch">
+        <span>
+          <small>
+            {t(selectedDifficulty?.label || "Normal")} ·{" "}
+            {t(p.matchFormat === "bo3" ? "Best of three" : "Single duel")}
+          </small>
+          <strong>
+            {p.playerDeck?.champion} <i>vs</i> {p.botDeck?.champion}
+          </strong>
+        </span>
+        <button
+          className="rift-primary"
+          disabled={!p.ready}
+          onClick={p.onStart}
+        >
+          {t("ZAPOČNI DUEL")}
+          <ArrowRight size={17} />
+        </button>
+      </div>
     </main>
   );
 }

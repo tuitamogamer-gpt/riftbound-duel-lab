@@ -16,11 +16,13 @@ import {
   ArrowRight,
   BookOpen,
   CircleHelp,
+  Check,
   Pause,
   Play,
   History,
   Layers3,
   Menu,
+  Palette,
   RotateCcw,
   Search,
   Shield,
@@ -66,6 +68,12 @@ import {
 import { RuneCard } from "./components/RuneCard";
 import { GearRow } from "./components/GearRow";
 import { CardSleeve } from "./components/CardSleeve";
+import { AppearanceDialog } from "./components/AppearanceDialog";
+import {
+  setInterfacePreferences,
+  useInterfacePreferences,
+} from "./interface-preferences";
+import { useCardSleeve } from "./components/cardback-preference";
 import { CombatPanel } from "./components/CombatPanel";
 import { CombatAssignment } from "./components/CombatAssignment";
 import { ChampionZone } from "./components/ChampionZone";
@@ -219,6 +227,14 @@ function sound() {
 export default function App() {
   const { t } = useI18n();
   const previewActive = useCardPreviewActive();
+  const interfacePreferences = useInterfacePreferences();
+  const [appearanceOpen, setAppearanceOpen] = useState(false);
+  useEffect(() => {
+    document.documentElement.dataset.effects =
+      interfacePreferences.reducedEffects ? "reduced" : "full";
+    document.documentElement.dataset.boardContrast =
+      interfacePreferences.boardContrast;
+  }, [interfacePreferences]);
   const compactTable = useCompactTable();
   const [handExpanded, setHandExpanded] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -263,6 +279,19 @@ export default function App() {
     return () => window.removeEventListener("hashchange", openInvite);
   }, []);
   const [builderDeck, setBuilderDeck] = useState<StarterDeck | undefined>();
+  useEffect(() => {
+    const titles = {
+      lobby: "Arena",
+      game: "Duel",
+      library: "Karte",
+      builder: "Deck builder",
+      training: "Practice",
+      history: "Match history",
+      online: "Private duel",
+      series: "Series results",
+    };
+    document.title = `${t(titles[screen])} · Riftbound Duel Lab`;
+  }, [screen, t]);
   const [series, setSeries] = useState(loadMatchSeries);
   const [seriesSaveError, setSeriesSaveError] = useState(false);
   const [stored] = useState(readStoredSession);
@@ -425,6 +454,7 @@ export default function App() {
   });
   const [importOpen, setImportOpen] = useState(false);
   const [deckDetails, setDeckDetails] = useState<StarterDeck | null>(null);
+  const deckSleeve = useCardSleeve(deckDetails ?? undefined);
   const [playerDeck, setPlayerDeck] = useState(initialSetup.playerDeck);
   const [botDeck, setBotDeck] = useState(initialSetup.botDeck);
   const [fieldChoices, setFieldChoices] = useState<Record<string, string>>(
@@ -455,7 +485,13 @@ export default function App() {
   const [selected, setSelected] = useState<string | null>(null);
   const [hiddenPlayMode, setHiddenPlayMode] = useState<HiddenPlayMode>("hide");
   const [error, setError] = useState("");
-  const [muted, setMuted] = useState(true);
+  const [notice, setNotice] = useState("");
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(""), 6500);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
+  const muted = !interfacePreferences.soundEnabled;
   const thinking = Boolean(
     match && !review && match.winner === null && match.priorityPlayer === 1,
   );
@@ -509,6 +545,7 @@ export default function App() {
     !handExpanded &&
     !mobileMenuOpen &&
     !sessionManagerOpen &&
+    !appearanceOpen &&
     !paymentAction &&
     !confirmNew &&
     !logOpen;
@@ -592,6 +629,7 @@ export default function App() {
     !handExpanded &&
     !mobileMenuOpen &&
     !sessionManagerOpen &&
+    !appearanceOpen &&
     !paymentAction &&
     !guide.blocking &&
     !confirmNew &&
@@ -619,6 +657,7 @@ export default function App() {
       handExpanded ||
       mobileMenuOpen ||
       sessionManagerOpen ||
+      appearanceOpen ||
       paymentAction ||
       guide.blocking ||
       confirmNew ||
@@ -668,6 +707,7 @@ export default function App() {
     handExpanded,
     mobileMenuOpen,
     sessionManagerOpen,
+    appearanceOpen,
     paymentAction,
     guide.blocking,
     confirmNew,
@@ -762,6 +802,34 @@ export default function App() {
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
   }, []);
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => {
+      if (
+        screen !== "game" ||
+        event.defaultPrevented ||
+        event.isComposing ||
+        event.repeat ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey
+      )
+        return;
+      if (
+        event.target instanceof Element &&
+        event.target.closest(
+          "input, textarea, select, [contenteditable='true'], [role='textbox']",
+        )
+      )
+        return;
+      if (document.querySelector("[aria-modal='true']")) return;
+      if (event.key.toLowerCase() === "p") {
+        event.preventDefault();
+        setPaused((value) => !value);
+      }
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [screen]);
   const selectedPlayerDeck = allDecks.find((d) => d.id === playerDeck);
   const selectedBotDeck = allDecks.find((d) => d.id === botDeck);
   const playerBattlefield =
@@ -795,6 +863,7 @@ export default function App() {
       setPlayerDeck(deck.id);
       setDeckGroup("Moji");
       setImportOpen(false);
+      setNotice("Deck imported and selected.");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Špil nije sačuvan.");
     }
@@ -808,6 +877,7 @@ export default function App() {
     link.download = `${deck.id}.txt`;
     link.click();
     URL.revokeObjectURL(url);
+    setNotice("Deck export started.");
   };
   const saveBuiltDeck = (deck: StarterDeck, previousId?: string) => {
     const next = [
@@ -825,6 +895,7 @@ export default function App() {
     if (previousId === botDeck) setBotDeck(deck.id);
     setDeckGroup("Moji");
     setScreen("lobby");
+    setNotice("Deck saved and selected.");
     return true;
   };
   const deleteBuiltDeck = (id: string) => {
@@ -981,6 +1052,7 @@ export default function App() {
     !!pileView ||
     handExpanded ||
     mobileMenuOpen ||
+    appearanceOpen ||
     sessionManagerOpen ||
     !!paymentAction ||
     guide.blocking ||
@@ -1004,6 +1076,7 @@ export default function App() {
       <nav aria-label={t("Glavna navigacija")}>
         <button
           className={screen === "lobby" ? "active" : ""}
+          aria-current={screen === "lobby" ? "page" : undefined}
           onClick={() => setScreen("lobby")}
         >
           <Swords size={16} />
@@ -1011,26 +1084,54 @@ export default function App() {
         </button>
         <button
           className={screen === "library" ? "active" : ""}
+          aria-current={screen === "library" ? "page" : undefined}
           onClick={() => setScreen("library")}
         >
           <Layers3 size={16} />
           {t("Karte")} <span className="nav-count">{catalog.length}</span>
         </button>
-        <button onClick={() => setHelp(true)}>
+        <button
+          className={screen === "builder" ? "active" : ""}
+          aria-current={screen === "builder" ? "page" : undefined}
+          onClick={() => {
+            if (screen !== "builder") {
+              setBuilderDeck(undefined);
+              setScreen("builder");
+            }
+          }}
+        >
+          <Layers3 size={16} />
+          {t("Deck builder")}
+        </button>
+        <button
+          className={screen === "training" ? "active" : ""}
+          aria-current={screen === "training" ? "page" : undefined}
+          onClick={() => setScreen("training")}
+        >
+          <BookOpen size={16} />
+          {t("Practice")}
+        </button>
+        <button onClick={() => setHelp(true)} aria-haspopup="dialog">
           <BookOpen size={16} />
           {t("Kako igrati")}{" "}
         </button>
       </nav>
       <div className="header-right">
         <LanguageSelector />
-        <span className="local-ai-label">
-          <span className="status-dot" /> {t("LOKALNI AI")}
-        </span>
+        <button
+          className="icon-button appearance-trigger"
+          onClick={() => setAppearanceOpen(true)}
+          aria-label={t("Appearance")}
+          title={t("Appearance")}
+          aria-haspopup="dialog"
+        >
+          <Palette size={19} />
+        </button>
         <button
           className="icon-button"
           title={muted ? t("Uključi zvuk") : t("Isključi zvuk")}
           aria-label={muted ? t("Uključi zvuk") : t("Isključi zvuk")}
-          onClick={() => setMuted(!muted)}
+          onClick={() => setInterfacePreferences({ soundEnabled: muted })}
         >
           {muted ? <VolumeX size={17} /> : <Volume2 size={17} />}
         </button>
@@ -1389,10 +1490,21 @@ export default function App() {
                 onChange={setPlaybackSpeed}
               />
               <button
+                className="icon-button appearance-trigger"
+                data-mobile-secondary
+                onClick={() => setAppearanceOpen(true)}
+                aria-label={t("Appearance")}
+                title={t("Appearance")}
+                aria-haspopup="dialog"
+              >
+                <Palette size={18} />
+              </button>
+              <button
                 className="icon-button"
                 onClick={() => setPaused((value) => !value)}
                 aria-label={t(paused ? "Resume game" : "Pause game")}
-                title={t(paused ? "Resume game" : "Pause game")}
+                title={`${t(paused ? "Resume game" : "Pause game")} (P)`}
+                aria-keyshortcuts="P"
               >
                 {paused ? <Play size={16} /> : <Pause size={16} />}
               </button>
@@ -1743,6 +1855,7 @@ export default function App() {
                 setSpeed={setPlaybackSpeed}
                 showHistory={() => setLogOpen(true)}
                 showHelp={() => setHelp(true)}
+                showAppearance={() => setAppearanceOpen(true)}
                 leave={() => setScreen("lobby")}
                 botReason={thinking && !review ? "Bot is thinking…" : botReason}
                 showSaved={() => setSessionManagerOpen(true)}
@@ -1911,7 +2024,7 @@ export default function App() {
               <CardSleeve player={deckDetails} />
               <div>
                 <strong>
-                  {deckDetails.champion} · {t("Signature sleeve")}
+                  {t(deckSleeve.name)} · {t("Card backs")}
                 </strong>
                 <p>
                   {t("Automatically used on your deck and face-down cards.")}
@@ -1999,6 +2112,15 @@ export default function App() {
               {t("Izvezi .txt")}{" "}
             </button>
           </AppDialog>
+        )}
+        {notice && !error && (
+          <div className="ui-notice" role="status">
+            <Check size={18} aria-hidden="true" />
+            <span>{t(notice)}</span>
+            <button onClick={() => setNotice("")} aria-label={t("Zatvori")}>
+              <X size={17} />
+            </button>
+          </div>
         )}
         {error && (
           <div className="error-toast" role="alert">
@@ -2088,6 +2210,12 @@ export default function App() {
                   match.players[action.player].runes.map((rune) => rune.id),
               });
             }}
+          />
+        )}
+        {appearanceOpen && (
+          <AppearanceDialog
+            player={screen === "game" ? game?.players[0] : selectedPlayerDeck}
+            close={() => setAppearanceOpen(false)}
           />
         )}
         {help && <Help close={() => setHelp(false)} />}

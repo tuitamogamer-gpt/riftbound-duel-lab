@@ -1,13 +1,13 @@
-import { getSignatureSleeve } from "../data/sleeves";
 import type { PlayerState } from "../game/types";
+import { useCardSleeve } from "./cardback-preference";
 
-/** Resolve only public setup identity, never the face-down card's identity. */
+/** Only a local cosmetic choice and public setup identity determine the back. */
 export function CardSleeve({
   player,
 }: {
   player: Pick<PlayerState, "championId" | "legendId">;
 }) {
-  const sleeve = getSignatureSleeve(player);
+  const sleeve = useCardSleeve(player);
   return (
     <img
       className="signature-sleeve"
@@ -15,7 +15,16 @@ export function CardSleeve({
       alt=""
       aria-hidden="true"
       draggable={false}
+      width={744}
+      height={1039}
+      decoding="async"
       data-sleeve={sleeve.key}
+      onError={(event) => {
+        const image = event.currentTarget;
+        if (!image.src.endsWith("/art/sleeves/riftbound.svg")) {
+          image.src = "/art/sleeves/riftbound.svg";
+        }
+      }}
     />
   );
 }

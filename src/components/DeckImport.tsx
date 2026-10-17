@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useI18n } from "../i18n";
-import { ArrowRight, Check, FileUp, Shield, X } from "lucide-react";
+import { ArrowRight, Check, Clipboard, FileUp, Shield, X } from "lucide-react";
 import type { StarterDeck } from "../data/decks";
 import { exportDeckText } from "../game/deck-import";
 import { importDeckSource } from "../game/deck-sources";
@@ -28,7 +28,9 @@ export function DeckImport({
   const [name, setName] = useState("");
   const [championId, setChampionId] = useState("");
   const [reading, setReading] = useState(false);
+  const [fileName, setFileName] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const textRef = useRef<HTMLTextAreaElement>(null);
   const request = useRef(0);
   const detected = useMemo(() => importDeckSource(text), [text]);
   const result = useMemo(
@@ -56,290 +58,350 @@ export function DeckImport({
       aria-labelledby="deck-import-title"
       onClick={(event) => event.stopPropagation()}
     >
-      {onClose && (
-        <button
-          className="close-button"
-          onClick={onClose}
-          aria-label={t("Zatvori import")}
-        >
-          <X size={22} />
-        </button>
-      )}
-      <div className="eyebrow">
-        <FileUp size={14} /> {t("LOKALNI IMPORT")}
-      </div>
-      <h2 id="deck-import-title">{t("Tvoj špil. Tvoja strategija.")}</h2>
-      <p>
-        {t(
-          "Zalijepi Piltover Archive deck kod ili tekstualni izvoz sa deck-building sajta. Karte se provjeravaju prije čuvanja.",
-        )}
-      </p>
-      <div className="deck-import-sites">
-        <a
-          href="https://piltoverarchive.com/deckbuilder"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Piltover Archive ↗
-        </a>
-        <a
-          href="https://riftbound.gg/deckbuilder/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Riftbound.gg ↗
-        </a>
-        <p>
-          {t(
-            "Na sajtu otvori svoj špil, izaberi Export i kopiraj Deck code ili Text. Ovdje zalijepi sadržaj izvoza.",
-          )}
-        </p>
-      </div>
-      <label className="deck-import-label" htmlFor="deck-import-name">
-        {t("Naziv špila (opcionalno)")}
-      </label>
-      <input
-        id="deck-import-name"
-        className="deck-import-name"
-        value={name}
-        maxLength={120}
-        onChange={(event) => setName(event.target.value)}
-        placeholder={t("Moj špil")}
-      />
-      <div className="deck-import-tools">
-        <button
-          className="outline-button"
-          disabled={reading}
-          onClick={() => fileRef.current?.click()}
-        >
-          <FileUp size={15} /> {t(reading ? "Čitam fajl…" : "Otvori .txt")}
-        </button>
-        {exampleDeck && (
+      <header className="deck-import-header">
+        {onClose && (
           <button
-            className="text-button"
-            onClick={() => {
-              request.current++;
-              setReading(false);
-              setFileError("");
-              setText(exportDeckText(exampleDeck));
-              setChampionId("");
-            }}
+            className="close-button"
+            onClick={onClose}
+            aria-label={t("Zatvori import")}
           >
-            {t("Učitaj primjer: {name}", { name: t(exampleDeck.name) })}
+            <X size={22} />
           </button>
         )}
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".txt,.dec,.deck,text/plain"
-          className="deck-import-file"
-          aria-label={t("Odaberi tekstualnu listu špila")}
-          onChange={async (event) => {
-            const file = event.target.files?.[0];
-            event.target.value = "";
-            if (!file) return;
-            const version = ++request.current;
-            setFileError("");
-            if (file.size > 100_000) {
-              setFileError("Fajl je prevelik. Maksimalna veličina je 100 KB.");
-              return;
-            }
-            setReading(true);
-            try {
-              const value = await file.text();
-              if (version === request.current) {
-                setText(value);
-                setChampionId("");
-              }
-            } catch {
-              if (version === request.current)
-                setFileError(
-                  "Fajl se ne može pročitati. Pokušaj zalijepiti njegov tekst.",
-                );
-            } finally {
-              if (version === request.current) setReading(false);
-            }
-          }}
-        />
-      </div>
-      <label className="deck-import-label" htmlFor="deck-import-text">
-        {t("Deck kod ili lista karata")}
-      </label>
-      <textarea
-        id="deck-import-text"
-        spellCheck={false}
-        value={text}
-        maxLength={100_000}
-        placeholder={t(
-          "Name: {name}\n\nLegend\n1 Annie - Dark Child (Starter)\n\nChampion\n1 Annie - Fiery\n\nMain Deck\n3 ogn-001-298\n…\n\nRunes\n6 Fury Rune\n6 Chaos Rune\n\nBattlefields\n1 Reaver’s Row",
-          { name: t("Moj špil") },
-        )}
-        onChange={(event) => {
-          request.current++;
-          setReading(false);
-          setText(event.target.value);
-          setChampionId("");
-          setFileError("");
-        }}
-      />
-      {detected.championCandidates.length > 0 && (
-        <div className="deck-import-champion">
-          <label className="deck-import-label" htmlFor="deck-import-champion">
-            {t("Odaberi championa za ovu listu")}
-          </label>
-          <select
-            id="deck-import-champion"
-            value={championId}
-            onChange={(event) => setChampionId(event.target.value)}
-          >
-            <option value="">{t("Izaberi odabranog championa…")}</option>
-            {detected.championCandidates.map((card) => (
-              <option key={card.id} value={card.id}>
-                {card.name}
-              </option>
-            ))}
-          </select>
+        <div className="eyebrow">
+          <FileUp size={14} /> {t("LOKALNI IMPORT")}
         </div>
-      )}
-      {hasText &&
-        result.sourceFormat === "piltover-code" &&
-        result.normalizedText && (
-          <details className="deck-import-decoded">
-            <summary>
-              {t("Prepoznat Piltover Archive kod · pogledaj listu")}
-            </summary>
-            <pre>{result.normalizedText}</pre>
-          </details>
-        )}
-      <p className="deck-import-hint">
-        {t(
-          "Sections: Legend, Champion, Main Deck, Runes and Battlefields. Main: at least 39 cards plus the chosen champion. Runes: 12. Battlefields: 1 for practice or a pool of 3.",
-        )}
-      </p>
-      {result.sourceFormat === "text" && (
-        <label className="deck-import-historical">
+        <h2 id="deck-import-title">{t("Uvezi špil")}</h2>
+        <p>
+          {t("Paste a deck code or card list. We’ll check it before saving.")}
+        </p>
+      </header>
+      <div className="deck-import-body">
+        <div className="deck-import-tools">
+          <button
+            className="outline-button"
+            onClick={() => textRef.current?.focus()}
+          >
+            <Clipboard size={16} /> {t("Paste text")}
+          </button>
+          <button
+            className="outline-button"
+            disabled={reading}
+            onClick={() => fileRef.current?.click()}
+          >
+            <FileUp size={15} /> {t(reading ? "Čitam fajl…" : "Otvori .txt")}
+          </button>
+          {exampleDeck && (
+            <button
+              className="text-button"
+              onClick={() => {
+                request.current++;
+                setReading(false);
+                setFileError("");
+                setFileName("");
+                setText(exportDeckText(exampleDeck));
+                setChampionId("");
+              }}
+              title={t("Učitaj primjer: {name}", { name: t(exampleDeck.name) })}
+            >
+              {t("Use example")}
+            </button>
+          )}
           <input
-            type="checkbox"
-            checked={mainIncludesChampion}
-            onChange={(event) => setMainIncludesChampion(event.target.checked)}
+            ref={fileRef}
+            type="file"
+            accept=".txt,.dec,.deck,text/plain"
+            className="deck-import-file"
+            aria-label={t("Odaberi tekstualnu listu špila")}
+            onChange={async (event) => {
+              const file = event.target.files?.[0];
+              event.target.value = "";
+              if (!file) return;
+              const version = ++request.current;
+              setFileError("");
+              setFileName(file.name);
+              if (file.size > 100_000) {
+                setFileError(
+                  "Fajl je prevelik. Maksimalna veličina je 100 KB.",
+                );
+                return;
+              }
+              setReading(true);
+              try {
+                const value = await file.text();
+                if (version === request.current) {
+                  setText(value);
+                  setChampionId("");
+                }
+              } catch {
+                if (version === request.current)
+                  setFileError(
+                    "Fajl se ne može pročitati. Pokušaj zalijepiti njegov tekst.",
+                  );
+              } finally {
+                if (version === request.current) setReading(false);
+              }
+            }}
           />
-          {t("My Main Deck section also includes the chosen champion.")}
-        </label>
-      )}
-      <label className="deck-import-historical">
-        <input
-          type="checkbox"
-          checked={historical}
-          onChange={(event) => setHistorical(event.target.checked)}
-        />{" "}
-        {t(
-          "Historijski precon — dozvoli izvorne karte zabranjene u današnjem Duelu",
-        )}
-      </label>
-      <div className="deck-import-feedback" aria-live="polite">
-        {fileError && (
-          <p className="deck-import-error" role="alert">
-            {t(fileError)}
+        </div>
+        {fileName && (
+          <p className="deck-import-file-status" role="status">
+            <FileUp size={15} aria-hidden="true" />
+            <span>
+              {reading ? t("Čitam fajl…") : t("Selected file")}:{" "}
+              <strong>{fileName}</strong>
+            </span>
           </p>
         )}
-        {hasText && errors.length > 0 && (
-          <div className="deck-import-errors">
-            <strong>
-              {t("Ispravi listu ({count})", { count: errors.length })}
-            </strong>
-            <ul>
-              {errors.slice(0, 15).map((issue, index) => (
-                <li key={`${issue.code}-${index}`}>
-                  {issue.line ? t("Red {line}: ", { line: issue.line }) : ""}
-                  {t(issue.message)}
-                </li>
-              ))}
-            </ul>
-            {errors.length > 15 && (
-              <p>{t("Još {count} grešaka.", { count: errors.length - 15 })}</p>
+        <label className="deck-import-label" htmlFor="deck-import-text">
+          {t("Deck kod ili lista karata")}
+        </label>
+        <textarea
+          ref={textRef}
+          id="deck-import-text"
+          spellCheck={false}
+          value={text}
+          maxLength={100_000}
+          placeholder={t(
+            "Name: {name}\n\nLegend\n1 Annie - Dark Child (Starter)\n\nChampion\n1 Annie - Fiery\n\nMain Deck\n3 ogn-001-298\n…\n\nRunes\n6 Fury Rune\n6 Chaos Rune\n\nBattlefields\n1 Reaver’s Row",
+            { name: t("Moj špil") },
+          )}
+          onChange={(event) => {
+            request.current++;
+            setReading(false);
+            setText(event.target.value);
+            setChampionId("");
+            setFileError("");
+            setFileName("");
+          }}
+        />
+        <details className="deck-import-sites">
+          <summary>{t("Where to find your deck export")}</summary>
+          <div className="deck-import-site-links">
+            <a
+              href="https://piltoverarchive.com/deckbuilder"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Piltover Archive ↗
+            </a>
+            <a
+              href="https://riftbound.gg/deckbuilder/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Riftbound.gg ↗
+            </a>
+          </div>
+          <p>
+            {t(
+              "Na sajtu otvori svoj špil, izaberi Export i kopiraj Deck code ili Text. Ovdje zalijepi sadržaj izvoza.",
             )}
+          </p>
+        </details>
+        {detected.championCandidates.length > 0 && (
+          <div className="deck-import-champion">
+            <label className="deck-import-label" htmlFor="deck-import-champion">
+              {t("Odaberi championa za ovu listu")}
+            </label>
+            <select
+              id="deck-import-champion"
+              value={championId}
+              onChange={(event) => setChampionId(event.target.value)}
+            >
+              <option value="">{t("Izaberi odabranog championa…")}</option>
+              {detected.championCandidates.map((card) => (
+                <option key={card.id} value={card.id}>
+                  {card.name}
+                </option>
+              ))}
+            </select>
           </div>
         )}
-        {hasText && warnings.length > 0 && (
-          <ul className="deck-import-warnings">
-            {warnings.map((issue, index) => (
-              <li key={`${issue.code}-${index}`}>{t(issue.message)}</li>
-            ))}
-          </ul>
-        )}
-        {result.deck && (
-          <div className="deck-import-success">
-            <Check size={18} />
-            <div>
-              <strong>{t(result.deck.name)}</strong>
-              <span>
-                {t(
-                  "{total} cards · 12 runes · {count} battlefields · {domains}",
-                  {
-                    total:
-                      1 +
-                      result.deck.main.reduce((n, entry) => n + entry.count, 0),
-                    count: result.deck.battlefieldIds?.length ?? 1,
-                    domains: result.deck.domains
-                      .map((domain) => t(domain))
-                      .join(" / "),
-                  },
-                )}
-              </span>
-            </div>
-          </div>
-        )}
-        {result.deck && result.coverage && (
-          <div
-            className={`deck-import-coverage ${result.coverage.complete ? "complete" : ""}`}
-          >
-            <Shield size={17} />
-            <div>
+        {hasText &&
+          result.sourceFormat === "piltover-code" &&
+          result.normalizedText && (
+            <details className="deck-import-decoded">
+              <summary>
+                {t("Prepoznat Piltover Archive kod · pogledaj listu")}
+              </summary>
+              <pre>{result.normalizedText}</pre>
+            </details>
+          )}
+        <details className="deck-import-options">
+          <summary>{t("Deck name and import options")}</summary>
+          <label className="deck-import-label" htmlFor="deck-import-name">
+            {t("Naziv špila (opcionalno)")}
+          </label>
+          <input
+            id="deck-import-name"
+            className="deck-import-name"
+            value={name}
+            maxLength={120}
+            onChange={(event) => setName(event.target.value)}
+            placeholder={t("Moj špil")}
+          />
+          <p className="deck-import-hint">
+            {t(
+              "Sections: Legend, Champion, Main Deck, Runes and Battlefields. Main: at least 39 cards plus the chosen champion. Runes: 12. Battlefields: 1 for practice or a pool of 3.",
+            )}
+          </p>
+          {result.sourceFormat === "text" && (
+            <label className="deck-import-historical">
+              <input
+                type="checkbox"
+                checked={mainIncludesChampion}
+                onChange={(event) =>
+                  setMainIncludesChampion(event.target.checked)
+                }
+              />
+              {t("My Main Deck section also includes the chosen champion.")}
+            </label>
+          )}
+          <label className="deck-import-historical">
+            <input
+              type="checkbox"
+              checked={historical}
+              onChange={(event) => setHistorical(event.target.checked)}
+            />{" "}
+            {t(
+              "Historijski precon — dozvoli izvorne karte zabranjene u današnjem Duelu",
+            )}
+          </label>
+        </details>
+        <div className="deck-import-feedback" aria-live="polite">
+          {fileError && (
+            <p className="deck-import-error" role="alert">
+              {t(fileError)}
+            </p>
+          )}
+          {hasText && errors.length > 0 && (
+            <div className="deck-import-errors">
               <strong>
-                {t(
-                  "{implemented}/{total} različitih karata podržano za igranje",
-                  {
-                    implemented: result.coverage.implemented,
-                    total: result.coverage.total,
-                  },
-                )}
+                {t("Ispravi listu ({count})", { count: errors.length })}
               </strong>
-              <p>
-                {result.coverage.complete
-                  ? t("Špil je spreman za meč.")
-                  : t(
-                      "Lista se može sačuvati. Meč će biti dostupan kada sve karte budu podržane za igranje.",
-                    )}
-              </p>
-              {result.coverage.missing.length > 0 && (
-                <details>
-                  <summary>
-                    {t("Pregled nepodržanih karata ({count})", {
-                      count: result.coverage.missing.length,
-                    })}
-                  </summary>
-                  <ul>
-                    {result.coverage.missing.map((card) => (
-                      <li
-                        key={card.cardId}
-                        data-card-preview={card.cardId}
-                        tabIndex={0}
-                      >
-                        {card.name} <small>{card.cardId}</small>
-                      </li>
-                    ))}
-                  </ul>
-                </details>
+              <ul>
+                {errors.slice(0, 15).map((issue, index) => (
+                  <li key={`${issue.code}-${index}`}>
+                    {issue.line ? t("Red {line}: ", { line: issue.line }) : ""}
+                    {t(issue.message)}
+                  </li>
+                ))}
+              </ul>
+              {errors.length > 15 && (
+                <p>
+                  {t("Još {count} grešaka.", { count: errors.length - 15 })}
+                </p>
               )}
             </div>
-          </div>
-        )}
+          )}
+          {hasText && warnings.length > 0 && (
+            <ul className="deck-import-warnings">
+              {warnings.map((issue, index) => (
+                <li key={`${issue.code}-${index}`}>{t(issue.message)}</li>
+              ))}
+            </ul>
+          )}
+          {result.deck && (
+            <div className="deck-import-success">
+              <Check size={18} />
+              <div>
+                <strong>{t(result.deck.name)}</strong>
+                <span>
+                  {t(
+                    "{total} cards · 12 runes · {count} battlefields · {domains}",
+                    {
+                      total:
+                        1 +
+                        result.deck.main.reduce(
+                          (n, entry) => n + entry.count,
+                          0,
+                        ),
+                      count: result.deck.battlefieldIds?.length ?? 1,
+                      domains: result.deck.domains
+                        .map((domain) => t(domain))
+                        .join(" / "),
+                    },
+                  )}
+                </span>
+              </div>
+            </div>
+          )}
+          {result.deck && result.coverage && (
+            <div
+              className={`deck-import-coverage ${result.coverage.complete ? "complete" : ""}`}
+            >
+              <Shield size={17} />
+              <div>
+                <strong>
+                  {t(
+                    "{implemented}/{total} različitih karata podržano za igranje",
+                    {
+                      implemented: result.coverage.implemented,
+                      total: result.coverage.total,
+                    },
+                  )}
+                </strong>
+                <p>
+                  {result.coverage.complete
+                    ? t("Špil je spreman za meč.")
+                    : t(
+                        "Lista se može sačuvati. Meč će biti dostupan kada sve karte budu podržane za igranje.",
+                      )}
+                </p>
+                {result.coverage.missing.length > 0 && (
+                  <details>
+                    <summary>
+                      {t("Pregled nepodržanih karata ({count})", {
+                        count: result.coverage.missing.length,
+                      })}
+                    </summary>
+                    <ul>
+                      {result.coverage.missing.map((card) => (
+                        <li
+                          key={card.cardId}
+                          data-card-preview={card.cardId}
+                          tabIndex={0}
+                        >
+                          {card.name} <small>{card.cardId}</small>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
       <div className="deck-import-footer">
-        <span>{t("Obrada i čuvanje u ovom pregledniku.")}</span>
+        <div
+          className={`deck-import-readiness ${result.deck && !fileError ? "ready" : ""}`}
+          role="status"
+        >
+          {result.deck && !fileError ? (
+            <Check size={18} aria-hidden="true" />
+          ) : (
+            <FileUp size={18} aria-hidden="true" />
+          )}
+          <div>
+            <strong>
+              {reading
+                ? t("Čitam fajl…")
+                : fileError
+                  ? t("Check the selected file")
+                  : result.deck
+                    ? t("Ready to save")
+                    : hasText
+                      ? t("Ispravi listu ({count})", { count: errors.length })
+                      : t("Add a deck to continue")}
+            </strong>
+            <span>{t("Obrada i čuvanje u ovom pregledniku.")}</span>
+          </div>
+        </div>
         <button
           className="gold-button"
-          disabled={!result.deck || reading}
+          disabled={!result.deck || reading || Boolean(fileError)}
           onClick={() => result.deck && onImport(result.deck)}
         >
           {t("Sačuvaj špil")}

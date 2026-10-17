@@ -10,7 +10,10 @@ assert.ok(
 );
 const out = process.env.QA_OUTPUT || "test-results/lobby-setup";
 await mkdir(out, { recursive: true });
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({
+  headless: true,
+  executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined,
+});
 const reports = [];
 try {
   for (const [width, height, locale] of [
@@ -38,15 +41,26 @@ try {
       await page.locator(".rift-champion").first().waitFor();
       const cards = page.locator(".rift-champion");
       const disclosure = page.locator(".rift-champion-disclosure > button");
-      const compact = width <= 1000;
+      const compact = width <= 800 || (width <= 1000 && height <= 500);
+      const collapsedCount = compact ? 4 : 6;
       const initialCount = await cards.count();
-      if (compact) {
-        assert.equal(initialCount, 4);
+      {
+        assert.equal(initialCount, collapsedCount);
+        const search = page.locator(".rift-deck-search input");
+        await search.fill("jinx");
+        assert.ok((await cards.count()) > 0);
+        assert.ok(
+          (await cards.allTextContents()).every((text) => /jinx/i.test(text)),
+        );
+        await search.fill("no-matching-champion");
+        assert.equal(await cards.count(), 0);
+        await page.locator(".rift-empty button").click();
+        assert.equal(await search.inputValue(), "");
         assert.equal(await disclosure.getAttribute("aria-expanded"), "false");
         await disclosure.click();
         assert.equal(await disclosure.getAttribute("aria-expanded"), "true");
         const fullCount = await cards.count();
-        assert.ok(fullCount > 4);
+        assert.ok(fullCount > collapsedCount);
         // Select the final card, collapse, then select it through the dropdown.
         // Both paths must retain one visible selected card in the summary.
         await cards.last().click();
@@ -54,8 +68,11 @@ try {
         const lateChoice = await select.inputValue();
         await page.mouse.move(0, 0);
         await disclosure.click();
-        assert.equal(await cards.count(), 4);
-        assert.equal(await cards.locator(".rift-selection-check").count(), 4);
+        assert.equal(await cards.count(), collapsedCount);
+        assert.equal(
+          await cards.locator(".rift-selection-check").count(),
+          collapsedCount,
+        );
         assert.equal(
           await page.locator(".rift-champion.is-selected").count(),
           1,
@@ -66,35 +83,35 @@ try {
           .getAttribute("value");
         await select.selectOption(firstChoice);
         await select.selectOption(lateChoice);
-        assert.equal(await cards.count(), 4);
+        assert.equal(await cards.count(), collapsedCount);
         assert.equal(
           await page.locator(".rift-champion.is-selected").count(),
           1,
         );
 
         await disclosure.click();
-        await page.locator(".rift-collections button").nth(1).click();
+        await page
+          .locator(".rift-collection-select select")
+          .selectOption({ index: 1 });
         assert.ok(
-          (await cards.count()) <= 4,
+          (await cards.count()) <= collapsedCount,
           "Changing groups collapses the gallery",
         );
         // The empty imported collection must still offer its original import action.
         await page
-          .locator(".rift-collections button")
-          .filter({ hasText: /\(0\)/ })
-          .click();
+          .locator(".rift-collection-select select")
+          .selectOption("Moji");
         assert.equal(await cards.count(), 0);
         assert.equal(await page.locator(".rift-empty button").count(), 1);
         assert.equal(await disclosure.count(), 0);
-        await page.locator(".rift-collections button").first().click();
-        assert.equal(await cards.count(), 4);
+        await page
+          .locator(".rift-collection-select select")
+          .selectOption("Precon");
+        assert.equal(await cards.count(), collapsedCount);
         assert.equal(await disclosure.getAttribute("aria-expanded"), "false");
-      } else {
-        assert.ok(initialCount > 4);
-        assert.equal(await disclosure.count(), 0);
       }
       await page.mouse.move(0, 0);
-      await page.locator(".rift-collections").scrollIntoViewIfNeeded();
+      await page.locator(".rift-deck-browser").scrollIntoViewIfNeeded();
       const geometry = await page.evaluate(() => {
         const grid = document
           .querySelector(".rift-champions")

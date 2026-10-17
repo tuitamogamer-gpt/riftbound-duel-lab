@@ -6,6 +6,7 @@ import {
   ChevronFirst,
   ChevronLast,
   Download,
+  History,
   Pause,
   Play,
   RotateCcw,
@@ -78,6 +79,7 @@ export function MatchHistory({
     [archive.entries, filters],
   );
   const search = useRef<HTMLInputElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
   const matchList = useRef<HTMLElement>(null);
   const replayPanel = useRef<HTMLElement>(null);
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -87,6 +89,7 @@ export function MatchHistory({
   const [viewer, setViewer] = useState<PlayerId>(0);
   const [playing, setPlaying] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageError, setMessageError] = useState(false);
   const [messageValues, setMessageValues] = useState<
     Record<string, string | number>
   >({});
@@ -218,6 +221,7 @@ export function MatchHistory({
   const remove = (id: string) => {
     const result = deleteCompletedMatch(id);
     if (!result.saved) {
+      setMessageError(true);
       setMessage(
         result.error ??
           "Match history could not be saved. Previous entries were kept.",
@@ -225,7 +229,8 @@ export function MatchHistory({
       return;
     }
     setArchive({ entries: result.entries ?? [] });
-    setMessage("");
+    setMessage("Match removed from history.");
+    setMessageError(false);
     setMessageValues({});
     const cleaned = removeMatchBookmarks(id);
     if (cleaned.saved) setBookmarkState(cleaned);
@@ -238,10 +243,17 @@ export function MatchHistory({
       setSelectedId(null);
       setPlaying(false);
     }
+    requestAnimationFrame(() => {
+      (
+        matchList.current?.querySelector<HTMLButtonElement>("button") ??
+        heading.current
+      )?.focus();
+    });
   };
   const clear = () => {
     const result = clearMatchHistory();
     if (!result.saved) {
+      setMessageError(true);
       setMessage(
         result.error ??
           "Match history could not be saved. Previous entries were kept.",
@@ -250,6 +262,7 @@ export function MatchHistory({
     }
     setArchive({ entries: [] });
     setMessage("Match history cleared.");
+    setMessageError(false);
     setMessageValues({});
     const cleaned = clearReplayBookmarks();
     if (cleaned.saved) setBookmarkState(cleaned);
@@ -261,12 +274,14 @@ export function MatchHistory({
     setSelectedId(null);
     setConfirmClear(false);
     setPlaying(false);
+    heading.current?.focus();
   };
   const importFile = async (chosen?: File) => {
     if (!chosen) return;
     setBusy(true);
     setPlaying(false);
     setMessage("");
+    setMessageError(false);
     setMessageValues({});
     try {
       if (chosen.size > MAX_REPLAY_BYTES)
@@ -297,6 +312,7 @@ export function MatchHistory({
         setMessageValues({ count: MAX_HISTORY_MATCHES });
       }
     } catch (cause) {
+      setMessageError(true);
       setMessage(
         cause instanceof Error ? cause.message : "Replay import failed.",
       );
@@ -308,9 +324,24 @@ export function MatchHistory({
   const exportArchive = () => {
     try {
       const raw = localStorage.getItem(MATCH_HISTORY_KEY);
-      if (raw) download(raw, "riftbound-match-history-backup.json");
+      if (raw) {
+        download(raw, "riftbound-match-history-backup.json");
+        setMessage("History export started.");
+        setMessageError(false);
+      }
     } catch {
+      setMessageError(true);
       setMessage("Browser storage is unavailable.");
+    }
+  };
+  const exportReplay = (entry: CompletedMatch) => {
+    try {
+      download(JSON.stringify(entry), `riftbound-replay-${entry.id}.json`);
+      setMessage("Replay export started.");
+      setMessageError(false);
+    } catch {
+      setMessage("Replay export failed. Please try again.");
+      setMessageError(true);
     }
   };
   const saveBookmark = () => {
@@ -419,7 +450,9 @@ export function MatchHistory({
           <span className="history-eyebrow">
             {t("Completed match analysis")}
           </span>
-          <h1>{t("Match history")}</h1>
+          <h1 ref={heading} tabIndex={-1}>
+            {t("Match history")}
+          </h1>
           <p>
             {t(
               "Review actual moves, public turning points and your results by deck.",
@@ -439,6 +472,7 @@ export function MatchHistory({
         <input
           ref={file}
           type="file"
+          aria-label={t("Import completed replay")}
           accept="application/json,.json"
           onChange={(event) => void importFile(event.target.files?.[0])}
           disabled={busy}
@@ -489,7 +523,12 @@ export function MatchHistory({
         </section>
       )}
       {(archive.error || message) && (
-        <p className="history-notice" role="status">
+        <p
+          className={`history-notice ${messageError || (!message && archive.error) ? "error" : "success"}`}
+          role={
+            messageError || (!message && archive.error) ? "alert" : "status"
+          }
+        >
           {t(message || archive.error, messageValues)}
         </p>
       )}
@@ -532,13 +571,23 @@ export function MatchHistory({
         </section>
       )}
       {!archive.entries.length && !archive.error && (
-        <section className="history-empty">
-          <h2>{t("Your first finished duel starts the story.")}</h2>
+        <section
+          className="history-empty"
+          aria-labelledby="history-empty-title"
+        >
+          <History size={34} aria-hidden="true" />
+          <h2 id="history-empty-title">
+            {t("Your first finished duel starts the story.")}
+          </h2>
           <p>
             {t(
               "Completed matches are saved here automatically. You can also import a downloaded completed replay.",
             )}
           </p>
+          <button className="history-button primary" onClick={onBack}>
+            <ArrowLeft size={17} aria-hidden="true" />
+            {t("Back to decks")}
+          </button>
         </section>
       )}
       {archive.entries.length > 0 && (
@@ -621,7 +670,9 @@ export function MatchHistory({
           )}
         </p>
       )}
-      <div className="history-layout">
+      <div
+        className={`history-layout ${selected ? "has-replay" : "is-browsing"}`}
+      >
         <section
           ref={matchList}
           className="history-list"
@@ -660,12 +711,7 @@ export function MatchHistory({
               <div className="history-entry-tools">
                 <button
                   className="history-button"
-                  onClick={() =>
-                    download(
-                      JSON.stringify(entry),
-                      `riftbound-replay-${entry.id}.json`,
-                    )
-                  }
+                  onClick={() => exportReplay(entry)}
                 >
                   <Download size={14} />
                   {t("Export replay")}

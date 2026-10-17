@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { useInterfacePreferences } from "../interface-preferences";
 
 export function useReducedMotion() {
+  const preferences = useInterfacePreferences();
   const [reduced, setReduced] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -13,5 +15,5 @@ export function useReducedMotion() {
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, []);
-  return reduced;
+  return reduced || preferences.reducedEffects;
 }

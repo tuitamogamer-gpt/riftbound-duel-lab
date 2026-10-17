@@ -105,6 +105,7 @@ for (const [engine, width, height] of cases.filter(
             await page.locator(".catalog-card-name strong").allTextContents()
           ).every((name) => name === "Discipline"),
         );
+        if (mobile) await act(page.locator(".library-refinement > summary"));
         await page
           .getByRole("combobox", { name: "Domain", exact: true })
           .selectOption("Calm");
@@ -172,11 +173,17 @@ for (const [engine, width, height] of cases.filter(
       "Deck builder quantity edit, undo, redo, identity state and export download",
       async () => {
         await act(
-          page.getByRole("button", { name: "Build a deck", exact: true }),
+          page.getByRole("button", { name: "Deck builder", exact: true }),
         );
         await page
           .getByRole("heading", { name: "Deck builder", exact: true })
           .waitFor();
+        await act(page.locator(".builder-source-panel > summary"));
+        await act(
+          page.getByRole("button", { name: "Load as a copy", exact: true }),
+        );
+        await act(page.locator(".builder-source-panel > summary"));
+        if (mobile) await act(page.locator(".builder-setup > summary"));
         await page
           .getByRole("textbox", { name: "Deck name", exact: true })
           .fill(`Audit ${engine} ${width}`);
@@ -233,9 +240,7 @@ for (const [engine, width, height] of cases.filter(
     );
     await check("Deck save, reload, export/import round trip", async () => {
       await act(page.getByRole("button", { name: "Save deck", exact: true }));
-      await page
-        .getByRole("button", { name: "Build a deck", exact: true })
-        .waitFor();
+      await page.locator(".rift-deck-disclosure").waitFor();
       const before = await page.evaluate(() =>
         JSON.parse(localStorage.getItem("riftbound-imported-decks-v1")),
       );
@@ -245,8 +250,10 @@ for (const [engine, width, height] of cases.filter(
         JSON.parse(localStorage.getItem("riftbound-imported-decks-v1")),
       );
       assert.deepEqual(after, before);
+      await act(page.locator(".rift-deck-disclosure > summary"));
       await act(page.getByRole("button", { name: "Import deck", exact: true }));
       await page.locator("#deck-import-text").fill(exported);
+      await act(page.locator(".deck-import-options > summary"));
       await page
         .locator("#deck-import-name")
         .fill(`Roundtrip ${engine} ${width}`);
@@ -280,9 +287,7 @@ for (const [engine, width, height] of cases.filter(
     await check(
       "All six training lessons complete with Undo, Retry and stored progress",
       async () => {
-        await act(
-          page.getByRole("button", { name: "Training lab", exact: true }),
-        );
+        await act(page.getByRole("button", { name: "Practice", exact: true }));
         const titles = [
           "Deploy your first unit",
           "Move together and conquer",
@@ -315,6 +320,16 @@ for (const [engine, width, height] of cases.filter(
               name: "Undo practice move",
               exact: true,
             }),
+          );
+          await page.waitForFunction(
+            (expected) =>
+              JSON.stringify(
+                Array.from(
+                  document.querySelectorAll(".training-actions button"),
+                  (button) => button.textContent,
+                ),
+              ) === JSON.stringify(expected),
+            initial,
           );
           assert.deepEqual(
             await page.locator(".training-actions button").allTextContents(),
@@ -352,6 +367,16 @@ for (const [engine, width, height] of cases.filter(
             page.getByRole("button", { name: "Retry exercise", exact: true }),
           );
           assert.equal(await page.locator(".training-success").count(), 0);
+          await page.waitForFunction(
+            (expected) =>
+              JSON.stringify(
+                Array.from(
+                  document.querySelectorAll(".training-actions button"),
+                  (button) => button.textContent,
+                ),
+              ) === JSON.stringify(expected),
+            initial,
+          );
           assert.deepEqual(
             await page.locator(".training-actions button").allTextContents(),
             initial,
@@ -365,9 +390,7 @@ for (const [engine, width, height] of cases.filter(
         await noOverflow();
         await screenshot("training");
         await page.reload();
-        await act(
-          page.getByRole("button", { name: "Training lab", exact: true }),
-        );
+        await act(page.getByRole("button", { name: "Practice", exact: true }));
         assert.match(
           await page.locator(".training-progress").innerText(),
           /6 of 6/,

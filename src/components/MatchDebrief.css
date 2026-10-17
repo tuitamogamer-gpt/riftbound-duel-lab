@@ -1,27 +1,30 @@
 .match-debrief {
   margin: 20px 0;
   padding: 22px;
-  border: 1px solid #527c83;
+  border: 1px solid var(--ui-line, #b9d3dc24);
   border-radius: 14px;
-  background: linear-gradient(145deg, #18343e, #0c212b);
-  color: #d5e5e8;
+  background: var(--ui-panel, #101f29);
+  color: var(--ui-text, #edf3f4);
+  font-family: "DM Sans", sans-serif;
 }
 .debrief-heading h3 {
   margin: 6px 0;
-  font-size: 24px;
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
   line-height: 1.2;
-  color: #f0d08a;
+  color: var(--ui-gold, #e8c987);
 }
 .match-debrief .debrief-heading p {
   font-size: 13px;
   line-height: 1.5;
-  color: #a5bdc7;
+  color: var(--ui-muted, #a3b6c0);
 }
 .match-debrief .history-eyebrow {
-  color: #e0c17c;
+  color: var(--ui-gold, #e8c987);
 }
 .match-debrief .debrief-action {
-  color: #c5e6dc;
+  color: #c2dcd8;
 }
 .debrief-scoring {
   display: grid;
@@ -39,10 +42,10 @@
   display: block;
   font-size: 26px;
   line-height: 1.3;
-  color: #98e4cd;
+  color: var(--ui-teal, #64dcc8);
 }
 .debrief-scoring span {
-  color: #b9ccd3;
+  color: var(--ui-muted, #a3b6c0);
   font-size: 12px;
 }
 .debrief-moments {
@@ -58,19 +61,19 @@
   gap: 12px;
   width: 100%;
   padding: 14px;
-  border: 1px solid #43616e;
+  border: 1px solid var(--ui-line, #b9d3dc24);
   border-radius: 8px;
   text-align: left;
   color: inherit;
-  background: #102731;
+  background: var(--ui-panel-raised, #172b36);
   cursor: pointer;
 }
 .debrief-moments button:hover {
-  background: #1c3b44;
-  border-color: #8ed6c4;
+  background: #203843;
+  border-color: var(--ui-teal, #64dcc8);
 }
 .debrief-moments button:focus-visible {
-  outline: 2px solid #f0d08a;
+  outline: 2px solid var(--ui-gold, #e8c987);
   outline-offset: 3px;
 }
 .debrief-icon {
@@ -81,7 +84,7 @@
   place-items: center;
   background: #ddc17c19;
   border-radius: 7px;
-  color: #edcd85;
+  color: var(--ui-gold, #e8c987);
 }
 .debrief-copy {
   display: grid;
@@ -92,23 +95,23 @@
   overflow-wrap: anywhere;
 }
 .debrief-copy small {
-  color: #91b2bd;
+  color: var(--ui-muted, #a3b6c0);
   font-size: 11px;
 }
 .debrief-copy strong {
-  color: #f0f4eb;
+  color: var(--ui-text, #edf3f4);
   font-size: 15px;
 }
 .debrief-copy > span {
   font-size: 12px;
 }
 .debrief-copy .debrief-lesson {
-  color: #9db8c2;
+  color: var(--ui-muted, #a3b6c0);
 }
 .debrief-arrow {
   flex: none;
   align-self: center;
-  color: #8ed6c4;
+  color: var(--ui-teal, #64dcc8);
 }
 @media (max-width: 560px) {
   .match-debrief {
@@ -124,5 +127,29 @@
   .debrief-icon {
     width: 25px;
     height: 28px;
+  }
+}
+
+.debrief-moments button {
+  font-family: inherit;
+}
+.debrief-copy > span {
+  font-size: 13px;
+}
+.debrief-copy small {
+  font-size: 12px;
+}
+.debrief-scoring {
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 400px) {
+  .debrief-scoring {
+    gap: 5px;
+  }
+  .debrief-scoring span {
+    font-size: 11px;
+  }
+  .debrief-arrow {
+    display: none;
   }
 }

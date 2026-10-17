@@ -2,11 +2,15 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import {
   ArrowLeft,
   Check,
+  CheckCircle2,
+  ChevronDown,
   Copy,
   Download,
   Minus,
   Plus,
+  PencilLine,
   Search,
+  SlidersHorizontal,
   Trash2,
   Undo2,
   Redo2,
@@ -147,6 +151,21 @@ export function DeckBuilder({
   const [status, setStatus] = useState("");
   const [exportOpen, setExportOpen] = useState(false);
   const [mobileView, setMobileView] = useState<"cards" | "deck">("cards");
+  const [setupOpen, setSetupOpen] = useState(
+    () =>
+      typeof window === "undefined" ||
+      window.matchMedia("(min-width: 761px)").matches,
+  );
+  const activeFilterCount = [
+    search,
+    domain,
+    type,
+    cost,
+    set,
+    addableOnly,
+    !compatibleOnly,
+    sort !== "name",
+  ].filter(Boolean).length;
 
   useEffect(() => {
     if (!initialDeck) return;
@@ -370,6 +389,7 @@ export function DeckBuilder({
     setSet("");
     setAddableOnly(false);
     setCompatibleOnly(true);
+    setSort("name");
   };
   const discardDraft = () => {
     const result = clearBuilderDraft(undefined, draftRaw.current);
@@ -398,8 +418,26 @@ export function DeckBuilder({
     cardId: string,
     destination: BuilderSection,
     delta: 1 | -1,
-  ) =>
-    update((deck) => changeBuilderQuantity(deck, cardId, destination, delta));
+  ) => {
+    const next = changeBuilderQuantity(draft, cardId, destination, delta);
+    update(next);
+    const count =
+      (next[destination] ?? []).find((entry) => entry.cardId === cardId)
+        ?.count ?? 0;
+    setStatus(
+      t("{name}: {count} copies in {section}.", {
+        name: cardsById[cardId]?.name ?? cardId,
+        count,
+        section: t(
+          destination === "main"
+            ? "Main deck"
+            : destination === "runes"
+              ? "Runes"
+              : "Sideboard",
+        ),
+      }),
+    );
+  };
   const cardDetails = (cardId: string) => setDetailId(cardId);
   const cloneSource = () => {
     const source = availableDecks.find((deck) => deck.id === sourceId);
@@ -580,127 +618,153 @@ export function DeckBuilder({
         </section>
       )}
 
-      <div className="builder-start">
-        <label htmlFor="builder-source">{t("Start from a deck")}</label>
-        <select
-          id="builder-source"
-          value={sourceId}
-          onChange={(event) =>
-            dispatch({ type: "source", id: event.target.value })
-          }
-        >
-          {availableDecks.map((deck) => (
-            <option value={deck.id} key={deck.id}>
-              {deck.name} ·{" "}
-              {t(
-                deck.source === "Imported deck"
-                  ? "My decks"
-                  : deck.source === "Official preconstructed deck"
-                    ? "Precons"
-                    : "Practice",
-              )}
-            </option>
-          ))}
-        </select>
-        <button className="builder-button secondary" onClick={cloneSource}>
-          <Copy size={16} />
-          {t("Load as a copy")}
-        </button>
-        <button
-          className="builder-button secondary"
-          onClick={() => {
-            update(
-              {
-                ...draft,
-                name: t("New deck"),
-                main: [],
-                sideboard: [],
-                runes: balancedBuilderRunes(draft.domains),
-              },
-              { previousId: undefined },
-            );
-          }}
-        >
-          {t("New deck")}
-        </button>
-      </div>
+      <details className="builder-source-panel">
+        <summary>
+          <Copy size={16} aria-hidden="true" />
+          {t("Start from a deck")}
+          <ChevronDown size={16} aria-hidden="true" />
+        </summary>
+        <div className="builder-start">
+          <label htmlFor="builder-source">{t("Start from a deck")}</label>
+          <select
+            id="builder-source"
+            value={sourceId}
+            onChange={(event) =>
+              dispatch({ type: "source", id: event.target.value })
+            }
+          >
+            {availableDecks.map((deck) => (
+              <option value={deck.id} key={deck.id}>
+                {deck.name} ·{" "}
+                {t(
+                  deck.source === "Imported deck"
+                    ? "My decks"
+                    : deck.source === "Official preconstructed deck"
+                      ? "Precons"
+                      : "Practice",
+                )}
+              </option>
+            ))}
+          </select>
+          <button className="builder-button secondary" onClick={cloneSource}>
+            <Copy size={16} />
+            {t("Load as a copy")}
+          </button>
+          <button
+            className="builder-button secondary"
+            onClick={() => {
+              update(
+                {
+                  ...draft,
+                  name: t("New deck"),
+                  main: [],
+                  sideboard: [],
+                  runes: balancedBuilderRunes(draft.domains),
+                },
+                { previousId: undefined },
+              );
+            }}
+          >
+            {t("New deck")}
+          </button>
+        </div>
+      </details>
 
-      <div className="builder-identity">
-        <label>
-          {t("Deck name")}
-          <input
-            value={draft.name}
-            maxLength={120}
-            onChange={(event) => update({ ...draft, name: event.target.value })}
-          />
-        </label>
-        <label>
-          {t("Legend")}
-          <select
-            value={draft.legendId}
-            onChange={(event) => chooseLegend(event.target.value)}
-          >
-            {legends.map((card) => (
-              <option
-                key={card.id}
-                value={card.id}
-                disabled={
-                  card.bannedInDuel && draft.format !== "historical-precon"
-                }
-              >
-                {card.name} ·{" "}
-                {card.domains.map((value) => t(value)).join(" / ")}
+      <details
+        className="builder-setup"
+        open={setupOpen}
+        onToggle={(event) => setSetupOpen(event.currentTarget.open)}
+      >
+        <summary>
+          <PencilLine size={17} aria-hidden="true" />
+          <span>
+            <strong>{draft.name || t("Name your deck")}</strong>
+            <small>{t("Deck settings")}</small>
+          </span>
+          <ChevronDown size={17} aria-hidden="true" />
+        </summary>
+        <div className="builder-identity">
+          <label>
+            {t("Deck name")}
+            <input
+              value={draft.name}
+              maxLength={120}
+              onChange={(event) =>
+                update({ ...draft, name: event.target.value })
+              }
+            />
+          </label>
+          <label>
+            {t("Legend")}
+            <select
+              value={draft.legendId}
+              onChange={(event) => chooseLegend(event.target.value)}
+            >
+              {legends.map((card) => (
+                <option
+                  key={card.id}
+                  value={card.id}
+                  disabled={
+                    card.bannedInDuel && draft.format !== "historical-precon"
+                  }
+                >
+                  {card.name} ·{" "}
+                  {card.domains.map((value) => t(value)).join(" / ")}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            {t("Chosen champion")}
+            <select
+              value={draft.championId}
+              onChange={(event) =>
+                update({ ...draft, championId: event.target.value })
+              }
+            >
+              {!champions.length && (
+                <option value="">{t("No compatible champion")}</option>
+              )}
+              {champions.map((card) => (
+                <option
+                  key={card.id}
+                  value={card.id}
+                  disabled={
+                    card.bannedInDuel && draft.format !== "historical-precon"
+                  }
+                >
+                  {card.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            {t("Format")}
+            <select
+              value={draft.format ?? "standard"}
+              onChange={(event) =>
+                update({
+                  ...draft,
+                  format: event.target.value as
+                    "standard" | "historical-precon",
+                })
+              }
+            >
+              <option value="standard">{t("Standard Duel")}</option>
+              <option value="historical-precon">
+                {t("Historical precon")}
               </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {t("Chosen champion")}
-          <select
-            value={draft.championId}
-            onChange={(event) =>
-              update({ ...draft, championId: event.target.value })
-            }
-          >
-            {!champions.length && (
-              <option value="">{t("No compatible champion")}</option>
-            )}
-            {champions.map((card) => (
-              <option
-                key={card.id}
-                value={card.id}
-                disabled={
-                  card.bannedInDuel && draft.format !== "historical-precon"
-                }
-              >
-                {card.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {t("Format")}
-          <select
-            value={draft.format ?? "standard"}
-            onChange={(event) =>
-              update({
-                ...draft,
-                format: event.target.value as "standard" | "historical-precon",
-              })
-            }
-          >
-            <option value="standard">{t("Standard Duel")}</option>
-            <option value="historical-precon">{t("Historical precon")}</option>
-          </select>
-        </label>
-      </div>
-      <p className="builder-identity-note">
-        {t(
-          "Changing the legend keeps your main cards for review and balances its runes.",
-        )}{" "}
-        {draft.format === "historical-precon" &&
-          t("Historical format preserves cards banned in current Standard.")}
-      </p>
+            </select>
+          </label>
+        </div>
+        <p className="builder-identity-note">
+          {t(
+            "Changing the legend keeps your main cards for review and balances its runes.",
+          )}{" "}
+          {draft.format === "historical-precon" &&
+            t("Historical format preserves cards banned in current Standard.")}
+        </p>
+      </details>
 
       <div className="builder-edit-tools">
         <div className="builder-undo">
@@ -780,14 +844,13 @@ export function DeckBuilder({
         <main className="builder-catalog">
           <div
             className="builder-section-tabs"
-            role="tablist"
+            role="group"
             aria-label={t("Add cards to")}
           >
             {(["main", "sideboard", "runes"] as BuilderSection[]).map(
               (value) => (
                 <button
-                  role="tab"
-                  aria-selected={section === value}
+                  aria-pressed={section === value}
                   className={section === value ? "active" : ""}
                   key={value}
                   onClick={() => {
@@ -807,7 +870,7 @@ export function DeckBuilder({
               ),
             )}
           </div>
-          <div className="builder-filters">
+          <div className="builder-discovery">
             <label className="builder-search">
               <Search size={17} />
               <input
@@ -826,99 +889,131 @@ export function DeckBuilder({
                 </button>
               )}
             </label>
-            <select
-              aria-label={t("Filter by domain")}
-              value={domain}
-              onChange={(event) => setDomain(event.target.value as Domain | "")}
-            >
-              <option value="">{t("All domains")}</option>
-              {domains.map((value) => (
-                <option key={value} value={value}>
-                  {t(value)}
-                </option>
-              ))}
-            </select>
-            <select
-              aria-label={t("Filter by type")}
-              value={type}
-              disabled={section === "runes"}
-              onChange={(event) => setType(event.target.value)}
-            >
-              <option value="">{t("All types")}</option>
-              {["Unit", "Spell", "Gear"].map((value) => (
-                <option key={value} value={value}>
-                  {t(value)}
-                </option>
-              ))}
-            </select>
-            <select
-              aria-label={t("Filter by energy cost")}
-              value={cost}
-              disabled={section === "runes"}
-              onChange={(event) => setCost(event.target.value)}
-            >
-              <option value="">{t("Any cost")}</option>
-              {Array.from({ length: 10 }, (_, index) =>
-                index === 9 ? "9+" : String(index),
-              ).map((value) => (
-                <option value={value} key={value}>
-                  {value} {t("Energy")}
-                </option>
-              ))}
-            </select>
-            <select
-              aria-label={t("Filter by card set")}
-              value={set}
-              onChange={(event) => setSet(event.target.value)}
-            >
-              <option value="">{t("All sets")}</option>
-              {cardSets.map(([id, name]) => (
-                <option value={id} key={id}>
-                  {name}
-                </option>
-              ))}
-            </select>
-            <select
-              aria-label={t("Sort cards")}
-              value={sort}
-              onChange={(event) => setSort(event.target.value as CatalogSort)}
-            >
-              <option value="name">{t("Name · A–Z")}</option>
-              <option value="energy-asc">{t("Energy · low to high")}</option>
-              <option value="energy-desc">{t("Energy · high to low")}</option>
-              <option value="might-desc">{t("Might · high to low")}</option>
-            </select>
-            <div className="builder-filter-toggles">
-              <label className="builder-checkbox">
-                <input
-                  type="checkbox"
-                  checked={compatibleOnly}
-                  onChange={(event) => setCompatibleOnly(event.target.checked)}
-                />
-                {t("Legend domains only")}
-              </label>
-              <label className="builder-checkbox">
-                <input
-                  type="checkbox"
-                  checked={addableOnly}
-                  onChange={(event) => setAddableOnly(event.target.checked)}
-                />
-                {t("Can add to this section")}
-              </label>
-            </div>
-          </div>
-          <div className="builder-filter-tools">
-            <small>
-              {t(
-                "Use several terms to narrow results. Card IDs include alternate printings.",
-              )}
-            </small>
-            <button className="builder-reset-filters" onClick={resetFilters}>
-              {t("Reset filters")}
-            </button>
+            <details className="builder-refine">
+              <summary>
+                <SlidersHorizontal size={16} aria-hidden="true" />
+                {t("Filters")}
+                {activeFilterCount > 0 && (
+                  <span
+                    className="builder-filter-count"
+                    aria-label={t("{count} active filters", {
+                      count: activeFilterCount,
+                    })}
+                  >
+                    {activeFilterCount}
+                  </span>
+                )}
+                <ChevronDown size={16} aria-hidden="true" />
+              </summary>
+              <div className="builder-filters">
+                <select
+                  aria-label={t("Filter by domain")}
+                  value={domain}
+                  onChange={(event) =>
+                    setDomain(event.target.value as Domain | "")
+                  }
+                >
+                  <option value="">{t("All domains")}</option>
+                  {domains.map((value) => (
+                    <option key={value} value={value}>
+                      {t(value)}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  aria-label={t("Filter by type")}
+                  value={type}
+                  disabled={section === "runes"}
+                  onChange={(event) => setType(event.target.value)}
+                >
+                  <option value="">{t("All types")}</option>
+                  {["Unit", "Spell", "Gear"].map((value) => (
+                    <option key={value} value={value}>
+                      {t(value)}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  aria-label={t("Filter by energy cost")}
+                  value={cost}
+                  disabled={section === "runes"}
+                  onChange={(event) => setCost(event.target.value)}
+                >
+                  <option value="">{t("Any cost")}</option>
+                  {Array.from({ length: 10 }, (_, index) =>
+                    index === 9 ? "9+" : String(index),
+                  ).map((value) => (
+                    <option value={value} key={value}>
+                      {value} {t("Energy")}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  aria-label={t("Filter by card set")}
+                  value={set}
+                  onChange={(event) => setSet(event.target.value)}
+                >
+                  <option value="">{t("All sets")}</option>
+                  {cardSets.map(([id, name]) => (
+                    <option value={id} key={id}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  aria-label={t("Sort cards")}
+                  value={sort}
+                  onChange={(event) =>
+                    setSort(event.target.value as CatalogSort)
+                  }
+                >
+                  <option value="name">{t("Name · A–Z")}</option>
+                  <option value="energy-asc">
+                    {t("Energy · low to high")}
+                  </option>
+                  <option value="energy-desc">
+                    {t("Energy · high to low")}
+                  </option>
+                  <option value="might-desc">{t("Might · high to low")}</option>
+                </select>
+                <div className="builder-filter-toggles">
+                  <label className="builder-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={compatibleOnly}
+                      onChange={(event) =>
+                        setCompatibleOnly(event.target.checked)
+                      }
+                    />
+                    {t("Legend domains only")}
+                  </label>
+                  <label className="builder-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={addableOnly}
+                      onChange={(event) => setAddableOnly(event.target.checked)}
+                    />
+                    {t("Can add to this section")}
+                  </label>
+                </div>
+              </div>
+              <div className="builder-filter-tools">
+                <small>
+                  {t(
+                    "Use several terms to narrow results. Card IDs include alternate printings.",
+                  )}
+                </small>
+                <button
+                  className="builder-reset-filters"
+                  onClick={resetFilters}
+                >
+                  {t("Reset filters")}
+                </button>
+              </div>
+            </details>
           </div>
           <div className="builder-results-heading">
-            <strong>
+            <strong role="status" aria-live="polite" aria-atomic="true">
               {t("Showing {shown} of {count} rules cards", {
                 shown: Math.min(visibleCount, filtered.length),
                 count: filtered.length,
@@ -943,7 +1038,10 @@ export function DeckBuilder({
                   ?.count ?? 0;
               const block = builderAddIssue(draft, card.id, section);
               return (
-                <article className="builder-card" key={card.id}>
+                <article
+                  className={`builder-card ${count ? "is-in-deck" : ""}`}
+                  key={card.id}
+                >
                   <button
                     className="builder-card-art"
                     aria-label={t("Read {name}", { name: card.name })}
@@ -1002,7 +1100,9 @@ export function DeckBuilder({
                         >
                           <Minus size={15} />
                         </button>
-                        <strong>{count}</strong>
+                        <strong aria-label={t("{count} copies", { count })}>
+                          {count}
+                        </strong>
                         <button
                           disabled={Boolean(block)}
                           onClick={() => quantity(card.id, section, 1)}
@@ -1049,6 +1149,32 @@ export function DeckBuilder({
         </main>
 
         <aside className="builder-deck" aria-label={t("Your deck list")}>
+          <div className="builder-deck-heading">
+            {cardsById[draft.legendId] && (
+              <img src={cardArtUrl(cardsById[draft.legendId])} alt="" />
+            )}
+            <div>
+              <span>{t("Your deck list")}</span>
+              <strong>{draft.name || t("Name your deck")}</strong>
+              <small>
+                {draft.domains.map((value) => t(value)).join(" · ")}
+              </small>
+            </div>
+          </div>
+          <a
+            className={`builder-readiness ${errors.length ? "has-errors" : "complete"}`}
+            href="#builder-validation"
+          >
+            {errors.length ? (
+              <SlidersHorizontal size={17} aria-hidden="true" />
+            ) : (
+              <CheckCircle2 size={18} aria-hidden="true" />
+            )}
+            {errors.length
+              ? t("Fix {count} deck issues", { count: errors.length })
+              : t("Deck is legal")}
+            <ChevronDown size={15} aria-hidden="true" />
+          </a>
           <div className="builder-counts">
             <span className={mainCount >= 40 ? "complete" : ""}>
               <strong>{mainCount}</strong>
@@ -1256,6 +1382,8 @@ export function DeckBuilder({
             )}
           </section>
           <section
+            id="builder-validation"
+            tabIndex={-1}
             className={`builder-validation ${errors.length ? "has-errors" : "complete"}`}
             aria-live="polite"
           >
@@ -1298,7 +1426,17 @@ export function DeckBuilder({
       <footer className="builder-footer">
         <div>
           <strong>{draft.name || t("Name your deck")}</strong>
-          <span>{t("Saved locally in this browser.")}</span>
+          <span
+            className={
+              errors.length ? "builder-footer-issues" : "builder-footer-legal"
+            }
+          >
+            {errors.length
+              ? t("Fix {count} deck issues", { count: errors.length })
+              : !draft.name.trim()
+                ? t("Name your deck")
+                : t("Deck is legal")}
+          </span>
         </div>
         <button
           className="builder-button secondary"
@@ -1382,12 +1520,12 @@ export function DeckBuilder({
           <Check size={17} />
           {t(previousId ? "Update deck" : "Save deck")}
         </button>
+        {status && (
+          <p className="builder-status" role="status">
+            {t(status)}
+          </p>
+        )}
       </footer>
-      {status && (
-        <p className="builder-status" role="status">
-          {t(status)}
-        </p>
-      )}
       {exportOpen && (
         <section className="builder-export">
           <label htmlFor="builder-export-text">

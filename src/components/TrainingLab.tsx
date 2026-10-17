@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import {
   ArrowLeft,
+  ArrowRight,
   Check,
   RotateCcw,
   Undo2,
@@ -132,9 +133,16 @@ export function TrainingLab({
           </span>
           <h1>{t("Training lab")}</h1>
         </div>
-        <span className="training-progress">
-          {t("{count} of 6 exercises complete", { count: completed.length })}
-        </span>
+        <div className="training-progress">
+          <span>
+            {t("{count} of 6 exercises complete", { count: completed.length })}
+          </span>
+          <progress
+            value={completed.length}
+            max={trainingLessons.length}
+            aria-label={t("Training exercises")}
+          />
+        </div>
       </header>
       <p className="training-intro">
         {t(
@@ -145,21 +153,40 @@ export function TrainingLab({
         {trainingLessons.map((lesson, index) => (
           <button
             key={lesson.id}
-            className={id === lesson.id ? "active" : ""}
+            className={`${id === lesson.id ? "active" : ""} ${completed.includes(lesson.id) ? "complete" : ""}`}
             aria-current={id === lesson.id ? "step" : undefined}
+            aria-label={`${t(lesson.title)} · ${t(completed.includes(lesson.id) ? "Complete" : "Not yet complete")}`}
             onClick={() => reset(lesson.id)}
           >
-            <span>
+            <span className="training-lesson-number" aria-hidden="true">
               {completed.includes(lesson.id) ? <Check size={18} /> : index + 1}
             </span>
-            {t(lesson.title)}
+            <span className="training-lesson-label">
+              <strong>{t(lesson.title)}</strong>
+              <small>
+                {t(
+                  id === lesson.id
+                    ? "Current exercise"
+                    : completed.includes(lesson.id)
+                      ? "Complete"
+                      : "Not yet complete",
+                )}
+              </small>
+            </span>
           </button>
         ))}
       </nav>
       <section className="training-exercise" aria-labelledby="training-goal">
         <div className="training-instruction">
           <div>
-            <span className="eyebrow">{t("Your objective")}</span>
+            <span className="eyebrow">
+              {t("Exercise {current} of {total}", {
+                current:
+                  trainingLessons.findIndex((lesson) => lesson.id === id) + 1,
+                total: trainingLessons.length,
+              })}{" "}
+              · {t("Your objective")}
+            </span>
             <h2 id="training-goal">{t(lesson.title)}</h2>
             <p>{t(lesson.goal)}</p>
           </div>
@@ -214,16 +241,6 @@ export function TrainingLab({
               </li>
             ))}
           </ol>
-          {!success && !guidance.retry && (
-            <p className="training-next-hint" role="status">
-              {t(guidance.hint)}
-            </p>
-          )}
-          {guidance.retry && (
-            <p className="training-attempt-feedback" role="status">
-              {t(guidance.retry)}
-            </p>
-          )}
           {guidance.damage && guidance.damage.length > 0 && (
             <div className="training-damage-guide">
               <h3>{t("Damage needed to defeat each defender")}</h3>
@@ -448,12 +465,32 @@ export function TrainingLab({
                     onClick={() => reset(nextLesson.id)}
                   >
                     {t("Next exercise")}
+                    <ArrowRight size={17} aria-hidden="true" />
+                  </button>
+                )}
+                {nextLesson && (
+                  <p className="training-next-lesson">{t(nextLesson.title)}</p>
+                )}
+                {!nextLesson && (
+                  <button className="gold-button" onClick={onBack}>
+                    <ArrowLeft size={17} aria-hidden="true" />
+                    {t("Back")}
                   </button>
                 )}
               </div>
             ) : (
               <>
                 <h3>{t("Practice moves")}</h3>
+                {!guidance.retry && (
+                  <p className="training-next-hint" role="status">
+                    {t(guidance.hint)}
+                  </p>
+                )}
+                {guidance.retry && (
+                  <p className="training-attempt-feedback" role="status">
+                    {t(guidance.retry)}
+                  </p>
+                )}
                 <p>{t("Select a card or choose an available move below.")}</p>
                 {selectedCard && (
                   <div className="training-card-text">

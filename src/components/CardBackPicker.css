@@ -1,0 +1,149 @@
+.card-back-picker {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.card-back-picker > legend {
+  padding: 0;
+  color: #f0e5d2;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card-back-picker-intro,
+.card-back-picker-note {
+  color: #a5b5ba;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.card-back-picker-intro {
+  margin: 4px 0 18px;
+}
+
+.card-back-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.card-back-option {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 8px 8px 12px;
+  border: 1px solid #b6c4ca24;
+  border-radius: 12px;
+  background: #071218;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.card-back-option.is-selected {
+  border-color: var(--card-back-accent);
+  background: #12232b;
+}
+
+.card-back-option > input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.card-back-option:has(input:focus-visible) {
+  outline: 2px solid #f7e3b6;
+  outline-offset: 4px;
+}
+
+.card-back-option-art {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: visible;
+  aspect-ratio: 744 / 1039;
+  border-radius: 6px;
+  background: #061117;
+  box-shadow: 0 6px 16px #0005;
+}
+
+.card-back-option-art > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+}
+
+.card-back-selected-mark {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 3px solid #12232b;
+  border-radius: 50%;
+  background: var(--card-back-accent);
+  color: #071218;
+  opacity: 0;
+}
+
+.card-back-option.is-selected .card-back-selected-mark {
+  opacity: 1;
+}
+
+.card-back-option-name {
+  padding-top: 2px;
+  color: #f1e5cd;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.card-back-picker-note {
+  margin: 14px 0 0;
+  font-size: 11px;
+}
+
+@media (hover: hover) {
+  .card-back-option:hover {
+    border-color: var(--card-back-accent);
+    background: #12232b;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-back-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .card-back-option {
+    padding: 10px;
+  }
+
+  .card-back-option-art {
+    width: min(100%, 112px);
+    margin-inline: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-back-option {
+    transition: none;
+  }
+}

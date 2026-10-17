@@ -68,9 +68,9 @@ describe("translation coverage", () => {
     ).not.toContain("Nexus AI");
   });
   it.each([
-    ["en", "How to play", "CHOOSE YOUR CHAMPION"],
-    ["sr", "Kako igrati", "IZABERI ŠAMPIONA"],
-    ["it", "Come giocare", "SCEGLI IL CAMPIONE"],
+    ["en", "How to play", "Set up your duel"],
+    ["sr", "Kako igrati", "Pripremi svoj duel"],
+    ["it", "Come giocare", "Prepara il tuo duello"],
   ] as [Locale, string, string][])(
     "renders the complete lobby in %s without altering stored deck/filter identifiers",
     (locale, navigation, heading) => {

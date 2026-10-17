@@ -9,6 +9,7 @@ import type { PlaybackSpeed } from "../game/playback";
 import { reviewDelay } from "../game/presentation";
 import { decisionReason } from "../game/decision-reasons";
 import { useI18n } from "../i18n";
+import { useReducedMotion } from "../motion/useReducedMotion";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 import { Card } from "./Card";
 import { CardPiles, type PileView } from "./CardPiles";
@@ -51,6 +52,7 @@ export function HandTray({
   focus = "balanced",
 }: HandTrayProps) {
   const { t } = useI18n();
+  const reducedMotion = useReducedMotion();
   const titleId = useId();
   const handId = useId();
   const scroll = useRef<HTMLDivElement>(null);
@@ -164,9 +166,7 @@ export function HandTray({
     if (!element) return;
     element.scrollBy({
       left: direction * Math.max(100, element.clientWidth * 0.75),
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "auto"
-        : "smooth",
+      behavior: reducedMotion ? "auto" : "smooth",
     });
   };
 
