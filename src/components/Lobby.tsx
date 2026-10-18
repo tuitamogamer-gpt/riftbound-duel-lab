@@ -224,29 +224,28 @@ export function Lobby(p: Props) {
   };
   return (
     <main className="rift-lobby rift-lobby-upgrade" id="main-content">
-      <div className="rift-kicker">
-        <span>
-          <i /> {t("Ti protiv AI bota")}
-        </span>
-        <span>{t("LEAGUE OF LEGENDS · THE CARD GAME")}</span>
-      </div>
       <section
         className={`rift-hero ${p.hasMatch ? "has-saved-duel" : ""}`}
         aria-labelledby="hero-title"
       >
         <img
           className="rift-hero-image"
-          src={championArt("Jinx")}
-          alt={t("Jinx iz League of Legends, spremna za sljedeći duel")}
+          src={deckArt(p.playerDeck) || championArt("Jinx")}
+          alt=""
           fetchPriority="high"
         />
         <div className="rift-hero-wash" />
         <div className="rift-hero-copy">
-          <span className="rift-eyebrow">{t("A new duel starts here.")}</span>
+          <span className="rift-eyebrow rift-arena-status">
+            <i aria-hidden="true" /> {t("Ti protiv AI bota")}
+          </span>
           <h1 id="hero-title">{t("Your next move.")}</h1>
           <p>{t("Izaberi svoj špil. Zauzmi bojišta. Odigraj svoje.")}</p>
           <div className="rift-hero-actions">
-            <button className="rift-primary" onClick={scrollToSetup}>
+            <button
+              className="rift-link rift-choose-deck"
+              onClick={scrollToSetup}
+            >
               {t("Izaberi svoj špil")}
               <ArrowRight size={18} />
             </button>
@@ -257,20 +256,16 @@ export function Lobby(p: Props) {
               </button>
             )}
           </div>
-          <div className="rift-hero-facts">
-            <span>
-              <Shield size={14} />
-              {t("{count} šampiona", {
-                count: new Set(decks.map((d) => d.champion)).size,
-              })}
-            </span>
-            <span>
-              <Flag size={14} />
-              {t("Dva bojišta. Jedan pobjednik.")}
-            </span>
-          </div>
         </div>
-        <span className="rift-hero-index">RIFTBOUND / DUEL LAB</span>
+        {p.playerDeck && (
+          <span className="rift-hero-selection">
+            <small>{t("TVOJ IZBOR")}</small>
+            <strong>{p.playerDeck.champion}</strong>
+            <span>
+              {p.playerDeck.domains.map((domain) => t(domain)).join(" · ")}
+            </span>
+          </span>
+        )}
       </section>
       {p.hasMatch && (
         <button
@@ -311,7 +306,6 @@ export function Lobby(p: Props) {
       >
         <div className="rift-section-heading">
           <div>
-            <span className="rift-eyebrow">{t("PRIPREMI SE ZA DUEL")}</span>
             <h2 id="setup-title">{t("Set up your duel")}</h2>
           </div>
           <p>{t("Choose a deck, tune your challenge, and enter the Rift.")}</p>

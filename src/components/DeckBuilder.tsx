@@ -108,6 +108,18 @@ const addMessages: Record<BuilderAddIssue, string> = {
   sideboard: "The sideboard already contains 10 cards.",
   quantity: "The main deck reached the app limit of {count} cards.",
 };
+const addLabels: Record<BuilderAddIssue, string> = {
+  type: "Different section",
+  domain: "Other domains",
+  banned: "Banned card",
+  copies: "Copy limit",
+  unique: "Unique limit",
+  signature: "Signature limit",
+  "signature-tag": "Other legend",
+  runes: "Rune deck full",
+  sideboard: "Sideboard full",
+  quantity: "Deck full",
+};
 
 export function DeckBuilder({
   initialDeck,
@@ -139,6 +151,9 @@ export function DeckBuilder({
   );
   const [section, setSection] = useState<BuilderSection>("main");
   const [search, setSearch] = useState("");
+  const searchInput = useRef<HTMLInputElement>(null);
+  const filterChips = useRef<HTMLDivElement>(null);
+  const pendingFilterFocus = useRef<number | null>(null);
   const [domain, setDomain] = useState<Domain | "">("");
   const [type, setType] = useState("");
   const [cost, setCost] = useState("");
@@ -149,7 +164,14 @@ export function DeckBuilder({
   const [visibleCount, setVisibleCount] = useState(36);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [status, setStatus] = useState("");
+  const [quantityFeedback, setQuantityFeedback] = useState<{
+    name: string;
+    count: number;
+    section: BuilderSection;
+  } | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const exportActions = useRef<HTMLDetailsElement>(null);
+  const exportText = useRef<HTMLTextAreaElement>(null);
   const [mobileView, setMobileView] = useState<"cards" | "deck">("cards");
   const [setupOpen, setSetupOpen] = useState(
     () =>
@@ -157,7 +179,6 @@ export function DeckBuilder({
       window.matchMedia("(min-width: 761px)").matches,
   );
   const activeFilterCount = [
-    search,
     domain,
     type,
     cost,
@@ -166,6 +187,21 @@ export function DeckBuilder({
     !compatibleOnly,
     sort !== "name",
   ].filter(Boolean).length;
+
+  useEffect(() => {
+    const index = pendingFilterFocus.current;
+    if (index === null) return;
+    pendingFilterFocus.current = null;
+    const chips = filterChips.current?.querySelectorAll("button");
+    const next = chips?.[Math.min(index, chips.length - 1)];
+    (next ?? searchInput.current)?.focus();
+  }, [activeFilterCount]);
+
+  useEffect(() => {
+    if (!exportOpen) return;
+    exportText.current?.scrollIntoView({ block: "center" });
+    exportText.current?.focus({ preventScroll: true });
+  }, [exportOpen]);
 
   useEffect(() => {
     if (!initialDeck) return;
@@ -181,6 +217,7 @@ export function DeckBuilder({
     setDirty(false);
     setBackupStatus(storedDraft.status === "unavailable" ? "error" : "idle");
     setStatus("");
+    setQuantityFeedback(null);
   }, [initialDeck?.id]);
   useEffect(
     () => setVisibleCount(36),
@@ -280,6 +317,7 @@ export function DeckBuilder({
       dispatch({ type: direction });
       setDirty(true);
       setStatus("");
+      setQuantityFeedback(null);
     };
     window.addEventListener("keydown", shortcut);
     return () => window.removeEventListener("keydown", shortcut);
@@ -321,7 +359,7 @@ export function DeckBuilder({
       0,
     ),
   }));
-  const filtered = useMemo(() => {
+  const matchingCards = useMemo(() => {
     return sortCatalogCards(
       builderCards.filter((card) => {
         if (
@@ -335,8 +373,6 @@ export function DeckBuilder({
         if (domain && !card.domains.includes(domain)) return false;
         if (type && !isCardType(card, type)) return false;
         if (set && !searchIndex.get(card.id)?.sets.includes(set)) return false;
-        if (addableOnly && builderAddIssue(draft, card.id, section))
-          return false;
         if (
           cost &&
           (cost === "9+"
@@ -348,18 +384,83 @@ export function DeckBuilder({
       }),
       sort,
     );
-  }, [
-    search,
-    section,
-    compatibleOnly,
-    draft,
-    domain,
-    type,
-    cost,
-    set,
-    addableOnly,
-    sort,
-  ]);
+  }, [search, section, compatibleOnly, draft, domain, type, cost, set, sort]);
+  const filtered = useMemo(
+    () =>
+      addableOnly
+        ? matchingCards.filter(
+            (card) => !builderAddIssue(draft, card.id, section),
+          )
+        : matchingCards,
+    [matchingCards, addableOnly, draft, section],
+  );
+  const availabilityEmpty =
+    addableOnly && matchingCards.length > 0 && !filtered.length;
+  const availabilityExplanation =
+    section === "runes" && runeCount >= 12
+      ? "Your rune deck already has 12 runes. Remove a rune before adding another."
+      : section === "sideboard" && sideCount >= 10
+        ? "Your sideboard already has 10 cards. Remove a card before adding another."
+        : "Matching cards have reached a limit or do not meet this deck's requirements.";
+  const sortLabels: Record<CatalogSort, string> = {
+    name: "Name · A–Z",
+    "energy-asc": "Energy · low to high",
+    "energy-desc": "Energy · high to low",
+    "might-desc": "Might · high to low",
+  };
+  const activeFilters = [
+    ...(domain
+      ? [{ key: "domain", label: t(domain), clear: () => setDomain("") }]
+      : []),
+    ...(type
+      ? [{ key: "type", label: t(type), clear: () => setType("") }]
+      : []),
+    ...(cost
+      ? [
+          {
+            key: "cost",
+            label: `${cost} ${t("Energy")}`,
+            clear: () => setCost(""),
+          },
+        ]
+      : []),
+    ...(set
+      ? [
+          {
+            key: "set",
+            label: cardSets.find(([id]) => id === set)?.[1] ?? set,
+            clear: () => setSet(""),
+          },
+        ]
+      : []),
+    ...(addableOnly
+      ? [
+          {
+            key: "addable",
+            label: t("Can add to this section"),
+            clear: () => setAddableOnly(false),
+          },
+        ]
+      : []),
+    ...(!compatibleOnly
+      ? [
+          {
+            key: "compatible",
+            label: t("All domains"),
+            clear: () => setCompatibleOnly(true),
+          },
+        ]
+      : []),
+    ...(sort !== "name"
+      ? [
+          {
+            key: "sort",
+            label: t(sortLabels[sort]),
+            clear: () => setSort("name"),
+          },
+        ]
+      : []),
+  ];
 
   const update = (
     next: StarterDeck | ((deck: StarterDeck) => StarterDeck),
@@ -375,14 +476,15 @@ export function DeckBuilder({
     });
     setDirty(true);
     setStatus("");
+    setQuantityFeedback(null);
   };
   const undo = (direction: "undo" | "redo") => {
     dispatch({ type: direction });
     setDirty(true);
     setStatus("");
+    setQuantityFeedback(null);
   };
   const resetFilters = () => {
-    setSearch("");
     setDomain("");
     setType("");
     setCost("");
@@ -390,6 +492,7 @@ export function DeckBuilder({
     setAddableOnly(false);
     setCompatibleOnly(true);
     setSort("name");
+    searchInput.current?.focus();
   };
   const discardDraft = () => {
     const result = clearBuilderDraft(undefined, draftRaw.current);
@@ -424,19 +527,11 @@ export function DeckBuilder({
     const count =
       (next[destination] ?? []).find((entry) => entry.cardId === cardId)
         ?.count ?? 0;
-    setStatus(
-      t("{name}: {count} copies in {section}.", {
-        name: cardsById[cardId]?.name ?? cardId,
-        count,
-        section: t(
-          destination === "main"
-            ? "Main deck"
-            : destination === "runes"
-              ? "Runes"
-              : "Sideboard",
-        ),
-      }),
-    );
+    setQuantityFeedback({
+      name: cardsById[cardId]?.name ?? cardId,
+      count,
+      section: destination,
+    });
   };
   const cardDetails = (cardId: string) => setDetailId(cardId);
   const cloneSource = () => {
@@ -764,6 +859,72 @@ export function DeckBuilder({
           {draft.format === "historical-precon" &&
             t("Historical format preserves cards banned in current Standard.")}
         </p>
+        <div className="builder-delete-action">
+          {previousId && onDelete && (
+            <button
+              className="builder-button danger"
+              disabled={
+                storedDraft.status === "ready" ||
+                storedDraft.status === "invalid"
+              }
+              title={
+                storedDraft.status === "ready" ||
+                storedDraft.status === "invalid"
+                  ? t(
+                      "Choose what to do with the stored draft before automatic backup resumes.",
+                    )
+                  : undefined
+              }
+              onClick={() => {
+                // The host may navigate away immediately after deletion. Retain
+                // the exact editable list before removing its saved counterpart.
+                const backup = writeBuilderDraft(
+                  {
+                    version: 1,
+                    savedAt: new Date().toISOString(),
+                    deck: draft,
+                    sourceId,
+                  },
+                  undefined,
+                  draftRaw.current,
+                );
+                if (!backup.ok) {
+                  setBackupStatus("error");
+                  setStatus(
+                    "Draft backup failed. Export your list to keep a copy.",
+                  );
+                  if (
+                    backup.reason === "conflict" ||
+                    backup.reason === "invalid"
+                  ) {
+                    const current = readBuilderDraft();
+                    draftRaw.current = current.raw;
+                    setStoredDraft(current);
+                  }
+                  return;
+                }
+                draftRaw.current = backup.raw;
+                setBackupStatus("saved");
+                try {
+                  if (onDelete(previousId) === false)
+                    setStatus("The deck could not be deleted.");
+                  else {
+                    dispatch({ type: "saved", id: undefined });
+                    setDirty(true);
+                    setStatus(
+                      "Saved deck deleted. Your draft remains available.",
+                    );
+                  }
+                } catch {
+                  setStatus("The deck could not be deleted.");
+                }
+              }}
+            >
+              <Trash2 size={16} />
+              {t("Delete saved deck")}
+            </button>
+          )}
+        </div>
       </details>
 
       <div className="builder-edit-tools">
@@ -871,9 +1032,10 @@ export function DeckBuilder({
             )}
           </div>
           <div className="builder-discovery">
-            <label className="builder-search">
+            <div className="builder-search" role="search">
               <Search size={17} />
               <input
+                ref={searchInput}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder={t("Search name, rules, tag or card ID…")}
@@ -882,13 +1044,16 @@ export function DeckBuilder({
               {search && (
                 <button
                   className="builder-clear-search"
-                  onClick={() => setSearch("")}
+                  onClick={() => {
+                    setSearch("");
+                    searchInput.current?.focus();
+                  }}
                   aria-label={t("Clear card search")}
                 >
                   <X size={16} />
                 </button>
               )}
-            </label>
+            </div>
             <details className="builder-refine">
               <summary>
                 <SlidersHorizontal size={16} aria-hidden="true" />
@@ -1006,12 +1171,36 @@ export function DeckBuilder({
                 <button
                   className="builder-reset-filters"
                   onClick={resetFilters}
+                  disabled={!activeFilterCount}
                 >
-                  {t("Reset filters")}
+                  {t("Clear filters")}
                 </button>
               </div>
             </details>
           </div>
+          {activeFilters.length > 0 && (
+            <div
+              className="builder-active-filters"
+              aria-label={t("Active filters")}
+              ref={filterChips}
+            >
+              {activeFilters.map((filter, index) => (
+                <button
+                  key={filter.key}
+                  onClick={() => {
+                    pendingFilterFocus.current = index;
+                    filter.clear();
+                  }}
+                  aria-label={t("Remove filter: {filter}", {
+                    filter: filter.label,
+                  })}
+                >
+                  {filter.label}
+                  <X size={13} aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          )}
           <div className="builder-results-heading">
             <strong role="status" aria-live="polite" aria-atomic="true">
               {t("Showing {shown} of {count} rules cards", {
@@ -1049,7 +1238,6 @@ export function DeckBuilder({
                     data-card-preview={card.id}
                   >
                     <img src={cardArtUrl(card)} alt="" loading="lazy" />
-                    <span>{card.energy ?? "◈"}</span>
                   </button>
                   <div className="builder-card-copy">
                     <button
@@ -1085,39 +1273,40 @@ export function DeckBuilder({
                         .filter(Boolean)
                         .join(" · ")}
                     </small>
-                    <p>
-                      {readableText(card.text) ||
-                        t("No additional rules text.")}
-                    </p>
-                    <div className="builder-card-action">
-                      <div className="builder-stepper">
-                        <button
-                          disabled={!count}
-                          onClick={() => quantity(card.id, section, -1)}
-                          aria-label={t("Remove one {name}", {
-                            name: card.name,
-                          })}
-                        >
-                          <Minus size={15} />
-                        </button>
-                        <strong aria-label={t("{count} copies", { count })}>
-                          {count}
-                        </strong>
-                        <button
-                          disabled={Boolean(block)}
-                          onClick={() => quantity(card.id, section, 1)}
-                          title={block ? addReason(block) : undefined}
-                          aria-label={t("Add one {name}", { name: card.name })}
-                        >
-                          <Plus size={15} />
-                        </button>
-                      </div>
-                      {block && (
-                        <span className="builder-add-reason">
-                          {addReason(block)}
-                        </span>
-                      )}
+                    {card.text && <p>{readableText(card.text)}</p>}
+                  </div>
+                  <div className="builder-card-action">
+                    <div className="builder-stepper">
+                      <button
+                        disabled={!count}
+                        onClick={() => quantity(card.id, section, -1)}
+                        aria-label={t("Remove one {name}", {
+                          name: card.name,
+                        })}
+                      >
+                        <Minus size={15} />
+                      </button>
+                      <strong aria-label={t("{count} copies", { count })}>
+                        {count}
+                      </strong>
+                      <button
+                        disabled={Boolean(block)}
+                        onClick={() => quantity(card.id, section, 1)}
+                        title={block ? addReason(block) : undefined}
+                        aria-label={t("Add one {name}", { name: card.name })}
+                      >
+                        <Plus size={15} />
+                      </button>
                     </div>
+                    {block && (
+                      <span
+                        className="builder-add-reason"
+                        title={addReason(block)}
+                        aria-label={addReason(block)}
+                      >
+                        {t(addLabels[block])}
+                      </span>
+                    )}
                   </div>
                 </article>
               );
@@ -1125,15 +1314,55 @@ export function DeckBuilder({
           </div>
           {!filtered.length && (
             <div className="builder-empty-results">
-              <p className="builder-empty">
-                {t("No cards match these filters.")}
+              <strong>
+                {availabilityEmpty
+                  ? t("No cards available to add")
+                  : search.trim()
+                    ? t("No cards match “{query}”.", { query: search.trim() })
+                    : t("No cards match these filters.")}
+              </strong>
+              <p>
+                {t(
+                  availabilityEmpty
+                    ? availabilityExplanation
+                    : "Try a shorter search or remove a filter.",
+                )}
               </p>
-              <button
-                className="builder-button secondary"
-                onClick={resetFilters}
-              >
-                {t("Reset filters")}
-              </button>
+              <div>
+                {availabilityEmpty ? (
+                  <button
+                    className="builder-button secondary"
+                    onClick={() => {
+                      setAddableOnly(false);
+                      searchInput.current?.focus();
+                    }}
+                  >
+                    {t("Show matching cards")}
+                  </button>
+                ) : (
+                  <>
+                    {search && (
+                      <button
+                        className="builder-button secondary"
+                        onClick={() => {
+                          setSearch("");
+                          searchInput.current?.focus();
+                        }}
+                      >
+                        {t("Clear search")}
+                      </button>
+                    )}
+                    {activeFilterCount > 0 && (
+                      <button
+                        className="builder-button secondary"
+                        onClick={resetFilters}
+                      >
+                        {t("Clear filters")}
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           )}
           {visibleCount < filtered.length && (
@@ -1424,94 +1653,88 @@ export function DeckBuilder({
       </div>
 
       <footer className="builder-footer">
-        <div>
+        <div className="builder-footer-copy">
           <strong>{draft.name || t("Name your deck")}</strong>
           <span
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
             className={
-              errors.length ? "builder-footer-issues" : "builder-footer-legal"
+              quantityFeedback
+                ? "builder-footer-feedback"
+                : errors.length
+                  ? "builder-footer-issues"
+                  : "builder-footer-legal"
             }
           >
-            {errors.length
-              ? t("Fix {count} deck issues", { count: errors.length })
-              : !draft.name.trim()
-                ? t("Name your deck")
-                : t("Deck is legal")}
+            {quantityFeedback
+              ? t("{name}: {count} copies in {section}.", {
+                  name: quantityFeedback.name,
+                  count: quantityFeedback.count,
+                  section: t(
+                    quantityFeedback.section === "main"
+                      ? "Main deck"
+                      : quantityFeedback.section === "sideboard"
+                        ? "Sideboard"
+                        : "Runes",
+                  ),
+                })
+              : errors.length
+                ? t("Fix {count} deck issues", { count: errors.length })
+                : !draft.name.trim()
+                  ? t("Name your deck")
+                  : t("Deck is legal")}
           </span>
         </div>
-        <button
-          className="builder-button secondary"
-          onClick={() => setExportOpen((value) => !value)}
-          aria-expanded={exportOpen}
+        <details
+          className="builder-export-actions"
+          ref={exportActions}
+          onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) {
+              event.currentTarget.open = false;
+            }
+          }}
+          onKeyDown={(event) => {
+            if (event.key !== "Escape") return;
+            event.preventDefault();
+            event.currentTarget.open = false;
+            event.currentTarget.querySelector("summary")?.focus();
+          }}
         >
-          <Copy size={16} />
-          {t("Export text")}
-        </button>
-        <button className="builder-button secondary" onClick={download}>
-          <Download size={16} />
-          {t("Download .txt")}
-        </button>
-        {previousId && onDelete && (
-          <button
-            className="builder-button danger"
-            disabled={
-              storedDraft.status === "ready" || storedDraft.status === "invalid"
-            }
-            title={
-              storedDraft.status === "ready" || storedDraft.status === "invalid"
-                ? t(
-                    "Choose what to do with the stored draft before automatic backup resumes.",
-                  )
-                : undefined
-            }
-            onClick={() => {
-              // The host may navigate away immediately after deletion. Retain
-              // the exact editable list before removing its saved counterpart.
-              const backup = writeBuilderDraft(
-                {
-                  version: 1,
-                  savedAt: new Date().toISOString(),
-                  deck: draft,
-                  sourceId,
-                },
-                undefined,
-                draftRaw.current,
-              );
-              if (!backup.ok) {
-                setBackupStatus("error");
-                setStatus(
-                  "Draft backup failed. Export your list to keep a copy.",
-                );
-                if (
-                  backup.reason === "conflict" ||
-                  backup.reason === "invalid"
-                ) {
-                  const current = readBuilderDraft();
-                  draftRaw.current = current.raw;
-                  setStoredDraft(current);
+          <summary>
+            <Download size={16} aria-hidden="true" />
+            {t("Export deck")}
+            <ChevronDown size={15} aria-hidden="true" />
+          </summary>
+          <div>
+            <button
+              onClick={() => {
+                setExportOpen((value) => !value);
+                if (exportActions.current) {
+                  exportActions.current.open = false;
+                  exportActions.current.querySelector("summary")?.focus();
                 }
-                return;
-              }
-              draftRaw.current = backup.raw;
-              setBackupStatus("saved");
-              try {
-                if (onDelete(previousId) === false)
-                  setStatus("The deck could not be deleted.");
-                else {
-                  dispatch({ type: "saved", id: undefined });
-                  setDirty(true);
-                  setStatus(
-                    "Saved deck deleted. Your draft remains available.",
-                  );
+              }}
+              aria-expanded={exportOpen}
+              aria-controls="builder-export-text"
+            >
+              <Copy size={16} />
+              {t("Export text")}
+            </button>
+            <button
+              onClick={() => {
+                download();
+                if (exportActions.current) {
+                  exportActions.current.open = false;
+                  exportActions.current.querySelector("summary")?.focus();
                 }
-              } catch {
-                setStatus("The deck could not be deleted.");
-              }
-            }}
-          >
-            <Trash2 size={16} />
-            {t("Delete saved deck")}
-          </button>
-        )}
+              }}
+            >
+              <Download size={16} />
+              {t("Download .txt")}
+            </button>
+          </div>
+        </details>
         <button
           className="builder-button primary"
           disabled={!result.deck || !draft.name.trim()}
@@ -1533,6 +1756,7 @@ export function DeckBuilder({
           </label>
           <textarea
             id="builder-export-text"
+            ref={exportText}
             readOnly
             value={exportDeckText(draft)}
             onFocus={(event) => event.target.select()}

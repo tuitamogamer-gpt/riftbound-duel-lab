@@ -22,6 +22,7 @@ const persist = () =>
 const cases = [
   ["chromium", 1440, 900],
   ["chromium", 390, 844],
+  ["chromium", 320, 568],
 ];
 if (process.env.WEBKIT_EXECUTABLE) cases.push(["webkit", 390, 844]);
 for (const [engine, width, height] of cases.filter(
@@ -94,6 +95,36 @@ for (const [engine, width, height] of cases.filter(
     await page.goto(report.base);
     await page.locator(".language-selector select").selectOption("en");
     await check(
+      "Topbar keyboard navigation keeps focused actions visible",
+      async () => {
+        const navigation = page.locator(".topbar nav button");
+        await navigation.first().focus();
+        for (let index = 0; index < (await navigation.count()); index += 1) {
+          const button = navigation.nth(index);
+          assert(
+            await button.evaluate(
+              (element) => element === document.activeElement,
+            ),
+            "Tab order must reach each navigation action",
+          );
+          assert(
+            await button.evaluate((element) => {
+              const rect = element.getBoundingClientRect();
+              return element.contains(
+                document.elementFromPoint(
+                  rect.x + rect.width / 2,
+                  rect.y + rect.height / 2,
+                ),
+              );
+            }),
+            `Focused navigation action is clipped: ${await button.innerText()}`,
+          );
+          if (index + 1 < (await navigation.count()))
+            await page.keyboard.press("Tab");
+        }
+      },
+    );
+    await check(
       "Catalog search, filters, detail, no results, reset, pagination",
       async () => {
         await act(page.getByRole("button", { name: /^Cards\b/ }));
@@ -105,7 +136,7 @@ for (const [engine, width, height] of cases.filter(
             await page.locator(".catalog-card-name strong").allTextContents()
           ).every((name) => name === "Discipline"),
         );
-        if (mobile) await act(page.locator(".library-refinement > summary"));
+        await act(page.locator(".library-refinement > summary"));
         await page
           .getByRole("combobox", { name: "Domain", exact: true })
           .selectOption("Calm");
@@ -117,6 +148,12 @@ for (const [engine, width, height] of cases.filter(
           await page
             .getByLabel("Base printings only", { exact: true })
             .isChecked(),
+        );
+        await act(
+          page.getByRole("button", {
+            name: "Show matching cards",
+            exact: true,
+          }),
         );
         const count = await page.locator(".catalog-grid > div").count();
         assert(count > 0);
@@ -144,6 +181,60 @@ for (const [engine, width, height] of cases.filter(
         await noOverflow();
         await screenshot("catalog");
         return { filteredDisciplineCount: count, afterLoadMore: 120 };
+      },
+    );
+    await check(
+      "Catalog filter keyboard dismissal and chip focus",
+      async () => {
+        const summary = page.locator(".library-refinement > summary");
+        const disclosure = page.locator(".library-refinement");
+        const focused = (locator) =>
+          locator.evaluate((element) => element === document.activeElement);
+        // Repeat the quick close/reopen sequence that exposed a queued native
+        // details toggle reopening a dismissed panel at narrow viewport widths.
+        for (let iteration = 0; iteration < 5; iteration += 1) {
+          await summary.focus();
+          await page.keyboard.press("Enter");
+          await page.keyboard.press("Tab");
+          const domain = page.getByRole("combobox", {
+            name: "Domain",
+            exact: true,
+          });
+          assert(await focused(domain), "Filters must tab into Domain");
+          await domain.selectOption("Fury");
+          await page.keyboard.press("Escape");
+          assert.equal(await disclosure.getAttribute("open"), null);
+          assert(await focused(summary), "Escape must restore Filters focus");
+
+          await act(summary);
+          await page
+            .getByRole("button", { name: "Show matching cards", exact: true })
+            .focus();
+          await page.keyboard.press("Tab");
+          assert(
+            await focused(page.getByRole("combobox", { name: "Sort cards" })),
+            "Tab out must reach Sort cards",
+          );
+          assert.equal(await disclosure.getAttribute("open"), null);
+          await page.keyboard.press("Tab");
+          assert(
+            await focused(page.locator(".library-reset-all")),
+            "Next Tab must reach the visible Reset filters control",
+          );
+          await page.keyboard.press("Escape");
+          await page.evaluate(
+            () => new Promise((resolve) => requestAnimationFrame(resolve)),
+          );
+          assert.equal(await disclosure.getAttribute("open"), null);
+          await page.locator(".library-filter-chip").focus();
+          await page.keyboard.press("Enter");
+          assert.equal(await page.locator(".library-filter-chip").count(), 0);
+          assert(
+            await focused(summary),
+            "Removing the last filter must restore Filters focus",
+          );
+        }
+        return { repetitions: 5 };
       },
     );
     await check(
@@ -187,8 +278,13 @@ for (const [engine, width, height] of cases.filter(
         await page
           .getByRole("textbox", { name: "Deck name", exact: true })
           .fill(`Audit ${engine} ${width}`);
+        await act(page.locator(".builder-export-actions > summary"));
         await act(
           page.getByRole("button", { name: "Export text", exact: true }),
+        );
+        assert.equal(
+          await page.locator(".builder-export-actions").getAttribute("open"),
+          null,
         );
         const before = await page.locator("#builder-export-text").inputValue();
         if (width < 500)
@@ -218,12 +314,17 @@ for (const [engine, width, height] of cases.filter(
         );
         await page.locator(".language-selector select").selectOption("en");
         exported = await page.locator("#builder-export-text").inputValue();
+        await act(page.locator(".builder-export-actions > summary"));
         const downloadPromise = page.waitForEvent("download");
         await act(
           page.getByRole("button", { name: "Download .txt", exact: true }),
         );
         const download = await downloadPromise;
         assert.equal(await readFile(await download.path(), "utf8"), exported);
+        assert.equal(
+          await page.locator(".builder-export-actions").getAttribute("open"),
+          null,
+        );
         assert(
           await page
             .getByRole("button", { name: "Save deck", exact: true })

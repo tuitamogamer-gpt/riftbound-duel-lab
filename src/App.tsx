@@ -1073,7 +1073,20 @@ export default function App() {
           RIFTBOUND<small>LEAGUE OF LEGENDS · DUEL LAB</small>
         </span>
       </button>
-      <nav aria-label={t("Glavna navigacija")}>
+      <nav
+        aria-label={t("Glavna navigacija")}
+        onFocusCapture={(event) => {
+          const nav = event.currentTarget;
+          const item = (event.target as HTMLElement).getBoundingClientRect();
+          const bounds = nav.getBoundingClientRect();
+          // Browsers may leave a partially visible focused tab clipped.
+          // Move only this horizontal strip, with no motion or page jump.
+          if (item.left < bounds.left + 4)
+            nav.scrollLeft -= bounds.left + 4 - item.left;
+          else if (item.right > bounds.right - 4)
+            nav.scrollLeft += item.right - bounds.right + 4;
+        }}
+      >
         <button
           className={screen === "lobby" ? "active" : ""}
           aria-current={screen === "lobby" ? "page" : undefined}

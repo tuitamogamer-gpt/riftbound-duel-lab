@@ -94,7 +94,7 @@ Precon effects extend this with explicit discard, recycle, retrieval and Vision 
 
 ## Interface and appearance
 
-The lobby, card library, deck builder and dialogs use a dark obsidian/navy interface with champagne actions and teal selection states. The lobby provides a searchable champion gallery, visual matchup and compact setup; optional deck details and rules expand when needed. Mobile keeps a launch action beside the selected matchup. The library groups filters and displays result counts, while the builder keeps draft status and save/export actions together.
+The lobby, card library, deck builder and dialogs use a dark obsidian/navy interface with champagne actions and teal selection states. The compact lobby follows your selected champion and keeps the launch action reachable on phones and short displays. The library keeps search, sorting and filter controls together in a sticky toolbar; removable filter chips preserve the rest of your query. The builder uses compact card rows with aligned quantity controls and a stable Save-first footer. Optional deck details, rules and export actions expand when needed. See [the design refinement](docs/DESIGN-REFINEMENT.md) for screenshots and verification.
 
 Open **Appearance** from the header, match toolbar or mobile **Duel menu** to choose **Riftglass**, **Moonveil**, **Sunforge** or a champion signature card back. **Clearer table** dims battlefield art and emphasizes zone borders; **Reduce effects** reduces movement and flashing while respecting the device's reduced-motion setting. Preferences apply immediately and are stored locally on this device. **P** pauses or resumes a duel when no modal is open and you are not typing.
 

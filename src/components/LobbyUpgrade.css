@@ -4,8 +4,8 @@
   --lobby-muted: #a3b6c0;
   --lobby-gold: #e8c987;
   --lobby-teal: #64dcc8;
-  max-width: 1380px;
-  padding: 0 40px;
+  max-width: var(--ui-content-width, 1380px);
+  padding: 24px var(--ui-page-gutter, 40px) 0;
   color: #edf3f4;
   font-family: "DM Sans", sans-serif;
 }
@@ -43,41 +43,26 @@
   white-space: nowrap;
   border: 0;
 }
-.rift-lobby-upgrade .rift-kicker {
-  padding: 24px 0 18px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: #c5d4d9;
-}
-.rift-lobby-upgrade .rift-kicker i {
-  background: var(--lobby-teal);
-}
-.rift-lobby-upgrade .rift-kicker > span:last-child {
-  color: #8ea3b0;
-  font-size: 9px;
-  letter-spacing: 0.1em;
-}
 .rift-lobby-upgrade .rift-hero {
-  min-height: 320px;
+  min-height: 202px;
   border: 1px solid #b9d3dc30;
   border-radius: 14px;
   background: #0d1c25;
   box-shadow: none;
 }
 .rift-lobby-upgrade .rift-hero-image {
-  width: 73%;
-  object-position: 65% 39%;
-  opacity: 0.86;
+  width: 66%;
+  object-position: 64% 37%;
+  opacity: 0.76;
 }
 .rift-lobby-upgrade .rift-hero-wash {
   background:
     linear-gradient(
       90deg,
       #0d1c25 0%,
-      #0d1c25fa 23%,
-      #0d1c25d9 37%,
-      #0d1c2526 70%
+      #0d1c25fa 30%,
+      #0d1c25a8 49%,
+      #0d1c2526 80%
     ),
     linear-gradient(0deg, #0d1c2566, transparent 65%);
 }
@@ -86,7 +71,7 @@
 }
 .rift-lobby-upgrade .rift-hero-copy {
   width: 65%;
-  padding: 43px 42px 34px;
+  padding: 24px 32px 18px;
 }
 .rift-lobby-upgrade .rift-eyebrow {
   color: var(--lobby-teal);
@@ -97,11 +82,11 @@
 }
 .rift-lobby-upgrade .rift-hero h1 {
   color: #f4f3ed;
-  font-size: clamp(38px, 4.5vw, 62px);
+  font-size: clamp(34px, 3.5vw, 46px);
   line-height: 1.08;
   letter-spacing: -0.055em;
   font-style: normal;
-  margin: 15px 0 16px;
+  margin: 10px 0;
   max-width: 540px;
   text-wrap: balance;
 }
@@ -109,12 +94,53 @@
   color: #b9c9d0;
   font-size: 14px;
   font-weight: 400;
-  line-height: 1.7;
-  max-width: 380px;
+  line-height: 1.6;
+  max-width: 470px;
 }
 .rift-lobby-upgrade .rift-hero-actions {
-  margin-top: 23px;
-  gap: 22px;
+  margin-top: 10px;
+  gap: 24px;
+}
+.rift-lobby-upgrade .rift-arena-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #c2d9d7;
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
+.rift-lobby-upgrade .rift-arena-status i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--lobby-teal);
+}
+.rift-lobby-upgrade .rift-hero-actions .rift-choose-deck {
+  color: var(--lobby-gold);
+}
+.rift-lobby-upgrade .rift-hero-selection {
+  position: absolute;
+  right: 28px;
+  bottom: 24px;
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  text-shadow: 0 2px 12px #000;
+}
+.rift-lobby-upgrade .rift-hero-selection small {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: #e6ce9a;
+}
+.rift-lobby-upgrade .rift-hero-selection strong {
+  color: #fff5df;
+  font:
+    600 29px/1.1 "Barlow Condensed",
+    sans-serif;
+}
+.rift-lobby-upgrade .rift-hero-selection > span {
+  font-size: 11px;
+  color: #d4e2e4;
 }
 .rift-lobby-upgrade .rift-primary,
 .rift-lobby-upgrade .rift-secondary {
@@ -160,25 +186,6 @@
 }
 .rift-lobby-upgrade .rift-link:disabled {
   opacity: 0.5;
-}
-.rift-lobby-upgrade .rift-hero-facts {
-  color: #94aeb7;
-  margin-top: 24px;
-  gap: 20px;
-  font-size: 10px;
-  font-weight: 400;
-}
-.rift-lobby-upgrade .rift-hero-facts svg {
-  color: #70a5a4;
-}
-.rift-lobby-upgrade .rift-hero-index {
-  font:
-    600 9px "DM Sans",
-    sans-serif;
-  color: #c5d4d9;
-  right: 24px;
-  bottom: 19px;
-  letter-spacing: 0.16em;
 }
 .rift-lobby-upgrade .rift-return-card {
   display: flex;
@@ -226,17 +233,17 @@
   font-size: 11px;
 }
 .rift-lobby-upgrade .rift-setup {
-  margin-top: 38px;
+  margin-top: 26px;
   scroll-margin-top: 24px;
   outline: none;
 }
 .rift-lobby-upgrade .rift-section-heading {
   gap: 24px;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 .rift-lobby-upgrade .rift-section-heading h2 {
-  margin-top: 9px;
-  font-size: 30px;
+  margin-top: 0;
+  font-size: 27px;
   font-style: normal;
   line-height: 1.15;
 }
@@ -248,18 +255,19 @@
   text-align: right;
 }
 .rift-lobby-upgrade .rift-setup-grid {
-  grid-template-columns: minmax(0, 1fr) 388px;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 368px;
+  gap: 32px;
 }
 .rift-lobby-upgrade .rift-champion-column {
-  padding: 22px;
-  background: #101f29;
-  border: 1px solid var(--lobby-line);
-  border-radius: 12px;
+  padding: 18px 0 0;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--lobby-line);
+  border-radius: 0;
 }
 .rift-lobby-upgrade .rift-step-heading {
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 .rift-lobby-upgrade .rift-step-heading > span {
   width: 28px;
@@ -360,7 +368,7 @@
   gap: 10px;
 }
 .rift-lobby-upgrade .rift-champion {
-  height: 202px;
+  height: 176px;
   border: 1px solid #78929f45;
   border-radius: 8px;
   box-shadow: none;
@@ -416,7 +424,7 @@
   color: #f2f4ee;
 }
 .rift-lobby-upgrade .rift-champion-label > span {
-  font-size: 10px;
+  font-size: 11px;
   margin-top: 6px;
   color: #c2d0d4;
 }
@@ -648,7 +656,7 @@
 }
 .rift-lobby-upgrade .rift-opponent {
   position: static;
-  padding: 22px;
+  padding: 20px;
   color: #edf3f4;
   background: #101f29;
   border: 1px solid var(--lobby-line);
@@ -670,11 +678,11 @@
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  height: 194px;
+  height: 140px;
   border: 1px solid #b9d3dc24;
   border-radius: 8px;
   overflow: hidden;
-  margin-bottom: 19px;
+  margin-bottom: 16px;
 }
 .rift-lobby-upgrade .rift-duelist {
   position: relative;
@@ -746,7 +754,7 @@
   margin-top: 8px;
 }
 .rift-lobby-upgrade .rift-difficulty {
-  margin-top: 19px;
+  margin-top: 16px;
 }
 .rift-lobby-upgrade .rift-difficulty legend {
   color: #a9bdc7;
@@ -767,8 +775,8 @@
   display: flex;
   flex-direction: column;
   gap: 7px;
-  min-height: 59px;
-  padding: 10px 3px;
+  min-height: 54px;
+  padding: 8px 3px;
   border: 1px solid #78929f40;
   border-radius: 6px;
   background: #0c1a23;
@@ -835,7 +843,7 @@
   margin-left: auto;
 }
 .rift-lobby-upgrade .rift-guided-start {
-  margin-top: 4px;
+  margin-top: 8px;
   gap: 0;
   display: flex;
   flex-direction: column;
@@ -855,7 +863,7 @@
 .rift-lobby-upgrade .rift-opponent-settings {
   border-top: 1px solid var(--lobby-line);
   padding-top: 6px;
-  margin-top: 20px;
+  margin-top: 16px;
 }
 .rift-lobby-upgrade .rift-first-player {
   display: grid;
@@ -927,28 +935,19 @@
 .rift-lobby-upgrade .rift-mobile-launch {
   display: none;
 }
-@media (min-width: 1500px) {
-  .rift-lobby-upgrade .rift-hero {
-    min-height: 350px;
-  }
-  .rift-lobby-upgrade .rift-hero-copy {
-    padding-top: 50px;
-  }
-}
 @media (max-width: 1120px) {
   .rift-lobby-upgrade.rift-lobby {
-    padding: 0 26px;
+    padding: 20px 26px 0;
   }
   .rift-lobby-upgrade .rift-setup-grid {
     grid-template-columns: minmax(0, 1fr) 344px;
     gap: 18px;
   }
-  .rift-lobby-upgrade .rift-champion-column,
   .rift-lobby-upgrade .rift-opponent {
     padding: 18px;
   }
   .rift-lobby-upgrade .rift-champion {
-    height: 184px;
+    height: 168px;
   }
   .rift-lobby-upgrade .rift-deck-browser {
     grid-template-columns: minmax(0, 1fr);
@@ -958,32 +957,58 @@
   }
   .rift-lobby-upgrade .rift-hero-copy {
     width: 70%;
-    padding: 36px;
+    padding: 24px 28px 18px;
   }
   .rift-lobby-upgrade .rift-hero h1 {
-    font-size: 48px;
+    font-size: 40px;
   }
   .rift-lobby-upgrade .rift-starting-pair-cards {
     grid-template-columns: 1fr;
   }
 }
-@media (max-width: 800px) {
-  .rift-lobby-upgrade.rift-lobby {
-    padding: 0 20px 85px;
+/* Keep the launch action within the initial view on common laptop displays. */
+@media (min-width: 801px) and (max-height: 800px) {
+  .rift-lobby-upgrade .rift-hero {
+    min-height: 0;
   }
-  .rift-lobby-upgrade .rift-kicker {
-    padding: 19px 0 15px;
+  .rift-lobby-upgrade .rift-hero-copy {
+    padding: 16px 28px 10px;
   }
-  .rift-lobby-upgrade .rift-kicker > span:last-child {
+  .rift-lobby-upgrade .rift-hero h1 {
+    font-size: 38px;
+    margin: 7px 0;
+  }
+  .rift-lobby-upgrade .rift-hero-copy > p {
     display: none;
   }
+  .rift-lobby-upgrade .rift-hero-actions {
+    margin-top: 2px;
+  }
+  .rift-lobby-upgrade .rift-opponent .rift-step-heading {
+    margin-bottom: 12px;
+  }
+  .rift-lobby-upgrade .rift-duel-preview {
+    height: 112px;
+    margin-bottom: 14px;
+  }
+  .rift-lobby-upgrade .rift-duel-summary {
+    padding-top: 14px;
+  }
+  .rift-lobby-upgrade .rift-start {
+    margin-top: 12px;
+  }
+}
+@media (max-width: 800px), (max-width: 1000px) and (max-height: 500px) {
+  .rift-lobby-upgrade.rift-lobby {
+    padding: 18px 20px 85px;
+  }
   .rift-lobby-upgrade .rift-hero {
-    min-height: 320px;
+    min-height: 200px;
   }
   .rift-lobby-upgrade .rift-hero-copy,
   .rift-lobby-upgrade .rift-hero.has-saved-duel .rift-hero-copy {
     width: 76%;
-    padding: 32px 28px;
+    padding: 22px 24px 16px;
   }
   .rift-lobby-upgrade .rift-hero-image,
   .rift-lobby-upgrade .rift-hero.has-saved-duel .rift-hero-image {
@@ -999,8 +1024,8 @@
   }
   .rift-lobby-upgrade .rift-hero h1,
   .rift-lobby-upgrade .rift-hero.has-saved-duel h1 {
-    font-size: 43px;
-    margin: 15px 0;
+    font-size: 36px;
+    margin: 10px 0;
   }
   .rift-lobby-upgrade .rift-hero-copy > p,
   .rift-lobby-upgrade .rift-hero.has-saved-duel .rift-hero-copy > p {
@@ -1008,22 +1033,18 @@
     font-size: 13px;
     max-width: 270px;
   }
-  .rift-lobby-upgrade .rift-hero-facts {
-    max-width: 280px;
-    gap: 10px;
-  }
-  .rift-lobby-upgrade .rift-hero-index {
+  .rift-lobby-upgrade .rift-hero-selection {
     display: none;
   }
   .rift-lobby-upgrade .rift-setup {
-    margin-top: 28px;
+    margin-top: 22px;
   }
   .rift-lobby-upgrade .rift-section-heading {
     align-items: flex-start;
     gap: 14px;
   }
   .rift-lobby-upgrade .rift-section-heading h2 {
-    font-size: 27px;
+    font-size: 25px;
   }
   .rift-lobby-upgrade .rift-section-heading > p {
     display: none;
@@ -1045,7 +1066,7 @@
     display: block;
   }
   .rift-lobby-upgrade .rift-duel-preview {
-    height: 230px;
+    height: 180px;
   }
   .rift-lobby-upgrade .rift-duelist > img {
     object-position: 64% 31%;
@@ -1091,6 +1112,13 @@
     flex-basis: 100%;
     order: 2;
     margin-left: 52px;
+  }
+}
+@media (max-width: 800px),
+  (max-width: 1000px) and (max-height: 500px),
+  (min-width: 1001px) and (max-height: 720px) {
+  .rift-lobby-upgrade.rift-lobby {
+    padding-bottom: 90px;
   }
   .rift-lobby-upgrade .rift-mobile-launch {
     position: fixed;
@@ -1142,30 +1170,30 @@
 }
 @media (max-width: 560px) {
   .rift-lobby-upgrade.rift-lobby {
-    padding: 0 16px 90px;
+    padding: 16px 16px 90px;
   }
   .rift-lobby-upgrade .rift-hero,
   .rift-lobby-upgrade .rift-hero.has-saved-duel {
-    min-height: 328px;
+    min-height: 188px;
     border-radius: 10px;
   }
   .rift-lobby-upgrade .rift-hero-copy,
   .rift-lobby-upgrade .rift-hero.has-saved-duel .rift-hero-copy {
     width: 100%;
-    padding: 29px 23px 26px;
+    padding: 18px 20px 12px;
   }
   .rift-lobby-upgrade .rift-hero-image,
   .rift-lobby-upgrade .rift-hero.has-saved-duel .rift-hero-image {
-    width: 155%;
+    width: 130%;
     max-width: none;
-    right: -29%;
-    opacity: 0.63;
+    right: -22%;
+    opacity: 0.58;
     object-position: 68% 35%;
   }
   .rift-lobby-upgrade .rift-hero h1,
   .rift-lobby-upgrade .rift-hero.has-saved-duel h1 {
-    max-width: 260px;
-    font-size: 42px;
+    max-width: none;
+    font-size: 32px;
     line-height: 1.05;
   }
   .rift-lobby-upgrade .rift-hero .rift-eyebrow {
@@ -1176,22 +1204,11 @@
   .rift-lobby-upgrade .rift-hero.has-saved-duel .rift-hero-actions {
     align-items: flex-start;
     gap: 9px 16px;
-    margin-top: 20px;
-  }
-  .rift-lobby-upgrade .rift-hero-actions .rift-primary {
-    font-size: 12px;
-    gap: 9px;
-    min-height: 46px;
+    margin-top: 6px;
   }
   .rift-lobby-upgrade .rift-hero-actions .rift-link {
     font-size: 11px;
   }
-  .rift-lobby-upgrade .rift-hero-facts {
-    margin-top: 17px;
-    font-size: 9px;
-    gap: 10px 14px;
-  }
-  .rift-lobby-upgrade .rift-champion-column,
   .rift-lobby-upgrade .rift-opponent {
     padding: 16px;
     border-radius: 10px;
@@ -1217,7 +1234,7 @@
     gap: 10px;
   }
   .rift-lobby-upgrade .rift-champion {
-    height: 192px;
+    height: 174px;
   }
   .rift-lobby-upgrade .rift-champion-label {
     left: 11px;
@@ -1259,7 +1276,7 @@
     font-size: 10px;
   }
   .rift-lobby-upgrade .rift-duel-preview {
-    height: 206px;
+    height: 164px;
   }
   .rift-lobby-upgrade .rift-duelist > span {
     padding: 14px 12px;

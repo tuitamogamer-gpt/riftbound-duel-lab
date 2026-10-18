@@ -12,6 +12,8 @@
   --ui-teal: #64dcc8;
   --ui-danger: #f2a6a1;
   --ui-radius: 14px;
+  --ui-content-width: 1380px;
+  --ui-page-gutter: 40px;
   --gold: var(--ui-gold);
   --muted: var(--ui-muted);
   --panel: var(--ui-panel);
@@ -880,13 +882,13 @@ button:disabled {
   .app .topbar nav {
     order: 2;
     width: 100%;
-    height: 43px;
+    height: 44px;
     gap: 24px;
     overflow-x: auto;
     scrollbar-width: none;
   }
   .app .topbar nav button {
-    min-height: 42px;
+    min-height: 44px;
     flex-shrink: 0;
     font-size: 12px;
   }
