@@ -75,7 +75,40 @@ try {
   for (const page of [host, guest])
     page.on("pageerror", (error) => errors.push(error.message));
   await host.goto(origin);
-  await host.getByRole("button", { name: "Private duel", exact: true }).click();
+  await host.locator(".rift-champion").nth(1).click();
+  const selectedDeck = await host.evaluate(
+    () =>
+      JSON.parse(localStorage.getItem("riftbound-lobby-preferences-v1"))
+        .playerDeck,
+  );
+  await host
+    .getByRole("button", { name: "Play a friend · 1v1", exact: true })
+    .click();
+  assert.equal(
+    await host
+      .getByRole("combobox", { name: "Your deck", exact: true })
+      .inputValue(),
+    selectedDeck,
+    "The lobby deck carries into online setup",
+  );
+  await host.getByRole("button", { name: "Join a duel", exact: true }).click();
+  const inviteInput = host.getByRole("textbox", {
+    name: "Invitation link",
+    exact: true,
+  });
+  assert.ok(
+    await host
+      .getByRole("button", { name: "Join room", exact: true })
+      .isDisabled(),
+  );
+  await inviteInput.fill("not-an-invitation");
+  assert.equal(await inviteInput.getAttribute("aria-invalid"), "true");
+  assert.ok(
+    await host
+      .getByRole("button", { name: "Join room", exact: true })
+      .isDisabled(),
+  );
+  await host.getByRole("button", { name: "Host a duel", exact: true }).click();
   await host
     .getByRole("combobox", { name: "First player", exact: true })
     .selectOption("host");
@@ -94,6 +127,40 @@ try {
   assert.equal(state.seat, 0);
   assert.equal(state.observation.state.phase, "mulligan");
   const revision = state.revision;
+  const handCard = host.locator(".online-hand .game-card").first();
+  assert.equal(
+    await host.locator(".online-card-piece > strong:visible").count(),
+    0,
+  );
+  assert.equal(await host.locator(".online-card-detail:visible").count(), 0);
+  await handCard.scrollIntoViewIfNeeded();
+  const bounds = await handCard.boundingBox();
+  const touch = await contexts[0].newCDPSession(host);
+  await touch.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + 18, id: 1 }],
+  });
+  await host.locator(".card-detail").waitFor();
+  await touch.send("Input.dispatchTouchEvent", {
+    type: "touchEnd",
+    touchPoints: [],
+  });
+  assert.equal(
+    await handCard.getAttribute("aria-pressed"),
+    "false",
+    "Reading a card cannot select a mulligan",
+  );
+  assert.equal((await roomRequest(host)).body.room.revision, revision);
+  await host.keyboard.press("Escape");
+  await host.locator(".card-detail").waitFor({ state: "detached" });
+  await guest.locator(".online-hand .game-card").first().hover();
+  const preview = guest.locator(".card-preview");
+  await preview.waitFor();
+  assert.equal(await preview.innerText(), "");
+  assert.equal(await preview.locator("img").count(), 1);
+  const art = await preview.locator("img").boundingBox();
+  assert.ok(art.width >= 350 && art.width <= 360);
+  await guest.mouse.move(0, 0);
   await host.locator(".online-hand .game-card").first().click();
   await host
     .getByRole("button", { name: "Confirm move", exact: true })
@@ -121,7 +188,7 @@ try {
     await page.reload();
     if (seat === 0)
       await page
-        .getByRole("button", { name: "Private duel", exact: true })
+        .getByRole("button", { name: "Play a friend · 1v1", exact: true })
         .click();
     await page.locator(".online-match-status").waitFor();
     const resumed = (await roomRequest(page)).body.room;
@@ -205,7 +272,7 @@ try {
   assert.equal((await roomRequest(guest)).body.room.status, "departed");
   assert.deepEqual(errors, []);
   console.log(
-    "PASS local Chromium: two isolated clients, create/join, explicit mulligan confirmation/cancel, privacy, reload/resume, filtering, turn handoff, accepted move, idempotent retry, stale rejection, departure.",
+    "PASS local Chromium: two isolated clients, lobby deck carryover, host/join modes, invalid invitation, create/join, mobile long-press without selection, clean mobile cards, large image-only desktop hover, explicit mulligan confirmation/cancel, privacy, reload/resume, filtering, turn handoff, accepted move, idempotent retry, stale rejection, departure.",
   );
 } finally {
   for (const context of contexts) await context.close();

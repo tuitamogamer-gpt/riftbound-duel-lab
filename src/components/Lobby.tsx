@@ -17,6 +17,7 @@ import {
   X,
   SlidersHorizontal,
   Upload,
+  Users,
   Zap,
 } from "lucide-react";
 import { findCard } from "../catalog";
@@ -69,6 +70,7 @@ type Props = {
   onLibrary: () => void;
   onBuildDeck?: () => void;
   onTraining?: () => void;
+  onOnline?: () => void;
   matchFormat?: "single" | "bo3";
   onMatchFormat?: (format: "single" | "bo3") => void;
   playerBattlefield?: string;
@@ -249,6 +251,15 @@ export function Lobby(p: Props) {
               {t("Izaberi svoj špil")}
               <ArrowRight size={18} />
             </button>
+            {p.onOnline && (
+              <button
+                className="rift-link rift-online-link"
+                onClick={p.onOnline}
+              >
+                <Users size={18} />
+                {t("Play a friend · 1v1")}
+              </button>
+            )}
             {!p.hasMatch && (
               <button className="rift-link" onClick={p.onHelp}>
                 <BookOpen size={17} />

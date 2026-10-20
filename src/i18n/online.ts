@@ -1,4 +1,34 @@
 export const onlineMessages: Record<string, [string, string, string]> = {
+  "Play a friend · 1v1": [
+    "Play a friend · 1v1",
+    "Igraj s prijateljem · 1v1",
+    "Sfida un amico · 1v1",
+  ],
+  "Online 1v1": ["Online 1v1", "Online 1v1", "1v1 online"],
+  "Room setup": ["Room setup", "Priprema sobe", "Configurazione stanza"],
+  "Host a duel": ["Host a duel", "Napravi duel", "Crea un duello"],
+  "Join a duel": ["Join a duel", "Pridruži se", "Entra in un duello"],
+  "Paste your friend's invitation and choose your deck to join.": [
+    "Paste your friend's invitation and choose your deck to join.",
+    "Zalijepi prijateljevu pozivnicu i izaberi svoj špil za ulazak.",
+    "Incolla l'invito del tuo amico e scegli il tuo mazzo per entrare.",
+  ],
+  "Create a room and send the invitation to your friend. Each player uses their own device and keeps their hand private.":
+    [
+      "Create a room and send the invitation to your friend. Each player uses their own device and keeps their hand private.",
+      "Napravi sobu i pošalji pozivnicu prijatelju. Svako igra sa svog uređaja i vidi samo svoje karte u ruci.",
+      "Crea una stanza e invia l'invito al tuo amico. Ognuno gioca dal proprio dispositivo e tiene privata la propria mano.",
+    ],
+  "Paste the complete invitation link, including the part after #duel=.": [
+    "Paste the complete invitation link, including the part after #duel=.",
+    "Zalijepi cijeli link pozivnice, uključujući dio nakon #duel=.",
+    "Incolla il link d'invito completo, inclusa la parte dopo #duel=.",
+  ],
+  "Rooms last 24 hours. Refreshing the page keeps your seat.": [
+    "Rooms last 24 hours. Refreshing the page keeps your seat.",
+    "Sobe traju 24 sata. Osvježavanje stranice čuva tvoje mjesto.",
+    "Le stanze durano 24 ore. Aggiornare la pagina conserva il tuo posto.",
+  ],
   "Private online duel": [
     "Private online duel",
     "Privatni online duel",

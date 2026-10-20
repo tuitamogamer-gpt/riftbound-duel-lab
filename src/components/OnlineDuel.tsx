@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   ArrowDown,
   ArrowLeft,
@@ -45,16 +45,20 @@ const errors: Record<string, string> = {
 
 export default function OnlineDuel({
   availableDecks,
+  initialDeckId,
   onBack,
 }: {
   availableDecks: StarterDeck[];
+  initialDeckId?: string;
   onBack: () => void;
 }) {
   const { t } = useI18n();
   const online = useOnlineRoom();
+  const setupId = useId();
   const [deckId, setDeckId] = useState(
     online.pendingJoin?.selection.deck?.id ??
       online.pendingJoin?.selection.deckId ??
+      initialDeckId ??
       availableDecks[0]?.id ??
       "",
   );
@@ -74,6 +78,9 @@ export default function OnlineDuel({
             window.location.href,
           )
         : "",
+  );
+  const [setupMode, setSetupMode] = useState<"create" | "join">(() =>
+    inviteText ? "join" : "create",
   );
   const invitation = useMemo(() => {
     try {
@@ -152,8 +159,10 @@ export default function OnlineDuel({
   }, [runeIds]);
   useEffect(() => {
     const change = () => {
-      if (readOnlineInvitation(window.location.hash))
+      if (readOnlineInvitation(window.location.hash)) {
         setInviteText(window.location.href);
+        setSetupMode("join");
+      }
     };
     window.addEventListener("hashchange", change);
     return () => window.removeEventListener("hashchange", change);
@@ -213,7 +222,6 @@ export default function OnlineDuel({
           damage={unit?.damage}
           might={unit ? unitMight(unit) : undefined}
           onClick={onSelect ?? (() => inspect(cardId))}
-          preview={false}
           selected={
             (key.startsWith("hand-") &&
               selected?.action.category === "mulligan" &&
@@ -223,7 +231,7 @@ export default function OnlineDuel({
           }
         />
         <strong>{card.name}</strong>
-        <span>
+        <span className={unit ? "online-unit-stats" : "online-printed-cost"}>
           {unit
             ? `${t("MIGHT")} ${unitMight(unit)}${unit.damage ? ` · ${t("Damage")} ${unit.damage}` : ""}`
             : `${card.energy ?? 0} ${t("ENERGY")} · ${card.power ?? 0} ${t("Power")}`}
@@ -247,7 +255,7 @@ export default function OnlineDuel({
         </button>
         <div>
           <span className="eyebrow">RIFTBOUND DUEL LAB</span>
-          <h1>{t("Private online duel")}</h1>
+          <h1>{t("Online 1v1")}</h1>
         </div>
         {online.credentials && (
           <button
@@ -297,14 +305,69 @@ export default function OnlineDuel({
       )}
       {!online.credentials && (
         <section className="online-setup">
+          <div
+            className="online-setup-modes"
+            role="group"
+            aria-label={t("Room setup")}
+          >
+            <button
+              type="button"
+              aria-pressed={setupMode === "create"}
+              onClick={() => setSetupMode("create")}
+            >
+              {t("Host a duel")}
+            </button>
+            <button
+              type="button"
+              aria-pressed={setupMode === "join"}
+              onClick={() => setSetupMode("join")}
+            >
+              {t("Join a duel")}
+            </button>
+          </div>
           <h2>
-            {t(invitation ? "Join a private room" : "Play with a friend")}
+            {t(
+              setupMode === "join"
+                ? "Join a private room"
+                : "Play with a friend",
+            )}
           </h2>
           <p>
             {t(
-              "Create a room, share its invitation, and each player chooses a deck. Rooms last 24 hours.",
+              setupMode === "join"
+                ? "Paste your friend's invitation and choose your deck to join."
+                : "Create a room and send the invitation to your friend. Each player uses their own device and keeps their hand private.",
             )}
           </p>
+          {setupMode === "join" && (
+            <label>
+              {t("Invitation link")}
+              <input
+                aria-label={t("Invitation link")}
+                aria-invalid={Boolean(inviteText.trim()) && !invitation}
+                aria-describedby={
+                  inviteText.trim() && !invitation
+                    ? `${setupId}-invitation-error`
+                    : undefined
+                }
+                value={inviteText}
+                onChange={(event) => setInviteText(event.target.value)}
+                placeholder="https://…/#duel=…"
+                autoComplete="off"
+                spellCheck={false}
+              />
+              {inviteText.trim() && !invitation && (
+                <span
+                  className="online-field-error"
+                  id={`${setupId}-invitation-error`}
+                >
+                  {t(
+                    "Paste the complete invitation link, including the part after #duel=.",
+                  )}
+                </span>
+              )}
+            </label>
+          )}
           <label>
             {t("Your deck")}
             <select
@@ -335,7 +398,7 @@ export default function OnlineDuel({
                 ))}
             </select>
           </label>
-          {!invitation && (
+          {setupMode === "create" && (
             <label>
               {t("First player")}
               <select
@@ -351,45 +414,32 @@ export default function OnlineDuel({
               </select>
             </label>
           )}
-          <label>
-            {t("Invitation link")}
-            <input
-              aria-label={t("Invitation link")}
-              value={inviteText}
-              onChange={(event) => setInviteText(event.target.value)}
-              placeholder="https://…/#duel=…"
-              autoComplete="off"
-              spellCheck={false}
-            />
-          </label>
           <div className="online-setup-actions">
             <button
               disabled={
-                online.busy || !chosen || (Boolean(inviteText) && !invitation)
+                online.busy || !chosen || (setupMode === "join" && !invitation)
               }
               onClick={() => {
                 if (!chosen) return;
                 const selection = { deck: chosen, battlefieldId: fieldId };
-                void (invitation
-                  ? online.join(invitation, selection)
-                  : online.create(selection, first));
+                if (setupMode === "join") {
+                  if (invitation) void online.join(invitation, selection);
+                } else void online.create(selection, first);
               }}
             >
               {t(
                 online.busy
                   ? "Connecting…"
-                  : invitation
+                  : setupMode === "join"
                     ? "Join room"
                     : "Create room",
               )}
               <ArrowRight size={17} />
             </button>
-            {inviteText && (
-              <button onClick={() => setInviteText("")}>
-                {t("Create a different room")}
-              </button>
-            )}
           </div>
+          <p className="online-room-lifetime">
+            {t("Rooms last 24 hours. Refreshing the page keeps your seat.")}
+          </p>
         </section>
       )}
       {online.credentials && !room && (

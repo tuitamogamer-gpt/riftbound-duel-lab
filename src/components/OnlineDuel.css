@@ -61,7 +61,7 @@
 .online-duel h1,
 .online-duel h2,
 .online-duel h3 {
-  font-family: "Exo 2", sans-serif;
+  font-family: "DM Sans", sans-serif;
   margin: 0;
 }
 .online-duel h1 {
@@ -85,7 +85,44 @@
   padding: 24px;
   border: 1px solid #88a7b04d;
   border-radius: 16px;
-  background: #17333fc4;
+  background: var(--ui-panel, #101f29);
+}
+.online-setup-modes {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 24px;
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  background: var(--ui-bg, #071219);
+}
+.online-setup-modes button {
+  flex: 1;
+  border-color: transparent;
+  background: transparent;
+  color: var(--ui-muted);
+}
+.online-setup-modes button[aria-pressed="true"] {
+  color: var(--ui-teal);
+  border-color: #64dcc83d;
+  background: #64dcc812;
+}
+.online-setup-actions > button:first-child {
+  width: 100%;
+  min-height: 48px;
+  color: #14232b;
+  border-color: var(--ui-gold);
+  background: var(--ui-gold);
+  font-weight: 600;
+  font-size: 14px;
+}
+.online-field-error {
+  color: #f2bc9e;
+  line-height: 1.5;
+}
+.online-duel .online-room-lifetime {
+  margin: 14px 0 0;
+  font-size: 11px;
 }
 .online-duel label {
   display: grid;
@@ -435,22 +472,17 @@
   }
   .online-card-piece,
   .online-unit {
-    width: 88px;
-    flex-basis: 88px;
+    width: 100px;
+    flex-basis: 100px;
   }
   .online-card-piece .game-card {
-    width: 88px;
-    height: 122px;
+    width: 100px;
+    height: 140px;
   }
+  .online-card-piece > strong,
+  .online-card-piece > .online-printed-cost,
   .online-duel .online-card-detail {
-    top: 122px;
-    width: 44px;
-    min-height: 44px;
-  }
-  .online-card-piece > strong {
-    padding-right: 0;
-    margin-top: 44px;
-    min-height: 28px;
+    display: none;
   }
   .online-pieces {
     gap: 9px;

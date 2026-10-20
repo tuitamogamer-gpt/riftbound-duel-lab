@@ -1,6 +1,8 @@
 # Private online duels
 
-The **Private duel** button opens a human-versus-human table. Each player selects a supported deck and one of that deck's battlegrounds. The host chooses a random first player, the host, or the invited opponent. Share the generated invitation to admit the second player.
+The **Play a friend · 1v1** button in the Arena introduction opens a human-versus-human table. **Host a duel** creates a room; **Join a duel** accepts an invitation. Opening an invitation link selects the join flow automatically. Each player selects a supported deck and one of that deck's battlegrounds. The Arena's selected deck carries into the host setup. The host chooses a random first player, the host, or the invited opponent. Share the generated invitation to admit the second player.
+
+An incomplete invitation leaves Join disabled and explains which part of the link is missing. On phones, cards use their artwork without repeated names or inspection icons; hold a visible card to read it without selecting or playing it. Desktop hover shows the large card image.
 
 The invitation is held in the URL fragment (`#duel=…`), which is not sent as a request URL or referrer. Room IDs use 128 random bits; seat and invitation credentials use 256 bits. The server stores SHA-256 hashes of those credentials. The browser remembers only its own seat access under `riftbound-online-seat-v1`, separately from the local duel save.
 
@@ -10,7 +12,7 @@ Players choose from the engine's actual legal moves, including mulligan, reactio
 
 ## Production setup
 
-Production uses **private Vercel Blob** for authoritative room state. There is no in-memory production fallback. As of 7 October 2026, the connected Vercel account rejected private-store creation with HTTP 403, so the application and API are prepared, but online rooms require storage activation. The UI reports that online rooms are unavailable while configuration is absent.
+Production uses **private Vercel Blob** for authoritative room state. There is no in-memory production fallback. On **20 October 2026**, the connected Vercel tool again rejected private-store creation with HTTP 403 (`You don't have permission to create the blob`). Both projects have no configured environment variables, and the execution environment has no separately authenticated Vercel CLI identity. Both public `/api/duel` endpoints return `503 storage-unavailable` for a valid synthetic poll. The application and API are prepared, but **public online play is still blocked on storage activation**. The UI reports that online rooms are unavailable while configuration is absent.
 
 1. In Vercel, create a Blob store with **Private** access and connect it to the app project.
 2. Provide the connected store's `BLOB_READ_WRITE_TOKEN` as a **server-only production environment variable**. Do not use a `VITE_` or `NEXT_PUBLIC_` prefix.
@@ -49,3 +51,5 @@ npm test -- tests/online-rooms.test.ts tests/online-client.test.ts tests/online-
 ```
 
 The tests cover credential hashing, both starting seats, all official precons, legal actions and payment validation, Hidden/hand/RNG privacy, invalid requests, expiry, concurrent joins/moves, stale decisions, safe retries, separate browser credential storage, invitation fragments, body limits and friendly storage failures.
+
+The 20 October interface pass also runs `scripts/online-interaction-check.mjs` with two isolated Chromium contexts. It exercises a mobile host and desktop guest through room creation, invitation, both mulligans, turn handoff, a committed move, reload/resume, an idempotent retry, stale rejection and departure. It checks deck carryover, host/join selection, invalid-link feedback, mobile long-press reading and desktop image-only hover. These loopback results use the development adapter and do not establish production storage availability.

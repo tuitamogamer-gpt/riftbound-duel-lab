@@ -1229,6 +1229,7 @@ export default function App() {
                 setScreen("builder");
               }}
               onTraining={() => setScreen("training")}
+              onOnline={() => setScreen("online")}
               playerBattlefield={playerBattlefield}
               botBattlefield={botBattlefield}
               onPlayerBattlefield={(id) =>
@@ -1246,13 +1247,6 @@ export default function App() {
               onInspect={setInspected}
             />
             <div className="product-tools">
-              <button
-                className="outline-button"
-                onClick={() => setScreen("online")}
-              >
-                <Swords size={16} />
-                {t("Private duel")}
-              </button>
               <button
                 className="outline-button"
                 onClick={() => setScreen("history")}
@@ -1359,6 +1353,7 @@ export default function App() {
             >
               <OnlineDuel
                 availableDecks={allDecks}
+                initialDeckId={selectedPlayerDeck?.id}
                 onBack={() => {
                   if (window.location.hash.startsWith("#duel="))
                     window.history.replaceState(
