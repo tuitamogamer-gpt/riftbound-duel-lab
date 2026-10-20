@@ -309,15 +309,10 @@ for (const [engine, type, options] of engines) {
         });
         await menuTrigger.focus();
         await openMenu();
-        const menuClose = menu.getByRole("button", {
-          name: "Close",
-          exact: true,
-        });
         assert.equal(
-          await menuClose.evaluate(
-            (element) => element === document.activeElement,
-          ),
+          await menu.evaluate((element) => element === document.activeElement),
           true,
+          "The shared dialog manager starts at the menu heading",
         );
         await page.keyboard.press("Shift+Tab");
         assert.equal(
@@ -328,9 +323,9 @@ for (const [engine, type, options] of engines) {
         );
         await page.keyboard.press("Tab");
         assert.equal(
-          await menuClose.evaluate(
-            (element) => element === document.activeElement,
-          ),
+          await menu
+            .getByRole("button", { name: "Close", exact: true })
+            .evaluate((element) => element === document.activeElement),
           true,
         );
         await menu.getByLabel(/Rune payment mode/).selectOption("auto");

@@ -56,6 +56,7 @@ import {
 } from "./game/deck-import";
 import { Card, CardDetail } from "./components/Card";
 import { AppDialog } from "./components/AppDialog";
+import { HelpDialog } from "./components/HelpDialog";
 import { RouteBoundary } from "./components/RouteBoundary";
 import { MatchResultPanel } from "./components/MatchResultPanel";
 import { DuelGuide } from "./components/DuelGuide";
@@ -2231,7 +2232,7 @@ export default function App() {
             close={() => setAppearanceOpen(false)}
           />
         )}
-        {help && <Help close={() => setHelp(false)} />}
+        {help && <HelpDialog close={() => setHelp(false)} />}
         {confirmNew && (
           <AppDialog
             className="small-modal"
@@ -2634,101 +2635,5 @@ function BoardZone({
         inspect={inspect}
       />
     </section>
-  );
-}
-function Help({ close }: { close: () => void }) {
-  const { t } = useI18n();
-  return (
-    <AppDialog className="help-modal" label={t("Kako igrati")} close={close}>
-      <button
-        className="close-button"
-        onClick={close}
-        aria-label={t("Zatvori")}
-      >
-        ×
-      </button>
-      <div className="eyebrow"> {t("TVOJ PRVI DUEL")} </div>
-      <h2>
-        {t("Osvoji bojišta.")} <br />
-        <em> {t("Zadrži prednost.")} </em>
-      </h2>
-      <div className="help-grid">
-        {[
-          [
-            "01",
-            "Pripremi ruku",
-            "Start with 4 cards and replace up to 2 once. Your Legend starts in its zone with its effects. Your chosen champion starts in a separate zone; pay its cost to play it.",
-          ],
-          [
-            "02",
-            "Upravljaj runama",
-            "Na početku poteza pripremaš karte i dobijaš 2 rune. Iscrpi runu za energiju; recikliraj je za power njene domene. Plaćanje karata radi automatski.",
-          ],
-          [
-            "03",
-            "Pošalji jedinice",
-            "Select a ready unit, then a highlighted battlefield. Add other units if you want, then confirm the move in the center.",
-          ],
-          [
-            "04",
-            "Odgovori na protivnika",
-            "Showdown daje objema stranama priliku za Action i Reaction karte. Lanac efekata rješava se od posljednjeg odigranog.",
-          ],
-          [
-            "05",
-            "Riješi borbu",
-            "Click highlighted enemies to assign combat damage. Both sides deal damage simultaneously. Open the match log for combat details.",
-          ],
-          [
-            "06",
-            "Stigni do 8",
-            "Bod dobijaš osvajanjem ili držanjem bojišta na početku poteza. Za osmi bod osvajanjem moraš bodovati oba bojišta u tom potezu.",
-          ],
-        ].map(([n, heading, p]) => (
-          <div key={n}>
-            <span>{n}</span>
-            <h3>{t(heading)}</h3>
-            <p>{t(p)}</p>
-          </div>
-        ))}
-      </div>
-      <div className="scope-note">
-        <h3> {t("One place for every decision")} </h3>
-        <p>
-          {t(
-            "Select a card on the board and choose its move in the bottom bar. The opponent and effects advance automatically. The game waits whenever you have a real choice. Pause at any time or open the log to review what happened.",
-          )}{" "}
-        </p>
-        <h3> {t("Podrška i izvori")} </h3>
-        <p>
-          {t(
-            "Ovo je nezavisni eksperimentalni simulator. Sve karte u spremljenom katalogu imaju podršku za igranje. Katalog je snimak Riftcodex podataka; podrška za karte ne potvrđuje sve moguće interakcije pravila.",
-          )}{" "}
-        </p>
-        <p>
-          {t(
-            "Riotova Digital Tools Policy ne odobrava automatizovane Riftbound simulatore. Ovaj projekt nema Riot odobrenje.",
-          )}{" "}
-        </p>
-        <a
-          href="https://developer.riotgames.com/docs/riftbound"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Riot Digital Tools Policy ↗
-        </a>{" "}
-        ·{" "}
-        <a
-          href="https://playriftbound.com/en-us/rules-hub/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          {t("Službena pravila ↗")}{" "}
-        </a>
-      </div>
-      <button className="gold-button" onClick={close}>
-        {t("Spreman za duel")} <Swords size={17} />
-      </button>
-    </AppDialog>
   );
 }

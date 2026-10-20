@@ -36,11 +36,15 @@ export function TrainingLab({
   onProgress?: (completed: TrainingLessonId[]) => void;
 }) {
   const { t } = useI18n();
-  const [id, setId] = useState<TrainingLessonId>("deploy");
-  const [game, setGame] = useState(() => createTrainingPosition("deploy"));
+  const [completed, setCompleted] = useState(readTrainingProgress);
+  const [id, setId] = useState<TrainingLessonId>(
+    () =>
+      trainingLessons.find((lesson) => !completed.includes(lesson.id))?.id ??
+      "deploy",
+  );
+  const [game, setGame] = useState(() => createTrainingPosition(id));
   const [history, setHistory] = useState<GameState[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
-  const [completed, setCompleted] = useState(readTrainingProgress);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(true);
   const boardRef = useRef<HTMLDivElement>(null);
@@ -149,6 +153,20 @@ export function TrainingLab({
           "Learn with real legal moves. Retry and undo are available inside these exercises.",
         )}
       </p>
+      <label className="training-lesson-select">
+        <span>{t("Training exercises")}</span>
+        <select
+          value={id}
+          onChange={(event) => reset(event.target.value as TrainingLessonId)}
+        >
+          {trainingLessons.map((lesson, index) => (
+            <option key={lesson.id} value={lesson.id}>
+              {index + 1}. {t(lesson.title)}
+              {completed.includes(lesson.id) ? ` · ${t("Complete")}` : ""}
+            </option>
+          ))}
+        </select>
+      </label>
       <nav className="training-lessons" aria-label={t("Training exercises")}>
         {trainingLessons.map((lesson, index) => (
           <button
@@ -201,13 +219,18 @@ export function TrainingLab({
               className="ghost-button"
               onClick={undo}
               disabled={!history.length}
+              aria-label={t("Undo practice move")}
             >
               <Undo2 size={17} />
-              {t("Undo practice move")}
+              {t("Undo")}
             </button>
-            <button className="ghost-button" onClick={() => reset()}>
+            <button
+              className="ghost-button"
+              onClick={() => reset()}
+              aria-label={t("Retry exercise")}
+            >
               <RotateCcw size={17} />
-              {t("Retry exercise")}
+              {t("Retry")}
             </button>
           </div>
         </div>

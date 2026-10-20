@@ -398,10 +398,21 @@ for (const [engine, width, height] of cases.filter(
           "Hold for the winning point",
         ];
         const results = [];
-        for (const title of titles) {
-          await act(
-            page.locator(".training-lessons button").filter({ hasText: title }),
-          );
+        for (const [index, title] of titles.entries()) {
+          if (mobile) {
+            await page
+              .getByRole("combobox", {
+                name: "Training exercises",
+                exact: true,
+              })
+              .selectOption({ index });
+          } else {
+            await act(
+              page
+                .locator(".training-lessons button")
+                .filter({ hasText: title }),
+            );
+          }
           assert(
             await page
               .getByRole("button", { name: "Undo practice move", exact: true })

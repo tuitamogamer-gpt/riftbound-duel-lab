@@ -50,6 +50,7 @@ async function appearance(page, mobile) {
     await page.getByRole("button", { name: "Duel menu", exact: true }).click();
   await page.getByRole("button", { name: "Appearance", exact: true }).click();
   await page.getByRole("dialog", { name: "Appearance", exact: true }).waitFor();
+  await page.getByRole("tab", { name: "Display & sound", exact: true }).click();
 }
 async function geometry(page) {
   return page.evaluate(() => {
@@ -201,6 +202,9 @@ try {
           "Sound preference is saved from Appearance",
         );
         await page
+          .getByRole("tab", { name: "Card backs", exact: true })
+          .click();
+        await page
           .locator('.card-back-option:has(input[value="moonveil"])')
           .click();
         assert.equal(
@@ -260,6 +264,9 @@ try {
           await page.getByRole("switch", { name: /Game sound/ }).isChecked(),
           "Sound preference persists after reload",
         );
+        await page
+          .getByRole("tab", { name: "Card backs", exact: true })
+          .click();
         assert.ok(
           await page
             .getByRole("radio", { name: "Moonveil", exact: true })
@@ -327,6 +334,7 @@ try {
         "Review cannot advance while Appearance is open",
       );
       await page.keyboard.press("Escape");
+      await page.mouse.move(0, 0);
       await page.waitForFunction(
         (old) => localStorage.getItem("riftbound-duel-save-v1") !== old,
         JSON.stringify(JSON.parse(before)),
@@ -365,6 +373,8 @@ try {
         "Bot cannot advance while Appearance is open",
       );
       await page.keyboard.press("Escape");
+      // Closing over a table card can open its hover, which also pauses play.
+      await page.mouse.move(0, 0);
       await page.waitForFunction(
         (old) => localStorage.getItem("riftbound-duel-save-v1") !== old,
         JSON.stringify(JSON.parse(before)),
