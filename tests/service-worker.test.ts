@@ -72,6 +72,23 @@ describe("offline service-worker failures", () => {
     expect(sw.caches.match.mock.calls[0]?.[1]).toEqual({ ignoreVary: true });
     expect(sw.fetcher).not.toHaveBeenCalled();
   });
+  it("serves every packaged announcer clip from cache while offline", async () => {
+    const sw = worker();
+    sw.fetcher.mockRejectedValue(new TypeError("Offline"));
+    sw.caches.match.mockImplementation(
+      async (request) =>
+        new Response(`cached ${new URL((request as Request).url).pathname}`),
+    );
+    for (const voice of ["champion", "battle", "victory", "defeat"]) {
+      const path = `/audio/${voice}.mp3`;
+      const response = await sw.request(`https://game.test${path}`);
+      expect(await response?.text()).toBe(`cached ${path}`);
+    }
+    expect(sw.fetcher).not.toHaveBeenCalled();
+    expect(
+      sw.request("https://external.test/audio/champion.mp3"),
+    ).toBeUndefined();
+  });
   it.each(["match", "open", "put"] as const)(
     "returns the successful network chunk when cache.%s fails",
     async (failure) => {

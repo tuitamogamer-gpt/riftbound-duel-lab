@@ -60,7 +60,7 @@ self.addEventListener("fetch", (event) => {
   }
   const appAsset =
     url.origin === self.location.origin &&
-    (/^\/assets\//.test(url.pathname) ||
+    (/^\/(?:assets|audio)\//.test(url.pathname) ||
       ["/manifest.webmanifest", "/app-icon.svg", "/favicon.svg"].includes(
         url.pathname,
       ));
