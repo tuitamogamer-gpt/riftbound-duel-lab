@@ -57,6 +57,12 @@ export default defineConfig({
               ),
           );
         const hash = createHash("sha256").update(assets.sort().join("|"));
+        const audioRoot = new URL("./public/audio/", import.meta.url);
+        const nativeAudio = readdirSync(audioRoot)
+          .filter((name) => /\.(?:mp3|ogg|wav)$/.test(name))
+          .sort();
+        for (const name of nativeAudio)
+          hash.update(name).update(readFileSync(new URL(name, audioRoot)));
         for (const name of nativeArt.sort())
           hash.update(name).update(readFileSync(new URL(name, artRoot)));
         hash.update(
@@ -91,6 +97,7 @@ export default defineConfig({
               "/app-icon-512.png",
               "/manifest.webmanifest",
               ...nativeArt.map((name) => `/art/${name}`),
+              ...nativeAudio.map((name) => `/audio/${name}`),
               ...assets.map((name) => `/${name}`),
             ],
           }),

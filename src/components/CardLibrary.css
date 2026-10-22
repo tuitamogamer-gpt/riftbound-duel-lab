@@ -28,10 +28,147 @@
   line-height: 1.6;
 }
 .card-library .library-header .catalog-snapshot {
-  max-width: 320px;
+  max-width: 380px;
   font-size: 10px;
   text-align: right;
   color: #829aa7;
+}
+.card-library .catalog-snapshot > span {
+  display: block;
+  margin-top: 2px;
+}
+.card-library .library-references {
+  margin-bottom: 18px;
+  border: 1px solid var(--ui-line, #b9d3dc24);
+  border-radius: 10px;
+  background: #101f2966;
+}
+.card-library .library-references > summary,
+.card-library .library-reference-deck > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 12px 16px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 600;
+}
+.card-library .library-references > summary::-webkit-details-marker,
+.card-library .library-reference-deck > summary::-webkit-details-marker {
+  display: none;
+}
+.card-library .library-references > summary > svg,
+.card-library .library-reference-deck > summary > svg {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--ui-muted, #a3b6c0);
+}
+.card-library .library-references[open] > summary > svg,
+.card-library .library-reference-deck[open] > summary > svg {
+  transform: rotate(180deg);
+}
+.card-library .library-reference-status {
+  padding: 4px 7px;
+  border: 1px solid #e8c98730;
+  border-radius: 4px;
+  color: var(--ui-gold, #e8c987);
+  font-size: 10px;
+  font-weight: 500;
+}
+.card-library .library-reference-content {
+  padding: 0 16px 16px;
+}
+.card-library .library-reference-content p {
+  margin: 0 0 14px;
+  color: var(--ui-muted, #a3b6c0);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.card-library .library-reference-decks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 12px;
+}
+.card-library .library-reference-deck {
+  min-width: 0;
+  border: 1px solid var(--ui-line, #b9d3dc24);
+  border-radius: 7px;
+  background: #09172055;
+}
+.card-library .library-reference-deck-content {
+  padding: 0 14px 14px;
+}
+.card-library .library-reference-deck-groups {
+  display: grid;
+  gap: 16px;
+}
+.app .library.card-library .library-reference-deck h3 {
+  margin: 0 0 5px;
+  color: var(--ui-gold, #e8c987);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.card-library .library-reference-deck ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.card-library .library-reference-deck li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+.card-library .library-reference-quantity {
+  flex: none;
+  color: var(--ui-muted, #a3b6c0);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.card-library .library-reference-deck li button {
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 0;
+  border: 0;
+  background: none;
+  color: var(--ui-text, #edf3f4);
+  font:
+    12px/1.6 "DM Sans",
+    sans-serif;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.card-library .library-reference-deck li button:hover {
+  color: var(--ui-teal, #64dcc8);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.card-library .library-reference-deck-content > a {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 8px 0;
+  color: var(--ui-teal, #64dcc8);
+  font-size: 12px;
+  text-underline-offset: 3px;
+}
+.card-library .library-reference-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+.card-library .library-reference-footer > p {
+  margin: 0;
+  font-size: 11px;
 }
 .card-library .library-toolbar {
   position: sticky;
@@ -390,7 +527,7 @@
   display: flex;
   margin: 32px auto 0;
 }
-.card-library :is(button, input, select, summary):focus-visible {
+.card-library :is(button, input, select, summary, a):focus-visible {
   outline: 2px solid var(--ui-gold, #e8c987);
   outline-offset: 3px;
 }
@@ -411,6 +548,9 @@
     padding: 24px 16px 44px;
   }
   .card-library .library-header {
+    align-items: start;
+    flex-direction: column;
+    gap: 10px;
     margin-bottom: 18px;
   }
   .app .library.card-library h1 {
@@ -422,7 +562,23 @@
     font-size: 12px;
   }
   .card-library .library-header .catalog-snapshot {
-    display: none;
+    max-width: none;
+    font-size: 10px;
+    text-align: left;
+  }
+  .card-library .library-reference-decks {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .card-library .library-references > summary {
+    gap: 8px;
+    padding-inline: 12px;
+    font-size: 12px;
+  }
+  .card-library .library-reference-content {
+    padding-inline: 12px;
+  }
+  .card-library .library-reference-deck li button {
+    min-height: 44px;
   }
   .card-library .library-toolbar {
     grid-template-columns: auto minmax(0, 1fr);

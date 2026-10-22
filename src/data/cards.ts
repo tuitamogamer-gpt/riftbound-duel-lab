@@ -1,6 +1,8 @@
 import cardData from "./cards.json";
 import { rulesTokens } from "./tokens";
 import metadata from "./catalog-meta.json";
+import referenceData from "./reference-cards.json";
+import referenceMetadata from "./reference-catalog-meta.json";
 
 export type CardType =
   "Unit" | "Spell" | "Gear" | "Legend" | "Battlefield" | "Rune";
@@ -28,10 +30,20 @@ export interface Card {
   variant: boolean;
   artist: string | null;
   bannedInDuel: boolean;
+  /** Imported for browsing; rules must be reviewed before this face can execute. */
+  referenceOnly?: boolean;
+  sourceUrl?: string;
 }
 
-export const cards: Card[] = [...(cardData as Card[]), ...rulesTokens];
+export const providerCards = cardData as Card[];
+export const referenceCards = referenceData as Card[];
+export const cards: Card[] = [
+  ...providerCards,
+  ...rulesTokens,
+  ...referenceCards,
+];
 export const catalogMeta = metadata;
+export const referenceCatalogMeta = referenceMetadata;
 export const cardsById: Record<string, Card> = Object.fromEntries(
   cards.map((card) => [card.id, card]),
 );

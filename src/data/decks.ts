@@ -1,6 +1,7 @@
 import { canonicalCardName, hasUnlimitedCopies } from "./card-identity";
 export { canonicalCardName } from "./card-identity";
 import preconData from "./precon-lists.json";
+import referencePreconData from "./reference-precon-lists.json";
 import { cardsById, getCard, type Domain } from "./cards";
 
 export interface DeckEntry {
@@ -143,6 +144,8 @@ export const starterDecks: StarterDeck[] = [
 
 export const practiceDecks = starterDecks;
 export const officialPreconDecks = preconData as StarterDeck[];
+/** Official lists available for inspection, excluded from all playable presets. */
+export const referencePreconDecks = referencePreconData as StarterDeck[];
 export const decks: StarterDeck[] = [...officialPreconDecks, ...practiceDecks];
 export const decksById = Object.fromEntries(
   decks.map((deck) => [deck.id, deck]),

@@ -14,6 +14,8 @@ function unsupportedRulesReason(
   card: Card,
   script?: CardScript,
 ): string | undefined {
+  if (card.referenceOnly)
+    return "Reference import: this printing requires reviewed rules and behavior tests before play.";
   // The Vendetta FAQ makes this both Unit and Gear, despite the provider's
   // single-type record. A keyword-only script cannot implement that rules face.
   // https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications/

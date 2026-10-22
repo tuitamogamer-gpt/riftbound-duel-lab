@@ -286,9 +286,9 @@ describe("choosing Hide independently from normal card play", () => {
     );
   });
 
-  it("recognizes every catalog face with the Hidden reminder", () => {
-    const hiddenFaces = cards.filter((card) =>
-      card.text.startsWith("[Hidden]"),
+  it("recognizes every reviewed catalog face with the Hidden reminder", () => {
+    const hiddenFaces = cards.filter(
+      (card) => !card.referenceOnly && card.text.startsWith("[Hidden]"),
     );
     expect(hiddenFaces.length).toBeGreaterThan(0);
     expect(hiddenFaces.filter((card) => !getScript(card.id)?.hidden)).toEqual(

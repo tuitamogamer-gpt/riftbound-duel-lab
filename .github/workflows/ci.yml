@@ -33,6 +33,7 @@ jobs:
           tests/engine.test.ts
           tests/rules-regression.test.ts
           tests/rules-errata.test.ts
+          tests/conditional-beginning-triggers.test.ts
           tests/physical-board-return.test.ts
           tests/hybrid-copy-protection.test.ts
           tests/physical-verdict.test.ts
@@ -41,6 +42,8 @@ jobs:
           tests/card-registry.test.ts
           tests/card-script-compiler.test.ts
           tests/catalog-core.test.ts
+          tests/reference-catalog.test.ts
+          tests/catalog-reference-ui.test.ts
           tests/deck-import.test.ts
           tests/match-setup.test.ts
           tests/session-storage.test.ts
@@ -74,6 +77,8 @@ jobs:
           tests/art-runtime-index.test.ts
           tests/reduced-motion-loading.test.tsx
           tests/interface-preferences.test.ts
+          tests/game-audio-events.test.ts
+          tests/game-audio-player.test.ts
           tests/cardbacks.test.ts
           tests/i18n.test.ts
           tests/body-scroll-lock.test.ts

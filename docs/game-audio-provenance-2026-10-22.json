@@ -1,0 +1,69 @@
+{
+  "generatedOn": "2026-10-22",
+  "provider": "Fish Audio",
+  "connectorOperation": "text_to_speech",
+  "model": "s2.1-pro",
+  "voice": {
+    "id": "bf322df2096a46f18c579d0baa36f41d",
+    "title": "Adrian",
+    "author": "Fish Official"
+  },
+  "language": "en",
+  "kind": "short spoken event announcements",
+  "creditsCharged": 83,
+  "processing": "Edge silence trimmed only; internal pauses retained. EBU loudness normalization at -20 LUFS / -3 dBTP, mono 24 kHz MP3 at 64 kbit/s; 40 ms tail padding.",
+  "clips": [
+    {
+      "id": "champion",
+      "file": "champion.mp3",
+      "text": "[confident] Champion unleashed.",
+      "generationTaskId": "a1a08563fff64487bda088b9ef55e686",
+      "sourceAudioUrl": "https://platform.r2.fish.audio/tasks/2026-10-22/a1a08563fff64487bda088b9ef55e686.mp3",
+      "durationSeconds": 1.368,
+      "bytes": 11180,
+      "sha256": "5d7b65f8ef50a6792e9ff42c56dca13f29fff4ff7c34abdfab06073af4ac9cc9",
+      "peakDbFS": -6.0,
+      "sampleRate": 24000,
+      "channels": 1
+    },
+    {
+      "id": "battle",
+      "file": "battle.mp3",
+      "text": "[firm] Battle!",
+      "generationTaskId": "fa004dc0c85b4e228c5de89cdaf2ea2f",
+      "sourceAudioUrl": "https://platform.r2.fish.audio/tasks/2026-10-22/fa004dc0c85b4e228c5de89cdaf2ea2f.mp3",
+      "durationSeconds": 0.672,
+      "bytes": 5612,
+      "sha256": "d28acf0cfeef8a45faa39413f6273a0635161f68b598a4f0901798137c49470e",
+      "peakDbFS": -4.2,
+      "sampleRate": 24000,
+      "channels": 1
+    },
+    {
+      "id": "victory",
+      "file": "victory.mp3",
+      "text": "[triumphant] Victory!",
+      "generationTaskId": "435b9d3975cc41bc94e374be8e77d614",
+      "sourceAudioUrl": "https://platform.r2.fish.audio/tasks/2026-10-22/435b9d3975cc41bc94e374be8e77d614.mp3",
+      "durationSeconds": 0.744,
+      "bytes": 6188,
+      "sha256": "1bb07652c06fa4d96cf4b77e2d4b97059b1cbc26698f97b9cf4109e170984a08",
+      "peakDbFS": -3.9,
+      "sampleRate": 24000,
+      "channels": 1
+    },
+    {
+      "id": "defeat",
+      "file": "defeat.mp3",
+      "text": "[serious] Defeat.",
+      "generationTaskId": "eb8230e3109e40aabf6c9b3671ac3082",
+      "sourceAudioUrl": "https://platform.r2.fish.audio/tasks/2026-10-22/eb8230e3109e40aabf6c9b3671ac3082.mp3",
+      "durationSeconds": 0.624,
+      "bytes": 5228,
+      "sha256": "0166eda9599b6353340ec3e7331c8538490ac15c8eed6c6f77c70d1133ad5034",
+      "peakDbFS": -5.2,
+      "sampleRate": 24000,
+      "channels": 1
+    }
+  ]
+}

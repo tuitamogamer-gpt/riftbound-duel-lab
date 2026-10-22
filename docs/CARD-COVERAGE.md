@@ -4,18 +4,22 @@
 
 Saved catalog fetched **6 October 2026**: **1,451 provider printings** in **8 sets**, plus **8 local rules tokens**. Completeness is relative to Riftcodex; its latest reported record update is **21 July 2026**.
 
-Executable registration: **1,459 / 1,459 entries**, with **0 unsupported** (1,108 scripted, 37 compiled, 314 aliases). Counts include printings and tokens, rather than only distinct card designs.
+Supplemental reference catalog fetched **22 October 2026**: **219 Radiance printings** from **Hextech Analytics**, including all **167 numbered base cards**. These entries are available for browsing and are blocked from play pending reviewed rules implementations. Source coverage does not claim every token or promotion.
+
+Executable registration: **1,459 / 1,678 entries**, with **219 unsupported** (1,108 scripted, 37 compiled, 314 aliases). Counts include printings and tokens, rather than only distinct card designs.
 
 Retail precons: **13 / 13** have complete executable coverage. All 13 lists have valid structure and complete catalog references. Historical retail contents and current tournament legality remain separate.
+
+Additional official lists: **2 Radiance Showdown precons** (Seraphine and Evelynn) have valid structure and complete catalog references. They are visible as reference lists and excluded from playable presets and bot matrices.
 <!-- card-catalog-summary:end -->
 
-Provider completeness is checked against both pagination totals and each set's card count. It does not establish that Riftcodex contains every Riot publication or preview. No Radiance set is returned in this snapshot. The generated summary above and [per-card inventory](card-coverage.json) are maintained by `cards:report` and verified by `cards:check`.
+Provider completeness is checked against both pagination totals and each set's card count. It does not establish that Riftcodex contains every Riot publication or preview. The 22 October refresh returned no provider changes and still omits Radiance; the separate [Radiance reference import](IMPORT-RADIANCE-SOURCES.md) supplies 219 community-source printings and two official decklists without making them playable. The generated summary above and [per-card inventory](card-coverage.json) are maintained by `cards:report` and verified by `cards:check`.
 
-## Current implementation — 7 October 2026
+## Playable implementation — 7 October 2026
 
 The [next 100 printing batch](IMPORT-100-SOURCES.md) and [remaining 107 printing batch](IMPORT-107-SOURCES.md) completed executable registration for the saved catalog. The latter added three local rules tokens. Shared support now includes effect-directed plays, physical ownership, hybrid Unit/Gear objects, copied ability instances, death replacements, extra turns, multiple paid repeats, staged target declarations and deck inspection/reveal choices. Original provider records, card text, printing identities and constructed-ban flags are preserved.
 
-The [validation log](VALIDATION.md) records the actual completed test runs and their limits. Registration covers the full saved catalog; a registry entry alone does not prove every possible rules interaction.
+The [validation log](VALIDATION.md) records the actual completed test runs and their limits. Executable registration covers the original provider snapshot and local tokens; the supplementary Radiance entries are reference-only. A registry entry alone does not prove every possible rules interaction.
 
 ## Historical implementation checkpoints
 

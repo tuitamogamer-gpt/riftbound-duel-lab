@@ -44,6 +44,34 @@ export const uiPolishMessages: Record<string, [string, string, string]> = {
     "Sezioni dell'aspetto",
   ],
   "Display & sound": ["Display & sound", "Prikaz i zvuk", "Schermo e audio"],
+  "Combat, scoring and decisive moments.": [
+    "Combat, scoring and decisive moments.",
+    "Borba, osvajanje poena i odlučujući trenuci.",
+    "Combattimento, punti e momenti decisivi.",
+  ],
+  Volume: ["Volume", "Glasnoća", "Volume"],
+  Announcer: ["Announcer", "Glasovne najave", "Annunciatore"],
+  "Short English calls for champions, battle and the result.": [
+    "Short English calls for champions, battle and the result.",
+    "Kratke najave na engleskom za heroje, borbu i rezultat.",
+    "Brevi annunci in inglese per campioni, battaglia e risultato.",
+  ],
+  "Play sample": ["Play sample", "Poslušaj primjer", "Ascolta un esempio"],
+  "Sound could not start. Try the sample again.": [
+    "Sound could not start. Try the sample again.",
+    "Zvuk se nije pokrenuo. Pokušaj ponovo.",
+    "L'audio non è partito. Riprova l'esempio.",
+  ],
+  "Sound stays off until you enable it.": [
+    "Sound stays off until you enable it.",
+    "Zvuk je isključen dok ga ne uključiš.",
+    "L'audio rimane spento finché non lo attivi.",
+  ],
+  "Only important game moments make a sound.": [
+    "Only important game moments make a sound.",
+    "Zvuk prati samo važne trenutke u igri.",
+    "L'audio accompagna solo i momenti importanti della partita.",
+  ],
   Undo: ["Undo", "Vrati", "Annulla"],
   Retry: ["Retry", "Ponovi", "Riprova"],
 };

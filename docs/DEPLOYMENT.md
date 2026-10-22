@@ -1,5 +1,29 @@
 # Production deployment
 
+## Radiance references, game audio and conditional triggers — 22 October 2026
+
+The [catalog refresh](IMPORT-RADIANCE-SOURCES.md) adds 219 Radiance reference
+printings and the official Seraphine/Evelynn lists. These entries remain excluded
+from play; the original 1,459 executable entries, 13 playable precons and saved
+match catalog version are preserved. Name-only basic rune imports retain their
+reviewed printing despite the new reference variants.
+
+[Game audio](GAME-AUDIO.md) uses four locally packaged Fish Audio calls and quiet
+Web Audio accents for significant events. Volume, announcer and mute preferences
+are available in Appearance. All four clips belong to the offline application
+cache. [Conditional-trigger fixes](CONDITIONAL-TRIGGERS.md) remove completed Jinx
+effects from later turn steps, shorten empty resolutions and correctly gate
+Mushroom Pouch without removing legitimate reaction windows.
+
+Local required checks pass 1,049 tests in 85 files and 14 focused saved-game
+regressions, plus catalog consistency, report guards and production compilation.
+Fresh private Chromium
+contexts at 1440, 390 and 320 pixels verify the reference catalog and actual
+native audio decoding/playback, saved controls, quiet ordinary actions, pause
+deduplication and Jinx review navigation. These are browser-emulated viewport
+checks, not physical-device tests. Publication is verified against the pushed
+commit on both production aliases.
+
 ## Command placement and stack pacing — 8 October 2026
 
 The [control-flow polish](CONTROL-FLOW-POLISH.md) centres desktop commands,

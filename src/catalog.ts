@@ -18,6 +18,8 @@ export interface CatalogCard {
   keywords: string[];
   collectorNumber: number;
   variant: boolean;
+  referenceOnly?: boolean;
+  sourceUrl?: string;
 }
 export const catalog = data as CatalogCard[];
 export const cardById = new Map(catalog.map((c) => [c.id, c]));

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "catalogFetchedAt": "2026-10-06T12:48:20.286Z",
   "provider": "Riftcodex",
   "catalogScope": "All printings returned by /cards without set, new, rarity, or variant filters; completeness is relative to Riftcodex.",
@@ -8,13 +8,51 @@
   "providerPrintings": 1451,
   "providerSets": 8,
   "localRulesTokens": 8,
-  "registered": 1459,
+  "referencePrintings": 219,
+  "referenceCatalog": {
+    "schemaVersion": 1,
+    "provider": "Hextech Analytics",
+    "sourceUrl": "https://hextechanalytics.com/cards?q=set%3ARAD",
+    "fetchedAt": "2026-10-22T17:38:18.249Z",
+    "sourceUpdatedAt": null,
+    "sourcePageCount": 10,
+    "sourceRecordCount": 219,
+    "sourceDataSha256": "988131325fae08f625fed128cffa697a80f56c54524af1c9f967258a422a8276",
+    "count": 219,
+    "cardDataSha256": "ba342b447ec91c388150f4682a48d59ba52347beeb68813547cb99f3fbd35303",
+    "scope": "All 219 Radiance records returned by the public Hextech Analytics set:RAD library on 22 October 2026. Includes all numbered base cards 001–167, 40 additional numbered/alternate/showcase printings and 12 rune printings. Completeness is relative to this community source; tokens and any other promotional printings are not claimed complete.",
+    "referenceOnly": true,
+    "playableCount": 0,
+    "reason": "Radiance mechanics and individual card behavior require reviewed engine implementations and tests. Even reprints and runes remain blocked until reviewed.",
+    "sets": [
+      {
+        "id": "RAD",
+        "name": "Radiance",
+        "releasedAt": "2026-10-23",
+        "preRiftStartedAt": "2026-10-16",
+        "baseCardCount": 167,
+        "count": 219
+      }
+    ],
+    "officialSources": [
+      "https://playriftbound.com/en-us/news/announcements/the-radiance-overview/",
+      "https://playriftbound.com/en-us/news/announcements/radiance-errata-updates/"
+    ],
+    "verifiedErrataCardIds": [
+      "rad-010-167",
+      "rad-081-167",
+      "rad-154-167",
+      "rad-167-167"
+    ],
+    "attribution": "Unofficial fan project. Structured records are from Hextech Analytics, not Riftcodex or an official Riot API. Card names, rules text, and Riot CDN artwork are property of Riot Games, Inc."
+  },
+  "registered": 1678,
   "playable": 1459,
   "statuses": {
     "scripted": 1108,
     "compiled": 37,
     "alias": 314,
-    "unsupported": 0
+    "unsupported": 219
   },
   "sets": {
     "JDG": {
@@ -61,6 +99,11 @@
       "total": 8,
       "playable": 8,
       "unsupported": 0
+    },
+    "RAD": {
+      "total": 219,
+      "playable": 0,
+      "unsupported": 219
     }
   },
   "precons": [
@@ -180,6 +223,75 @@
       "executableCards": 26,
       "complete": true,
       "missingCardIds": []
+    }
+  ],
+  "referencePrecons": [
+    {
+      "id": "reference-precon-seraphine",
+      "name": "Seraphine · Radiance",
+      "product": "Radiance Showdown",
+      "uniqueCards": 30,
+      "executableCards": 5,
+      "complete": false,
+      "missingCardIds": [
+        "rad-151-167",
+        "rad-138-167",
+        "rad-159-167",
+        "rad-166-167",
+        "rad-065-167",
+        "rad-152-167",
+        "rad-132-167",
+        "rad-134-167",
+        "rad-057-167",
+        "rad-125-167",
+        "rad-060-167",
+        "rad-128-167",
+        "rad-127-167",
+        "rad-059-167",
+        "rad-124-167",
+        "rad-116-167",
+        "rad-053-167",
+        "rad-048-167",
+        "rad-047-167",
+        "rad-119-167",
+        "rad-049-167",
+        "rad-118-167",
+        "rad-122-167",
+        "rad-120-167",
+        "rad-117-167"
+      ]
+    },
+    {
+      "id": "reference-precon-evelynn",
+      "name": "Evelynn · Radiance",
+      "product": "Radiance Showdown",
+      "uniqueCards": 29,
+      "executableCards": 7,
+      "complete": false,
+      "missingCardIds": [
+        "rad-153-167",
+        "rad-090-167",
+        "rad-157-167",
+        "rad-165-167",
+        "rad-109-167",
+        "rad-154-167",
+        "rad-108-167",
+        "rad-086-167",
+        "rad-103-167",
+        "rad-102-167",
+        "rad-106-167",
+        "rad-081-167",
+        "rad-105-167",
+        "rad-104-167",
+        "rad-076-167",
+        "rad-097-167",
+        "rad-070-167",
+        "rad-100-167",
+        "rad-095-167",
+        "rad-099-167",
+        "rad-077-167",
+        "rad-098-167"
+      ]
     }
   ],
   "entries": [
@@ -9476,6 +9588,1977 @@
       "script": {
         "implemented": true
       }
+    },
+    {
+      "name": "Amateur Demolitionist",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-001-167",
+      "rulesCardId": "rad-001-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Banner of Conquest",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-002-167",
+      "rulesCardId": "rad-002-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Bilgewater Tracker",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-003-167",
+      "rulesCardId": "rad-003-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Brawl",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-004-167",
+      "rulesCardId": "rad-004-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Lingering Animus",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-005-167",
+      "rulesCardId": "rad-005-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Scorched Earth",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-006-167",
+      "rulesCardId": "rad-006-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Rally for War",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-007-167",
+      "rulesCardId": "rad-007-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "War Scout",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-008-167",
+      "rulesCardId": "rad-008-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Antagonistic Apparatus",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-009-167",
+      "rulesCardId": "rad-009-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Forbidden Technique",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-010-167",
+      "rulesCardId": "rad-010-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Incorrigible Construct",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-011-167",
+      "rulesCardId": "rad-011-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Runeblade Anvil",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-012-167",
+      "rulesCardId": "rad-012-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Lost to the Sands",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-013-167",
+      "rulesCardId": "rad-013-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Shimmering Swimmer",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-014-167",
+      "rulesCardId": "rad-014-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Akali, Brash",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-015-167",
+      "rulesCardId": "rad-015-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Coalesced Energy",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-016-167",
+      "rulesCardId": "rad-016-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Detonation Amplifier",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-017-167",
+      "rulesCardId": "rad-017-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Drakehound Packmaster",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-018-167",
+      "rulesCardId": "rad-018-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Firebrand Raider",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-019-167",
+      "rulesCardId": "rad-019-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Mordekaiser, Twice Slain",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-020-167",
+      "rulesCardId": "rad-020-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Mordekaiser, Twice Slain",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-020a-167",
+      "rulesCardId": "rad-020a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ekko, Revolutionary",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-021-167",
+      "rulesCardId": "rad-021-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ekko, Revolutionary",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-021a-167",
+      "rulesCardId": "rad-021a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Whirling Twirligig",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-022-167",
+      "rulesCardId": "rad-022-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ziggs, Short-Fused",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-023-167",
+      "rulesCardId": "rad-023-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ziggs, Short-Fused",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-023a-167",
+      "rulesCardId": "rad-023a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Blossoming Dreamroot",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-024-167",
+      "rulesCardId": "rad-024-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Consult the Heavens",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-025-167",
+      "rulesCardId": "rad-025-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Entrenched Boar",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-026-167",
+      "rulesCardId": "rad-026-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Iridescent Avian",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-027-167",
+      "rulesCardId": "rad-027-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ki Burst",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-028-167",
+      "rulesCardId": "rad-028-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Life from Stone",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-029-167",
+      "rulesCardId": "rad-029-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Sanctum Conservator",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-030-167",
+      "rulesCardId": "rad-030-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Stoic Ferryman",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-031-167",
+      "rulesCardId": "rad-031-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Battle Preparations",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-032-167",
+      "rulesCardId": "rad-032-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Command: Attack",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-033-167",
+      "rulesCardId": "rad-033-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Hunker Down",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-034-167",
+      "rulesCardId": "rad-034-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Invigorating Bloom",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-035-167",
+      "rulesCardId": "rad-035-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Storm Raptor",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-036-167",
+      "rulesCardId": "rad-036-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Watchful Curator",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-037-167",
+      "rulesCardId": "rad-037-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ahri, Confident",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-038-167",
+      "rulesCardId": "rad-038-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ephemeral Ward",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-039-167",
+      "rulesCardId": "rad-039-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Heartening Soul",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-040-167",
+      "rulesCardId": "rad-040-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Hush",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-041-167",
+      "rulesCardId": "rad-041-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Orianna, Exquisite",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-042-167",
+      "rulesCardId": "rad-042-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Orianna, Exquisite",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-042a-167",
+      "rulesCardId": "rad-042a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Riven, Broken Blade",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-043-167",
+      "rulesCardId": "rad-043-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Riven, Broken Blade",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-043a-167",
+      "rulesCardId": "rad-043a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Hunting Blind",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-044-167",
+      "rulesCardId": "rad-044-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "K'Sante, Dauntless",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-045-167",
+      "rulesCardId": "rad-045-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "K'Sante, Dauntless",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-045a-167",
+      "rulesCardId": "rad-045a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Resplendent Rostrum",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-046-167",
+      "rulesCardId": "rad-046-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Fanfare",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-047-167",
+      "rulesCardId": "rad-047-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "High Note",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-048-167",
+      "rulesCardId": "rad-048-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Industrious Mechsmith",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-049-167",
+      "rulesCardId": "rad-049-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Mysterious Chronomancer",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-050-167",
+      "rulesCardId": "rad-050-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Parallel Convergence",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-051-167",
+      "rulesCardId": "rad-051-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Resource Extractor",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-052-167",
+      "rulesCardId": "rad-052-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Strigian Oracle",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-053-167",
+      "rulesCardId": "rad-053-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Trinket Peddler",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-054-167",
+      "rulesCardId": "rad-054-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Clanging Sentry",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-055-167",
+      "rulesCardId": "rad-055-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Improvised Projectile",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-056-167",
+      "rulesCardId": "rad-056-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Piltovan Guidebot",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-057-167",
+      "rulesCardId": "rad-057-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Riptide Mage",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-058-167",
+      "rulesCardId": "rad-058-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Supernova",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-059-167",
+      "rulesCardId": "rad-059-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "The Empyrean",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-060-167",
+      "rulesCardId": "rad-060-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ekko, Ingenious",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-061-167",
+      "rulesCardId": "rad-061-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ekko, Ingenious",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-061a-167",
+      "rulesCardId": "rad-061a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Gravity Field",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-062-167",
+      "rulesCardId": "rad-062-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Kai'Sa, Rebel",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-063-167",
+      "rulesCardId": "rad-063-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Scrutinizing Scope",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-064-167",
+      "rulesCardId": "rad-064-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Seraphine, Inspiring",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-065-167",
+      "rulesCardId": "rad-065-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Seraphine, Inspiring",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-065a-167",
+      "rulesCardId": "rad-065a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Spirit of the Forge",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-066-167",
+      "rulesCardId": "rad-066-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Clocktower Guardian",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-067-167",
+      "rulesCardId": "rad-067-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Orianna, Mechanical Marvel",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-068-167",
+      "rulesCardId": "rad-068-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Orianna, Mechanical Marvel",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-068a-167",
+      "rulesCardId": "rad-068-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Zero Point Inflection",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-069-167",
+      "rulesCardId": "rad-069-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Hold 'Em",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-070-167",
+      "rulesCardId": "rad-070-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Nazuman Ntofo",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-071-167",
+      "rulesCardId": "rad-071-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Overloaded Traveler",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-072-167",
+      "rulesCardId": "rad-072-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Pillaged Armory",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-073-167",
+      "rulesCardId": "rad-073-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Raving Witness",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-074-167",
+      "rulesCardId": "rad-074-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Skystrike Squadron",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-075-167",
+      "rulesCardId": "rad-075-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Sneaky Zeebles",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-076-167",
+      "rulesCardId": "rad-076-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Wrath of the Freljord",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-077-167",
+      "rulesCardId": "rad-077-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Armored Tusker",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-078-167",
+      "rulesCardId": "rad-078-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Avalanche",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-079-167",
+      "rulesCardId": "rad-079-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Bloodscent Swarm",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-080-167",
+      "rulesCardId": "rad-080-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Elnuk Herd",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-081-167",
+      "rulesCardId": "rad-081-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Primordial Roar",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-082-167",
+      "rulesCardId": "rad-082-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Stalwart Goatherd",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-083-167",
+      "rulesCardId": "rad-083-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Cataclysm",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-084-167",
+      "rulesCardId": "rad-084-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Graves, Blasting Through",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-085-167",
+      "rulesCardId": "rad-085-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "K'Sante, Courageous",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-086-167",
+      "rulesCardId": "rad-086-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "K'Sante, Courageous",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-086a-167",
+      "rulesCardId": "rad-086a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Portable Portal",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-087-167",
+      "rulesCardId": "rad-087-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Staunch Survivor",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-088-167",
+      "rulesCardId": "rad-088-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Titanic Shrine",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-089-167",
+      "rulesCardId": "rad-089-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Evelynn, Consuming",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-090-167",
+      "rulesCardId": "rad-090-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Evelynn, Consuming",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-090a-167",
+      "rulesCardId": "rad-090a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Jarvan IV, Martial Paragon",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-091-167",
+      "rulesCardId": "rad-091-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Jarvan IV, Martial Paragon",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-091a-167",
+      "rulesCardId": "rad-091a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Seraphic Wyvern",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-092-167",
+      "rulesCardId": "rad-092-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Disposal Expert",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-093-167",
+      "rulesCardId": "rad-093-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Explosimian",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-094-167",
+      "rulesCardId": "rad-094-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Momentary Companion",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-095-167",
+      "rulesCardId": "rad-095-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Satchel Charge",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-096-167",
+      "rulesCardId": "rad-096-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Siren of the Shallows",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-097-167",
+      "rulesCardId": "rad-097-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Siren's Song",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-098-167",
+      "rulesCardId": "rad-098-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Suave Negotiator",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-099-167",
+      "rulesCardId": "rad-099-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "The Waters' Wage",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-100-167",
+      "rulesCardId": "rad-100-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "An Offer You Can't Refuse",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-101-167",
+      "rulesCardId": "rad-101-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Demon Shade",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-102-167",
+      "rulesCardId": "rad-102-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Gutter Guardian",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-103-167",
+      "rulesCardId": "rad-103-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Pitiless Stalker",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-104-167",
+      "rulesCardId": "rad-104-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Reckless Innovator",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-105-167",
+      "rulesCardId": "rad-105-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "The Good Stuff",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-106-167",
+      "rulesCardId": "rad-106-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Bedeviling Stranger",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-107-167",
+      "rulesCardId": "rad-107-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Bushwhack Trap",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-108-167",
+      "rulesCardId": "rad-108-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Evelynn, In Control",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-109-167",
+      "rulesCardId": "rad-109-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Evelynn, In Control",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-109a-167",
+      "rulesCardId": "rad-109a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Lulu, Whimsical",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-110-167",
+      "rulesCardId": "rad-110-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Mechanical Bandit",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-111-167",
+      "rulesCardId": "rad-111-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ziggs, Explosive",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-112-167",
+      "rulesCardId": "rad-112-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ziggs, Explosive",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-112a-167",
+      "rulesCardId": "rad-112a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Angler Wyrm",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-113-167",
+      "rulesCardId": "rad-113-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Riven, Deserter",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-114-167",
+      "rulesCardId": "rad-114-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Riven, Deserter",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-114a-167",
+      "rulesCardId": "rad-114a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Transpositionist",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-115-167",
+      "rulesCardId": "rad-115-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Concert Poster",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-116-167",
+      "rulesCardId": "rad-116-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "For Demacia!",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-117-167",
+      "rulesCardId": "rad-117-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Herald of the Emperor",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-118-167",
+      "rulesCardId": "rad-118-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Hunting Dog",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-119-167",
+      "rulesCardId": "rad-119-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Meticulous Restorationist",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-120-167",
+      "rulesCardId": "rad-120-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "One-Two Punch",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-121-167",
+      "rulesCardId": "rad-121-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Party Crasher",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-122-167",
+      "rulesCardId": "rad-122-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Protector's Shield",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-123-167",
+      "rulesCardId": "rad-123-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Burn Away",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-124-167",
+      "rulesCardId": "rad-124-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Dune Devourer",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-125-167",
+      "rulesCardId": "rad-125-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Mournful Spirit",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-126-167",
+      "rulesCardId": "rad-126-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Rousing Display",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-127-167",
+      "rulesCardId": "rad-127-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Steadfast Outrider",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-128-167",
+      "rulesCardId": "rad-128-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Trifarian Captain",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-129-167",
+      "rulesCardId": "rad-129-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Battlefield Armorer",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-130-167",
+      "rulesCardId": "rad-130-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Demacian Illuminators",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-131-167",
+      "rulesCardId": "rad-131-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Heimerdinger, Academy Instructor",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-132-167",
+      "rulesCardId": "rad-132-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Jarvan IV, Royal Heir",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-133-167",
+      "rulesCardId": "rad-133-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Jarvan IV, Royal Heir",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-133a-167",
+      "rulesCardId": "rad-133a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Raucous Anthem",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-134-167",
+      "rulesCardId": "rad-134-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Remember the Fallen",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-135-167",
+      "rulesCardId": "rad-135-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Dockside Lock-Up",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-136-167",
+      "rulesCardId": "rad-136-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Mordekaiser, Dominating",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-137-167",
+      "rulesCardId": "rad-137-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Mordekaiser, Dominating",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-137a-167",
+      "rulesCardId": "rad-137-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Seraphine, Not Alone",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-138-167",
+      "rulesCardId": "rad-138-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Seraphine, Not Alone",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-138a-167",
+      "rulesCardId": "rad-138-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Boy Who Shattered Time",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-139-167",
+      "rulesCardId": "rad-139-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Chronobreak",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-140-167",
+      "rulesCardId": "rad-140-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Hexplosives Expert",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-141-167",
+      "rulesCardId": "rad-141-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Hexplosive Minefield",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-142-167",
+      "rulesCardId": "rad-142-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Iron Revenant",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-143-167",
+      "rulesCardId": "rad-143-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Realm of Death",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-144-167",
+      "rulesCardId": "rad-144-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Lady of Clockwork",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-145-167",
+      "rulesCardId": "rad-145-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "The Ball",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-146-167",
+      "rulesCardId": "rad-146-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Pride of Nazumah",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-147-167",
+      "rulesCardId": "rad-147-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ntofo Strikes",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-148-167",
+      "rulesCardId": "rad-148-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "The Exile",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-149-167",
+      "rulesCardId": "rad-149-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Blade of the Exile",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-150-167",
+      "rulesCardId": "rad-150-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Starry-Eyed Songstress",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-151-167",
+      "rulesCardId": "rad-151-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Encore",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-152-167",
+      "rulesCardId": "rad-152-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Agony's Embrace",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-153-167",
+      "rulesCardId": "rad-153-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Last Caress",
+      "set": "RAD",
+      "type": "Spell",
+      "cardId": "rad-154-167",
+      "rulesCardId": "rad-154-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Exemplar of Demacia",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-155-167",
+      "rulesCardId": "rad-155-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Demacian Standard",
+      "set": "RAD",
+      "type": "Gear",
+      "cardId": "rad-156-167",
+      "rulesCardId": "rad-156-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Bandle Scouts' Academy",
+      "set": "RAD",
+      "type": "Battlefield",
+      "cardId": "rad-157-167",
+      "rulesCardId": "rad-157-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Black Market",
+      "set": "RAD",
+      "type": "Battlefield",
+      "cardId": "rad-158-167",
+      "rulesCardId": "rad-158-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Black Rose Sanctum",
+      "set": "RAD",
+      "type": "Battlefield",
+      "cardId": "rad-159-167",
+      "rulesCardId": "rad-159-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Cosmic Vista",
+      "set": "RAD",
+      "type": "Battlefield",
+      "cardId": "rad-160-167",
+      "rulesCardId": "rad-160-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Durand Memorial",
+      "set": "RAD",
+      "type": "Battlefield",
+      "cardId": "rad-161-167",
+      "rulesCardId": "rad-161-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Firelights' Hideout",
+      "set": "RAD",
+      "type": "Battlefield",
+      "cardId": "rad-162-167",
+      "rulesCardId": "rad-162-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Hunters' Circle",
+      "set": "RAD",
+      "type": "Battlefield",
+      "cardId": "rad-163-167",
+      "rulesCardId": "rad-163-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Packed Amphitheater",
+      "set": "RAD",
+      "type": "Battlefield",
+      "cardId": "rad-164-167",
+      "rulesCardId": "rad-164-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Rakelstake",
+      "set": "RAD",
+      "type": "Battlefield",
+      "cardId": "rad-165-167",
+      "rulesCardId": "rad-165-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ruined Monastery",
+      "set": "RAD",
+      "type": "Battlefield",
+      "cardId": "rad-166-167",
+      "rulesCardId": "rad-166-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Neeko, Blending In",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-167-167",
+      "rulesCardId": "rad-167-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Boy Who Shattered Time",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-168-167",
+      "rulesCardId": "rad-168-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Hexplosives Expert",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-169-167",
+      "rulesCardId": "rad-169-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Iron Revenant",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-170-167",
+      "rulesCardId": "rad-170-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Lady of Clockwork",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-171-167",
+      "rulesCardId": "rad-145-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Pride of Nazumah",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-172-167",
+      "rulesCardId": "rad-172-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "The Exile",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-173-167",
+      "rulesCardId": "rad-149-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Starry-Eyed Songstress",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-174-167",
+      "rulesCardId": "rad-151-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Agony's Embrace",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-175-167",
+      "rulesCardId": "rad-153-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Exemplar of Demacia",
+      "set": "RAD",
+      "type": "Legend",
+      "cardId": "rad-176-167",
+      "rulesCardId": "rad-155-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ekko, Revolutionary",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-177-167",
+      "rulesCardId": "rad-021a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "K'Sante, Courageous",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-178-167",
+      "rulesCardId": "rad-086a-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Aphelios, Exalted",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-179-167",
+      "rulesCardId": "rad-179-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ezreal, Dashing",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-180-167",
+      "rulesCardId": "rad-180-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Yone, Blademaster",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-181-167",
+      "rulesCardId": "rad-181-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Kayn, Unleashed",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-182-167",
+      "rulesCardId": "rad-182-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Sett, Kingpin",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-183-167",
+      "rulesCardId": "rad-183-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Packed Amphitheater",
+      "set": "RAD",
+      "type": "Battlefield",
+      "cardId": "rad-184-167",
+      "rulesCardId": "rad-164-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Fury Rune",
+      "set": "RAD",
+      "type": "Rune",
+      "cardId": "rad-r01",
+      "rulesCardId": "rad-r01",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Fury Rune",
+      "set": "RAD",
+      "type": "Rune",
+      "cardId": "rad-r01a",
+      "rulesCardId": "rad-r01",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Calm Rune",
+      "set": "RAD",
+      "type": "Rune",
+      "cardId": "rad-r02",
+      "rulesCardId": "rad-r02",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Calm Rune",
+      "set": "RAD",
+      "type": "Rune",
+      "cardId": "rad-r02a",
+      "rulesCardId": "rad-r02",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Mind Rune",
+      "set": "RAD",
+      "type": "Rune",
+      "cardId": "rad-r03",
+      "rulesCardId": "rad-r03",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Mind Rune",
+      "set": "RAD",
+      "type": "Rune",
+      "cardId": "rad-r03a",
+      "rulesCardId": "rad-r03",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Body Rune",
+      "set": "RAD",
+      "type": "Rune",
+      "cardId": "rad-r04",
+      "rulesCardId": "rad-r04",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Body Rune",
+      "set": "RAD",
+      "type": "Rune",
+      "cardId": "rad-r04a",
+      "rulesCardId": "rad-r04",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Chaos Rune",
+      "set": "RAD",
+      "type": "Rune",
+      "cardId": "rad-r05",
+      "rulesCardId": "rad-r05",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Chaos Rune",
+      "set": "RAD",
+      "type": "Rune",
+      "cardId": "rad-r05a",
+      "rulesCardId": "rad-r05",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Order Rune",
+      "set": "RAD",
+      "type": "Rune",
+      "cardId": "rad-r06",
+      "rulesCardId": "rad-r06",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Order Rune",
+      "set": "RAD",
+      "type": "Rune",
+      "cardId": "rad-r06a",
+      "rulesCardId": "rad-r06",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Ahri, Confident",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-sp1-005",
+      "rulesCardId": "rad-sp1-005",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Akali, Brash",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-sp2-005",
+      "rulesCardId": "rad-sp2-005",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Evelynn, In Control",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-sp3-005",
+      "rulesCardId": "rad-109-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Kai'Sa, Rebel",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-sp4-005",
+      "rulesCardId": "rad-sp4-005",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+    },
+    {
+      "name": "Seraphine, Not Alone",
+      "set": "RAD",
+      "type": "Unit",
+      "cardId": "rad-sp5-005",
+      "rulesCardId": "rad-138-167",
+      "status": "unsupported",
+      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
     },
     {
       "name": "Against the Odds",

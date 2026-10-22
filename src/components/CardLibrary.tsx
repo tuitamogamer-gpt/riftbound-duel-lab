@@ -15,8 +15,15 @@ import {
   X,
 } from "lucide-react";
 import { useI18n } from "../i18n";
-import { catalog, type CatalogCard } from "../catalog";
-import { catalogMeta, isCardType } from "../data/cards";
+import { catalog, cardById, type CatalogCard } from "../catalog";
+import {
+  catalogMeta,
+  isCardType,
+  referenceCards,
+  referenceCatalogMeta,
+} from "../data/cards";
+import { referencePreconDecks, type StarterDeck } from "../data/decks";
+import { rulesTokens } from "../data/tokens";
 import { scripts } from "../game/scripts";
 import { canonicalBuilderId } from "../game/deck-builder";
 import {
@@ -29,12 +36,82 @@ import { Card } from "./Card";
 import "./CardLibrary.css";
 
 const supported = (card: CatalogCard) =>
-  Boolean(scripts[card.id]) || card.type === "Rune";
+  !card.referenceOnly && (Boolean(scripts[card.id]) || card.type === "Rune");
 const catalogSets = [
   ...new Map(catalog.map((card) => [card.set, card.setName])).entries(),
 ];
 const printingSearch = createCardSearchIndex(catalog);
 const faceSearch = createCardSearchIndex(catalog, canonicalBuilderId);
+
+function ReferencePrecon({
+  deck,
+  inspect,
+}: {
+  deck: StarterDeck;
+  inspect: (card: CatalogCard) => void;
+}) {
+  const { t } = useI18n();
+  const groups = [
+    { label: "Legend", entries: [{ cardId: deck.legendId, count: 1 }] },
+    {
+      label: "Chosen champion",
+      entries: [{ cardId: deck.championId, count: 1 }],
+    },
+    { label: "Main deck", entries: deck.main },
+    { label: "Runes", entries: deck.runes },
+    {
+      label: "Battlefields",
+      entries: (deck.battlefieldIds ?? [deck.battlefieldId]).map((cardId) => ({
+        cardId,
+        count: 1,
+      })),
+    },
+  ];
+  const sourceUrl = deck.sourceUrl ?? deck.sourceUrls?.[0];
+  return (
+    <details className="library-reference-deck">
+      <summary>
+        <span>{deck.name}</span>
+        <ChevronDown size={16} aria-hidden="true" />
+      </summary>
+      <div className="library-reference-deck-content">
+        <p>
+          {t("{count} main-deck cards, including the chosen champion", {
+            count: 1 + deck.main.reduce((sum, entry) => sum + entry.count, 0),
+          })}
+        </p>
+        <div className="library-reference-deck-groups">
+          {groups.map(({ label, entries }) => (
+            <section key={label}>
+              <h3>{t(label)}</h3>
+              <ul>
+                {entries.map(({ cardId, count }) => {
+                  const card = cardById.get(cardId);
+                  if (!card) return null;
+                  return (
+                    <li key={cardId}>
+                      <span className="library-reference-quantity">
+                        {count}×
+                      </span>
+                      <button type="button" onClick={() => inspect(card)}>
+                        {card.name}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
+        {sourceUrl && (
+          <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
+            {t("Official decklist")}
+          </a>
+        )}
+      </div>
+    </details>
+  );
+}
 
 export function CardLibrary({
   inspect,
@@ -42,6 +119,13 @@ export function CardLibrary({
   inspect: (c: CatalogCard) => void;
 }) {
   const { t, locale } = useI18n();
+  const snapshotDate = (date: string) =>
+    new Date(date).toLocaleDateString(locale === "sr" ? "sr-Latn" : locale, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC",
+    });
   const searchInput = useRef<HTMLInputElement>(null);
   const toolbar = useRef<HTMLElement>(null);
   const refinement = useRef<HTMLDetailsElement>(null);
@@ -211,23 +295,74 @@ export function CardLibrary({
         </div>
         <p className="catalog-snapshot">
           {t(
-            "{printings} printings · {tokens} rules tokens · Snapshot {date}",
+            "{printings} Riftcodex printings · {references} reference printings · {tokens} rules tokens",
             {
               printings: catalogMeta.count,
-              tokens: catalog.length - catalogMeta.count,
-              date: new Date(catalogMeta.fetchedAt).toLocaleDateString(
-                locale === "sr" ? "sr-Latn" : locale,
-                {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                  timeZone: "UTC",
-                },
-              ),
+              references: referenceCards.length,
+              tokens: rulesTokens.length,
             },
           )}
+          <span>
+            {t("Riftcodex snapshot: {date}", {
+              date: snapshotDate(catalogMeta.fetchedAt),
+            })}
+          </span>
         </p>
       </header>
+
+      {referencePreconDecks.length > 0 && (
+        <details className="library-references">
+          <summary>
+            <span>
+              {t("Radiance precons · {count}", {
+                count: referencePreconDecks.length,
+              })}
+            </span>
+            <span className="library-reference-status">
+              {t("Reference only")}
+            </span>
+            <ChevronDown size={17} aria-hidden="true" />
+          </summary>
+          <div className="library-reference-content">
+            <p>
+              {t(
+                "Explore the official lists and their cards. These decks are not available for play while their rules are being implemented.",
+              )}
+            </p>
+            <div className="library-reference-decks">
+              {referencePreconDecks.map((deck) => (
+                <ReferencePrecon key={deck.id} deck={deck} inspect={inspect} />
+              ))}
+            </div>
+            <div className="library-reference-footer">
+              <p>
+                {t("Reference card data: {source} · {date}", {
+                  source: referenceCatalogMeta.provider,
+                  date: snapshotDate(referenceCatalogMeta.fetchedAt),
+                })}
+              </p>
+              <button
+                type="button"
+                className="outline-button"
+                onClick={() => {
+                  setSearch("");
+                  setDomain("Sve domene");
+                  setType("Sve vrste");
+                  setSet("RAD");
+                  setBaseOnly(false);
+                  setOnlyScripted(false);
+                  setLimit(60);
+                  searchInput.current?.focus({ preventScroll: true });
+                  toolbar.current?.scrollIntoView({ block: "start" });
+                }}
+              >
+                {t("View Radiance cards")}
+                <ArrowRight size={16} aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </details>
+      )}
 
       <section
         className="library-toolbar"
@@ -493,7 +628,9 @@ export function CardLibrary({
                 {supported(card) && <Check size={12} aria-hidden="true" />}
                 {supported(card)
                   ? t("● Podržana").replace(/^●\s*/, "")
-                  : card.set}
+                  : card.referenceOnly
+                    ? t("Reference only")
+                    : card.set}
               </span>
             </div>
           </div>

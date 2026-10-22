@@ -1,0 +1,262 @@
+[
+  {
+    "id": "reference-precon-seraphine",
+    "name": "Seraphine · Radiance",
+    "champion": "Seraphine",
+    "title": "Radiance Showdown",
+    "description": "Official Radiance Showdown list for reference. Rules implementation is pending.",
+    "difficulty": "Srednje",
+    "archetype": "Showdown precon",
+    "color": "#c68ee8",
+    "domains": ["Mind", "Order"],
+    "legendId": "rad-151-167",
+    "championId": "rad-138-167",
+    "battlefieldId": "rad-159-167",
+    "battlefieldIds": ["rad-159-167", "rad-166-167", "unl-218-219"],
+    "main": [
+      {
+        "cardId": "rad-065-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-152-167",
+        "count": 1
+      },
+      {
+        "cardId": "rad-132-167",
+        "count": 1
+      },
+      {
+        "cardId": "rad-134-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-057-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-125-167",
+        "count": 1
+      },
+      {
+        "cardId": "rad-060-167",
+        "count": 1
+      },
+      {
+        "cardId": "rad-128-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-127-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-059-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-124-167",
+        "count": 1
+      },
+      {
+        "cardId": "rad-116-167",
+        "count": 3
+      },
+      {
+        "cardId": "rad-053-167",
+        "count": 3
+      },
+      {
+        "cardId": "rad-048-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-047-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-119-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-049-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-118-167",
+        "count": 1
+      },
+      {
+        "cardId": "rad-122-167",
+        "count": 1
+      },
+      {
+        "cardId": "ogn-211-298",
+        "count": 2
+      },
+      {
+        "cardId": "rad-120-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-117-167",
+        "count": 1
+      },
+      {
+        "cardId": "unl-066-219",
+        "count": 1
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ogn-089-298",
+        "count": 6
+      },
+      {
+        "cardId": "ogn-214-298",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Radiance Showdown",
+    "sourceUrl": "https://playriftbound.com/en-us/news/announcements/the-radiance-overview/",
+    "sourceUrls": [
+      "https://playriftbound.com/en-us/news/announcements/the-radiance-overview/"
+    ],
+    "verifiedAt": "2026-10-22",
+    "importNotes": [
+      "Transcribed from the Riot Radiance overview updated 16 October 2026. The chosen champion is stored separately from the other 39 main-deck cards.",
+      "Reference only: excluded from playable presets until every card has a reviewed rules implementation.",
+      "Source lists names and quantities, not every printing ID. Available Radiance base printings are preferred; matching existing cards are reused when the name is a reprint. Retail token inserts are recorded in the import audit and are not main-deck cards."
+    ]
+  },
+  {
+    "id": "reference-precon-evelynn",
+    "name": "Evelynn · Radiance",
+    "champion": "Evelynn",
+    "title": "Radiance Showdown",
+    "description": "Official Radiance Showdown list for reference. Rules implementation is pending.",
+    "difficulty": "Srednje",
+    "archetype": "Showdown precon",
+    "color": "#c976b1",
+    "domains": ["Body", "Chaos"],
+    "legendId": "rad-153-167",
+    "championId": "rad-090-167",
+    "battlefieldId": "rad-157-167",
+    "battlefieldIds": ["rad-157-167", "rad-165-167", "ogn-278-298"],
+    "main": [
+      {
+        "cardId": "rad-109-167",
+        "count": 1
+      },
+      {
+        "cardId": "unl-141-219",
+        "count": 2
+      },
+      {
+        "cardId": "rad-154-167",
+        "count": 1
+      },
+      {
+        "cardId": "rad-108-167",
+        "count": 1
+      },
+      {
+        "cardId": "rad-086-167",
+        "count": 1
+      },
+      {
+        "cardId": "rad-103-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-102-167",
+        "count": 1
+      },
+      {
+        "cardId": "rad-106-167",
+        "count": 1
+      },
+      {
+        "cardId": "rad-081-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-105-167",
+        "count": 2
+      },
+      {
+        "cardId": "ven-106-166--6a517609ad64d2d80a4f03d5",
+        "count": 2
+      },
+      {
+        "cardId": "rad-104-167",
+        "count": 1
+      },
+      {
+        "cardId": "rad-076-167",
+        "count": 3
+      },
+      {
+        "cardId": "rad-097-167",
+        "count": 3
+      },
+      {
+        "cardId": "rad-070-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-100-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-095-167",
+        "count": 2
+      },
+      {
+        "cardId": "rad-099-167",
+        "count": 2
+      },
+      {
+        "cardId": "ogn-135-298",
+        "count": 2
+      },
+      {
+        "cardId": "rad-077-167",
+        "count": 2
+      },
+      {
+        "cardId": "sfd-121-221",
+        "count": 2
+      },
+      {
+        "cardId": "rad-098-167",
+        "count": 2
+      }
+    ],
+    "runes": [
+      {
+        "cardId": "ogn-126-298",
+        "count": 6
+      },
+      {
+        "cardId": "ogn-166-298",
+        "count": 6
+      }
+    ],
+    "source": "Official preconstructed deck",
+    "format": "historical-precon",
+    "product": "Radiance Showdown",
+    "sourceUrl": "https://playriftbound.com/en-us/news/announcements/the-radiance-overview/",
+    "sourceUrls": [
+      "https://playriftbound.com/en-us/news/announcements/the-radiance-overview/"
+    ],
+    "verifiedAt": "2026-10-22",
+    "importNotes": [
+      "Transcribed from the Riot Radiance overview updated 16 October 2026. The chosen champion is stored separately from the other 39 main-deck cards.",
+      "Reference only: excluded from playable presets until every card has a reviewed rules implementation.",
+      "Source lists names and quantities, not every printing ID. Available Radiance base printings are preferred; matching existing cards are reused when the name is a reprint. Retail token inserts are recorded in the import audit and are not main-deck cards."
+    ]
+  }
+]

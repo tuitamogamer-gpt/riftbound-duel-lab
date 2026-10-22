@@ -3,6 +3,8 @@ import { useSyncExternalStore } from "react";
 export type InterfacePreferences = {
   reducedEffects: boolean;
   soundEnabled: boolean;
+  soundVolume: number;
+  announcerEnabled: boolean;
   boardContrast: "standard" | "high";
 };
 
@@ -11,6 +13,8 @@ const changed = "riftbound:interface-change";
 const defaults: InterfacePreferences = {
   reducedEffects: false,
   soundEnabled: false,
+  soundVolume: 0.55,
+  announcerEnabled: true,
   boardContrast: "standard",
 };
 let cachedRaw: string | null | undefined;
@@ -27,6 +31,12 @@ export function parseInterfacePreferences(
     return {
       reducedEffects: record.reducedEffects === true,
       soundEnabled: record.soundEnabled === true,
+      soundVolume:
+        typeof record.soundVolume === "number" &&
+        Number.isFinite(record.soundVolume)
+          ? Math.max(0, Math.min(1, record.soundVolume))
+          : defaults.soundVolume,
+      announcerEnabled: record.announcerEnabled !== false,
       boardContrast: record.boardContrast === "high" ? "high" : "standard",
     };
   } catch {

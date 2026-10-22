@@ -148,6 +148,20 @@ export function resolveImportCard(
   // A section can disambiguate a Legend and Champion Unit with the same name.
   const typed = matches.filter((card) => sectionType(section, card));
   if (typed.length) matches = typed;
+  // A reference provider may omit the Basic supertype on blank runes. Keep
+  // existing name-only lists stable; explicit printing IDs above remain exact.
+  const reviewedBasicRunes = matches.filter(
+    (card) =>
+      !card.referenceOnly && card.type === "Rune" && card.supertype === "Basic",
+  );
+  if (
+    reviewedBasicRunes.length &&
+    matches.every(
+      (card) =>
+        card.type === "Rune" && !card.text.replace(/\[NO TEXT\]/gi, "").trim(),
+    )
+  )
+    matches = reviewedBasicRunes;
   const canonical = matches.filter((card) => !card.variant);
   return uniqueRulesFaces(canonical.length ? canonical : matches);
 }
@@ -471,13 +485,17 @@ export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
 }
 
 export function getDeckScriptCoverage(deck: StarterDeck): DeckScriptCoverage {
-  // Basic runes use the engine resource rules, not per-card effect scripts.
+  // Reviewed basic runes use the engine resource rules. Reference imports
+  // still need explicit review before their printings are playable.
   const ids = [
     ...new Set([
       deck.legendId,
       deck.championId,
       ...fieldIds(deck),
       ...deck.main.map((entry) => entry.cardId),
+      ...deck.runes
+        .filter((entry) => cardsById[entry.cardId]?.referenceOnly)
+        .map((entry) => entry.cardId),
     ]),
   ];
   const missing = ids

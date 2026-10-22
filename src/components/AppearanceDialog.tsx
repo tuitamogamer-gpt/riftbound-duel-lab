@@ -1,5 +1,14 @@
 import { useId, useRef, useState } from "react";
-import { Check, Eye, Keyboard, Sparkles, Volume2, X } from "lucide-react";
+import {
+  Check,
+  Eye,
+  Keyboard,
+  Mic,
+  Play,
+  Sparkles,
+  Volume2,
+  X,
+} from "lucide-react";
 import { useI18n } from "../i18n";
 import {
   setInterfacePreferences,
@@ -9,6 +18,7 @@ import { AppDialog } from "./AppDialog";
 import { DialogTabs } from "./DialogTabs";
 import { CardBackPicker } from "./CardBackPicker";
 import type { SleevePlayer } from "../data/cardbacks";
+import { previewGameAudio, unlockGameAudio } from "../audio/player";
 import "./AppearanceDialog.css";
 
 export function AppearanceDialog({
@@ -24,6 +34,7 @@ export function AppearanceDialog({
   const body = useRef<HTMLDivElement>(null);
   const [section, setSection] = useState<"backs" | "display">("backs");
   const [saved, setSaved] = useState(true);
+  const [audioPreviewFailed, setAudioPreviewFailed] = useState(false);
   return (
     <AppDialog
       className="appearance-dialog"
@@ -127,21 +138,101 @@ export function AppearanceDialog({
               <Volume2 size={21} aria-hidden="true" />
               <span>
                 <strong>{t("Game sound")}</strong>
-                <small>{t("Play a short cue when an action resolves.")}</small>
+                <small>{t("Combat, scoring and decisive moments.")}</small>
               </span>
               <input
                 type="checkbox"
                 role="switch"
                 checked={preferences.soundEnabled}
-                onChange={(event) =>
+                onChange={(event) => {
                   setSaved(
                     setInterfacePreferences({
                       soundEnabled: event.target.checked,
+                    }),
+                  );
+                  void unlockGameAudio({
+                    enabled: event.target.checked,
+                    volume: preferences.soundVolume,
+                    announcerEnabled: preferences.announcerEnabled,
+                  });
+                }}
+              />
+            </label>
+            <div className="appearance-volume">
+              <label htmlFor={`${id}-volume`}>
+                {t("Volume")}
+                <output htmlFor={`${id}-volume`}>
+                  {Math.round(preferences.soundVolume * 100)}%
+                </output>
+              </label>
+              <input
+                id={`${id}-volume`}
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value={Math.round(preferences.soundVolume * 100)}
+                disabled={!preferences.soundEnabled}
+                aria-valuetext={`${Math.round(preferences.soundVolume * 100)}%`}
+                onChange={(event) =>
+                  setSaved(
+                    setInterfacePreferences({
+                      soundVolume: Number(event.target.value) / 100,
+                    }),
+                  )
+                }
+              />
+            </div>
+            <label className="appearance-option">
+              <Mic size={21} aria-hidden="true" />
+              <span>
+                <strong>{t("Announcer")}</strong>
+                <small>
+                  {t(
+                    "Short English calls for champions, battle and the result.",
+                  )}
+                </small>
+              </span>
+              <input
+                type="checkbox"
+                role="switch"
+                checked={preferences.announcerEnabled}
+                disabled={!preferences.soundEnabled}
+                onChange={(event) =>
+                  setSaved(
+                    setInterfacePreferences({
+                      announcerEnabled: event.target.checked,
                     }),
                   )
                 }
               />
             </label>
+            <div className="appearance-audio-preview">
+              <button
+                type="button"
+                disabled={
+                  !preferences.soundEnabled || preferences.soundVolume === 0
+                }
+                onClick={() => {
+                  setAudioPreviewFailed(false);
+                  void previewGameAudio({
+                    enabled: preferences.soundEnabled,
+                    volume: preferences.soundVolume,
+                    announcerEnabled: preferences.announcerEnabled,
+                  }).then((played) => setAudioPreviewFailed(!played));
+                }}
+              >
+                <Play size={16} aria-hidden="true" />
+                {t("Play sample")}
+              </button>
+              <span role="status">
+                {audioPreviewFailed
+                  ? t("Sound could not start. Try the sample again.")
+                  : preferences.soundEnabled
+                    ? t("Only important game moments make a sound.")
+                    : t("Sound stays off until you enable it.")}
+              </span>
+            </div>
           </div>
           <details className="appearance-shortcuts">
             <summary>

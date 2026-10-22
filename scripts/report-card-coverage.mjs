@@ -27,18 +27,30 @@ const server = await createServer({
   appType: "custom",
 });
 try {
-  const { cards, catalogMeta } =
-    await server.ssrLoadModule("/src/data/cards.ts");
+  const {
+    cards,
+    catalogMeta,
+    providerCards,
+    referenceCards,
+    referenceCatalogMeta,
+  } = await server.ssrLoadModule("/src/data/cards.ts");
   const { cardRegistry } = await server.ssrLoadModule("/src/game/scripts.ts");
-  const { officialPreconDecks, validateDeck } =
+  const { officialPreconDecks, referencePreconDecks, validateDeck } =
     await server.ssrLoadModule("/src/data/decks.ts");
-  const providerCards = cards.filter((card) => card.set !== "TOKEN");
   if (
     providerCards.length !== catalogMeta.count ||
     catalogDigest(providerCards) !== catalogMeta.cardDataSha256
   )
     throw new Error(
       "Saved catalog count or SHA-256 differs from its metadata.",
+    );
+  if (
+    referenceCards.length !== referenceCatalogMeta.count ||
+    catalogDigest(referenceCards) !== referenceCatalogMeta.cardDataSha256 ||
+    referenceCards.some((card) => !card.referenceOnly || !card.sourceUrl)
+  )
+    throw new Error(
+      "Reference catalog count, provenance or SHA-256 differs from its metadata.",
     );
   if (new Set(cards.map((card) => card.id)).size !== cards.length)
     throw new Error("Duplicate catalog card ID.");
@@ -48,6 +60,10 @@ try {
     .map((card) => {
       const entry = cardRegistry[card.id];
       if (!entry) throw new Error(`Unregistered card: ${card.id}`);
+      if (card.referenceOnly && entry.script)
+        throw new Error(
+          `Unreviewed reference card became playable: ${card.id}`,
+        );
       statuses[entry.status]++;
       sets[card.set] ??= { total: 0, playable: 0, unsupported: 0 };
       sets[card.set].total++;
@@ -60,11 +76,11 @@ try {
       throw new Error(`Saved catalog count differs for set ${set.id}.`);
   }
   if (
-    Object.keys(sets).filter((set) => set !== "TOKEN").length !==
+    new Set(providerCards.map((card) => card.set)).size !==
     catalogMeta.sets.length
   )
     throw new Error("Saved catalog sets differ from its metadata.");
-  const precons = officialPreconDecks.map((deck) => {
+  const preconCoverage = (deck) => {
     const errors = validateDeck(deck);
     if (errors.length)
       throw new Error(
@@ -89,9 +105,15 @@ try {
       complete: missingCardIds.length === 0,
       missingCardIds,
     };
-  });
+  };
+  const precons = officialPreconDecks.map(preconCoverage);
+  const referencePrecons = referencePreconDecks.map(preconCoverage);
+  if (referencePrecons.some((deck) => deck.complete))
+    throw new Error(
+      "Reference precon is executable; review its placement in the playable catalog.",
+    );
   const report = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     catalogFetchedAt: catalogMeta.fetchedAt,
     provider: catalogMeta.provider,
     catalogScope: catalogMeta.scope,
@@ -99,12 +121,15 @@ try {
     catalogDataSha256: catalogMeta.cardDataSha256,
     providerPrintings: catalogMeta.count,
     providerSets: catalogMeta.sets.length,
-    localRulesTokens: cards.length - providerCards.length,
+    localRulesTokens: cards.filter((card) => card.set === "TOKEN").length,
+    referencePrintings: referenceCards.length,
+    referenceCatalog: referenceCatalogMeta,
     registered: entries.length,
     playable: entries.length - statuses.unsupported,
     statuses,
     sets,
     precons,
+    referencePrecons,
     entries,
   };
   const content = JSON.stringify(report, null, 2) + "\n";
@@ -123,9 +148,13 @@ try {
     "",
     `Saved catalog fetched **${date(report.catalogFetchedAt)}**: **${count(report.providerPrintings)} provider printings** in **${report.providerSets} sets**, plus **${report.localRulesTokens} local rules tokens**. Completeness is relative to ${report.provider}; its latest reported record update is **${date(report.catalogSourceUpdatedAt)}**.`,
     "",
+    `Supplemental reference catalog fetched **${date(referenceCatalogMeta.fetchedAt)}**: **${count(report.referencePrintings)} Radiance printings** from **${referenceCatalogMeta.provider}**, including all **167 numbered base cards**. These entries are available for browsing and are blocked from play pending reviewed rules implementations. Source coverage does not claim every token or promotion.`,
+    "",
     `Executable registration: **${count(report.playable)} / ${count(report.registered)} entries**, with **${count(statuses.unsupported)} unsupported** (${count(statuses.scripted)} scripted, ${count(statuses.compiled)} compiled, ${count(statuses.alias)} aliases). Counts include printings and tokens, rather than only distinct card designs.`,
     "",
     `Retail precons: **${completePrecons} / ${precons.length}** have complete executable coverage. All ${precons.length} lists have valid structure and complete catalog references. Historical retail contents and current tournament legality remain separate.`,
+    "",
+    `Additional official lists: **${referencePrecons.length} Radiance Showdown precons** (Seraphine and Evelynn) have valid structure and complete catalog references. They are visible as reference lists and excluded from playable presets and bot matrices.`,
     summaryEnd,
   ].join("\n");
   for (const file of summaryFiles) {
@@ -148,7 +177,7 @@ try {
     }
   }
   console.log(
-    `${report.registered} registered (${report.providerPrintings} provider printings); ${report.playable} playable; ${statuses.unsupported} require rules implementation.`,
+    `${report.registered} registered (${report.providerPrintings} provider + ${report.referencePrintings} reference printings + ${report.localRulesTokens} tokens); ${report.playable} playable; ${statuses.unsupported} require rules implementation.`,
   );
   console.log(JSON.stringify(sets, null, 2));
   console.log(

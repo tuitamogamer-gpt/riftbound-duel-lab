@@ -33,6 +33,22 @@ export function pendingChoiceCardId(game: GameState) {
   );
 }
 
+function previousEffectInStep(review: Review | null, visible: GameState) {
+  if (!review) return;
+  for (let index = review.index - 1; index >= 0; index--) {
+    const frame = review.frames[index];
+    // A completed Beginning trigger must leave with its step. Otherwise an
+    // old Legend remains labelled "resolving" throughout Channel and Draw.
+    if (
+      frame.state.turn !== visible.turn ||
+      frame.state.currentPlayer !== visible.currentPlayer ||
+      frame.state.turnStep !== visible.turnStep
+    )
+      return;
+    if (frame.effect && frame.effect.stage !== "announced") return frame.effect;
+  }
+}
+
 /** The visible frame is the only authority during playback, never review.final. */
 export function getActionStackView(game: GameState, review: Review | null) {
   const frame = review?.frames[review.index];
@@ -44,12 +60,7 @@ export function getActionStackView(game: GameState, review: Review | null) {
       : review.before
     : undefined;
   const feedback = getEffectView(review);
-  const publicEffect =
-    frame?.effect ??
-    review?.frames
-      .slice(0, review.index)
-      .reverse()
-      .find((past) => past.effect && past.effect.stage !== "announced")?.effect;
+  const publicEffect = frame?.effect ?? previousEffectInStep(review, visible);
   const effectSource = findCard(publicEffect?.cardId);
   const cards: PresentedStackCard[] = [];
   const publicPlay =

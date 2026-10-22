@@ -8,12 +8,45 @@ import {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("interface preferences", () => {
+  it("migrates existing sound settings without unmuting a saved preference", () => {
+    expect(parseInterfacePreferences('{"soundEnabled":true}')).toMatchObject({
+      soundEnabled: true,
+      soundVolume: 0.55,
+      announcerEnabled: true,
+    });
+    expect(
+      parseInterfacePreferences(
+        '{"soundEnabled":false,"announcerEnabled":false,"soundVolume":0}',
+      ),
+    ).toMatchObject({
+      soundEnabled: false,
+      soundVolume: 0,
+      announcerEnabled: false,
+    });
+  });
+
+  it("bounds saved volume and recovers malformed audio values", () => {
+    expect(parseInterfacePreferences('{"soundVolume":8}').soundVolume).toBe(1);
+    expect(parseInterfacePreferences('{"soundVolume":-2}').soundVolume).toBe(0);
+    for (const value of [null, "0.9", false, {}, []]) {
+      expect(
+        parseInterfacePreferences(JSON.stringify({ soundVolume: value }))
+          .soundVolume,
+      ).toBe(0.55);
+    }
+    expect(parseInterfacePreferences('{"soundVolume":1e999}').soundVolume).toBe(
+      0.55,
+    );
+  });
+
   it.each([null, "broken", "null", "42", '"high"', "[]"])(
     "recovers safe defaults from an absent or invalid stored value: %s",
     (value) => {
       expect(parseInterfacePreferences(value)).toEqual({
         reducedEffects: false,
         soundEnabled: false,
+        soundVolume: 0.55,
+        announcerEnabled: true,
         boardContrast: "standard",
       });
     },
@@ -27,6 +60,8 @@ describe("interface preferences", () => {
     ).toEqual({
       reducedEffects: false,
       soundEnabled: false,
+      soundVolume: 0.55,
+      announcerEnabled: true,
       boardContrast: "standard",
     });
     expect(
@@ -36,6 +71,8 @@ describe("interface preferences", () => {
     ).toEqual({
       reducedEffects: true,
       soundEnabled: false,
+      soundVolume: 0.55,
+      announcerEnabled: true,
       boardContrast: "high",
     });
   });
@@ -56,6 +93,8 @@ describe("interface preferences", () => {
     expect(JSON.parse(values.get(INTERFACE_PREFERENCES_KEY)!)).toEqual({
       reducedEffects: true,
       soundEnabled: false,
+      soundVolume: 0.55,
+      announcerEnabled: true,
       boardContrast: "high",
     });
   });

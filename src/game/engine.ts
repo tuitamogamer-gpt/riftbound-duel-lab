@@ -6742,6 +6742,26 @@ function trigger(
         ? { ...effect, condition: undefined }
         : effect,
     );
+  // Mushroom Pouch's immediate "if" belongs to the trigger condition
+  // (Core Rules 383.2.a.1). Check it now and retain the draw if its Hidden
+  // card is revealed before resolution. Jinx's trailing hand-size "if"
+  // belongs to her effect and must still be checked only at resolution.
+  effects = effects
+    .filter(
+      (effect) =>
+        effect.condition !== "hiddenControlled" ||
+        s.hidden?.some(
+          (hidden) =>
+            hidden.owner === p &&
+            s.fields.find((field) => field.id === hidden.location)
+              ?.controller === p,
+        ),
+    )
+    .map((effect) =>
+      effect.condition === "hiddenControlled"
+        ? { ...effect, condition: undefined }
+        : effect,
+    );
   effects = effects
     .filter(
       (effect) =>

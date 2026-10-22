@@ -3,6 +3,7 @@ import type { GameAction, GameState, TurnStep } from "./types";
 import { getRuneChanges } from "./rune-presentation";
 import { scoreMoment, phaseMoment, championMoment } from "./table-presentation";
 import { publicTableEvents } from "./event-presentation";
+import { getRulesCardId } from "./scripts";
 import type { PlaybackSpeed } from "./playback";
 
 export function visibleTurnStep(game: GameState): TurnStep {
@@ -68,6 +69,17 @@ function baseReviewDelay(review: Review): number {
       ? 4400 + Math.min(2, frame.draw.count - 1) * 500
       : 2800;
   if (phaseMoment(review)) return 2600;
+  // The trigger has already left the chain and resolution has begun: nobody
+  // can respond between this public hand-count check and Jinx's conditional
+  // draw. Keep her real reaction window; shorten only this known empty effect.
+  if (
+    frame.effect?.stage === "resolving" &&
+    getRulesCardId(frame.effect.cardId ?? "") === "ogn-251-298" &&
+    frame.effect.sourceId === "legend" &&
+    frame.effect.player !== undefined &&
+    frame.state.players[frame.effect.player].hand.length > 1
+  )
+    return 450;
   const events = publicTableEvents(review);
   if (events.some((event) => event.kind === "victory")) return 3000;
   const publicPlay =

@@ -61,6 +61,8 @@ import { RouteBoundary } from "./components/RouteBoundary";
 import { MatchResultPanel } from "./components/MatchResultPanel";
 import { DuelGuide } from "./components/DuelGuide";
 import { useDuelGuide } from "./hooks/useDuelGuide";
+import { useGameAudio } from "./hooks/useGameAudio";
+import { unlockGameAudio } from "./audio/player";
 import { tableFocus } from "./game/table-focus";
 import {
   readLobbyPreferences,
@@ -197,7 +199,7 @@ const BoardInteraction = createContext<{
 }>({ game: null, legal: [], actions: [], choose: () => {} });
 
 const supported = (c: CatalogCard) =>
-  Boolean(scripts[c.id]) || c.type === "Rune";
+  !c.referenceOnly && (Boolean(scripts[c.id]) || c.type === "Rune");
 const locationName = (l?: string) =>
   l === "base:0"
     ? "Tvoja baza"
@@ -208,23 +210,6 @@ const locationName = (l?: string) =>
         : l === "field:1"
           ? "Desno bojište"
           : "Igra";
-function sound() {
-  try {
-    const a = new AudioContext();
-    const o = a.createOscillator(),
-      g = a.createGain();
-    o.connect(g);
-    g.connect(a.destination);
-    o.frequency.setValueAtTime(430, a.currentTime);
-    o.frequency.exponentialRampToValueAtTime(220, a.currentTime + 0.12);
-    g.gain.setValueAtTime(0.045, a.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.18);
-    o.start();
-    o.stop(a.currentTime + 0.18);
-    o.onended = () => void a.close();
-  } catch {}
-}
-
 export default function App() {
   const { t } = useI18n();
   const previewActive = useCardPreviewActive();
@@ -607,14 +592,13 @@ export default function App() {
               },
         );
         setError("");
-        if (!muted) sound();
         setSelected(null);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Nevažeći potez");
         setPaused(true);
       }
     },
-    [match, review, muted, manualPayment],
+    [match, review, manualPayment],
   );
 
   const botEnabled =
@@ -1060,6 +1044,14 @@ export default function App() {
     help ||
     logOpen ||
     confirmNew;
+  useGameAudio({
+    review,
+    sessionKey: match ? String(match.seed) : undefined,
+    active: screen === "game" && !playbackPaused,
+    enabled: interfacePreferences.soundEnabled,
+    volume: interfacePreferences.soundVolume,
+    announcerEnabled: interfacePreferences.announcerEnabled,
+  });
   const header = (
     <header className="topbar">
       <button
@@ -1145,7 +1137,14 @@ export default function App() {
           className="icon-button"
           title={muted ? t("Uključi zvuk") : t("Isključi zvuk")}
           aria-label={muted ? t("Uključi zvuk") : t("Isključi zvuk")}
-          onClick={() => setInterfacePreferences({ soundEnabled: muted })}
+          onClick={() => {
+            setInterfacePreferences({ soundEnabled: muted });
+            void unlockGameAudio({
+              enabled: muted,
+              volume: interfacePreferences.soundVolume,
+              announcerEnabled: interfacePreferences.announcerEnabled,
+            });
+          }}
         >
           {muted ? <VolumeX size={17} /> : <Volume2 size={17} />}
         </button>
