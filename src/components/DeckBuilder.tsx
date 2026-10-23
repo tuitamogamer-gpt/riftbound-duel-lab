@@ -31,7 +31,7 @@ import {
   type DeckEntry,
   type StarterDeck,
 } from "../data/decks";
-import { findCard } from "../catalog";
+import { domainColors, findCard } from "../catalog";
 import {
   createCardSearchIndex,
   matchesCardSearch,
@@ -108,6 +108,35 @@ const addMessages: Record<BuilderAddIssue, string> = {
   sideboard: "The sideboard already contains 10 cards.",
   quantity: "The main deck reached the app limit of {count} cards.",
 };
+/** Unreachable artwork shows the card's initial instead of a broken image. */
+function BuilderArt({
+  card,
+  lazy,
+}: {
+  card: { id: string; name: string; image: string; domains: string[] };
+  lazy?: boolean;
+}) {
+  const src = cardArtUrl(card);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  if (!src || failedSrc === src)
+    return (
+      <span
+        className="builder-art-fallback"
+        style={{ color: domainColors[card.domains[0]] || "#bd9b64" }}
+        aria-hidden="true"
+      >
+        {card.name.charAt(0)}
+      </span>
+    );
+  return (
+    <img
+      src={src}
+      alt=""
+      loading={lazy ? "lazy" : undefined}
+      onError={() => setFailedSrc(src)}
+    />
+  );
+}
 const addLabels: Record<BuilderAddIssue, string> = {
   type: "Different section",
   domain: "Other domains",
@@ -1237,7 +1266,7 @@ export function DeckBuilder({
                     onClick={() => cardDetails(card.id)}
                     data-card-preview={card.id}
                   >
-                    <img src={cardArtUrl(card)} alt="" loading="lazy" />
+                    <BuilderArt card={card} lazy />
                   </button>
                   <div className="builder-card-copy">
                     <button
@@ -1380,7 +1409,7 @@ export function DeckBuilder({
         <aside className="builder-deck" aria-label={t("Your deck list")}>
           <div className="builder-deck-heading">
             {cardsById[draft.legendId] && (
-              <img src={cardArtUrl(cardsById[draft.legendId])} alt="" />
+              <BuilderArt card={cardsById[draft.legendId]} />
             )}
             <div>
               <span>{t("Your deck list")}</span>

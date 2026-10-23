@@ -842,7 +842,7 @@ export function Lobby(p: Props) {
           </article>
           <article>
             <BookOpen size={24} />
-            <h3>{t("Training lab")}</h3>
+            <h3>{t("ODIGRAJ PRAVI TRENUTAK.")}</h3>
             <p>
               {t(
                 "Čuvaj rune za odgovor. Jedna dobro tempirana čarolija može promijeniti cijeli duel.",

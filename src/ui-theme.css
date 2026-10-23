@@ -234,6 +234,7 @@ button:disabled {
 }
 .app .product-tools > button,
 .app .product-tools .outline-button {
+  gap: 9px;
   min-height: 44px;
   padding: 10px 16px;
   font-size: 12px;
@@ -241,12 +242,30 @@ button:disabled {
 .app .offline-tools {
   padding-bottom: 28px;
 }
+.app .offline-tools .product-tools {
+  margin-top: 0;
+}
 .app:not(.is-game) .footer {
-  background: #08141b;
+  width: calc(100% - 2 * var(--ui-page-gutter));
+  max-width: calc(var(--ui-content-width) - 2 * var(--ui-page-gutter));
+  margin: 0 auto;
+  padding-left: 0;
+  padding-right: 0;
+  background: transparent;
   border-top: 1px solid var(--ui-line);
   color: var(--ui-muted);
   padding-top: 28px;
   padding-bottom: 28px;
+}
+@media (max-width: 1120px) {
+  .app:not(.is-game) .footer {
+    --ui-page-gutter: 26px;
+  }
+}
+@media (max-width: 800px) {
+  .app:not(.is-game) .footer {
+    --ui-page-gutter: 20px;
+  }
 }
 .app:not(.is-game) .footer a,
 .app:not(.is-game) .footer button {
@@ -945,6 +964,9 @@ button:disabled {
   }
   .app .product-tools > button {
     flex: 1 1 40%;
+  }
+  .app .offline-tools .product-tools {
+    padding: 0;
   }
   .ui-notice {
     bottom: 94px;

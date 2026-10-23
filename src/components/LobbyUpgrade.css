@@ -1090,15 +1090,25 @@
     grid-template-columns: 1fr;
     gap: 10px;
   }
-  .rift-lobby-upgrade .rift-guide-grid article {
+  .rift-lobby-upgrade .rift-guide-grid article,
+  .rift-lobby-upgrade .rift-guide-grid article:last-child {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
+    column-gap: 14px;
+    align-items: start;
+    border: 1px solid var(--lobby-line);
     padding: 18px;
   }
   .rift-lobby-upgrade .rift-guide-grid article > svg {
-    float: left;
-    margin: 2px 14px 6px 0;
+    grid-row: 1 / span 3;
+    margin: 0;
+  }
+  .rift-lobby-upgrade .rift-guide-grid article > :not(svg) {
+    grid-column: 2;
+    justify-self: start;
   }
   .rift-lobby-upgrade .rift-guide-grid article p {
-    margin-top: 7px;
+    margin: 6px 0 0;
   }
   .rift-lobby-upgrade .rift-return-card {
     flex-wrap: wrap;
@@ -1291,8 +1301,11 @@
     margin-top: 28px;
   }
   .rift-lobby-upgrade .rift-field-guide .rift-section-heading {
+    flex-direction: column;
+    align-items: flex-start;
     flex-wrap: wrap;
     gap: 6px;
+    text-align: left;
   }
   .rift-lobby-upgrade .rift-field-guide .rift-section-heading h2 {
     font-size: 23px;

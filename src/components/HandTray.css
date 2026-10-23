@@ -268,6 +268,9 @@
   .hand-mobile-tools .hand-scroll-button {
     width: 44px;
     padding: 0;
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
   }
   .hand-mobile-tools button:disabled {
     opacity: 0.35;
@@ -275,8 +278,9 @@
   .app.is-game .hand-visible-range {
     min-width: 20px;
     text-align: center;
-    color: #9cabb8;
-    font-size: 9px;
+    color: #b4c2cc;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
     line-height: 44px;
   }
   .hand-mobile-tools .hand-expand-button {

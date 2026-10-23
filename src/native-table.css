@@ -10,8 +10,8 @@
       minmax(0, 1fr) clamp(240px, 20vw, 340px);
     grid-template-rows: 64px repeat(2, minmax(0, 1fr)) 28px clamp(
         156px,
-        23dvh,
-        310px
+        calc(32dvh - 40px),
+        320px
       );
     grid-template-areas:
       "enemy-runes enemy-runes opponent enemy-hand"

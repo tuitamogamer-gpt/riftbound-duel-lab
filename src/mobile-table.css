@@ -371,15 +371,19 @@
     padding: 0 5px;
   }
   .app.is-game .mobile-base-panel .rune-zone-heading {
-    flex: 0 1 46%;
+    flex: 1 1 auto;
     min-width: 0;
     max-width: none;
   }
   .app.is-game .mobile-base-panel .rune-zone .rune-zone-heading small {
     font-size: 10px;
+    line-height: 1.35;
+    text-wrap: balance;
   }
   .app.is-game .mobile-base-panel .rune-orbs {
-    flex: 1;
+    flex: 0 1 auto;
+    max-width: 58%;
+    justify-content: flex-end;
     overflow-x: auto;
     gap: 2px;
     height: 44px;
