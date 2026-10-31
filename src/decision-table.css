@@ -19,10 +19,13 @@
   }
 }
 
+/* Your turn and effect playback share one hand height on phones, so the
+   board does not grow and shrink around every card that is played. */
 @media (max-width: 800px) and (min-height: 701px) {
-  .app.is-game .playmat[data-table-focus="hand"] {
+  .app.is-game
+    .playmat:is([data-table-focus="hand"], [data-table-focus="balanced"]) {
     grid-template-rows:
-      44px 64px auto minmax(0, 1fr) clamp(180px, 26dvh, 230px)
+      44px 64px auto minmax(0, 1fr) clamp(170px, 23dvh, 210px)
       auto;
   }
 }

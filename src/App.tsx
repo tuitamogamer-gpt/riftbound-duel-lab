@@ -1593,7 +1593,10 @@ export default function App() {
                     review={review}
                   />
                   {compactTable && (
-                    <div className="mobile-duel-chain">
+                    <div
+                      className="mobile-duel-chain"
+                      data-empty-label={t("Chain is empty")}
+                    >
                       <ActionStack
                         game={game}
                         review={review}

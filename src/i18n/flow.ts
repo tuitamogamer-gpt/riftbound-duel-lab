@@ -218,6 +218,7 @@ export const flowMessages: Record<string, [string, string, string]> = {
   ],
 
   "Action chain": ["Action chain", "Lanac akcija", "Catena di azioni"],
+  "Chain is empty": ["Chain is empty", "Lanac je prazan", "La catena è vuota"],
   "Resolves first": [
     "Resolves first",
     "Izvršava se prva",

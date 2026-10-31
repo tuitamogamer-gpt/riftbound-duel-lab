@@ -95,7 +95,8 @@
 }
 @media (max-width: 800px) {
   .screen-highlight-label {
-    top: max(172px, calc(env(safe-area-inset-top) + 172px));
+    /* Just below the reserved chain strip, never over its cards. */
+    top: max(222px, calc(env(safe-area-inset-top) + 222px));
     max-width: min(340px, calc(100vw - 24px));
     gap: 8px;
     padding: 8px 11px;
@@ -107,7 +108,7 @@
 }
 @media (max-width: 800px) and (max-height: 700px) {
   .screen-highlight-label {
-    top: max(156px, calc(env(safe-area-inset-top) + 156px));
+    top: max(204px, calc(env(safe-area-inset-top) + 204px));
   }
 }
 @media (max-height: 500px) and (orientation: landscape) {

@@ -13,10 +13,14 @@ export function tableFocus(
 ): TableFocus {
   if (game.phase === "mulligan" && !game.players[0].mulliganDone)
     return "opening";
-  if (game.winner !== null || reviewing) return "balanced";
-  if (hiddenHandStatus(game, selected, actions)) return "balanced";
+  if (game.winner !== null) return "balanced";
+  if (!reviewing && hiddenHandStatus(game, selected, actions))
+    return "balanced";
+  // Combat keeps the board focus through its replayed steps, so the hand does
+  // not collapse and reopen between each one.
   if (game.phase === "move" || game.phase === "damage" || game.combat)
     return "board";
+  if (reviewing) return "balanced";
   if (
     selected &&
     actions.some(

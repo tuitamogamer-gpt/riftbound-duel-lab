@@ -257,7 +257,7 @@ export function MatchControls({
                         : "Click a glowing card to play it, or a ready unit to move. End your turn when finished.";
   return (
     <section
-      className={`match-controls visual-controls window-${window} ${sourceCard ? "has-source" : ""} ${hasTargetOptions ? "has-target-options" : ""} ${pageSize === 2 ? "paired-targets" : ""} ${hiddenSetup ? "has-hidden-modes" : ""} ${review || busy ? "is-busy" : ""}`}
+      className={`match-controls visual-controls window-${window} ${sourceCard ? "has-source" : ""} ${hasTargetOptions ? "has-target-options" : ""} ${pageSize === 2 ? "paired-targets" : ""} ${hiddenSetup ? "has-hidden-modes" : ""} ${review || busy ? "is-busy" : ""} ${forcedPass && !busy && !paused ? "is-forced-pass" : ""}`}
       aria-label={t("Game controls")}
     >
       <div className="decision-context">
