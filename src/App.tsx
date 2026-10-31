@@ -1436,7 +1436,7 @@ export default function App() {
                 <small className="mobile-turn-number">
                   {t("POTEZ")} {game.turn}
                 </small>
-                {t(status?.label)}
+                <span className="turn-indicator-label">{t(status?.label)}</span>
               </div>
               {game.winner === null && (
                 <button

@@ -662,6 +662,11 @@
   .history-tools .history-button {
     flex: 1 1 150px;
   }
+  @media (max-width: 480px) {
+    .history-tools .history-button {
+      flex-basis: 100%;
+    }
+  }
   .history-stats h2 {
     font-size: 23px;
   }

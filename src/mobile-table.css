@@ -81,6 +81,12 @@
   .app.is-game .turn-indicator::before {
     display: none;
   }
+  .app.is-game .turn-indicator-label {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .mobile-turn-number {
     font:
       600 9px/1 "DM Sans",
@@ -400,8 +406,21 @@
     grid-area: enemy-hand;
     display: flex;
   }
+  .app.is-game .opponent-base-panel .enemy-hand {
+    justify-content: flex-end;
+    align-items: center;
+    min-width: 0;
+  }
   .app.is-game .opponent-base-panel .enemy-hand > span {
+    position: static;
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
     font-size: 10px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
   .app.is-game .opponent-base-panel .enemy-hand .card-back {
     display: none;
