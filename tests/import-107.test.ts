@@ -30,9 +30,12 @@ describe("remaining 107 catalog entries", () => {
   it("reserves generated battlefields for card effects instead of deck setup", () => {
     expect(battlefieldChoices.some((c) => c.set === "TOKEN")).toBe(false);
   });
-  it("leaves no unsupported entry in the imported catalog", () => {
+  it("leaves no unsupported entry in the playable imported catalog", () => {
     expect(
-      Object.values(cardRegistry).filter((c) => c.status === "unsupported"),
+      Object.values(cardRegistry).filter(
+        (c) =>
+          c.status === "unsupported" && !cardsById[c.cardId]?.referenceOnly,
+      ),
     ).toEqual([]);
   });
   it("saves and resumes every Rain declaration without paying twice or changing query state", () => {

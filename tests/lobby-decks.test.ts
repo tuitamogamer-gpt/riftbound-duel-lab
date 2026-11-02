@@ -46,17 +46,27 @@ function selectMarkup(html: string, label: string) {
 }
 
 describe("discoverable precon selection", () => {
-  it("shows all 13 official precons on a fresh visit, including later sets", () => {
+  it("keeps all 13 official precons available on a fresh visit, including later sets", () => {
     vi.stubGlobal("localStorage", { getItem: () => null });
     const html = renderToStaticMarkup(
       createElement(LanguageProvider, null, createElement(App)),
     );
     expect(officialPreconDecks).toHaveLength(13);
-    expect(html.match(/class="rift-champion /g)).toHaveLength(13);
-    for (const deck of officialPreconDecks)
-      expect(html).toContain(`aria-label="Select ${deck.name}"`);
-    expect(html).toMatch(/aria-pressed="true">All precons<\/button>/);
-    expect(html).toContain("13 precons across all sets.");
+    // The lobby gallery starts collapsed: six cards on desktop, with the rest behind expand.
+    expect(html.match(/class="rift-champion /g)).toHaveLength(6);
+    expect(html).toContain("6 of 13 decks");
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).toContain("Show all 13 decks");
+    expect(html).toContain(
+      '<option value="Precon" selected="">All precons</option>',
+    );
+    for (const label of ["Your deck", "Opponent’s deck"]) {
+      const options = selectMarkup(html, label);
+      for (const deck of officialPreconDecks)
+        expect(options).toContain(`<option value="${deck.id}"`);
+    }
+    for (const product of ["Spiritforged", "Unleashed", "Vendetta Showdown"])
+      expect(html).toContain(`<optgroup label="${product}">`);
   });
 
   it.each(["Proving Grounds", "Origins", "Vendetta Showdown"])(
