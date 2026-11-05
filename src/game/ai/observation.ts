@@ -65,10 +65,8 @@ const publicExtensionKeys = [
   "vendettaWave3",
   "vendettaWave4",
   // Radiance rules state: once-per-turn uses, grants and public zone links.
+  // Without it the planner could pick options the engine has ruled out.
   "radiance",
-  "radianceFieldPlays",
-  "radianceIllumBatch",
-  "radiancePride",
 ];
 function inspectedCards(s: GameState, viewer: PlayerId): [string[], string[]] {
   const inspected: [string[], string[]] = [[], []];

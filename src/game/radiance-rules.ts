@@ -60,11 +60,13 @@ export function songstressOptions(s: GameState, p: PlayerId): string[] {
   return out;
 }
 
-/** A friendly unit or gear died this turn (Lingering Animus). */
+/** A friendly gear died this turn (units are tracked by `firstDeathTurn`). */
 export const markDied = (s: GameState, p: PlayerId) => {
   ((s.radiance ??= {}).once ??= {})[`died:${p}`] = s.turn;
 };
+/** A friendly unit or gear died this turn (Lingering Animus). */
 export const diedThisTurn = (s: GameState, p: PlayerId) =>
+  s.players[p].firstDeathTurn === s.turn ||
   s.radiance?.once?.[`died:${p}`] === s.turn;
 
 /** Conditional "I enter ready" and "units enter ready" rules. */

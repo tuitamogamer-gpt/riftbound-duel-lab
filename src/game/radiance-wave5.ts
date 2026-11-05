@@ -392,7 +392,9 @@ export const radianceWave5Module: ExpansionModule = {
   event(s, name, p, cardId, sourceId, locationId, ctx) {
     if (name === "death") {
       const card = getCard(cardId);
-      if (isCardType(card, "Unit") || isCardType(card, "Gear")) markDied(s, p);
+      // Unit deaths are already recorded by the engine (firstDeathTurn).
+      if (isCardType(card, "Gear") && !s.units.some((u) => u.id === sourceId))
+        markDied(s, p);
       // Demacian Illuminators: once for each batch of friendly deaths.
       const batch = `${s.turn}:${p}:${(ctx.dyingUnitIds ?? [sourceId]).join(",")}`;
       if (
