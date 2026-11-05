@@ -373,6 +373,22 @@ describe("Radiance wave 6", () => {
     expect(s.players[1].points).toBe(points + 1);
   });
 
+  it("Zero Point Inflection and Orianna ignore tokens, which are not cards", () => {
+    let s = fixture();
+    for (const [id, n] of [
+      ["zpi", 69],
+      ["tw", 22],
+    ] as const) {
+      const g = deployGear(s, rad(n), "base:0", 0, id);
+      delete g.deployedAt;
+    }
+    s.units = [{ ...unit("ori", 0, "field:0", 5), cardId: rad(68) }];
+    s = settle(ability(s, "tw", "Gold"));
+    expect(goldCount(s)).toBe(1);
+    expect(s.players[0].hand).toHaveLength(0);
+    expect(s.radiance?.once?.["orianna-mm:0"]).toBeUndefined();
+  });
+
   it("Graves damages every enemy here and deals no combat damage", () => {
     let s = fixture();
     s.units = [

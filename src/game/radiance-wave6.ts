@@ -425,7 +425,15 @@ export const radianceWave6Module: ExpansionModule = {
   },
   event(s, name, p, cardId, sourceId, locationId, ctx) {
     const card = cardId ? getCard(cardId) : undefined;
-    if (name === "play" && card) {
+    // Tokens are played but are not cards (Core Rules: tokens aren't cards).
+    const token =
+      card?.supertype === "Token" ||
+      Boolean(
+        sourceId &&
+        (s.units.find((u) => u.id === sourceId)?.token ||
+          s.gears.find((g) => g.id === sourceId)?.token),
+      );
+    if (name === "play" && card && !token) {
       // Forbidden Technique: play me from your trash after a 7+ card.
       if ((card.energy ?? 0) >= 7)
         for (const t of trashCards(s, p).filter((t) =>

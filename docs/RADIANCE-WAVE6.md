@@ -56,6 +56,7 @@ The alternate printings of Akali, Ekko (two), Ziggs, Ahri, both Rivens, K'Sante,
 - **Improvised Projectile**: the gear is chosen when the spell resolves; the largest Energy cost is offered first.
 - **Riven, Broken Blade**: the mode is chosen when the ability resolves, so it uses her buff at that time.
 - **Riven, Deserter and Whirling Twirligig**: the unit or gear used for the cost is chosen when the ability resolves.
+- **Tokens are not cards**: playing a token does not trigger Zero Point Inflection or Forbidden Technique, and does not use Orianna's or Boy Who Shattered Time's discount.
 
 ## Remaining work
 
@@ -63,4 +64,4 @@ The 11 unsupported Radiance printings cover 8 cards: Mordekaiser, Twice Slain; G
 
 ## Validation
 
-`tests/radiance-wave6.test.ts` has 32 tests covering every face above.
+`tests/radiance-wave6.test.ts` has 33 tests covering every face above.
