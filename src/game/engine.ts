@@ -7,7 +7,8 @@ import {
 } from "./text-sources";
 import { inspectDeck, shiftInspectedPositions } from "./deck-inspection";
 import { showOffCandidates, withShown } from "./show-off";
-import { lastCaressActive } from "./radiance-rules";
+import { lastCaressActive, songstressOptions } from "./radiance-rules";
+import { drainHeimerdinger, queueHeimerdinger } from "./radiance-wave4";
 import {
   deployedGear,
   deployGearHasAction,
@@ -536,6 +537,7 @@ interface PlayCostOptions {
   repeatedTargetId?: string;
   accelerated?: boolean;
   locationId?: LocationId;
+  songstressUnits?: string;
 }
 function flowCost(
   s: GameState,
@@ -575,11 +577,9 @@ function playPowerDomains(
   card: Card,
   sourceId?: string,
 ) {
-  if (
-    s.pendingPlays?.find((item) => item.id === sourceId)?.spec.powerOverride !==
-    undefined
-  )
-    return [];
+  const overridden = s.pendingPlays?.find((item) => item.id === sourceId)?.spec;
+  if (overridden?.powerOverride !== undefined)
+    return overridden.powerDomains ?? [];
   if (!sourceId?.startsWith("trash:")) return card.domains;
   const flow = flowCost(s, p, card.id, sourceId);
   const jayce = sourceId?.includes(":jayce:");
@@ -894,6 +894,7 @@ function playCost(
         domains: c.domains,
       })),
       energyReduction:
+        (options.songstressUnits ? 2 : 0) +
         (permission?.energyReduction ?? 0) +
         (options.additionalCostPaid
           ? (script.additionalCost?.energyReduction ?? 0)
@@ -917,7 +918,7 @@ function playCost(
       domains: flow
         ? (flow.domains ?? (flow.domain ? [flow.domain] : []))
         : permission?.powerOverride !== undefined
-          ? []
+          ? (permission.powerDomains ?? [])
           : card.domains,
     },
   );
@@ -1872,6 +1873,9 @@ function effectTargetMatches(
     (!e.targetDifferentLocationFromSource ||
       (source && location !== source.location)) &&
     (!e.excludeTag || !c.tags.includes(e.excludeTag)) &&
+    (e.targetMaxMight === undefined ||
+      !("location" in object) ||
+      getMight(s, object) <= e.targetMaxMight) &&
     (!e.movedThisTurn ||
       ("movesTurn" in object &&
         object.movesTurn === s.turn &&
@@ -3769,6 +3773,7 @@ function* iterateBaseLegalActions(
           ]
         : [entry],
     );
+  const songstress = songstressOptions(s, p);
   for (const entry of playable) {
     const c = getCard(entry.id),
       script = getScript(c.id);
@@ -4006,6 +4011,19 @@ function* iterateBaseLegalActions(
           !payable &&
           !script.repeat &&
           !(
+            songstress.length &&
+            isCardType(c, "Spell") &&
+            canPay(
+              s,
+              p,
+              Math.max(0, cost.energy - 2),
+              cost.power,
+              domains,
+              cost.extraPower,
+              cost.additionalPower,
+            )
+          ) &&
+          !(
             c.id === "ogn-002-298" &&
             canPay(
               s,
@@ -4074,6 +4092,49 @@ function* iterateBaseLegalActions(
             },
             player: p,
           });
+        // Starry-Eyed Songstress: exhaust the legend and three friendly units
+        // as an additional cost to reduce this spell's cost by 2.
+        if (
+          songstress.length &&
+          isCardType(c, "Spell") &&
+          !entry.paidAdditional &&
+          !entry.costSourceId &&
+          !entry.namedTag
+        ) {
+          const reduced = playCost(s, p, c, targetId, entry.source, {
+            locationId,
+            songstressUnits: "reduced",
+          });
+          if (
+            canPay(
+              s,
+              p,
+              reduced.energy,
+              reduced.power,
+              domains,
+              reduced.extraPower,
+              reduced.additionalPower,
+            )
+          )
+            for (const ids of songstress)
+              yield add({
+                id: `play|${entry.source}|${locationId ?? ""}|${targetId ?? ""}${entry.mode ? `|mode:${entry.modeIndex}` : ""}|songstress:${ids}`,
+                label: `Play ${cardName(c.id)}${entry.mode ? ` · ${entry.mode.label}` : ""}${targetLabel(s, targetId)} · exhaust Songstress, ${ids
+                  .split(",")
+                  .map((id) =>
+                    cardName(s.units.find((u) => u.id === id)!.cardId),
+                  )
+                  .join(", ")} (−2 energy)`,
+                category: "play",
+                sourceId: entry.source,
+                cardId: c.id,
+                targetId,
+                locationId,
+                detail: `${reduced.energy} energy · ${reduced.power + reduced.extraPower} power`,
+                songstressUnits: ids,
+                ...(entry.mode || isFace(c.id, "UNL", 142) ? { effects } : {}),
+              });
+        }
         if (c.id === "ogn-048-298")
           for (const unit of s.units.filter((u) => u.owner === p && u.ready))
             yield add({
@@ -4574,6 +4635,7 @@ function spawnToken(
     summonedTurn: s.turn,
   };
   s.units.push(u);
+  queueHeimerdinger(s, p, u);
   log(
     s,
     `${s.players[p].name} plays a ${name} at ${locationName(location)}.`,
@@ -5492,6 +5554,7 @@ function takeSpell(s: GameState, p: PlayerId, id: string) {
 }
 function finishResolvedCards(s: GameState) {
   drainTokenReplacements(s, context());
+  drainHeimerdinger(s, context());
   if (s.pendingChoice) return;
   const resolved = [...(s.resolving ?? []), ...(s.resolvingAbilities ?? [])];
   s.resolving = [];
@@ -5561,6 +5624,7 @@ function finishResolvedCards(s: GameState) {
 }
 function continuePending(s: GameState) {
   drainTokenReplacements(s, context());
+  drainHeimerdinger(s, context());
   if (s.pendingChoice) return;
   advanceDeaths(s, context());
   if (s.pendingChoice || s.deathBatches?.length) return;
@@ -8370,6 +8434,19 @@ function applyActionInternal(
     if (discarded.length) discardCards(s, p, discarded);
     if (legal.additionalCostPaid && script.additionalCost?.board) {
       payBoardCost(s, p, script, legal.costSourceId!);
+    }
+    if (legal.songstressUnits) {
+      x.legendUsedTurn = s.turn;
+      for (const id of legal.songstressUnits.split(",")) {
+        const unit = s.units.find((u) => u.id === id && u.owner === p);
+        if (unit) unit.ready = false;
+      }
+      log(
+        s,
+        `Additional cost: ${x.name} exhausts Starry-Eyed Songstress and three units.`,
+        "play",
+        p,
+      );
     }
     x.cardsPlayedThisTurn++;
     const playOrdinal = x.cardsPlayedThisTurn;

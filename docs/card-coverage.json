@@ -47,12 +47,12 @@
     "attribution": "Unofficial fan project. Structured records are from Hextech Analytics, not Riftcodex or an official Riot API. Card names, rules text, and Riot CDN artwork are property of Riot Games, Inc."
   },
   "registered": 1679,
-  "playable": 1537,
+  "playable": 1561,
   "statuses": {
-    "scripted": 1180,
+    "scripted": 1204,
     "compiled": 37,
     "alias": 320,
-    "unsupported": 142
+    "unsupported": 118
   },
   "sets": {
     "JDG": {
@@ -102,8 +102,8 @@
     },
     "RAD": {
       "total": 219,
-      "playable": 77,
-      "unsupported": 142
+      "playable": 101,
+      "unsupported": 118
     }
   },
   "precons": [
@@ -231,31 +231,10 @@
       "name": "Seraphine · Radiance",
       "product": "Radiance Showdown",
       "uniqueCards": 30,
-      "executableCards": 10,
-      "complete": false,
-      "missingCardIds": [
-        "rad-151-167",
-        "rad-138-167",
-        "rad-159-167",
-        "rad-166-167",
-        "rad-065-167",
-        "rad-152-167",
-        "rad-132-167",
-        "rad-057-167",
-        "rad-125-167",
-        "rad-060-167",
-        "rad-128-167",
-        "rad-127-167",
-        "rad-124-167",
-        "rad-053-167",
-        "rad-048-167",
-        "rad-047-167",
-        "rad-118-167",
-        "rad-122-167",
-        "rad-120-167",
-        "rad-117-167"
-      ],
-      "playable": false
+      "executableCards": 30,
+      "complete": true,
+      "missingCardIds": [],
+      "playable": true
     },
     {
       "id": "reference-precon-evelynn",
@@ -10131,8 +10110,16 @@
       "type": "Spell",
       "cardId": "rad-047-167",
       "rulesCardId": "rad-047-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "radiance4:fanfare"
+          }
+        ]
+      }
     },
     {
       "name": "High Note",
@@ -10140,8 +10127,18 @@
       "type": "Spell",
       "cardId": "rad-048-167",
       "rulesCardId": "rad-048-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "reaction": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "radiance4:high-note",
+            "target": "anyUnit"
+          }
+        ]
+      }
     },
     {
       "name": "Industrious Mechsmith",
@@ -10206,8 +10203,10 @@
       "type": "Unit",
       "cardId": "rad-053-167",
       "rulesCardId": "rad-053-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Trinket Peddler",
@@ -10254,8 +10253,10 @@
       "type": "Unit",
       "cardId": "rad-057-167",
       "rulesCardId": "rad-057-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Riptide Mage",
@@ -10304,8 +10305,20 @@
       "type": "Unit",
       "cardId": "rad-060-167",
       "rulesCardId": "rad-060-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "showOff": {
+          "kind": "card",
+          "value": "power"
+        },
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "radiance4:empyrean"
+          }
+        ]
+      }
     },
     {
       "name": "Ekko, Ingenious",
@@ -10358,8 +10371,20 @@
       "type": "Unit",
       "cardId": "rad-065-167",
       "rulesCardId": "rad-065-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Disarm 2"
+        ],
+        "onAttack": [
+          {
+            "type": "might",
+            "amount": -2,
+            "target": "enemyUnitHere"
+          }
+        ]
+      }
     },
     {
       "name": "Seraphine, Inspiring",
@@ -10367,8 +10392,20 @@
       "type": "Unit",
       "cardId": "rad-065a-167",
       "rulesCardId": "rad-065a-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Disarm 2"
+        ],
+        "onAttack": [
+          {
+            "type": "might",
+            "amount": -2,
+            "target": "enemyUnitHere"
+          }
+        ]
+      }
     },
     {
       "name": "Spirit of the Forge",
@@ -11297,8 +11334,18 @@
       "type": "Spell",
       "cardId": "rad-117-167",
       "rulesCardId": "rad-117-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "reaction": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "radiance4:for-demacia",
+            "target": "battlefield"
+          }
+        ]
+      }
     },
     {
       "name": "Herald of the Emperor",
@@ -11306,8 +11353,18 @@
       "type": "Unit",
       "cardId": "rad-118-167",
       "rulesCardId": "rad-118-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "radiance4:base-might",
+            "target": "friendlyUnit",
+            "amount": 5
+          }
+        ]
+      }
     },
     {
       "name": "Hunting Dog",
@@ -11337,8 +11394,10 @@
       "type": "Unit",
       "cardId": "rad-120-167",
       "rulesCardId": "rad-120-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "One-Two Punch",
@@ -11355,8 +11414,13 @@
       "type": "Unit",
       "cardId": "rad-122-167",
       "rulesCardId": "rad-122-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Tank"
+        ]
+      }
     },
     {
       "name": "Protector's Shield",
@@ -11373,8 +11437,41 @@
       "type": "Spell",
       "cardId": "rad-124-167",
       "rulesCardId": "rad-124-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spellModes": [
+          {
+            "label": "Banish a unit with 3 Might or less",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance4:banish",
+                "target": "anyUnit",
+                "targetMaxMight": 3
+              },
+              {
+                "type": "mill",
+                "amount": 2
+              }
+            ]
+          },
+          {
+            "label": "Banish a gear",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance4:banish",
+                "target": "anyGear"
+              },
+              {
+                "type": "mill",
+                "amount": 2
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Dune Devourer",
@@ -11382,8 +11479,20 @@
       "type": "Unit",
       "cardId": "rad-125-167",
       "rulesCardId": "rad-125-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "deflect": 1,
+        "keywords": [
+          "Deflect"
+        ],
+        "additionalCost": {
+          "board": {
+            "kind": "killUnit"
+          },
+          "energyReduction": 2
+        }
+      }
     },
     {
       "name": "Mournful Spirit",
@@ -11400,8 +11509,19 @@
       "type": "Spell",
       "cardId": "rad-127-167",
       "rulesCardId": "rad-127-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "showOff": {
+          "kind": "cost7"
+        },
+        "spell": [
+          {
+            "type": "special",
+            "custom": "radiance4:rousing"
+          }
+        ]
+      }
     },
     {
       "name": "Steadfast Outrider",
@@ -11409,8 +11529,13 @@
       "type": "Unit",
       "cardId": "rad-128-167",
       "rulesCardId": "rad-128-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Tank"
+        ]
+      }
     },
     {
       "name": "Trifarian Captain",
@@ -11445,8 +11570,10 @@
       "type": "Unit",
       "cardId": "rad-132-167",
       "rulesCardId": "rad-132-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Jarvan IV, Royal Heir",
@@ -11530,17 +11657,35 @@
       "type": "Unit",
       "cardId": "rad-138-167",
       "rulesCardId": "rad-138-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "token",
+            "amount": 1,
+            "location": "base"
+          }
+        ]
+      }
     },
     {
       "name": "Seraphine, Not Alone",
       "set": "RAD",
       "type": "Unit",
       "cardId": "rad-138a-167",
-      "rulesCardId": "rad-138-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "rulesCardId": "rad-138a-167",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "token",
+            "amount": 1,
+            "location": "base"
+          }
+        ]
+      }
     },
     {
       "name": "Boy Who Shattered Time",
@@ -11672,8 +11817,10 @@
       "type": "Legend",
       "cardId": "rad-151-167",
       "rulesCardId": "rad-151-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Encore",
@@ -11681,8 +11828,56 @@
       "type": "Spell",
       "cardId": "rad-152-167",
       "rulesCardId": "rad-152-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "draft:choose-two",
+            "modes": [
+              {
+                "label": "Deal 2 to a unit",
+                "effects": [
+                  {
+                    "type": "damage",
+                    "amount": 2,
+                    "target": "anyUnit"
+                  }
+                ]
+              },
+              {
+                "label": "Play two 1 Might Recruit unit tokens",
+                "effects": [
+                  {
+                    "type": "token",
+                    "amount": 2
+                  }
+                ]
+              },
+              {
+                "label": "Give up to two units each +1 Might this turn",
+                "effects": [
+                  {
+                    "type": "special",
+                    "custom": "radiance4:encore-might",
+                    "target": "upToTwoUnits"
+                  }
+                ]
+              },
+              {
+                "label": "Look at the top 2 cards: draw 1, recycle the other",
+                "effects": [
+                  {
+                    "type": "special",
+                    "custom": "radiance4:encore-look"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Agony's Embrace",
@@ -11770,8 +11965,10 @@
       "type": "Battlefield",
       "cardId": "rad-159-167",
       "rulesCardId": "rad-159-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Cosmic Vista",
@@ -11835,8 +12032,16 @@
       "type": "Battlefield",
       "cardId": "rad-166-167",
       "rulesCardId": "rad-166-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onConquer": [
+          {
+            "type": "special",
+            "custom": "radiance4:monastery"
+          }
+        ]
+      }
     },
     {
       "name": "Neeko, Blending In",
@@ -11922,9 +12127,11 @@
       "set": "RAD",
       "type": "Legend",
       "cardId": "rad-174-167",
-      "rulesCardId": "rad-151-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "rulesCardId": "rad-174-167",
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Agony's Embrace",
@@ -12283,9 +12490,18 @@
       "set": "RAD",
       "type": "Unit",
       "cardId": "rad-sp5-005",
-      "rulesCardId": "rad-138-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "rulesCardId": "rad-sp5-005",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "token",
+            "amount": 1,
+            "location": "base"
+          }
+        ]
+      }
     },
     {
       "name": "Against the Odds",

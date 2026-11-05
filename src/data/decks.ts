@@ -153,6 +153,7 @@ export const referencePreconDecks = referencePreconData as StarterDeck[];
  * complete list that was not promoted.
  */
 export const playableReferencePreconIds: ReadonlySet<string> = new Set([
+  "reference-precon-seraphine",
   "reference-precon-evelynn",
 ]);
 export const playableReferencePrecons = referencePreconDecks.filter((deck) =>

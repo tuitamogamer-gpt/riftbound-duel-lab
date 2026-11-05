@@ -218,6 +218,8 @@ export interface CardPlaySpec {
   ignoreEnergy?: boolean;
   energyReduction?: number;
   powerOverride?: number;
+  /** Domains the overridden Power cost must use (any domain if omitted). */
+  powerDomains?: string[];
   destination?:
     "normal" | "base" | "here" | "controlledBattlefield" | "anyBattlefield";
   alternativeHere?: boolean;
@@ -457,12 +459,16 @@ export interface RadianceState {
   clockwork?: Partial<Record<PlayerId, string>>;
   /** Dockside Lock-Up: banished card held by each gear. */
   lockUp?: Record<string, string>;
+  /** Heimerdinger, Academy Instructor: tokens that may become Mechs. */
+  heimer?: { player: PlayerId; tokenId: string }[];
   /** Neeko: legends added while a Neeko is on the board. */
   neeko?: { player: PlayerId; unitId: string; legendId: string }[];
 }
 export interface GameAction {
   /** Show Off: the revealed or picked card's locked-in information. */
   showOff?: ShownInfo & { ref: string };
+  /** Starry-Eyed Songstress: the three friendly units exhausted as a cost. */
+  songstressUnits?: string;
   draftFinalized?: boolean;
   repeatMask?: number;
   flexibleEnergy?: number;
@@ -657,6 +663,8 @@ export type Effect = {
   shown?: ShownInfo;
   /** Target only units that moved this turn. */
   movedThisTurn?: boolean;
+  /** Target only units whose current Might is at most this value. */
+  targetMaxMight?: number;
   condition?: string;
   /** Leading trigger costs are paid while finalizing, before responses. */
   triggerCost?: {

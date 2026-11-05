@@ -65,7 +65,11 @@ export function makeDraft(
       else steps.push({ effects: [e] });
     }
   };
-  if (original.some((e) => e.custom === "draft:curtain")) {
+  const chooseTwo = original.find((e) => e.custom === "draft:choose-two");
+  if (chooseTwo?.modes) {
+    // "Choose two": two different modes, each with its own targets.
+    steps.push({ modes: chooseTwo.modes }, { modes: chooseTwo.modes });
+  } else if (original.some((e) => e.custom === "draft:curtain")) {
     const modes = [
       { label: "Draw 1", effects: [{ type: "draw" } as Effect] },
       {
@@ -236,7 +240,13 @@ export function draftChoices(
   else if (step.modes && d.activeMode === undefined) {
     for (const [i, m] of step.modes.entries())
       if (
-        !(d.action.cardId === "unl-182-219" && d.modes.includes(i)) &&
+        !(
+          (d.action.cardId === "unl-182-219" ||
+            getScript(d.action.cardId ?? "")?.spell?.some(
+              (e) => e.custom === "draft:choose-two",
+            )) &&
+          d.modes.includes(i)
+        ) &&
         targetChoices(m.effects, choice.locationId, choice.sourceId).length
       )
         out.push(action(`draft:mode:${i}`, m.label, { amount: i }));

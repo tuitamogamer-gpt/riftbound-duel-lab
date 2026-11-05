@@ -33,6 +33,7 @@ import { vendettaExtraModule } from "./vendetta-extra";
 import { unleashedExtraModule } from "./unleashed-extra";
 import { radianceDeployModule } from "./radiance-deploy";
 import { radianceWave3Module } from "./radiance-wave3";
+import { radianceWave4Module } from "./radiance-wave4";
 /** Typed extension boundary for explicitly scripted expansion precons. */
 import type { Card } from "../data/cards";
 import type {
@@ -279,6 +280,7 @@ function modules(): ExpansionModule[] {
     cardWave25Module,
     radianceDeployModule,
     radianceWave3Module,
+    radianceWave4Module,
   ];
 }
 export function laterMight(s: GameState, u: Unit, value: number) {
