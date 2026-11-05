@@ -4,7 +4,7 @@
 
 Saved catalog fetched **6 October 2026**: **1,451 provider printings** in **8 sets**, plus **9 local rules tokens**. Completeness is relative to Riftcodex; its latest reported record update is **21 July 2026**.
 
-Supplemental reference catalog fetched **22 October 2026**: **219 Radiance printings** from **Hextech Analytics**, including all **167 numbered base cards**. **218** individually reviewed printings are playable; the other **1** remain available for browsing and blocked from play pending reviewed rules implementations. Source coverage does not claim every token or promotion.
+Supplemental reference catalog fetched **22 October 2026**: **219 Radiance printings** from **Hextech Analytics**, including all **167 numbered base cards**. **218** individually reviewed printings are playable; the other **1** remains available for browsing and blocked from play pending reviewed rules implementations. Source coverage does not claim every token or promotion.
 
 Executable registration: **1,678 / 1,679 entries**, with **1 unsupported** (1,321 scripted, 37 compiled, 320 aliases). Counts include printings and tokens, rather than only distinct card designs.
 
