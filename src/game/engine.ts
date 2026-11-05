@@ -2594,8 +2594,37 @@ function payBoardCost(
   }
   log(s, `Additional cost: ${label}.`, "play", p);
 }
-function addPlayVariants(s: GameState, p: PlayerId, actions: GameAction[]) {
-  const out: GameAction[] = [];
+/**
+ * Repeat variants multiply target choices (for example two group targets),
+ * and every cost re-checks Deflect. Variants are produced lazily, in the same
+ * order, so a caller that needs only a few never prices all of them. The
+ * Deflect memo is active only while this read-only generator is running.
+ */
+function* addPlayVariants(
+  s: GameState,
+  p: PlayerId,
+  actions: GameAction[],
+): Generator<GameAction> {
+  const memo = new WeakMap<GameState, Map<string, number>>();
+  const variants = playVariants(s, p, actions);
+  while (true) {
+    const outer = deflectMemo;
+    deflectMemo = memo;
+    let next: IteratorResult<GameAction>;
+    try {
+      next = variants.next();
+    } finally {
+      deflectMemo = outer;
+    }
+    if (next.done) return;
+    yield next.value;
+  }
+}
+function* playVariants(
+  s: GameState,
+  p: PlayerId,
+  actions: GameAction[],
+): Generator<GameAction> {
   for (const a of actions.filter(
     (a) =>
       a.category === "play" &&
@@ -2629,13 +2658,13 @@ function addPlayVariants(s: GameState, p: PlayerId, actions: GameAction[]) {
               cost.additionalPower,
             )
           )
-            out.push({
+            yield {
               ...a,
               id: `${a.id}|repeat-mask:${mask}`,
               label: `${a.label} · Repeat (${mask.toString(2).replace(/0/g, "").length})`,
               repeated: true,
               repeatMask: mask,
-            });
+            };
         }
         continue;
       }
@@ -2700,7 +2729,7 @@ function addPlayVariants(s: GameState, p: PlayerId, actions: GameAction[]) {
             )
           : [-1];
         for (const index of indices)
-          out.push({
+          yield {
             ...a,
             detail: `${cost.energy} energy · ${cost.power + cost.extraPower + cost.additionalPower.reduce((n, g) => n + g.power, 0)} power`,
             id: `${a.id}|${mode}:${index}:${repeatedTargetId ?? ""}${mode === "repeat" && sc.spellModes ? `:mode:${repeatModeIndex}` : ""}`,
@@ -2713,11 +2742,10 @@ function addPlayVariants(s: GameState, p: PlayerId, actions: GameAction[]) {
                   repeatedEffects: repeatMode.effects,
                 }
               : { additionalCostPaid: true }),
-          });
+          };
       }
     }
   }
-  return out;
 }
 function groupMoveTax(
   s: GameState,
@@ -4254,7 +4282,9 @@ function* iterateBaseLegalActions(
       sourceId: gear.id,
       cardId: gear.cardId,
     });
-  yield* addMany(...addPlayVariants(s, p, [...out, ...repeatCandidates]));
+  if (!skipPlayVariants)
+    for (const variant of addPlayVariants(s, p, [...out, ...repeatCandidates]))
+      yield add(variant);
   yield* addMany(
     ...getLaterActions(s, p, { ...context(), baseActions: out }).filter(
       (a) =>
@@ -4772,7 +4802,24 @@ function effectDescription(e: Effect): string {
   };
   return names[e.type] ?? `${e.type} effect resolves`;
 }
+/** Set only while validating an action ID that cannot be a cost variant. */
+let skipPlayVariants = false;
+const isPlayVariantId = (id: string) =>
+  id.startsWith("play|") && /\|(?:additionalCost|repeat|repeat-mask):/.test(id);
+/** Deflect taxes memoized during one read-only legal-action enumeration. */
+let deflectMemo: WeakMap<GameState, Map<string, number>> | null = null;
 function deflect(s: GameState, u: Unit) {
+  const memo = deflectMemo?.get(s);
+  const known = memo?.get(u.id);
+  if (known !== undefined) return known;
+  const value = deflectUncached(s, u);
+  if (deflectMemo) {
+    if (memo) memo.set(u.id, value);
+    else deflectMemo.set(s, new Map([[u.id, value]]));
+  }
+  return value;
+}
+function deflectUncached(s: GameState, u: Unit) {
   if (s.fields.some((f) => f.id === u.location && isFace(f.cardId, "VEN", 158)))
     return 0;
   const keywordTax = (keywords: string[]) =>
@@ -7447,13 +7494,24 @@ function applyActionInternal(
       ) ?? undefined;
     if (legal?.id !== id) legal = undefined;
   }
-  if (!legal)
-    for (const candidate of iterateLegalActions(state, state.priorityPlayer)) {
-      if (candidate.id === id) {
-        legal = candidate;
-        break;
+  if (!legal) {
+    // Cost variants are only appended; an ID that is not one never needs them.
+    const outer = skipPlayVariants;
+    skipPlayVariants = !isPlayVariantId(id);
+    try {
+      for (const candidate of iterateLegalActions(
+        state,
+        state.priorityPlayer,
+      )) {
+        if (candidate.id === id) {
+          legal = candidate;
+          break;
+        }
       }
+    } finally {
+      skipPlayVariants = outer;
     }
+  }
   if (!legal) throw new Error(`Illegal action: ${id}`);
   const s: GameState = structuredClone(state);
   syncHybridObjects(s);

@@ -1,5 +1,9 @@
 # Validation evidence
 
+## Radiance wave 2: Deploy — 5 November 2026
+
+The Deploy wave (21 more Radiance printings, Bomb token and battlefield gear display) passed **2,732 tests in 142 files** outside the precon matrix and **331 precon-matrix tests** in three shards. Every run used the CI timeouts and exited 0. TypeScript, the production build and catalog consistency also passed. An earlier full run timed out in the existing Lux vs Lux simulation. The cause was a pre-existing slow bot-planning path, now 11 times faster without changing decisions. See [Radiance wave 2](RADIANCE-WAVE2-DEPLOY.md#bot-planning-performance).
+
 ## Radiance wave 1 — 5 November 2026
 
 The source check found no new provider or Hextech data. The first reviewed Radiance wave (33 printings) passed **2,706 tests in 141 files** outside the precon matrix and **331 precon-matrix tests** in three shards, all with exit 0 and the CI test timeouts. Catalog consistency, TypeScript and the production build also passed. Details are in [Radiance wave 1](RADIANCE-WAVE1.md).

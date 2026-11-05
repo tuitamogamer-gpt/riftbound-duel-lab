@@ -46,6 +46,18 @@ Choices that the printed text resolves on resolution (“you may pay…”, “y
 
 Deploy cards that need further engine work stay reference-only: **Detonation Amplifier** (extra Deathknell triggers here), **Blossoming Dreamroot** (“win a combat”, not defined in the current Core Rules text), **Gravity Field** (movement tax), **Dockside Lock-Up** (banish and replay), **The Ball** (gear with Ganking that moves), **Command: Attack** (moving gear and deck search), **Hexplosive Minefield** (delayed Bombs) and **Ziggs, Short-Fused** (bonus damage for gear abilities).
 
+## Bot planning performance
+
+The first full-suite run timed out in one existing simulation, Lux vs Lux (seed 20261002), after 240 seconds. Lux decks contain no Radiance cards. The bot seeds its sampling of hidden opponent cards from a hash of the observed state, which includes the list of supported cards. Adding cards therefore changes which hypothetical hands it imagines. In this position it imagined Bellows Breath, whose Repeat over "up to three units at one location" creates thousands of cost variants. One decision took about 105 seconds. The previous code took 0.4 seconds for the same position, but a different seed gave the same new code 0.25 seconds. The slow path already existed and was exposed, not introduced, by the new cards.
+
+Three changes to legal-action generation remove most of the cost without changing any result:
+
+- Deflect taxes are memoized while one enumeration prices its variants. The memo is active only while the read-only variant generator runs.
+- Cost variants (additional costs and Repeat) are generated lazily, in the same order.
+- Validating an action whose ID is not a cost variant (for example `pass`) does not enumerate cost variants. Variants are only appended to the list and never change other actions.
+
+The same decision now takes about 9.5 seconds. Three deterministic Lux vs Lux games produced identical move sequences before and after these changes and ran 12–15% faster overall. The remaining cost is pricing every unaffordable variant inside one generator step. Pruning those variants safely would need either a planner change or a target-aware cost bound. Two modules give target-dependent discounts, so a simple cost bound is not safe. That remains separate work.
+
 ## Precon progress
 
 | List      | Executable / distinct cards |
@@ -57,4 +69,4 @@ Deploy cards that need further engine work stay reference-only: **Detonation Amp
 
 - `tests/radiance-deploy.test.ts` (26 tests): Deploy play locations, kill on an opponent's hold only, save/validation of `deployedAt`, Bomb creation and chain detonation (damage only to enemies, tokens never in the trash), every card above, and two complete bot-versus-bot games with Ziggs/Hexplosives Expert and Jarvan/Exemplar Deploy decks.
 - `tests/deploy-preview.html` is a browser fixture for the battlefield chips. It was checked in Chromium at 1440×900, 1024×768, 844×390 and 390×844 with no page errors or horizontal scrolling. On a 1024×768 table, the chips do not shrink unit cards (43 px, the same as without them).
-- Full-suite results are recorded in [VALIDATION.md](VALIDATION.md).
+- Full suite outside the precon matrix: **142 files, 2,732 tests passed**. Precon matrix: **331 tests passed** (111 + 110 + 110). All runs used the CI timeouts and exited 0. See also [VALIDATION.md](VALIDATION.md).
