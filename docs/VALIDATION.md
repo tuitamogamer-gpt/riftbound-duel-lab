@@ -1,5 +1,14 @@
 # Validation evidence
 
+## Radiance waves 5–7 — 5 November 2026
+
+Waves [5](RADIANCE-WAVE5.md), [6](RADIANCE-WAVE6.md) and [7](RADIANCE-WAVE7.md) make **218 of 219** Radiance printings playable; only Neeko, Blending In stays reference-only.
+
+- **Wave 5 commit** `2a6251f`: **2,870 tests in 145 files** outside the precon matrix and **331 precon-matrix tests** in three shards (111 + 110 + 110), all with exit 0 and the CI timeouts.
+- **Final commit** `1c3bcb4`: **2,920 tests in 148 files** outside the precon matrix, exit 0 with the CI timeouts. TypeScript, the production build and catalog consistency also passed. The precon matrix for this commit is recorded below when it completes.
+
+A new test plays six bot games with decks covering every main-deck face of waves 5–7. It found that the bot's view of the game left out the Radiance state, so the bot could pick an option the engine had already ruled out (a second Black Market draw in one turn). The view now includes that state. A first full run after that fix then timed out in the Garen vs Lux hidden-information check: Lingering Animus's death record was written on every unit death in every game, which changed retail bot decisions. That record now uses the engine's existing per-player death turn, and the check is back to its earlier time.
+
 ## Radiance wave 2: Deploy — 5 November 2026
 
 The Deploy wave (21 more Radiance printings, Bomb token and battlefield gear display) passed **2,732 tests in 142 files** outside the precon matrix and **331 precon-matrix tests** in three shards. Every run used the CI timeouts and exited 0. TypeScript, the production build and catalog consistency also passed. An earlier full run timed out in the existing Lux vs Lux simulation. The cause was a pre-existing slow bot-planning path, now 11 times faster without changing decisions. See [Radiance wave 2](RADIANCE-WAVE2-DEPLOY.md#bot-planning-performance).
