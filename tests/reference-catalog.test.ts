@@ -29,9 +29,7 @@ import {
   resolveImportCard,
 } from "../src/game/deck-import";
 import { createGame, deserializeGame, serializeGame } from "../src/game/engine";
-import { reviewedRadiancePrintings } from "../src/game/radiance-wave1";
-
-const reviewed = new Set(reviewedRadiancePrintings);
+import { reviewedReferencePrintings as reviewed } from "../src/game/scripts";
 
 describe("Radiance reference catalog", () => {
   it("imports every base number and retains source identity without modifying the playable snapshot", () => {
@@ -190,7 +188,7 @@ describe("Radiance reference catalog", () => {
       "0861c196b3100198a9fffa7b9465afc76a2e4b07db84e63e8efa6145fea25f6c",
     );
     expect(state.matchConfig?.supportedCardIds).toHaveLength(
-      1459 + reviewed.size,
+      providerCards.length + rulesTokens.length + reviewed.size,
     );
     expect(
       state.matchConfig?.supportedCardIds.filter((id) => id.startsWith("rad-")),

@@ -1,0 +1,107 @@
+.deployed-zone {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 2px 6px;
+}
+.deployed-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 11rem;
+  min-height: 24px;
+  border: 1px solid #bc9b5d;
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: #192d32ee;
+  color: #ffe2a8;
+  font-size: 11px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.deployed-chip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.deployed-chip svg {
+  flex: none;
+}
+.deployed-chip.is-theirs {
+  border-color: #c2667a;
+  background: #2d1820ee;
+  color: #ffd5dc;
+}
+.deployed-chip.is-exhausted {
+  opacity: 0.75;
+}
+.deployed-chip.is-selected,
+.deployed-chip.is-target {
+  outline: 2px solid #ffe08a;
+  outline-offset: 1px;
+}
+.deployed-chip:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+/* Table layouts: overlay the top-left corner, mirroring hidden cards on the
+   right, so deployed gear never takes space from the unit rows. */
+.app.is-game .battlefield > .deployed-zone {
+  position: absolute;
+  top: 30px;
+  left: 5px;
+  z-index: 5;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 42%;
+  padding: 0;
+}
+.app.is-game .battlefield > .deployed-zone .deployed-chip {
+  max-width: 100%;
+  min-height: 20px;
+  padding: 1px 7px;
+  font-size: 10px;
+}
+.gear-attachment.gear-deployed {
+  border-color: #8fb7a8;
+  background: #14302aee;
+}
+
+/* Compact table: a sixth grid row for deployed gear, only when present. */
+@media (max-width: 800px), (max-width: 1000px) and (max-height: 500px) {
+  .app.is-game
+    :is(.battlefields, .battlefields:has(> .action-stack))
+    > .battlefield:has(> .deployed-zone) {
+    grid-template-rows:
+      32px minmax(0, 1fr) 32px minmax(0, 1fr) var(--mobile-field-footer)
+      30px;
+  }
+  .app.is-game
+    :is(.battlefields, .battlefields:has(> .action-stack))
+    > .battlefield.in-combat:has(> .deployed-zone) {
+    grid-template-rows:
+      32px minmax(0, 1fr) 44px minmax(0, 1fr) var(--mobile-field-footer)
+      30px;
+  }
+  .app.is-game .battlefield > .deployed-zone {
+    position: static;
+    grid-area: 6 / 1;
+    flex-direction: row;
+    align-items: center;
+    max-width: 100%;
+    align-self: center;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding: 2px 6px;
+  }
+  .app.is-game .battlefield > .deployed-zone .deployed-chip {
+    flex: none;
+    min-height: 22px;
+    font-size: 10px;
+  }
+}

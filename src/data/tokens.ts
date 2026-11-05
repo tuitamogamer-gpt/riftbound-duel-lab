@@ -74,4 +74,17 @@ export const rulesTokens: Card[] = [
     ["Shadow Clone"],
     "When I attack, you may banish a unit from your trash. If you do, give me [Assault 4] this turn.",
   ),
+  // Core Rules 187.12 (Radiance). Created only by reviewed Radiance cards.
+  {
+    ...token(
+      "token-bomb",
+      "Bomb",
+      0,
+      ["Bomb"],
+      "[Deploy] (Play this only to a battlefield. When an opponent holds here, kill this.)\n[Deathknell][>] Deal 2 to an enemy unit here and kill all other Bombs you control here.",
+      ["Deploy", "Deathknell"],
+    ),
+    type: "Gear",
+    might: null,
+  },
 ];

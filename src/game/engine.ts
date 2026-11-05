@@ -6,6 +6,12 @@ import {
   copiedScripts,
 } from "./text-sources";
 import { inspectDeck, shiftInspectedPositions } from "./deck-inspection";
+import {
+  deployedGear,
+  deployGearHasAction,
+  extraHiddenSlots,
+  hasDeploy,
+} from "./deploy";
 import { queueTokenReplacements, drainTokenReplacements } from "./card-wave25";
 import {
   repeatPrices,
@@ -111,6 +117,8 @@ import type {
 export * from "./types";
 export const otherPlayer = (p: PlayerId): PlayerId => (p === 0 ? 1 : 0);
 const base = (p: PlayerId): LocationId => `base:${p}`;
+/** Unattached gear is in its controller's base unless [Deploy] placed it. */
+const gearPlace = (g: Gear): LocationId => g.deployedAt ?? base(g.owner);
 const uid = (s: GameState, prefix: string) => `${prefix}${s.nextId++}`;
 export interface StepFrame {
   state: GameState;
@@ -1486,6 +1494,25 @@ function scoreField(
       ))
         trigger(s, p, u.cardId, u.id, textEffects(u, effects), field);
     }
+    // CR 830.1.b: "When an opponent holds here, kill this." Friendly [Deploy]
+    // gear use their own "when you conquer/hold here" abilities.
+    for (const gear of deployedGear(s, field)) {
+      if (gear.owner !== p) {
+        if (hold)
+          trigger(
+            s,
+            gear.owner,
+            gear.cardId,
+            gear.id,
+            [{ type: "special", custom: "deploy:opponent-held" }],
+            field,
+          );
+        continue;
+      }
+      const effects = getScript(gear.cardId)?.[hold ? "onHold" : "onConquer"];
+      if (effects)
+        trigger(s, p, gear.cardId, gear.id, textEffects(gear, effects), field);
+    }
     event(
       s,
       hold ? "hold" : "conquer",
@@ -1663,7 +1690,10 @@ function startBeginning(s: GameState, p: PlayerId) {
         source.cardId,
         source.id,
         textEffects(source, effects),
-        s.units.find((u) => u.id === source.id)?.location ?? base(p),
+        s.units.find((u) => u.id === source.id)?.location ??
+          ("deployedAt" in source && source.deployedAt
+            ? source.deployedAt
+            : base(p)),
       );
   }
   if (!s.stack.length && !s.pendingChoice) {
@@ -1829,7 +1859,7 @@ function effectTargetMatches(
   sourceId?: string,
 ) {
   const c = getCard(object.cardId);
-  const location = "location" in object ? object.location : base(object.owner);
+  const location = "location" in object ? object.location : gearPlace(object);
   const source = s.units.find((u) => u.id === sourceId);
   return (
     (!e.targetDomain ||
@@ -2558,7 +2588,7 @@ function payBoardCost(
         p,
         object.cardId,
         object.id,
-        "location" in object ? object.location : base(object.owner),
+        "location" in object ? object.location : gearPlace(object),
       ),
     );
   }
@@ -2841,7 +2871,7 @@ function boardCandidates(
         (!e.excludeSource || g.id !== sourceId) &&
         effectTargetMatches(s, g, e, sourceId)
       )
-        result.push({ ...g, location: base(g.owner), might: 0 });
+        result.push({ ...g, location: gearPlace(g), might: 0 });
     }
   if (e.cardTypes?.includes("Hidden"))
     for (const h of s.hidden ?? [])
@@ -3434,10 +3464,14 @@ function* iterateBaseLegalActions(
       return;
     }
     if (choice.kind === "token") {
-      for (const locationId of [
-        base(p),
-        ...s.fields.filter((f) => f.controller === p).map((f) => f.id),
-      ].filter(
+      const face = tokenCard(choice.effect?.cardName ?? "Recruit");
+      for (const locationId of (face && hasDeploy(face.id)
+        ? s.fields.map((f) => f.id)
+        : [
+            base(p),
+            ...s.fields.filter((f) => f.controller === p).map((f) => f.id),
+          ]
+      ).filter(
         (locationId) =>
           (!choice.effect?.fromHidden || locationId === choice.locationId) &&
           canPlayCard(
@@ -3578,7 +3612,8 @@ function* iterateBaseLegalActions(
           (f) =>
             f.controller === p &&
             (s.hidden?.filter((h) => h.location === f.id).length ?? 0) <
-              (f.cardId === "ogn-278-298" ? 2 : 1),
+              (f.cardId === "ogn-278-298" ? 2 : 1) +
+                extraHiddenSlots(s, f.id, p),
         ))
           for (const cost of [
             hideCost(s, p),
@@ -3728,6 +3763,7 @@ function* iterateBaseLegalActions(
       inShowdown &&
       !inChain &&
       !script.action &&
+      !deployGearHasAction(s, p, c.id) &&
       !script.reaction &&
       !quickDraw &&
       !hidden &&
@@ -3845,6 +3881,9 @@ function* iterateBaseLegalActions(
               )
               .map((f) => f.id)
           : [undefined];
+      // [Deploy]: play only to a battlefield, including enemy and open ones.
+      if (isCardType(c, "Gear") && hasDeploy(c.id))
+        locations = s.fields.map((f) => f.id);
       if (instructed && isCardType(c, "Unit")) {
         const permission = instructed.spec;
         if (permission.destination === "base") locations = [base(p)];
@@ -4440,16 +4479,25 @@ function spawnToken(
   if (!canPlayCard(s, p, c, location, c.supertype === "Token"))
     return undefined;
   if (isCardType(c, "Gear")) {
-    const gear = {
+    const deployed = hasDeploy(c.id);
+    // A [Deploy] token is created only to a battlefield.
+    if (deployed && !location.startsWith("field:")) return undefined;
+    const gear: Gear = {
       id: uid(s, "g"),
       cardId: c.id,
       owner: p,
       ready,
       token: true,
+      ...(deployed ? { deployedAt: location } : {}),
     };
     s.gears.push(gear);
-    log(s, `${s.players[p].name} plays a ${name} gear token.`, "play", p);
-    event(s, "play", p, c.id, gear.id, base(p));
+    log(
+      s,
+      `${s.players[p].name} plays a ${name} gear token${deployed ? ` to ${locationName(location)}` : ""}.`,
+      "play",
+      p,
+    );
+    event(s, "play", p, c.id, gear.id, gearPlace(gear));
     return gear as unknown as Unit;
   }
   const u: Unit = {
@@ -4653,7 +4701,8 @@ function killGear(s: GameState, id: string) {
   }
   const gear = s.gears.find((g) => g.id === id);
   if (!gear) return;
-  event(s, "death", gear.owner, gear.cardId, gear.id, base(gear.owner));
+  const deathPlace = gearPlace(gear);
+  event(s, "death", gear.owner, gear.cardId, gear.id, deathPlace);
   s.gears = s.gears.filter((g) => g.id !== id);
   for (const u of s.units) u.gear = u.gear.filter((g) => g !== id);
   detach(s, gear);
@@ -4675,7 +4724,7 @@ function killGear(s: GameState, id: string) {
         gear.cardId,
         gear.id,
         textEffects(gear, effects),
-        base(gear.owner),
+        deathPlace,
       );
 }
 function checkDeaths(s: GameState) {
@@ -5726,7 +5775,7 @@ function executeEffects(
             else if (gear) {
               if (!gear.ready && !readyForbidden(s, gear.owner)) {
                 gear.ready = true;
-                event(s, "ready", p, gear.cardId, gear.id, base(gear.owner));
+                event(s, "ready", p, gear.cardId, gear.id, gearPlace(gear));
               }
             } else {
               const rune = s.players[object.owner].runes.find(
@@ -5763,8 +5812,8 @@ function executeEffects(
         ? (sourceId as LocationId)
         : (relativeSource?.location ??
           (relativeGear
-            ? base(relativeGear.owner)
-            : sourceId === "legend"
+            ? gearPlace(relativeGear)
+            : sourceId === "legend" || e.condition === "deathLocation"
               ? locationId
               : undefined));
     const u =
@@ -7979,6 +8028,20 @@ function applyActionInternal(
   }
   if (id.startsWith("choose-token:")) {
     const choice = s.pendingChoice!;
+    // "...tokens to a single battlefield" places every remaining token at once.
+    if (choice.effect?.condition === "singleLocation") {
+      for (let i = 0; i < choice.remaining; i++)
+        spawnToken(
+          s,
+          p,
+          choice.effect.cardName ?? "Recruit",
+          legal.locationId!,
+          Boolean(choice.effect.ready),
+        );
+      choice.remaining = 0;
+      resumeChoice(s);
+      return s;
+    }
     const token = spawnToken(
       s,
       p,
@@ -8115,7 +8178,7 @@ function applyActionInternal(
       ...textUnits(s).filter((u) => u.owner === p),
       ...s.gears
         .filter((g) => g.owner === p)
-        .map((g) => ({ ...g, location: base(p) })),
+        .map((g) => ({ ...g, location: gearPlace(g) })),
     ]) {
       const effects = getScript(source.cardId)?.onEnd;
       if (effects)
@@ -8307,7 +8370,11 @@ function applyActionInternal(
           u.location,
         );
     } else if (isCardType(c, "Gear")) {
-      const gear = {
+      const deployedAt =
+        hasDeploy(c.id) && legal.locationId?.startsWith("field:")
+          ? legal.locationId
+          : undefined;
+      const gear: Gear = {
         id: uid(s, "g"),
         cardId: c.id,
         originalOwner: instructed?.spec.zoneOwner,
@@ -8315,8 +8382,16 @@ function applyActionInternal(
         owner: p,
         ready: true,
         temporary: script.keywords?.includes("Temporary") || undefined,
+        ...(deployedAt ? { deployedAt } : {}),
       };
       s.gears.push(gear);
+      if (deployedAt)
+        log(
+          s,
+          `${cardName(c.id)} is deployed to ${locationName(deployedAt)}.`,
+          "play",
+          p,
+        );
       if (script.onPlay)
         trigger(
           s,
@@ -8332,7 +8407,7 @@ function applyActionInternal(
               hidden?.location,
             ),
           ),
-          hidden?.location ?? base(p),
+          deployedAt ?? hidden?.location ?? base(p),
         );
       if (
         hasQuickDraw(s, p, c, legal.sourceId) &&
@@ -8453,7 +8528,9 @@ function applyActionInternal(
         p,
         c.id,
         entered?.id,
-        isCardType(c, "Unit") ? legal.locationId : base(p),
+        isCardType(c, "Unit")
+          ? legal.locationId
+          : (s.gears.find((g) => g.id === entered?.id)?.deployedAt ?? base(p)),
         {
           playOrdinal,
           fromHidden: Boolean(hidden),

@@ -72,6 +72,26 @@ export const componentMessages: Record<string, [string, string, string]> = {
     "Priključeno: {card}",
     "Assegnato a {card}",
   ],
+  "Deployed at {battlefield}": [
+    "Deployed at {battlefield}",
+    "Postavljeno na: {battlefield}",
+    "Schierato su {battlefield}",
+  ],
+  "Deployed gear": [
+    "Deployed gear",
+    "Postavljena oprema",
+    "Equipaggiamento schierato",
+  ],
+  "Your deployed {card}": [
+    "Your deployed {card}",
+    "Tvoja postavljena karta: {card}",
+    "Tuo {card} schierato",
+  ],
+  "Enemy deployed {card}": [
+    "Enemy deployed {card}",
+    "Protivnička postavljena karta: {card}",
+    "{card} schierato dall'avversario",
+  ],
   "Signature sleeve": [
     "Signature sleeve",
     "Signature sleeve",

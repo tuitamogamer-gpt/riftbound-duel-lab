@@ -40,6 +40,10 @@ import {
   radianceWave1Scripts,
   reviewedRadiancePrintings,
 } from "./radiance-wave1";
+import {
+  radianceDeployScripts,
+  reviewedRadianceDeployPrintings,
+} from "./radiance-deploy";
 import { cards, cardsById } from "../data/cards";
 import { buildCardRegistry } from "./card-registry";
 import { reviewedPrintingAliases } from "./printing-aliases";
@@ -256,6 +260,7 @@ Object.assign(
   cardWave25Scripts,
   cardWave26Scripts,
   radianceWave1Scripts,
+  radianceDeployScripts,
 );
 map["token-tentacle"] = plain;
 map["token-mech"] = plain;
@@ -265,7 +270,12 @@ for (const [printing, source] of Object.entries(reviewedRuleFamilies)) {
   if (!map[source]) throw new Error(`Missing reviewed rules source: ${source}`);
   map[printing] = { ...map[source] };
 }
-const reviewedReferences = new Set(reviewedRadiancePrintings);
+/** Every Radiance printing reviewed for play, across all rules waves. */
+export const reviewedReferencePrintings: ReadonlySet<string> = new Set([
+  ...reviewedRadiancePrintings,
+  ...reviewedRadianceDeployPrintings,
+]);
+const reviewedReferences = reviewedReferencePrintings;
 for (const id of reviewedReferences)
   if (!cardsById[id]?.referenceOnly)
     throw new Error(`Reviewed reference printing is not imported: ${id}`);

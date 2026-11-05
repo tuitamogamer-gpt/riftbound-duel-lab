@@ -35,10 +35,8 @@ try {
     referenceCatalogMeta,
   } = await server.ssrLoadModule("/src/data/cards.ts");
   const { cardRegistry } = await server.ssrLoadModule("/src/game/scripts.ts");
-  const { reviewedRadiancePrintings } = await server.ssrLoadModule(
-    "/src/game/radiance-wave1.ts",
-  );
-  const reviewedReferences = new Set(reviewedRadiancePrintings);
+  const { reviewedReferencePrintings: reviewedReferences } =
+    await server.ssrLoadModule("/src/game/scripts.ts");
   const { officialPreconDecks, referencePreconDecks, validateDeck } =
     await server.ssrLoadModule("/src/data/decks.ts");
   if (

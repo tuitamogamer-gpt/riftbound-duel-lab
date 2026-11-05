@@ -116,6 +116,7 @@ import { EffectTrails, FieldEffect } from "./components/EffectFeedback";
 import { ActionStack } from "./components/ActionStack";
 import { ScreenHighlight } from "./components/ScreenHighlight";
 import { BattlefieldMight } from "./components/BattlefieldMight";
+import { DeployedGear } from "./components/DeployedGear";
 import {
   MobileBoardNav,
   useMobileBoardZone,
@@ -1737,6 +1738,13 @@ export default function App() {
                                 ))}
                             </div>
                           )}
+                          <DeployedGear
+                            game={game}
+                            fieldId={field.id}
+                            legal={legal}
+                            selected={selected}
+                            select={selectCard}
+                          />
                           <div className="field-divider">
                             <BattlefieldMight game={game} fieldId={field.id} />
                             {game.combat?.fieldId === field.id && (

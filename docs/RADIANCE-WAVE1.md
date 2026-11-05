@@ -65,7 +65,7 @@ The two Radiance Showdown lists remain reference lists until every card is execu
 
 The remaining 186 printings need shared mechanics that do not exist yet. In rough order of reach:
 
-1. **Deploy** (24 faces, plus Bomb tokens): play-only-to-a-battlefield gear, killed when an opponent holds there, and “here” effects for gear at a battlefield.
+1. **Deploy** (24 faces, plus Bomb tokens): play-only-to-a-battlefield gear, killed when an opponent holds there, and “here” effects for gear at a battlefield. **Done in [wave 2](RADIANCE-WAVE2-DEPLOY.md)** for 17 faces.
 2. **Show Off** (6 faces): reveal a matching card from hand or pick a friendly one while playing, then branch on whether you did.
 3. **“When I become exhausted” triggers** (Strigian Oracle, Seraphine, Riven, Reckless Innovator, Resplendent Rostrum) and “three or more units exhausted at once”.
 4. **Play from trash when you play a card costing 7+** (Forbidden Technique, Meticulous Restorationist) and Sanctum Conservator's ready.

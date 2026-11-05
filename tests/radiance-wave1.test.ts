@@ -20,12 +20,17 @@ import {
   radianceWave1Scripts,
   reviewedRadiancePrintings,
 } from "../src/game/radiance-wave1";
-import { cardRegistry, getScript, isImplemented } from "../src/game/scripts";
+import {
+  cardRegistry,
+  getScript,
+  isImplemented,
+  reviewedReferencePrintings,
+} from "../src/game/scripts";
 import type { GameState, PlayerId } from "../src/game/types";
 import { act, addGear, chain, fixture, unit } from "./fixtures/cards";
 
 const rad = (n: number) => `rad-${String(n).padStart(3, "0")}-167`;
-const reviewed = new Set(reviewedRadiancePrintings);
+const reviewed = reviewedReferencePrintings;
 const play = (s: GameState, cardId: string, extra = "") =>
   act(
     s,

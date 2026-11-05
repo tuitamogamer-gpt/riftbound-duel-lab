@@ -75,6 +75,8 @@ export interface Gear {
   owner: PlayerId;
   ready: boolean;
   attachedTo?: string;
+  /** [Deploy] gear stays at this battlefield until it dies or is moved. */
+  deployedAt?: LocationId;
   temporary?: boolean;
   usedAbilities?: string[];
 }

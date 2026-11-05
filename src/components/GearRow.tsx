@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Link2, Search, Shield } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Flag,
+  Link2,
+  Search,
+  Shield,
+} from "lucide-react";
 import { findCard, type CatalogCard } from "../catalog";
 import type { GameAction, GameState, PlayerId } from "../game/types";
 import { gearStatuses } from "../game/status-presentation";
@@ -93,12 +100,22 @@ export function GearRow({
             (unit) => unit.id === gear.attachedTo,
           );
           const attachedCard = findCard(attached?.cardId);
+          const deployedIndex = gear.deployedAt
+            ? game.fields.findIndex((field) => field.id === gear.deployedAt)
+            : -1;
+          const deployedField =
+            deployedIndex >= 0
+              ? (findCard(game.fields[deployedIndex].cardId)?.name ??
+                t("Battlefield {number}", {
+                  number: String(deployedIndex + 1).padStart(2, "0"),
+                }))
+              : undefined;
           const target = actions.some((action) =>
             action.targetId?.split("~").includes(gear.id),
           );
           return (
             <div
-              className={`gear-slot${attached ? " is-attached" : ""}`}
+              className={`gear-slot${attached ? " is-attached" : ""}${deployedField && !attached ? " is-deployed" : ""}`}
               key={gear.id}
               data-gear-id={gear.id}
               data-attached-to={attached?.id}
@@ -121,6 +138,21 @@ export function GearRow({
               >
                 <Search size={11} />
               </button>
+              {!attached && deployedField && (
+                <button
+                  className="gear-attachment gear-deployed"
+                  title={t("Deployed at {battlefield}", {
+                    battlefield: deployedField,
+                  })}
+                  aria-label={t("Deployed at {battlefield}", {
+                    battlefield: deployedField,
+                  })}
+                  onClick={() => select(gear.id)}
+                >
+                  <Flag size={10} />
+                  <span>{deployedField}</span>
+                </button>
+              )}
               {attached && attachedCard && (
                 <button
                   className="gear-attachment"

@@ -76,11 +76,11 @@ Private online duels use a server-authoritative `/api/duel` function, invitation
 
 <!-- card-catalog-summary:start -->
 
-Saved catalog fetched **6 October 2026**: **1,451 provider printings** in **8 sets**, plus **8 local rules tokens**. Completeness is relative to Riftcodex; its latest reported record update is **21 July 2026**.
+Saved catalog fetched **6 October 2026**: **1,451 provider printings** in **8 sets**, plus **9 local rules tokens**. Completeness is relative to Riftcodex; its latest reported record update is **21 July 2026**.
 
-Supplemental reference catalog fetched **22 October 2026**: **219 Radiance printings** from **Hextech Analytics**, including all **167 numbered base cards**. **33** individually reviewed printings are playable; the other **186** remain available for browsing and blocked from play pending reviewed rules implementations. Source coverage does not claim every token or promotion.
+Supplemental reference catalog fetched **22 October 2026**: **219 Radiance printings** from **Hextech Analytics**, including all **167 numbered base cards**. **54** individually reviewed printings are playable; the other **165** remain available for browsing and blocked from play pending reviewed rules implementations. Source coverage does not claim every token or promotion.
 
-Executable registration: **1,492 / 1,678 entries**, with **186 unsupported** (1,135 scripted, 37 compiled, 320 aliases). Counts include printings and tokens, rather than only distinct card designs.
+Executable registration: **1,514 / 1,679 entries**, with **165 unsupported** (1,157 scripted, 37 compiled, 320 aliases). Counts include printings and tokens, rather than only distinct card designs.
 
 Retail precons: **13 / 13** have complete executable coverage. All 13 lists have valid structure and complete catalog references. Historical retail contents and current tournament legality remain separate.
 

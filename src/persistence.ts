@@ -731,6 +731,8 @@ export function validState(x: unknown, actionable = true): x is GameState {
         optionalString(g.namedTag) &&
         optionalString(g.attachedTo) &&
         optionalCount(g.attachedTurn) &&
+        (g.deployedAt === undefined ||
+          x.fields.some((f: { id: unknown }) => f.id === g.deployedAt)) &&
         isCardType(cardsById[g.cardId], "Gear") &&
         ["token", "temporary", "empowered"].every((k) =>
           optionalBoolean(g[k]),

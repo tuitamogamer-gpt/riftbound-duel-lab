@@ -31,6 +31,7 @@ import { spiritforgedExtraModule } from "./spiritforged-extra";
 import { originsMoreModule } from "./origins-more";
 import { vendettaExtraModule } from "./vendetta-extra";
 import { unleashedExtraModule } from "./unleashed-extra";
+import { radianceDeployModule } from "./radiance-deploy";
 /** Typed extension boundary for explicitly scripted expansion precons. */
 import type { Card } from "../data/cards";
 import type {
@@ -273,6 +274,7 @@ function modules(): ExpansionModule[] {
     cardWave23Module,
     cardWave24Module,
     cardWave25Module,
+    radianceDeployModule,
   ];
 }
 export function laterMight(s: GameState, u: Unit, value: number) {

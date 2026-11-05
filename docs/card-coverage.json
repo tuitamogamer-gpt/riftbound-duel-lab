@@ -7,7 +7,7 @@
   "catalogDataSha256": "0861c196b3100198a9fffa7b9465afc76a2e4b07db84e63e8efa6145fea25f6c",
   "providerPrintings": 1451,
   "providerSets": 8,
-  "localRulesTokens": 8,
+  "localRulesTokens": 9,
   "referencePrintings": 219,
   "referenceCatalog": {
     "schemaVersion": 1,
@@ -46,13 +46,13 @@
     ],
     "attribution": "Unofficial fan project. Structured records are from Hextech Analytics, not Riftcodex or an official Riot API. Card names, rules text, and Riot CDN artwork are property of Riot Games, Inc."
   },
-  "registered": 1678,
-  "playable": 1492,
+  "registered": 1679,
+  "playable": 1514,
   "statuses": {
-    "scripted": 1135,
+    "scripted": 1157,
     "compiled": 37,
     "alias": 320,
-    "unsupported": 186
+    "unsupported": 165
   },
   "sets": {
     "JDG": {
@@ -96,14 +96,14 @@
       "unsupported": 0
     },
     "TOKEN": {
-      "total": 8,
-      "playable": 8,
+      "total": 9,
+      "playable": 9,
       "unsupported": 0
     },
     "RAD": {
       "total": 219,
-      "playable": 33,
-      "unsupported": 186
+      "playable": 54,
+      "unsupported": 165
     }
   },
   "precons": [
@@ -231,7 +231,7 @@
       "name": "Seraphine · Radiance",
       "product": "Radiance Showdown",
       "uniqueCards": 30,
-      "executableCards": 9,
+      "executableCards": 10,
       "complete": false,
       "missingCardIds": [
         "rad-151-167",
@@ -247,7 +247,6 @@
         "rad-128-167",
         "rad-127-167",
         "rad-124-167",
-        "rad-116-167",
         "rad-053-167",
         "rad-048-167",
         "rad-047-167",
@@ -262,7 +261,7 @@
       "name": "Evelynn · Radiance",
       "product": "Radiance Showdown",
       "uniqueCards": 29,
-      "executableCards": 13,
+      "executableCards": 15,
       "complete": false,
       "missingCardIds": [
         "rad-153-167",
@@ -271,10 +270,8 @@
         "rad-165-167",
         "rad-109-167",
         "rad-154-167",
-        "rad-108-167",
         "rad-103-167",
         "rad-102-167",
-        "rad-106-167",
         "rad-081-167",
         "rad-105-167",
         "rad-070-167",
@@ -9585,8 +9582,16 @@
       "type": "Unit",
       "cardId": "rad-001-167",
       "rulesCardId": "rad-001-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "token",
+            "cardName": "Bomb"
+          }
+        ]
+      }
     },
     {
       "name": "Banner of Conquest",
@@ -9594,8 +9599,13 @@
       "type": "Gear",
       "cardId": "rad-002-167",
       "rulesCardId": "rad-002-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy"
+        ]
+      }
     },
     {
       "name": "Bilgewater Tracker",
@@ -10087,8 +10097,19 @@
       "type": "Gear",
       "cardId": "rad-044-167",
       "rulesCardId": "rad-044-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy"
+        ],
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "radiance:blind-move"
+          }
+        ]
+      }
     },
     {
       "name": "K'Sante, Dauntless",
@@ -10178,8 +10199,19 @@
       "type": "Gear",
       "cardId": "rad-052-167",
       "rulesCardId": "rad-052-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy"
+        ],
+        "onEnd": [
+          {
+            "type": "special",
+            "custom": "radiance:extractor"
+          }
+        ]
+      }
     },
     {
       "name": "Strigian Oracle",
@@ -10420,8 +10452,10 @@
       "type": "Unit",
       "cardId": "rad-072-167",
       "rulesCardId": "rad-072-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Pillaged Armory",
@@ -10429,8 +10463,25 @@
       "type": "Gear",
       "cardId": "rad-073-167",
       "rulesCardId": "rad-073-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy"
+        ],
+        "onPlay": [
+          {
+            "type": "buff",
+            "target": "friendlyUnit"
+          }
+        ],
+        "onConquer": [
+          {
+            "type": "buff",
+            "target": "friendlyUnit"
+          }
+        ]
+      }
     },
     {
       "name": "Raving Witness",
@@ -10617,8 +10668,19 @@
       "type": "Gear",
       "cardId": "rad-087-167",
       "rulesCardId": "rad-087-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy"
+        ],
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "radiance:portal-ready"
+          }
+        ]
+      }
     },
     {
       "name": "Staunch Survivor",
@@ -10670,8 +10732,17 @@
       "type": "Unit",
       "cardId": "rad-091-167",
       "rulesCardId": "rad-091-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "notes": "Your gear with [Deploy] have [Action].",
+        "onConquer": [
+          {
+            "type": "special",
+            "custom": "radiance:paragon-channel"
+          }
+        ]
+      }
     },
     {
       "name": "Jarvan IV, Martial Paragon",
@@ -10679,8 +10750,17 @@
       "type": "Unit",
       "cardId": "rad-091a-167",
       "rulesCardId": "rad-091a-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "notes": "Your gear with [Deploy] have [Action].",
+        "onConquer": [
+          {
+            "type": "special",
+            "custom": "radiance:paragon-channel"
+          }
+        ]
+      }
     },
     {
       "name": "Seraphic Wyvern",
@@ -10706,8 +10786,18 @@
       "type": "Unit",
       "cardId": "rad-094-167",
       "rulesCardId": "rad-094-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onHold": [
+          {
+            "type": "token",
+            "cardName": "Bomb",
+            "amount": 3,
+            "condition": "singleLocation"
+          }
+        ]
+      }
     },
     {
       "name": "Momentary Companion",
@@ -10724,8 +10814,22 @@
       "type": "Spell",
       "cardId": "rad-096-167",
       "rulesCardId": "rad-096-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "action": true,
+        "spell": [
+          {
+            "type": "moveTarget",
+            "target": "friendlyUnit",
+            "condition": "chooseDestination"
+          },
+          {
+            "type": "token",
+            "cardName": "Bomb"
+          }
+        ]
+      }
     },
     {
       "name": "Siren of the Shallows",
@@ -10854,8 +10958,29 @@
       "type": "Gear",
       "cardId": "rad-106-167",
       "rulesCardId": "rad-106-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy"
+        ],
+        "onPlay": [
+          {
+            "type": "discard",
+            "amount": 1
+          },
+          {
+            "type": "draw",
+            "amount": 3
+          }
+        ],
+        "onHold": [
+          {
+            "type": "special",
+            "custom": "radiance:return-self"
+          }
+        ]
+      }
     },
     {
       "name": "Bedeviling Stranger",
@@ -10872,8 +10997,13 @@
       "type": "Gear",
       "cardId": "rad-108-167",
       "rulesCardId": "rad-108-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy"
+        ]
+      }
     },
     {
       "name": "Evelynn, In Control",
@@ -10917,8 +11047,29 @@
       "type": "Unit",
       "cardId": "rad-112-167",
       "rulesCardId": "rad-112-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Play a Bomb gear token to a battlefield",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "token",
+                "cardName": "Bomb"
+              }
+            ]
+          }
+        ],
+        "onDefend": [
+          {
+            "type": "special",
+            "custom": "radiance:ziggs-defend"
+          }
+        ]
+      }
     },
     {
       "name": "Ziggs, Explosive",
@@ -10926,8 +11077,29 @@
       "type": "Unit",
       "cardId": "rad-112a-167",
       "rulesCardId": "rad-112a-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Play a Bomb gear token to a battlefield",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "token",
+                "cardName": "Bomb"
+              }
+            ]
+          }
+        ],
+        "onDefend": [
+          {
+            "type": "special",
+            "custom": "radiance:ziggs-defend"
+          }
+        ]
+      }
     },
     {
       "name": "Angler Wyrm",
@@ -10971,8 +11143,25 @@
       "type": "Gear",
       "cardId": "rad-116-167",
       "rulesCardId": "rad-116-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy"
+        ],
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "radiance:poster"
+          }
+        ],
+        "onConquer": [
+          {
+            "type": "special",
+            "custom": "radiance:poster"
+          }
+        ]
+      }
     },
     {
       "name": "For Demacia!",
@@ -11249,8 +11438,24 @@
       "type": "Legend",
       "cardId": "rad-141-167",
       "rulesCardId": "rad-141-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Play a Bomb gear token to a battlefield",
+            "energy": 1,
+            "power": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "token",
+                "cardName": "Bomb"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Hexplosive Minefield",
@@ -11375,8 +11580,10 @@
       "type": "Legend",
       "cardId": "rad-155-167",
       "rulesCardId": "rad-155-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Demacian Standard",
@@ -11384,8 +11591,19 @@
       "type": "Gear",
       "cardId": "rad-156-167",
       "rulesCardId": "rad-156-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy"
+        ],
+        "onHold": [
+          {
+            "type": "special",
+            "custom": "radiance:standard-return"
+          }
+        ]
+      }
     },
     {
       "name": "Bandle Scouts' Academy",
@@ -11501,8 +11719,24 @@
       "type": "Legend",
       "cardId": "rad-169-167",
       "rulesCardId": "rad-169-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Play a Bomb gear token to a battlefield",
+            "energy": 1,
+            "power": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "token",
+                "cardName": "Bomb"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Iron Revenant",
@@ -11563,9 +11797,11 @@
       "set": "RAD",
       "type": "Legend",
       "cardId": "rad-176-167",
-      "rulesCardId": "rad-155-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "rulesCardId": "rad-176-167",
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Ekko, Revolutionary",
@@ -17389,6 +17625,33 @@
         "deflect": 1,
         "keywords": [
           "Deflect"
+        ]
+      }
+    },
+    {
+      "name": "Bomb",
+      "set": "TOKEN",
+      "type": "Gear",
+      "cardId": "token-bomb",
+      "rulesCardId": "token-bomb",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy",
+          "Deathknell"
+        ],
+        "onDeath": [
+          {
+            "type": "damage",
+            "amount": 2,
+            "target": "enemyUnitHere",
+            "condition": "deathLocation"
+          },
+          {
+            "type": "special",
+            "custom": "radiance:bombs-here"
+          }
         ]
       }
     },
