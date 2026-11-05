@@ -186,6 +186,9 @@ export function runCardPlay(
     if (spec.unplayedToHand) {
       player.deck.unshift(...rest);
       ctx.draw(s, p, rest.length);
+    } else if (spec.unplayedBanished) {
+      player.banished.push(...rest);
+      for (const id of rest) ctx.cardEvent(s, "banish", p, id);
     } else recycleCards(s, owner, [...(ctx.shuffle?.(s, rest) ?? rest)], p);
     index = player.banished.length;
     if (cardId) ctx.cardEvent(s, "banish", p, cardId);

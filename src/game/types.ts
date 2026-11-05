@@ -225,6 +225,8 @@ export interface CardPlaySpec {
   alternativeHere?: boolean;
   recycleOnLeave?: boolean;
   unplayedToHand?: boolean;
+  /** Top-deck cards that are not played stay banished (they were banished first). */
+  unplayedBanished?: boolean;
   attachToSource?: boolean;
   revealed?: boolean;
   /** A public physical trash visit or a linked banishment entry. */
@@ -459,6 +461,8 @@ export interface RadianceState {
   clockwork?: Partial<Record<PlayerId, string>>;
   /** Dockside Lock-Up: banished card held by each gear. */
   lockUp?: Record<string, string>;
+  /** Spirit of the Forge: Energy cost of the gear returned as a cost. */
+  returnedEnergy?: { player: PlayerId; turn: number; energy: number };
   /** Heimerdinger, Academy Instructor: tokens that may become Mechs. */
   heimer?: { player: PlayerId; tokenId: string }[];
   /** Neeko: legends added while a Neeko is on the board. */
@@ -469,6 +473,8 @@ export interface GameAction {
   showOff?: ShownInfo & { ref: string };
   /** Starry-Eyed Songstress: the three friendly units exhausted as a cost. */
   songstressUnits?: string;
+  /** "You may have me enter ready" (Entrenched Boar). */
+  enterReady?: boolean;
   draftFinalized?: boolean;
   repeatMask?: number;
   flexibleEnergy?: number;
@@ -665,6 +671,10 @@ export type Effect = {
   movedThisTurn?: boolean;
   /** Target only units whose current Might is at most this value. */
   targetMaxMight?: number;
+  /** Target only gear whose Energy cost is at most this value. */
+  targetMaxEnergy?: number;
+  /** Counter only spells whose Power cost is at least this value. */
+  minPower?: number;
   condition?: string;
   /** Leading trigger costs are paid while finalizing, before responses. */
   triggerCost?: {
@@ -703,6 +713,8 @@ export interface ActivatedAbility {
   condition?: string;
 }
 export interface CardScript {
+  /** "You may have me enter ready" offered as a play option. */
+  optionalEnterReady?: boolean;
   /** [Show Off] requirement: what may be revealed from hand or picked. */
   showOff?: {
     kind: "mech" | "gear" | "card" | "unit" | "hidden" | "cost7";
@@ -781,7 +793,14 @@ export interface CardScript {
       tags?: string[];
       discount?: "energyPower" | "powerEach";
       allowCostLocation?: boolean;
-      kind: "spendBuff" | "killUnit" | "killGear" | "returnGear";
+      kind:
+        | "spendBuff"
+        | "killUnit"
+        | "killGear"
+        | "returnGear"
+        | "exhaustUnit"
+        | "returnUnit"
+        | "killUnitOrGear";
       minMight?: number;
     };
     energy?: number;

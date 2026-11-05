@@ -55,6 +55,7 @@ const cardPlaySpec = (x: unknown): boolean =>
     "alternativeHere",
     "recycleOnLeave",
     "unplayedToHand",
+    "unplayedBanished",
     "attachToSource",
     "revealed",
   ].every((k) => optionalBoolean(x[k])) &&

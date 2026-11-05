@@ -52,6 +52,10 @@ import {
   radianceWave4Scripts,
   reviewedRadianceWave4Printings,
 } from "./radiance-wave4";
+import {
+  radianceWave5Scripts,
+  reviewedRadianceWave5Printings,
+} from "./radiance-wave5";
 import { cards, cardsById } from "../data/cards";
 import { buildCardRegistry } from "./card-registry";
 import { reviewedPrintingAliases } from "./printing-aliases";
@@ -271,6 +275,7 @@ Object.assign(
   radianceDeployScripts,
   radianceWave3Scripts,
   radianceWave4Scripts,
+  radianceWave5Scripts,
 );
 map["token-tentacle"] = plain;
 map["token-mech"] = plain;
@@ -293,6 +298,7 @@ export const reviewedReferencePrintings: ReadonlySet<string> = new Set([
   ...reviewedRadianceDeployPrintings,
   ...reviewedRadianceWave3Printings,
   ...reviewedRadianceWave4Printings,
+  ...reviewedRadianceWave5Printings,
   ...reviewedFamilyPrintings,
 ]);
 const reviewedReferences = reviewedReferencePrintings;

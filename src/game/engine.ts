@@ -7,7 +7,19 @@ import {
 } from "./text-sources";
 import { inspectDeck, shiftInspectedPositions } from "./deck-inspection";
 import { showOffCandidates, withShown } from "./show-off";
-import { lastCaressActive, songstressOptions } from "./radiance-rules";
+import {
+  accelerateGranted,
+  battlefieldTargetAllowed,
+  radianceAbilityAllowed,
+  setMightProvider,
+  awakenReadyBlocked,
+  extraChannels,
+  gearDeflect,
+  lastCaressActive,
+  radianceEntersReady,
+  spellsHaveReaction,
+  songstressOptions,
+} from "./radiance-rules";
 import { drainHeimerdinger, queueHeimerdinger } from "./radiance-wave4";
 import {
   deployedGear,
@@ -302,6 +314,7 @@ function shuffle<T>(s: GameState, items: T[]) {
   }
   return result;
 }
+setMightProvider((state, unit) => getMight(state, unit));
 export function getMight(s: GameState, u: Unit, clamp = true): number {
   if (u.abilityInstance) u = s.units.find((v) => v.id === u.id) ?? u;
   const c = getCard(u.cardId),
@@ -635,6 +648,7 @@ function costFor(
     energyReduction?: number;
     allTargets?: string;
     domains?: string[];
+    locationId?: LocationId;
   } = {},
 ) {
   let energy = (c.energy ?? 0) + (extras.energy ?? 0);
@@ -662,7 +676,12 @@ function costFor(
     (extras.anyPower ?? 0) +
     (getScript(c.id)?.ignoreDeflect ? 0 : targetTax(s, p, allTargets));
   extraPower += helmets.filter((g) => g.empowered).length;
-  const adjustment = laterCost(s, p, c, context(allTargets));
+  const adjustment = laterCost(
+    s,
+    p,
+    c,
+    context(allTargets, undefined, extras.locationId),
+  );
   energy = Math.max(
     0,
     energy + adjustment.energy - (extras.energyReduction ?? 0),
@@ -915,6 +934,7 @@ function playCost(
       allTargets: options.repeated
         ? [targetId, options.repeatedTargetId].filter(Boolean).join("~")
         : targetId,
+      locationId: options.locationId,
       domains: flow
         ? (flow.domains ?? (flow.domain ? [flow.domain] : []))
         : permission?.powerOverride !== undefined
@@ -1169,6 +1189,13 @@ function channel(s: GameState, p: PlayerId, n: number, ready = true) {
   const count = Math.min(n, x.runeDeck.length);
   for (let i = 0; i < count; i++)
     x.runes.push({ id: uid(s, "r"), domain: x.runeDeck.shift()!, ready });
+  // Seraphic Wyvern: channel that many plus 1 exhausted rune instead.
+  for (let i = n > 0 ? extraChannels(s, p) : 0; i > 0 && x.runeDeck.length; i--)
+    x.runes.push({
+      id: uid(s, "r"),
+      domain: x.runeDeck.shift()!,
+      ready: false,
+    });
   if (count)
     log(
       s,
@@ -1631,11 +1658,16 @@ function beginTurn(s: GameState, p: PlayerId) {
   const x = s.players[p];
   const readied = s.units.filter(
     (u) =>
-      u.owner === p && !u.ready && !getKeywords(s, u).includes("Cannot ready"),
+      u.owner === p &&
+      !u.ready &&
+      !awakenReadyBlocked(s) &&
+      !getKeywords(s, u).includes("Cannot ready"),
   );
   for (const r of x.runes) r.ready = true;
+  const awakenBlocked = awakenReadyBlocked(s);
   for (const u of s.units.filter((u) => u.owner === p)) {
-    if (!getKeywords(s, u).includes("Cannot ready")) u.ready = true;
+    if (!awakenBlocked && !getKeywords(s, u).includes("Cannot ready"))
+      u.ready = true;
     u.usedAbilities = [];
   }
   for (const g of s.gears.filter((g) => g.owner === p)) {
@@ -1873,6 +1905,9 @@ function effectTargetMatches(
     (!e.targetDifferentLocationFromSource ||
       (source && location !== source.location)) &&
     (!e.excludeTag || !c.tags.includes(e.excludeTag)) &&
+    (e.targetMaxEnergy === undefined ||
+      "location" in object ||
+      (getCard(object.cardId).energy ?? 0) <= e.targetMaxEnergy) &&
     (e.targetMaxMight === undefined ||
       !("location" in object) ||
       getMight(s, object) <= e.targetMaxMight) &&
@@ -2101,13 +2136,17 @@ function* iterateTargets(
           (e.maxEnergy === undefined ||
             (getCard(item.cardId).energy ?? 0) <= e.maxEnergy) &&
           (e.maxPower === undefined ||
-            (getCard(item.cardId).power ?? 0) <= e.maxPower),
+            (getCard(item.cardId).power ?? 0) <= e.maxPower) &&
+          (e.minPower === undefined ||
+            (getCard(item.cardId).power ?? 0) >= e.minPower),
       )
       .map((item) => item.id);
     return;
   }
   if (e.target === "battlefield") {
-    yield* s.fields.map((f) => f.id);
+    yield* s.fields
+      .filter((f) => battlefieldTargetAllowed(s, p, f.id, e))
+      .map((f) => f.id);
     return;
   }
   if (
@@ -2506,6 +2545,15 @@ function boardCostSources(
   if (!cost) return [];
   if (cost.kind === "killGear" || cost.kind === "returnGear")
     return s.gears.filter((g) => g.owner === p);
+  if (cost.kind === "killUnitOrGear")
+    return [
+      ...s.units.filter((u) => u.owner === p),
+      ...s.gears.filter(
+        (g) => g.owner === p && !s.units.some((u) => u.id === g.id),
+      ),
+    ];
+  if (cost.kind === "exhaustUnit")
+    return s.units.filter((u) => u.owner === p && u.ready);
   return s.units.filter(
     (u) =>
       u.owner === p &&
@@ -2552,12 +2600,15 @@ function boardCostLabel(s: GameState, script: CardScript, sourceId?: string) {
   if (!object) return "";
   if (sourceId.includes("~"))
     return ` · pay ${sourceId.split("~").length} board costs`;
+  const kind = script.additionalCost?.board?.kind;
   const verb =
-    script.additionalCost?.board?.kind === "spendBuff"
+    kind === "spendBuff"
       ? "spend a buff from"
-      : script.additionalCost?.board?.kind === "returnGear"
+      : kind === "returnGear" || kind === "returnUnit"
         ? "return to hand"
-        : "kill";
+        : kind === "exhaustUnit"
+          ? "exhaust"
+          : "kill";
   return ` · ${verb} ${cardName(object!.cardId)}`;
 }
 function payBoardCost(
@@ -2590,7 +2641,19 @@ function payBoardCost(
     event(s, "spendBuff", p, unit.cardId, unit.id, unit.location);
   } else if (cost.kind === "killUnit") killUnits(s, [sourceId]);
   else if (cost.kind === "killGear") killGear(s, sourceId);
-  else {
+  else if (cost.kind === "killUnitOrGear") {
+    if (s.units.some((u) => u.id === sourceId)) killUnits(s, [sourceId]);
+    else killGear(s, sourceId);
+  } else if (cost.kind === "exhaustUnit") {
+    const unit = s.units.find((u) => u.id === sourceId)!;
+    unit.ready = false;
+  } else {
+    if (cost.kind === "returnGear")
+      (s.radiance ??= {}).returnedEnergy = {
+        player: p,
+        turn: s.turn,
+        energy: getCard(object.cardId).energy ?? 0,
+      };
     returnBoardCardsToHand(s, [sourceId], (object) =>
       event(
         s,
@@ -2643,6 +2706,14 @@ function* playVariants(
   )) {
     const c = getCard(a.cardId!),
       sc = getScript(c.id)!;
+    // "You may have me enter ready. If you do, I can't move this turn."
+    if (sc.optionalEnterReady && isCardType(c, "Unit"))
+      yield {
+        ...a,
+        id: `${a.id}|enter-ready`,
+        label: `${a.label} · enter ready (can't move this turn)`,
+        enterReady: true,
+      };
     // Core Rules 832: Show Off is chosen as the card is played.
     if (sc.showOff)
       for (const info of showOffCandidates(s, p, a.sourceId, sc.showOff, (u) =>
@@ -3807,7 +3878,15 @@ function* iterateBaseLegalActions(
     const ambush = s.units.some(
       (u) => ambushAt(u) && u.location.startsWith("field:"),
     );
-    if (inChain && !script.reaction && !quickDraw && !hidden && !ambush)
+    const kaisa = spellsHaveReaction(s, p, c);
+    if (
+      inChain &&
+      !script.reaction &&
+      !kaisa &&
+      !quickDraw &&
+      !hidden &&
+      !ambush
+    )
       continue;
     if (
       inShowdown &&
@@ -3815,6 +3894,7 @@ function* iterateBaseLegalActions(
       !script.action &&
       !deployGearHasAction(s, p, c.id) &&
       !script.reaction &&
+      !kaisa &&
       !quickDraw &&
       !hidden &&
       !ambush
@@ -4179,6 +4259,7 @@ function* iterateBaseLegalActions(
         });
         if (
           (script.accelerating ||
+            (isCardType(c, "Unit") && accelerateGranted(s, p)) ||
             ((instructed
               ? instructed.returnZone !== "hand"
               : !entry.source.startsWith("hand:")) &&
@@ -4250,6 +4331,11 @@ function* iterateBaseLegalActions(
       )
         continue;
       if (a.condition === "playedEquipment" && x.equipmentPlayedTurn !== s.turn)
+        continue;
+      if (
+        a.condition?.startsWith("radiance:") &&
+        !radianceAbilityAllowed(s, p, a.condition, source.id)
+      )
         continue;
       const cost = abilityCost(
         s,
@@ -4892,7 +4978,7 @@ function effectDescription(e: Effect): string {
 let skipPlayVariants = false;
 const isPlayVariantId = (id: string) =>
   id.startsWith("play|") &&
-  /\|(?:additionalCost|repeat|repeat-mask|showoff):/.test(id);
+  /\|(?:additionalCost|repeat|repeat-mask|showoff):|\|enter-ready$/.test(id);
 /** Deflect taxes memoized during one read-only legal-action enumeration. */
 let deflectMemo: WeakMap<GameState, Map<string, number>> | null = null;
 function deflect(s: GameState, u: Unit) {
@@ -4933,7 +5019,9 @@ function deflectUncached(s: GameState, u: Unit) {
 function targetTax(s: GameState, p: PlayerId, id?: string) {
   return (id ?? "").split("~").reduce((n, id) => {
     const u = s.units.find((u) => u.id === id);
-    return n + (u && u.owner !== p ? deflect(s, u) : 0);
+    if (u) return n + (u.owner !== p ? deflect(s, u) : 0);
+    const g = s.gears.find((g) => g.id === id);
+    return n + (g && g.owner !== p ? gearDeflect(s, g) : 0);
   }, 0);
 }
 function* iterateTriggerActions(
@@ -5349,6 +5437,7 @@ function playUnit(
     ready:
       ready ||
       !!sc?.keywords?.includes("Enters ready") ||
+      radianceEntersReady(s, p, cardId, location) ||
       s.players[p].unitsEnterReadyTurn === s.turn ||
       textUnits(s).some((u) => u.owner === p && u.cardId === "ogn-011-298"),
     damage: 0,
@@ -8485,6 +8574,8 @@ function applyActionInternal(
             legal.additionalCostPaid && script.additionalCost?.enterReady,
           ) ||
           !!script.keywords?.includes("Enters ready") ||
+          Boolean(legal.enterReady) ||
+          radianceEntersReady(s, p, c.id, legal.locationId!, legal) ||
           s.players[p].unitsEnterReadyTurn === s.turn ||
           textUnits(s).some((u) => u.owner === p && u.cardId === "ogn-011-298"),
         damage: 0,
@@ -8497,6 +8588,7 @@ function applyActionInternal(
         summonedTurn: s.turn,
         additionalCostPaid: legal.additionalCostPaid,
         playedFromHidden: Boolean(hidden),
+        ...(legal.enterReady ? { moveLockedTurn: s.turn } : {}),
       };
       s.units.push(u);
       log(

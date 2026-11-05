@@ -85,13 +85,14 @@ export function inspectDeck(
         ? until < 0
           ? deck.length
           : until + 1
-        : (play?.count ??
-            (e.type === "predict"
-              ? 1
-              : e.custom === "unl-extra:select-top" ||
-                  e.custom === "ven-wave3:predict"
-                ? (e.amount ?? lookEffects[e.custom])
-                : lookEffects[e.custom!])),
+        : play
+          ? (play.count ?? 1)
+          : e.type === "predict"
+            ? 1
+            : e.custom === "unl-extra:select-top" ||
+                e.custom === "ven-wave3:predict"
+              ? (e.amount ?? lookEffects[e.custom])
+              : lookEffects[e.custom!],
     );
   if (count === 0) return "skip";
   const index = deck
