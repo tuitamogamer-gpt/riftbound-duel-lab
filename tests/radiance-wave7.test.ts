@@ -190,6 +190,19 @@ describe("Radiance wave 7", () => {
     );
   });
 
+  it("The Ball's damage is a gear ability, so Ziggs adds Bonus Damage", () => {
+    let s = fixture();
+    s.units = [
+      { ...unit("ziggs", 0, "base:0", 5), cardId: rad(23) },
+      unit("e", 1, "field:0", 3),
+    ];
+    s.players[0].hand = [rad(146)];
+    s = settle(
+      until(play(s, rad(146), { locationId: "field:0" }), "Deal 2 to enemy"),
+    );
+    expect(s.units.map((u) => u.id)).toEqual(["ziggs"]);
+  });
+
   it("alternate printings share their source rules", () => {
     for (const [variant, source] of [
       ["rad-020a-167", rad(20)],

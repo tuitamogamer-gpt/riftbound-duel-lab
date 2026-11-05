@@ -12849,7 +12849,27 @@
         "onPlay": [
           {
             "type": "special",
-            "custom": "radiance7:ball"
+            "custom": "radiance7:modal",
+            "modes": [
+              {
+                "label": "Draw 1",
+                "effects": [
+                  {
+                    "type": "draw",
+                    "amount": 1
+                  }
+                ]
+              },
+              {
+                "label": "Deal 2 to enemy units here",
+                "effects": [
+                  {
+                    "type": "special",
+                    "custom": "radiance7:ball-damage"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }

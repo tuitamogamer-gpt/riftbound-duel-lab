@@ -30,6 +30,13 @@ const rd7 = (custom: string, extra: Partial<Effect> = {}): Effect => ({
   ...extra,
 });
 const cardName = (id: string) => getCard(id).name;
+/** The Ball: "When you play or move this, choose one" (chosen as it triggers). */
+export const ballTrigger: Effect = rd7("modal", {
+  modes: [
+    { label: "Draw 1", effects: [{ type: "draw", amount: 1 }] },
+    { label: "Deal 2 to enemy units here", effects: [rd7("ball-damage")] },
+  ],
+});
 const isUnitObject = (s: GameState, id: string) =>
   s.units.some((u) => u.id === id);
 
@@ -59,7 +66,7 @@ export const radianceWave7Scripts: Record<string, CardScript> = {
   "rad-146-167": {
     ...plain,
     keywords: ["Deploy", "Ganking"],
-    onPlay: [rd7("ball")],
+    onPlay: [ballTrigger],
   },
 };
 
@@ -203,7 +210,7 @@ export const radianceWave7Module: ExpansionModule = {
     if (name === "move" && sourceId) {
       const u = s.units.find((v) => v.id === sourceId);
       if (u && isFace(u.cardId, "RAD", 146))
-        ctx.trigger(s, u.owner, u.cardId, u.id, [rd7("ball")], u.location);
+        ctx.trigger(s, u.owner, u.cardId, u.id, [ballTrigger], u.location);
     }
   },
   actions(s, p) {
@@ -382,17 +389,8 @@ export const radianceWave7Module: ExpansionModule = {
       case "animate":
         animate(s, p, e.cardName!);
         return true;
-      case "ball": {
-        const id = ctx.sourceId;
-        if (!id) return true;
-        choices(s, p, ctx, [
-          option(p, "ball:draw", "Draw 1", [{ type: "draw", amount: 1 }]),
-          option(p, "ball:damage", "Deal 2 to enemy units here", [
-            rd7("ball-damage"),
-          ]),
-        ]);
+      case "modal":
         return true;
-      }
       case "ball-damage": {
         const here = ctx.sourceId ? ballPlace(s, ctx.sourceId) : undefined;
         if (!here?.startsWith("field:")) return true;

@@ -5,6 +5,7 @@ import { deployedGear, hasDeploy } from "./deploy";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
 import { useOncePerTurn, usedThisTurn } from "./radiance-rules";
 import { shieldValue } from "./radiance-wave5";
+import { ballTrigger } from "./radiance-wave7";
 import { textSources } from "./text-sources";
 import { takeTrash, trashCards } from "./trash";
 import type {
@@ -378,14 +379,7 @@ function moveGear(
   ctx.log?.(s, `${cardName(gear.cardId)} moves to ${to}.`, "info", p);
   // The Ball: "When you play or move this, choose one".
   if (isFace(gear.cardId, "RAD", 146))
-    ctx.trigger(
-      s,
-      gear.owner,
-      gear.cardId,
-      gear.id,
-      [{ type: "special", custom: "radiance7:ball" }],
-      to,
-    );
+    ctx.trigger(s, gear.owner, gear.cardId, gear.id, [ballTrigger], to);
 }
 
 /** The battlefield's combat winner: the only player with units left there. */

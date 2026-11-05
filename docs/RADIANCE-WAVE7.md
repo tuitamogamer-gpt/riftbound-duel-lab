@@ -27,7 +27,7 @@ The alternate printings of Mordekaiser, Iron Revenant and Lady of Clockwork use 
 
 ## Notes
 
-- **The Ball**: the mode is chosen when the ability resolves.
+- **The Ball**: the mode is chosen as the ability triggers; its damage is a gear ability, so Ziggs adds Bonus Damage.
 - **Iron Revenant**: one option is offered for each different unit or gear card in your trash.
 - **Lady of Clockwork**: only gear that is not attached to a unit can be chosen.
 
@@ -42,4 +42,4 @@ Treating her as a plain unit would be a legal choice (no extra legends) but woul
 
 ## Validation
 
-`tests/radiance-wave7.test.ts` has 9 tests covering every face above, including saved-game checks for Lady of Clockwork, Iron Revenant and Dockside Lock-Up.
+`tests/radiance-wave7.test.ts` has 10 tests covering every face above, including saved-game checks for Lady of Clockwork, Iron Revenant and Dockside Lock-Up.
