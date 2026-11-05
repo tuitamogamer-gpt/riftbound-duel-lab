@@ -48,6 +48,17 @@ export function makeDraft(
             ],
           },
         );
+      else if (e.custom === "draft:split")
+        steps.push({
+          effects: [
+            {
+              ...e,
+              custom: "wave24:split",
+              target: "boardCards",
+              targetCount: e.amount ?? 5,
+            },
+          ],
+        });
       else if (e.custom === "draft:volibear")
         steps.push({
           effects: [
@@ -283,10 +294,16 @@ export function draftChoices(
             );
       }
     } else if (e?.target === "boardCards") {
-      for (const u of board(e, choice.sourceId, choice.locationId))
+      const options = board(e, choice.sourceId, choice.locationId);
+      // "...at a single battlefield": later choices share the first one's place.
+      const place = e.group?.sameLocation
+        ? options.find((u) => u.id === d.selected[0])?.location
+        : undefined;
+      for (const u of options)
         if (
-          d.selected.includes(u.id) ||
-          d.selected.length < (e.targetCount ?? Infinity)
+          (d.selected.includes(u.id) ||
+            d.selected.length < (e.targetCount ?? Infinity)) &&
+          (!place || u.location === place)
         )
           out.push(
             action(
@@ -295,7 +312,8 @@ export function draftChoices(
               { targetId: u.id },
             ),
           );
-      out.push(action("draft:step", "Confirm targets"));
+      if (e.upTo || d.selected.length)
+        out.push(action("draft:step", "Confirm targets"));
     } else
       for (const id of targetChoices(
         effects,

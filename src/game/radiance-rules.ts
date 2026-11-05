@@ -153,6 +153,8 @@ export function radianceAbilityAllowed(
       );
     case "radiance:friendly-unit":
       return s.units.some((u) => u.owner === p);
+    case "radiance:any-ready-friendly-unit":
+      return s.units.some((u) => u.owner === p && u.ready);
     case "radiance:ready-friendly-unit":
       return s.units.some((u) => u.owner === p && u.ready && u.id !== sourceId);
     case "radiance:discard":

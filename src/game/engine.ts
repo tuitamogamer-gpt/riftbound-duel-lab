@@ -20,6 +20,13 @@ import {
   spellsHaveReaction,
   songstressOptions,
 } from "./radiance-rules";
+import {
+  banishedPlayable,
+  extraDeathknells,
+  gearAbilityBonus,
+  radianceLegendAbilities,
+  useBanishedPermission,
+} from "./radiance-wave6";
 import { drainHeimerdinger, queueHeimerdinger } from "./radiance-wave4";
 import {
   deployedGear,
@@ -258,6 +265,8 @@ const scoreTriggerRepeats = new WeakMap<
   { player: PlayerId; count: number }
 >();
 const stepEffects = new WeakMap<GameState, StepEffect>();
+/** The card whose stack item is resolving (rules, unlike stepEffects). */
+const resolvingCard = new WeakMap<GameState, string>();
 /** Presentation metadata is scoped to this synchronous effect, never game rules. */
 function withStepEffect<T>(s: GameState, effect: StepEffect, run: () => T): T {
   if (!stepFrames) return run();
@@ -3765,6 +3774,10 @@ function* iterateBaseLegalActions(
           ...(x.championAvailable
             ? [{ id: x.championId, source: "champion" }]
             : []),
+          ...banishedPlayable(s, p).map(({ id, index }) => ({
+            id,
+            source: `banished:${index}`,
+          })),
           ...(s.hidden ?? [])
             .filter((h) => h.owner === p && h.hiddenTurn < s.turn)
             .map((h) => ({ id: h.cardId, source: `hidden:${h.id}` })),
@@ -4536,6 +4549,17 @@ function* iterateBaseLegalActions(
             !canPay(s, p, cost.energy, cost.power, cost.domains, cost.anyPower)
           )
             continue;
+          if (sc.equipExhaustUnit)
+            for (const v of s.units.filter((v) => v.owner === p && v.ready))
+              yield add({
+                id: `equip:${g.id}:${u.id}:exhaust:${v.id}`,
+                costSourceId: v.id,
+                label: `Equip ${cardName(g.cardId)} to ${cardName(u.cardId)} · exhaust ${cardName(v.cardId)}`,
+                category: "ability",
+                sourceId: g.id,
+                targetId: u.id,
+                cardId: g.cardId,
+              });
           const sacrifices = sc.equipKillUnit
             ? s.units.filter((v) => v.owner === p).map((v) => v.id)
             : [undefined];
@@ -4632,7 +4656,9 @@ export function getAbilities(
         effects: textEffects(unit, a.effects),
       })),
     ),
-    ...(cardId === s.players[p].legendId ? grantedLegendAbilities(s, p) : []),
+    ...(cardId === s.players[p].legendId
+      ? [...grantedLegendAbilities(s, p), ...radianceLegendAbilities(s, p)]
+      : []),
   ];
   if (cardId !== "ogn-111-298") return own;
   const ids = new Set([
@@ -4756,7 +4782,8 @@ function bonusDamage(s: GameState, p: PlayerId) {
           s.units.some((u) => u.owner === p && u.id === g.attachedTo),
       ).length +
     (s.resolving?.filter((item) => item.player === p).at(-1)
-      ?.spellBonusDamage ?? 0)
+      ?.spellBonusDamage ?? 0) +
+    gearAbilityBonus(s, p, resolvingCard.get(s))
   );
 }
 function killUnits(
@@ -4879,7 +4906,12 @@ function commitDeaths(
       Number(a.owner !== s.currentPlayer) - Number(b.owner !== s.currentPlayer),
   )) {
     for (const effects of inherited.get(u.id) ?? [])
-      for (let repeat = 0; repeat < deathMultipliers[u.owner]; repeat++)
+      for (
+        let repeat = 0;
+        repeat <
+        deathMultipliers[u.owner] + extraDeathknells(s, u.owner, u.location);
+        repeat++
+      )
         trigger(
           s,
           u.owner,
@@ -4917,7 +4949,8 @@ function killGear(s: GameState, id: string) {
       1 +
         textUnits(s).filter(
           (u) => u.owner === gear.owner && isFace(u.cardId, "OGN", 236),
-        ).length;
+        ).length +
+        extraDeathknells(s, gear.owner, deathPlace);
       repeat++
     )
       trigger(
@@ -6275,6 +6308,10 @@ function executeEffects(
                   ? 1
                   : 0);
           changeMight(s, p, u, amount, Boolean(e.target));
+          if (amount < 0 && u.owner !== p)
+            event(s, "mightReduced", p, u.cardId, u.id, u.location, {
+              amount: -amount,
+            });
         }
         break;
       case "assault":
@@ -7565,15 +7602,22 @@ function passPriority(s: GameState) {
       },
       () => {
         log(s, `${cardName(item.cardId)} resolves.`, "play", item.player);
-        runEffects(
-          s,
-          item.player,
-          item.effects,
-          item.targetId,
-          item.sourceId,
-          item.locationId,
-          item.sourceSnapshot,
-        );
+        const outerCard = resolvingCard.get(s);
+        resolvingCard.set(s, item.cardId);
+        try {
+          runEffects(
+            s,
+            item.player,
+            item.effects,
+            item.targetId,
+            item.sourceId,
+            item.locationId,
+            item.sourceSnapshot,
+          );
+        } finally {
+          if (outerCard === undefined) resolvingCard.delete(s);
+          else resolvingCard.set(s, outerCard);
+        }
       },
     );
     if (!s.pendingChoice) finishResolvedCards(s);
@@ -8230,14 +8274,21 @@ function applyActionInternal(
   if (id.startsWith("equip:")) {
     const sc = getScript(legal.cardId!)!;
     x.xp = (x.xp ?? 0) - (sc.equipXP ?? 0);
-    const energyCost = payAbility(
-      s,
-      p,
-      legal.sourceId,
-      equipEnergy(s, legal.cardId!, legal.targetId!),
-      sc.equipCost ?? 0,
-      equipDomains(legal.cardId!),
-    );
+    const exhaustCost = sc.equipExhaustUnit && id.includes(":exhaust:");
+    const energyCost = exhaustCost
+      ? 0
+      : payAbility(
+          s,
+          p,
+          legal.sourceId,
+          equipEnergy(s, legal.cardId!, legal.targetId!),
+          sc.equipCost ?? 0,
+          equipDomains(legal.cardId!),
+        );
+    if (exhaustCost) {
+      const cost = s.units.find((u) => u.id === legal.costSourceId);
+      if (cost) cost.ready = false;
+    }
     x.firstGearAbilityTurn = s.turn;
     if (sc.equipRecycle) {
       const recycled = (legal.cardIndices ?? []).map((i) => x.discard[i]);
@@ -8510,7 +8561,10 @@ function applyActionInternal(
     else if (hidden) s.hidden = s.hidden?.filter((h) => h.id !== hidden.id);
     else if (fromTrash)
       takeTrashAt(s, p, Number(legal.sourceId!.split(":")[1]));
-    else if (instructed) {
+    else if (legal.sourceId?.startsWith("banished:")) {
+      x.banished.splice(Number(legal.sourceId.split(":")[1]), 1);
+      useBanishedPermission(s, p, c.id);
+    } else if (instructed) {
       /* Already moved to the pending chain during the parent effect. */
     } else {
       const playedIndex = Number(legal.sourceId!.split(":")[1]);
@@ -8722,7 +8776,7 @@ function applyActionInternal(
           kind: "spell",
           grenadeHits: instructed?.spec.grenadeHits,
           ...(spellBonusDamage ? { spellBonusDamage } : {}),
-          ...(flowed ? { flowed: true } : {}),
+          ...(flowed || instructed?.spec.banishAfter ? { flowed: true } : {}),
           ...(legal.sourceId?.endsWith(":granted")
             ? { grantedFlow: true }
             : {}),
@@ -8956,6 +9010,13 @@ function emitExhaustions(before: GameState, next: GameState) {
   );
   for (const u of exhausted)
     event(next, "exhausted", u.owner, u.cardId, u.id, u.location);
+  for (const g of next.gears.filter(
+    (g) =>
+      !g.ready &&
+      !next.units.some((u) => u.id === g.id) &&
+      before.gears.some((old) => old.id === g.id && old.ready),
+  ))
+    event(next, "exhausted", g.owner, g.cardId, g.id, gearPlace(g));
   for (const p of [0, 1] as PlayerId[]) {
     const count = exhausted.filter((u) => u.owner === p).length;
     if (count)

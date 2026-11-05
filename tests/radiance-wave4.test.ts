@@ -263,9 +263,7 @@ describe("Radiance wave 4: Seraphine list", () => {
     const plays = actions(s).filter((a) => a.cardId === rad(59));
     expect(plays.length).toBeGreaterThan(0);
     expect(plays.every((a) => a.songstressUnits)).toBe(true);
-    s = chain(
-      act(s, (a) => a.cardId === rad(59) && a.targetId === "enemy"),
-    );
+    s = chain(act(s, (a) => a.cardId === rad(59) && a.targetId === "enemy"));
     expect(s.players[0].legendUsedTurn).toBe(s.turn);
     expect(["a", "b", "c"].every((id) => !byId(s, id).ready)).toBe(true);
     expect(s.players[0].energy).toBe(0);

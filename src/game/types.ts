@@ -226,6 +226,8 @@ export interface CardPlaySpec {
   recycleOnLeave?: boolean;
   unplayedToHand?: boolean;
   /** Top-deck cards that are not played stay banished (they were banished first). */
+  /** The played spell is banished after it resolves or is countered. */
+  banishAfter?: boolean;
   unplayedBanished?: boolean;
   attachToSource?: boolean;
   revealed?: boolean;
@@ -757,6 +759,8 @@ export interface CardScript {
   equipCost?: number;
   equipRecycle?: number;
   equipKillUnit?: boolean;
+  /** Equip alternatively by exhausting a ready friendly unit. */
+  equipExhaustUnit?: boolean;
   equipXP?: number;
   equipAnyPower?: boolean;
   action?: boolean;

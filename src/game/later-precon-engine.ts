@@ -35,6 +35,7 @@ import { radianceDeployModule } from "./radiance-deploy";
 import { radianceWave3Module } from "./radiance-wave3";
 import { radianceWave4Module } from "./radiance-wave4";
 import { radianceWave5Module } from "./radiance-wave5";
+import { radianceWave6Module } from "./radiance-wave6";
 /** Typed extension boundary for explicitly scripted expansion precons. */
 import type { Card } from "../data/cards";
 import type {
@@ -216,7 +217,8 @@ export type PreconEvent =
   | "stateChanged"
   | "spellKill"
   | "exhausted"
-  | "exhaustBatch";
+  | "exhaustBatch"
+  | "mightReduced";
 export interface ExpansionModule {
   might?: (s: GameState, u: Unit, value: number) => number;
   keywords?: (s: GameState, u: Unit) => string[];
@@ -283,6 +285,7 @@ function modules(): ExpansionModule[] {
     radianceWave3Module,
     radianceWave4Module,
     radianceWave5Module,
+    radianceWave6Module,
   ];
 }
 export function laterMight(s: GameState, u: Unit, value: number) {

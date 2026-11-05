@@ -47,12 +47,12 @@
     "attribution": "Unofficial fan project. Structured records are from Hextech Analytics, not Riftcodex or an official Riot API. Card names, rules text, and Riot CDN artwork are property of Riot Games, Inc."
   },
   "registered": 1679,
-  "playable": 1628,
+  "playable": 1668,
   "statuses": {
-    "scripted": 1271,
+    "scripted": 1311,
     "compiled": 37,
     "alias": 320,
-    "unsupported": 51
+    "unsupported": 11
   },
   "sets": {
     "JDG": {
@@ -102,8 +102,8 @@
     },
     "RAD": {
       "total": 219,
-      "playable": 168,
-      "unsupported": 51
+      "playable": 208,
+      "unsupported": 11
     }
   },
   "precons": [
@@ -9627,8 +9627,26 @@
       "type": "Spell",
       "cardId": "rad-006-167",
       "rulesCardId": "rad-006-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "action": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "draft:split",
+            "cardTypes": [
+              "Unit"
+            ],
+            "who": "all",
+            "amount": 5,
+            "group": {
+              "atBattlefield": true,
+              "sameLocation": true
+            }
+          }
+        ]
+      }
     },
     {
       "name": "Rally for War",
@@ -9697,8 +9715,16 @@
       "type": "Spell",
       "cardId": "rad-010-167",
       "rulesCardId": "rad-010-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "ready",
+            "target": "anyUnit"
+          }
+        ]
+      }
     },
     {
       "name": "Incorrigible Construct",
@@ -9720,8 +9746,31 @@
       "type": "Gear",
       "cardId": "rad-012-167",
       "rulesCardId": "rad-012-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "radiance6:anvil"
+          }
+        ],
+        "abilities": [
+          {
+            "label": "Kill this",
+            "energy": 2,
+            "power": 1,
+            "domain": "Chaos",
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:kill-self"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Lost to the Sands",
@@ -9762,8 +9811,23 @@
       "type": "Unit",
       "cardId": "rad-014-167",
       "rulesCardId": "rad-014-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "additionalCost": {
+          "board": {
+            "kind": "killUnitOrGear"
+          }
+        },
+        "onPlay": [
+          {
+            "type": "damage",
+            "amount": 2,
+            "target": "anyUnit",
+            "condition": "paidAdditionalCost"
+          }
+        ]
+      }
     },
     {
       "name": "Akali, Brash",
@@ -9771,8 +9835,10 @@
       "type": "Unit",
       "cardId": "rad-015-167",
       "rulesCardId": "rad-015-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Coalesced Energy",
@@ -9797,8 +9863,19 @@
       "type": "Gear",
       "cardId": "rad-017-167",
       "rulesCardId": "rad-017-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy"
+        ],
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "radiance6:amplifier"
+          }
+        ]
+      }
     },
     {
       "name": "Drakehound Packmaster",
@@ -9861,8 +9938,31 @@
       "type": "Unit",
       "cardId": "rad-021-167",
       "rulesCardId": "rad-021-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "assault": 1,
+        "keywords": [
+          "Enters ready",
+          "Assault"
+        ],
+        "abilities": [
+          {
+            "label": "Banish me, then play me to your base",
+            "discard": 1,
+            "energy": 1,
+            "power": 1,
+            "domain": "Fury",
+            "timing": "action",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:ekko-blink"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Ekko, Revolutionary",
@@ -9870,8 +9970,31 @@
       "type": "Unit",
       "cardId": "rad-021a-167",
       "rulesCardId": "rad-021a-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "assault": 1,
+        "keywords": [
+          "Enters ready",
+          "Assault"
+        ],
+        "abilities": [
+          {
+            "label": "Banish me, then play me to your base",
+            "discard": 1,
+            "energy": 1,
+            "power": 1,
+            "domain": "Fury",
+            "timing": "action",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:ekko-blink"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Whirling Twirligig",
@@ -9879,8 +10002,45 @@
       "type": "Gear",
       "cardId": "rad-022-167",
       "rulesCardId": "rad-022-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Play a Gold gear token exhausted",
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "token",
+                "cardName": "Gold",
+                "location": "base"
+              }
+            ]
+          },
+          {
+            "label": "Kill a friendly gear: play a Recruit",
+            "exhaust": true,
+            "condition": "radiance:friendly-gear",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:twirl-gear"
+              }
+            ]
+          },
+          {
+            "label": "Kill a friendly unit: play a 3 Might Mech",
+            "exhaust": true,
+            "condition": "radiance:friendly-unit",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:twirl-unit"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Ziggs, Short-Fused",
@@ -9888,8 +10048,16 @@
       "type": "Unit",
       "cardId": "rad-023-167",
       "rulesCardId": "rad-023-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "token",
+            "cardName": "Bomb"
+          }
+        ]
+      }
     },
     {
       "name": "Ziggs, Short-Fused",
@@ -9897,8 +10065,16 @@
       "type": "Unit",
       "cardId": "rad-023a-167",
       "rulesCardId": "rad-023a-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "token",
+            "cardName": "Bomb"
+          }
+        ]
+      }
     },
     {
       "name": "Blossoming Dreamroot",
@@ -9906,8 +10082,13 @@
       "type": "Gear",
       "cardId": "rad-024-167",
       "rulesCardId": "rad-024-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy"
+        ]
+      }
     },
     {
       "name": "Consult the Heavens",
@@ -10083,8 +10264,30 @@
       "type": "Spell",
       "cardId": "rad-033-167",
       "rulesCardId": "rad-033-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spellModes": [
+          {
+            "label": "Move a friendly [Deploy] gear to a battlefield",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:command-move"
+              }
+            ]
+          },
+          {
+            "label": "Look at the top 5 and draw a gear",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:command-look"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Hunker Down",
@@ -10146,8 +10349,14 @@
       "type": "Unit",
       "cardId": "rad-036-167",
       "rulesCardId": "rad-036-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "deflect": 1,
+        "keywords": [
+          "Deflect"
+        ]
+      }
     },
     {
       "name": "Watchful Curator",
@@ -10166,8 +10375,20 @@
       "type": "Unit",
       "cardId": "rad-038-167",
       "rulesCardId": "rad-038-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Disarm"
+        ],
+        "onAttack": [
+          {
+            "type": "might",
+            "amount": -1,
+            "target": "enemyUnitHere"
+          }
+        ]
+      }
     },
     {
       "name": "Ephemeral Ward",
@@ -10186,8 +10407,16 @@
       "type": "Unit",
       "cardId": "rad-040-167",
       "rulesCardId": "rad-040-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "radiance6:ready-legend"
+          }
+        ]
+      }
     },
     {
       "name": "Hush",
@@ -10244,8 +10473,10 @@
       "type": "Unit",
       "cardId": "rad-043-167",
       "rulesCardId": "rad-043-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Riven, Broken Blade",
@@ -10253,8 +10484,10 @@
       "type": "Unit",
       "cardId": "rad-043a-167",
       "rulesCardId": "rad-043a-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Hunting Blind",
@@ -10282,8 +10515,26 @@
       "type": "Unit",
       "cardId": "rad-045-167",
       "rulesCardId": "rad-045-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "shield": 1,
+        "keywords": [
+          "Shield"
+        ],
+        "onAttack": [
+          {
+            "type": "special",
+            "custom": "radiance6:ksante"
+          }
+        ],
+        "onDefend": [
+          {
+            "type": "special",
+            "custom": "radiance6:ksante"
+          }
+        ]
+      }
     },
     {
       "name": "K'Sante, Dauntless",
@@ -10291,8 +10542,26 @@
       "type": "Unit",
       "cardId": "rad-045a-167",
       "rulesCardId": "rad-045a-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "shield": 1,
+        "keywords": [
+          "Shield"
+        ],
+        "onAttack": [
+          {
+            "type": "special",
+            "custom": "radiance6:ksante"
+          }
+        ],
+        "onDefend": [
+          {
+            "type": "special",
+            "custom": "radiance6:ksante"
+          }
+        ]
+      }
     },
     {
       "name": "Resplendent Rostrum",
@@ -10300,8 +10569,26 @@
       "type": "Gear",
       "cardId": "rad-046-167",
       "rulesCardId": "rad-046-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Draw 1 and channel 1 rune exhausted",
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "draw",
+                "amount": 1
+              },
+              {
+                "type": "special",
+                "custom": "radiance6:channel-exhausted"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Fanfare",
@@ -10479,8 +10766,18 @@
       "type": "Spell",
       "cardId": "rad-056-167",
       "rulesCardId": "rad-056-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "action": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "radiance6:projectile",
+            "target": "unitAtBattlefield"
+          }
+        ]
+      }
     },
     {
       "name": "Piltovan Guidebot",
@@ -10631,8 +10928,23 @@
       "type": "Gear",
       "cardId": "rad-064-167",
       "rulesCardId": "rad-064-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "An opponent guesses the type of your top card",
+            "energy": 1,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:scope"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Seraphine, Inspiring",
@@ -10742,17 +11054,21 @@
       "type": "Unit",
       "cardId": "rad-068-167",
       "rulesCardId": "rad-068-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Orianna, Mechanical Marvel",
       "set": "RAD",
       "type": "Unit",
       "cardId": "rad-068a-167",
-      "rulesCardId": "rad-068-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "rulesCardId": "rad-068a-167",
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Zero Point Inflection",
@@ -10760,8 +11076,10 @@
       "type": "Gear",
       "cardId": "rad-069-167",
       "rulesCardId": "rad-069-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Hold 'Em",
@@ -11058,8 +11376,22 @@
       "type": "Unit",
       "cardId": "rad-085-167",
       "rulesCardId": "rad-085-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onAttack": [
+          {
+            "type": "special",
+            "custom": "radiance6:graves"
+          }
+        ],
+        "onDefend": [
+          {
+            "type": "special",
+            "custom": "radiance6:graves"
+          }
+        ]
+      }
     },
     {
       "name": "K'Sante, Courageous",
@@ -11644,8 +11976,16 @@
       "type": "Gear",
       "cardId": "rad-111-167",
       "rulesCardId": "rad-111-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onBegin": [
+          {
+            "type": "special",
+            "custom": "radiance6:bandit"
+          }
+        ]
+      }
     },
     {
       "name": "Ziggs, Explosive",
@@ -11713,8 +12053,27 @@
       "type": "Unit",
       "cardId": "rad-113-167",
       "rulesCardId": "rad-113-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "deflect": 1,
+        "keywords": [
+          "Deflect"
+        ],
+        "abilities": [
+          {
+            "label": "An opponent moves a unit to my battlefield",
+            "exhaust": true,
+            "condition": "sourceAtBattlefield",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:angler"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Riven, Deserter",
@@ -11722,8 +12081,24 @@
       "type": "Unit",
       "cardId": "rad-114-167",
       "rulesCardId": "rad-114-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Exhaust a friendly unit: ready a unit",
+            "oncePerTurn": true,
+            "condition": "radiance:any-ready-friendly-unit",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:deserter",
+                "target": "anyUnit"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Riven, Deserter",
@@ -11731,8 +12106,24 @@
       "type": "Unit",
       "cardId": "rad-114a-167",
       "rulesCardId": "rad-114a-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Exhaust a friendly unit: ready a unit",
+            "oncePerTurn": true,
+            "condition": "radiance:any-ready-friendly-unit",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:deserter",
+                "target": "anyUnit"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Transpositionist",
@@ -11740,8 +12131,25 @@
       "type": "Unit",
       "cardId": "rad-115-167",
       "rulesCardId": "rad-115-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Return a friendly unit; you may play a smaller unit",
+            "power": 1,
+            "domain": "Chaos",
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:transpose",
+                "target": "friendlyUnit"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Concert Poster",
@@ -12037,8 +12445,10 @@
       "type": "Unit",
       "cardId": "rad-130-167",
       "rulesCardId": "rad-130-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Demacian Illuminators",
@@ -12253,8 +12663,35 @@
       "type": "Legend",
       "cardId": "rad-139-167",
       "rulesCardId": "rad-139-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Empower",
+            "energy": 1,
+            "exhaust": true,
+            "condition": "sourceNotEmpowered",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave14:empower-source"
+              }
+            ]
+          },
+          {
+            "label": "Your next unit costs 2 Energy and 1 Power less",
+            "disempowerSelf": true,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:boy"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Chronobreak",
@@ -12296,8 +12733,17 @@
       "type": "Spell",
       "cardId": "rad-142-167",
       "rulesCardId": "rad-142-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "action": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "radiance6:minefield"
+          }
+        ]
+      }
     },
     {
       "name": "Iron Revenant",
@@ -12405,8 +12851,20 @@
       "type": "Gear",
       "cardId": "rad-150-167",
       "rulesCardId": "rad-150-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "equipCost": 1,
+        "equipAnyPower": true,
+        "equipExhaustUnit": true,
+        "gearMight": 3,
+        "equipment": {
+          "text": "[Ganking]",
+          "keywords": [
+            "Ganking"
+          ]
+        }
+      }
     },
     {
       "name": "Starry-Eyed Songstress",
@@ -12679,8 +13137,35 @@
       "type": "Legend",
       "cardId": "rad-168-167",
       "rulesCardId": "rad-168-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "Empower",
+            "energy": 1,
+            "exhaust": true,
+            "condition": "sourceNotEmpowered",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "wave14:empower-source"
+              }
+            ]
+          },
+          {
+            "label": "Your next unit costs 2 Energy and 1 Power less",
+            "disempowerSelf": true,
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:boy"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Hexplosives Expert",
@@ -12799,9 +13284,32 @@
       "set": "RAD",
       "type": "Unit",
       "cardId": "rad-177-167",
-      "rulesCardId": "rad-021a-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "rulesCardId": "rad-177-167",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "assault": 1,
+        "keywords": [
+          "Enters ready",
+          "Assault"
+        ],
+        "abilities": [
+          {
+            "label": "Banish me, then play me to your base",
+            "discard": 1,
+            "energy": 1,
+            "power": 1,
+            "domain": "Fury",
+            "timing": "action",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance6:ekko-blink"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "K'Sante, Courageous",
@@ -13078,8 +13586,20 @@
       "type": "Unit",
       "cardId": "rad-sp1-005",
       "rulesCardId": "rad-sp1-005",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Disarm"
+        ],
+        "onAttack": [
+          {
+            "type": "might",
+            "amount": -1,
+            "target": "enemyUnitHere"
+          }
+        ]
+      }
     },
     {
       "name": "Akali, Brash",
@@ -13087,8 +13607,10 @@
       "type": "Unit",
       "cardId": "rad-sp2-005",
       "rulesCardId": "rad-sp2-005",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Evelynn, In Control",
