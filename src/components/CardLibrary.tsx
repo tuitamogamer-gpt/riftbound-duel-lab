@@ -22,7 +22,11 @@ import {
   referenceCards,
   referenceCatalogMeta,
 } from "../data/cards";
-import { referencePreconDecks, type StarterDeck } from "../data/decks";
+import {
+  playableReferencePreconIds,
+  referencePreconDecks,
+  type StarterDeck,
+} from "../data/decks";
 import { rulesTokens } from "../data/tokens";
 import { scripts } from "../game/scripts";
 import { canonicalBuilderId } from "../game/deck-builder";
@@ -72,6 +76,13 @@ function ReferencePrecon({
     <details className="library-reference-deck">
       <summary>
         <span>{deck.name}</span>
+        <span className="library-reference-status">
+          {t(
+            playableReferencePreconIds.has(deck.id)
+              ? "Playable"
+              : "Reference only",
+          )}
+        </span>
         <ChevronDown size={16} aria-hidden="true" />
       </summary>
       <div className="library-reference-deck-content">
@@ -119,6 +130,9 @@ export function CardLibrary({
   inspect: (c: CatalogCard) => void;
 }) {
   const { t, locale } = useI18n();
+  const playablePrecons = referencePreconDecks.filter((deck) =>
+    playableReferencePreconIds.has(deck.id),
+  ).length;
   const snapshotDate = (date: string) =>
     new Date(date).toLocaleDateString(locale === "sr" ? "sr-Latn" : locale, {
       day: "numeric",
@@ -319,14 +333,23 @@ export function CardLibrary({
               })}
             </span>
             <span className="library-reference-status">
-              {t("Reference only")}
+              {t(
+                playablePrecons === referencePreconDecks.length
+                  ? "Playable"
+                  : playablePrecons
+                    ? "{count} playable"
+                    : "Reference only",
+                { count: playablePrecons },
+              )}
             </span>
             <ChevronDown size={17} aria-hidden="true" />
           </summary>
           <div className="library-reference-content">
             <p>
               {t(
-                "Explore the official lists and their cards. These decks are not available for play while their rules are being implemented.",
+                playablePrecons
+                  ? "Explore the official lists and their cards. Lists marked playable are in the deck picker; the others are not available while their rules are being implemented."
+                  : "Explore the official lists and their cards. These decks are not available for play while their rules are being implemented.",
               )}
             </p>
             <div className="library-reference-decks">

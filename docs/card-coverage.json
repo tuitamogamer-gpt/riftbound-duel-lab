@@ -47,12 +47,12 @@
     "attribution": "Unofficial fan project. Structured records are from Hextech Analytics, not Riftcodex or an official Riot API. Card names, rules text, and Riot CDN artwork are property of Riot Games, Inc."
   },
   "registered": 1679,
-  "playable": 1514,
+  "playable": 1537,
   "statuses": {
-    "scripted": 1157,
+    "scripted": 1180,
     "compiled": 37,
     "alias": 320,
-    "unsupported": 165
+    "unsupported": 142
   },
   "sets": {
     "JDG": {
@@ -102,8 +102,8 @@
     },
     "RAD": {
       "total": 219,
-      "playable": 54,
-      "unsupported": 165
+      "playable": 77,
+      "unsupported": 142
     }
   },
   "precons": [
@@ -254,31 +254,18 @@
         "rad-122-167",
         "rad-120-167",
         "rad-117-167"
-      ]
+      ],
+      "playable": false
     },
     {
       "id": "reference-precon-evelynn",
       "name": "Evelynn · Radiance",
       "product": "Radiance Showdown",
       "uniqueCards": 29,
-      "executableCards": 15,
-      "complete": false,
-      "missingCardIds": [
-        "rad-153-167",
-        "rad-090-167",
-        "rad-157-167",
-        "rad-165-167",
-        "rad-109-167",
-        "rad-154-167",
-        "rad-103-167",
-        "rad-102-167",
-        "rad-081-167",
-        "rad-105-167",
-        "rad-070-167",
-        "rad-100-167",
-        "rad-095-167",
-        "rad-098-167"
-      ]
+      "executableCards": 29,
+      "complete": true,
+      "missingCardIds": [],
+      "playable": true
     }
   ],
   "entries": [
@@ -10434,8 +10421,18 @@
       "type": "Spell",
       "cardId": "rad-070-167",
       "rulesCardId": "rad-070-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "action": true,
+        "spell": [
+          {
+            "type": "might",
+            "amount": 3,
+            "target": "anyUnit"
+          }
+        ]
+      }
     },
     {
       "name": "Nazuman Ntofo",
@@ -10577,8 +10574,22 @@
       "type": "Unit",
       "cardId": "rad-081-167",
       "rulesCardId": "rad-081-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "hidden": true,
+        "onPlay": [
+          {
+            "type": "might",
+            "amount": 3,
+            "target": "friendlyUnit"
+          },
+          {
+            "type": "special",
+            "custom": "radiance3:recycle-if-hidden"
+          }
+        ]
+      }
     },
     {
       "name": "Primordial Roar",
@@ -10714,8 +10725,14 @@
       "type": "Unit",
       "cardId": "rad-090-167",
       "rulesCardId": "rad-090-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "ambush": true,
+        "keywords": [
+          "Ambush"
+        ]
+      }
     },
     {
       "name": "Evelynn, Consuming",
@@ -10723,8 +10740,14 @@
       "type": "Unit",
       "cardId": "rad-090a-167",
       "rulesCardId": "rad-090a-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "ambush": true,
+        "keywords": [
+          "Ambush"
+        ]
+      }
     },
     {
       "name": "Jarvan IV, Martial Paragon",
@@ -10805,8 +10828,17 @@
       "type": "Unit",
       "cardId": "rad-095-167",
       "rulesCardId": "rad-095-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "hidden": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "radiance3:companion"
+          }
+        ]
+      }
     },
     {
       "name": "Satchel Charge",
@@ -10859,8 +10891,19 @@
       "type": "Spell",
       "cardId": "rad-098-167",
       "rulesCardId": "rad-098-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "reaction": true,
+        "spell": [
+          {
+            "type": "moveTarget",
+            "target": "enemyUnit",
+            "condition": "chooseDestination",
+            "movedThisTurn": true
+          }
+        ]
+      }
     },
     {
       "name": "Suave Negotiator",
@@ -10890,8 +10933,17 @@
       "type": "Spell",
       "cardId": "rad-100-167",
       "rulesCardId": "rad-100-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "hidden": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "radiance3:waters-wage"
+          }
+        ]
+      }
     },
     {
       "name": "An Offer You Can't Refuse",
@@ -10908,8 +10960,33 @@
       "type": "Spell",
       "cardId": "rad-102-167",
       "rulesCardId": "rad-102-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "hidden": true,
+        "spellModes": [
+          {
+            "label": "Move it to an open battlefield",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance3:shade-move",
+                "target": "friendlyUnit"
+              }
+            ]
+          },
+          {
+            "label": "Give it [Ganking] this turn if there are no open battlefields",
+            "effects": [
+              {
+                "type": "special",
+                "custom": "radiance3:shade-ganking",
+                "target": "friendlyUnit"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Gutter Guardian",
@@ -10917,8 +10994,20 @@
       "type": "Unit",
       "cardId": "rad-103-167",
       "rulesCardId": "rad-103-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "hidden": true,
+        "showOff": {
+          "kind": "hidden"
+        },
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "radiance3:guardian-add"
+          }
+        ]
+      }
     },
     {
       "name": "Pitiless Stalker",
@@ -10949,8 +11038,11 @@
       "type": "Unit",
       "cardId": "rad-105-167",
       "rulesCardId": "rad-105-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true
+      }
     },
     {
       "name": "The Good Stuff",
@@ -11011,8 +11103,26 @@
       "type": "Unit",
       "cardId": "rad-109-167",
       "rulesCardId": "rad-109-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Disarm"
+        ],
+        "onAttack": [
+          {
+            "type": "might",
+            "amount": -1,
+            "target": "enemyUnitHere"
+          }
+        ],
+        "onHold": [
+          {
+            "type": "special",
+            "custom": "radiance3:evelynn-hold"
+          }
+        ]
+      }
     },
     {
       "name": "Evelynn, In Control",
@@ -11020,8 +11130,26 @@
       "type": "Unit",
       "cardId": "rad-109a-167",
       "rulesCardId": "rad-109a-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Disarm"
+        ],
+        "onAttack": [
+          {
+            "type": "might",
+            "amount": -1,
+            "target": "enemyUnitHere"
+          }
+        ],
+        "onHold": [
+          {
+            "type": "special",
+            "custom": "radiance3:evelynn-hold"
+          }
+        ]
+      }
     },
     {
       "name": "Lulu, Whimsical",
@@ -11562,8 +11690,10 @@
       "type": "Legend",
       "cardId": "rad-153-167",
       "rulesCardId": "rad-153-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Last Caress",
@@ -11571,8 +11701,17 @@
       "type": "Spell",
       "cardId": "rad-154-167",
       "rulesCardId": "rad-154-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "reaction": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "radiance3:last-caress"
+          }
+        ]
+      }
     },
     {
       "name": "Exemplar of Demacia",
@@ -11611,8 +11750,10 @@
       "type": "Battlefield",
       "cardId": "rad-157-167",
       "rulesCardId": "rad-157-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Black Market",
@@ -11683,8 +11824,10 @@
       "type": "Battlefield",
       "cardId": "rad-165-167",
       "rulesCardId": "rad-165-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Ruined Monastery",
@@ -11788,9 +11931,11 @@
       "set": "RAD",
       "type": "Legend",
       "cardId": "rad-175-167",
-      "rulesCardId": "rad-153-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "rulesCardId": "rad-175-167",
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Exemplar of Demacia",
@@ -11841,8 +11986,10 @@
       "type": "Unit",
       "cardId": "rad-179-167",
       "rulesCardId": "rad-179-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Ezreal, Dashing",
@@ -11850,8 +11997,41 @@
       "type": "Unit",
       "cardId": "rad-180-167",
       "rulesCardId": "rad-180-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "No combat damage"
+        ],
+        "onAttack": [
+          {
+            "type": "special",
+            "custom": "wave4:might-damage",
+            "target": "enemyUnitHere"
+          }
+        ],
+        "onDefend": [
+          {
+            "type": "special",
+            "custom": "wave4:might-damage",
+            "target": "enemyUnitHere"
+          }
+        ],
+        "abilities": [
+          {
+            "label": "Move me to base",
+            "power": 1,
+            "domain": "Mind",
+            "timing": "action",
+            "effects": [
+              {
+                "type": "moveTarget",
+                "condition": "self"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Yone, Blademaster",
@@ -11859,8 +12039,21 @@
       "type": "Unit",
       "cardId": "rad-181-167",
       "rulesCardId": "rad-181-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "sfd:weaponmaster",
+            "target": "friendlyEquipment",
+            "optional": true
+          }
+        ],
+        "keywords": [
+          "Weaponmaster"
+        ]
+      }
     },
     {
       "name": "Kayn, Unleashed",
@@ -11868,8 +12061,13 @@
       "type": "Unit",
       "cardId": "rad-182-167",
       "rulesCardId": "rad-182-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Ganking"
+        ]
+      }
     },
     {
       "name": "Sett, Kingpin",
@@ -11877,8 +12075,13 @@
       "type": "Unit",
       "cardId": "rad-183-167",
       "rulesCardId": "rad-183-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Tank"
+        ]
+      }
     },
     {
       "name": "Packed Amphitheater",
@@ -12044,9 +12247,27 @@
       "set": "RAD",
       "type": "Unit",
       "cardId": "rad-sp3-005",
-      "rulesCardId": "rad-109-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "rulesCardId": "rad-sp3-005",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Disarm"
+        ],
+        "onAttack": [
+          {
+            "type": "might",
+            "amount": -1,
+            "target": "enemyUnitHere"
+          }
+        ],
+        "onHold": [
+          {
+            "type": "special",
+            "custom": "radiance3:evelynn-hold"
+          }
+        ]
+      }
     },
     {
       "name": "Kai'Sa, Rebel",

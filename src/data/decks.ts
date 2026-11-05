@@ -144,9 +144,25 @@ export const starterDecks: StarterDeck[] = [
 
 export const practiceDecks = starterDecks;
 export const officialPreconDecks = preconData as StarterDeck[];
-/** Official lists available for inspection, excluded from all playable presets. */
+/** Official Radiance lists available for inspection in the card library. */
 export const referencePreconDecks = referencePreconData as StarterDeck[];
-export const decks: StarterDeck[] = [...officialPreconDecks, ...practiceDecks];
+/**
+ * Radiance lists whose every card now has reviewed rules. They join the
+ * playable presets; the retail 13x13 bot matrix stays unchanged. Tests and the
+ * coverage report reject a promoted list with unsupported cards, and a
+ * complete list that was not promoted.
+ */
+export const playableReferencePreconIds: ReadonlySet<string> = new Set([
+  "reference-precon-evelynn",
+]);
+export const playableReferencePrecons = referencePreconDecks.filter((deck) =>
+  playableReferencePreconIds.has(deck.id),
+);
+export const decks: StarterDeck[] = [
+  ...officialPreconDecks,
+  ...playableReferencePrecons,
+  ...practiceDecks,
+];
 export const decksById = Object.fromEntries(
   decks.map((deck) => [deck.id, deck]),
 );

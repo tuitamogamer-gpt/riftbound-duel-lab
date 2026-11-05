@@ -6,6 +6,8 @@ import {
   copiedScripts,
 } from "./text-sources";
 import { inspectDeck, shiftInspectedPositions } from "./deck-inspection";
+import { showOffCandidates, withShown } from "./show-off";
+import { lastCaressActive } from "./radiance-rules";
 import {
   deployedGear,
   deployGearHasAction,
@@ -1870,6 +1872,10 @@ function effectTargetMatches(
     (!e.targetDifferentLocationFromSource ||
       (source && location !== source.location)) &&
     (!e.excludeTag || !c.tags.includes(e.excludeTag)) &&
+    (!e.movedThisTurn ||
+      ("movesTurn" in object &&
+        object.movesTurn === s.turn &&
+        (object.movesThisTurn ?? 0) > 0)) &&
     (e.custom !== "wave15:dragons-duel" || object.id !== e.cardName) &&
     (e.condition !== "namedTag" ||
       getUnitTags(object).includes(
@@ -2633,6 +2639,17 @@ function* playVariants(
   )) {
     const c = getCard(a.cardId!),
       sc = getScript(c.id)!;
+    // Core Rules 832: Show Off is chosen as the card is played.
+    if (sc.showOff)
+      for (const info of showOffCandidates(s, p, a.sourceId, sc.showOff, (u) =>
+        getMight(s, u),
+      ))
+        yield {
+          ...a,
+          id: `${a.id}|showoff:${info.ref}`,
+          label: `${a.label} · show off ${cardName(info.cardId)}`,
+          showOff: info,
+        };
     for (const mode of ["additionalCost", "repeat"] as const) {
       const repeats = repeatPrices(s, p, c.id, sc);
       if (mode === "repeat" && repeats.length > 1) {
@@ -3854,12 +3871,14 @@ function* iterateBaseLegalActions(
         })
       )
         continue;
+      const anyField = isCardType(c, "Unit") && lastCaressActive(s, p);
       let locations: Array<LocationId | undefined> = isCardType(c, "Unit")
         ? [
             ...(hidden || (ambush && !canMain) ? [] : [base(p)]),
             ...s.fields
               .filter(
                 (f) =>
+                  anyField ||
                   f.controller === p ||
                   ((script.keywords?.includes("Play to open battlefields") ||
                     textUnits(s).some(
@@ -4007,7 +4026,12 @@ function* iterateBaseLegalActions(
             !x.conqueredThisTurn.includes(Number(locationId.split(":")[1])))
         )
           continue;
-        if (hidden && isCardType(c, "Unit") && locationId !== hidden.location)
+        if (
+          hidden &&
+          isCardType(c, "Unit") &&
+          locationId !== hidden.location &&
+          !anyField
+        )
           continue;
         if (c.id === "ogn-208-298" && !s.units.some((u) => u.owner === p))
           continue;
@@ -4805,7 +4829,8 @@ function effectDescription(e: Effect): string {
 /** Set only while validating an action ID that cannot be a cost variant. */
 let skipPlayVariants = false;
 const isPlayVariantId = (id: string) =>
-  id.startsWith("play|") && /\|(?:additionalCost|repeat|repeat-mask):/.test(id);
+  id.startsWith("play|") &&
+  /\|(?:additionalCost|repeat|repeat-mask|showoff):/.test(id);
 /** Deflect taxes memoized during one read-only legal-action enumeration. */
 let deflectMemo: WeakMap<GameState, Map<string, number>> | null = null;
 function deflect(s: GameState, u: Unit) {
@@ -8418,11 +8443,14 @@ function applyActionInternal(
           u.id,
           textEffects(
             u,
-            annotateEffects(
-              script.onPlay,
-              Boolean(hidden),
-              Boolean(legal.additionalCostPaid),
-              hidden?.location,
+            withShown(
+              annotateEffects(
+                script.onPlay,
+                Boolean(hidden),
+                Boolean(legal.additionalCostPaid),
+                hidden?.location,
+              ),
+              legal.showOff,
             ),
           ),
           u.location,
@@ -8494,29 +8522,32 @@ function applyActionInternal(
             repeatMask: legal.repeatMask,
           },
           targetId: legal.targetId,
-          effects: annotateEffects(
-            c.id === "ogn-048-298" && id.includes("|exhaust:")
-              ? [{ type: "draw", amount: 2 }]
-              : legal.repeated && !legal.draftFinalized
-                ? [
-                    ...(legal.effects ?? script.spell ?? []).map((e) => ({
-                      ...e,
-                      chosenTargetId: legal.targetId ?? null,
-                    })),
-                    ...(
-                      legal.repeatedEffects ??
-                      legal.effects ??
-                      script.spell ??
-                      []
-                    ).map((e) => ({
-                      ...e,
-                      chosenTargetId: legal.repeatedTargetId ?? null,
-                    })),
-                  ]
-                : (legal.effects ?? script.spell ?? []),
-            Boolean(hidden),
-            Boolean(legal.additionalCostPaid),
-            isFace(c.id, "VEN", 34) ? undefined : hidden?.location,
+          effects: withShown(
+            annotateEffects(
+              c.id === "ogn-048-298" && id.includes("|exhaust:")
+                ? [{ type: "draw", amount: 2 }]
+                : legal.repeated && !legal.draftFinalized
+                  ? [
+                      ...(legal.effects ?? script.spell ?? []).map((e) => ({
+                        ...e,
+                        chosenTargetId: legal.targetId ?? null,
+                      })),
+                      ...(
+                        legal.repeatedEffects ??
+                        legal.effects ??
+                        script.spell ??
+                        []
+                      ).map((e) => ({
+                        ...e,
+                        chosenTargetId: legal.repeatedTargetId ?? null,
+                      })),
+                    ]
+                  : (legal.effects ?? script.spell ?? []),
+              Boolean(hidden),
+              Boolean(legal.additionalCostPaid),
+              isFace(c.id, "VEN", 34) ? undefined : hidden?.location,
+            ),
+            legal.showOff,
           ),
           locationId: legal.locationId ?? hidden?.location,
           kind: "spell",
@@ -8580,6 +8611,13 @@ function applyActionInternal(
                 : "hand",
       },
     );
+    if (legal.showOff)
+      log(
+        s,
+        `${x.name} shows off ${cardName(legal.showOff.cardId)}${legal.showOff.ref.startsWith("hand:") ? " from hand" : ""}.`,
+        "play",
+        p,
+      );
     if (!isCardType(c, "Spell"))
       cardPlayed(
         s,
@@ -8738,6 +8776,33 @@ function applyActionInternal(
   }
   throw new Error(`Action not implemented: ${id}`);
 }
+/**
+ * "When I become exhausted": units that were ready before an action and are
+ * exhausted after it. Units exhausted by one action count as exhausted at the
+ * same time (Seraphine, Inspiring).
+ */
+function emitExhaustions(before: GameState, next: GameState) {
+  const exhausted = next.units.filter(
+    (u) => !u.ready && before.units.some((old) => old.id === u.id && old.ready),
+  );
+  for (const u of exhausted)
+    event(next, "exhausted", u.owner, u.cardId, u.id, u.location);
+  for (const p of [0, 1] as PlayerId[]) {
+    const count = exhausted.filter((u) => u.owner === p).length;
+    if (count)
+      event(
+        next,
+        "exhaustBatch",
+        p,
+        next.players[p].legendId,
+        undefined,
+        undefined,
+        {
+          amount: count,
+        },
+      );
+  }
+}
 export function applyAction(
   state: GameState,
   action: string | GameAction,
@@ -8754,6 +8819,7 @@ export function applyAction(
     next.pendingMove = null;
     return next;
   }
+  emitExhaustions(state, next);
   if (!next.pendingChoice) drainTriggers(next);
   const arrivals = next.units.filter(
     (u) =>

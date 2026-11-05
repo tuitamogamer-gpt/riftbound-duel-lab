@@ -47,4 +47,52 @@ export const reviewedRuleFamilies: Record<string, string> = {
   "ven-171-166": "ven-041-166--6a517607ad64d2d80a4f03c0",
   "ven-185-166": "ven-134-166",
 };
-export const ruleFamily = (id: string) => reviewedRuleFamilies[id] ?? id;
+/** Radiance alternate, showcase and reprinted faces. Each shares the rules of
+ * its source face once that face is implemented; text equivalence, including
+ * Radiance's updated templating, is tested in radiance-families.test.ts.
+ */
+export const radianceRuleFamilies: Record<string, string> = {
+  "rad-020a-167": "rad-020-167",
+  "rad-021a-167": "rad-021-167",
+  "rad-177-167": "rad-021-167",
+  "rad-023a-167": "rad-023-167",
+  "rad-042a-167": "rad-042-167",
+  "rad-043a-167": "rad-043-167",
+  "rad-045a-167": "rad-045-167",
+  "rad-061a-167": "rad-061-167",
+  "rad-065a-167": "rad-065-167",
+  "rad-068a-167": "rad-068-167",
+  "rad-086a-167": "rad-086-167",
+  "rad-178-167": "rad-086-167",
+  "rad-090a-167": "rad-090-167",
+  "rad-091a-167": "rad-091-167",
+  "rad-109a-167": "rad-109-167",
+  "rad-sp3-005": "rad-109-167",
+  "rad-112a-167": "rad-112-167",
+  "rad-114a-167": "rad-114-167",
+  "rad-133a-167": "rad-133-167",
+  "rad-137a-167": "rad-137-167",
+  "rad-138a-167": "rad-138-167",
+  "rad-sp5-005": "rad-138-167",
+  "rad-168-167": "rad-139-167",
+  "rad-169-167": "rad-141-167",
+  "rad-170-167": "rad-143-167",
+  "rad-171-167": "rad-145-167",
+  "rad-172-167": "rad-147-167",
+  "rad-173-167": "rad-149-167",
+  "rad-174-167": "rad-151-167",
+  "rad-175-167": "rad-153-167",
+  "rad-176-167": "rad-155-167",
+  "rad-184-167": "rad-164-167",
+  "rad-sp1-005": "rad-038-167",
+  "rad-sp2-005": "rad-015-167",
+  "rad-sp4-005": "rad-063-167",
+  // Reprints of earlier champions.
+  "rad-179-167": "sfd-049-221",
+  "rad-180-167": "sfd-082-221",
+  "rad-181-167": "sfd-116-221",
+  "rad-182-167": "ogn-189-298",
+  "rad-183-167": "ogn-240-298",
+};
+export const ruleFamily = (id: string) =>
+  reviewedRuleFamilies[id] ?? radianceRuleFamilies[id] ?? id;

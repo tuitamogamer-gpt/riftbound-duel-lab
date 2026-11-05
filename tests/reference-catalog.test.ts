@@ -11,6 +11,7 @@ import { rulesTokens } from "../src/data/tokens";
 import {
   decks,
   officialPreconDecks,
+  playableReferencePreconIds,
   referencePreconDecks,
   starterDecks,
   validateDeck,
@@ -163,7 +164,7 @@ describe("Radiance reference catalog", () => {
     ).toEqual(["rad-r01"]);
   });
 
-  it("imports both official lists for inspection while preserving all playable presets", () => {
+  it("imports both official lists and promotes exactly the fully executable ones", () => {
     expect(officialPreconDecks).toHaveLength(13);
     expect(referencePreconDecks).toHaveLength(2);
     for (const deck of referencePreconDecks) {
@@ -171,11 +172,17 @@ describe("Radiance reference catalog", () => {
       expect(deck.main.reduce((sum, entry) => sum + entry.count, 1)).toBe(40);
       expect(deck.runes.reduce((sum, entry) => sum + entry.count, 0)).toBe(12);
       expect(deck.battlefieldIds).toHaveLength(3);
-      expect(decks.some((playable) => playable.id === deck.id)).toBe(false);
-      expect(getDeckScriptCoverage(deck).complete).toBe(false);
-      expect(() => createGame({ playerDeck: deck })).toThrow(
-        "unsupported cards",
-      );
+      const complete = getDeckScriptCoverage(deck).complete;
+      expect(playableReferencePreconIds.has(deck.id)).toBe(complete);
+      expect(decks.some((playable) => playable.id === deck.id)).toBe(complete);
+      if (complete)
+        expect(createGame({ playerDeck: deck }).players[0].deckId).toBe(
+          deck.id,
+        );
+      else
+        expect(() => createGame({ playerDeck: deck })).toThrow(
+          "unsupported cards",
+        );
     }
     expect(
       officialPreconDecks.every((deck) => getDeckScriptCoverage(deck).complete),

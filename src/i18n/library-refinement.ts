@@ -29,6 +29,18 @@ export const libraryRefinementMessages: Record<
     "Mazzi precostruiti Radiance · {count}",
   ],
   "Reference only": ["Reference only", "Samo za pregled", "Solo consultazione"],
+  Playable: ["Playable", "Igrivo", "Giocabile"],
+  "{count} playable": [
+    "{count} playable",
+    "Igrivo: {count}",
+    "{count} giocabili",
+  ],
+  "Explore the official lists and their cards. Lists marked playable are in the deck picker; the others are not available while their rules are being implemented.":
+    [
+      "Explore the official lists and their cards. Lists marked playable are in the deck picker; the others are not available while their rules are being implemented.",
+      "Istraži službene liste i njihove karte. Liste označene kao igrive nalaze se u izboru špilova; ostale nisu dostupne dok se njihova pravila implementiraju.",
+      "Esplora le liste ufficiali e le loro carte. Le liste giocabili sono nella scelta dei mazzi; le altre non sono disponibili finché le loro regole sono in sviluppo.",
+    ],
   "Explore the official lists and their cards. These decks are not available for play while their rules are being implemented.":
     [
       "Explore the official lists and their cards. These decks are not available for play while their rules are being implemented.",

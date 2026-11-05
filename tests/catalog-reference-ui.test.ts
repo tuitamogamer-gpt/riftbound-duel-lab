@@ -3,7 +3,10 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { CardLibrary } from "../src/components/CardLibrary";
 import { catalogMeta, getCard, referenceCards } from "../src/data/cards";
-import { referencePreconDecks } from "../src/data/decks";
+import {
+  playableReferencePreconIds,
+  referencePreconDecks,
+} from "../src/data/decks";
 import { rulesTokens } from "../src/data/tokens";
 import { LanguageProvider, LANGUAGE_KEY } from "../src/i18n";
 
@@ -51,8 +54,16 @@ describe("reference catalog presentation", () => {
     expect(referencePreconDecks).toHaveLength(2);
     expect(references.match(/class="library-reference-deck"/g)).toHaveLength(2);
     expect(references).not.toMatch(/<details[^>]*\bopen=/);
-    expect(text).toContain("Reference only");
-    expect(text).toContain("These decks are not available for play");
+    // Each list shows its own status; promoted lists are in the deck picker.
+    for (const deck of referencePreconDecks)
+      expect(text).toContain(
+        `${deck.name}${playableReferencePreconIds.has(deck.id) ? "Playable" : "Reference only"}`,
+      );
+    expect(text).toContain(
+      playableReferencePreconIds.size
+        ? "Lists marked playable are in the deck picker"
+        : "These decks are not available for play",
+    );
     expect(text).toContain("Reference card data: Hextech Analytics");
     expect(references).not.toMatch(
       /Select (?:deck|champion)|Start (?:duel|game)/,

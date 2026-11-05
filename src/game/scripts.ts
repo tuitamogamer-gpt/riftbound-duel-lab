@@ -12,7 +12,7 @@ import { cardWave16Scripts } from "./card-wave16";
 import { cardWave15Scripts } from "./card-wave15";
 import { cardWave14Scripts } from "./card-wave14";
 import { cardWave13Scripts } from "./card-wave13";
-import { reviewedRuleFamilies } from "./rule-families";
+import { radianceRuleFamilies, reviewedRuleFamilies } from "./rule-families";
 import { cardWave6Scripts } from "./card-wave6";
 import { cardWave7Scripts } from "./card-wave7";
 import { cardWave8Scripts } from "./card-wave8";
@@ -44,6 +44,10 @@ import {
   radianceDeployScripts,
   reviewedRadianceDeployPrintings,
 } from "./radiance-deploy";
+import {
+  radianceWave3Scripts,
+  reviewedRadianceWave3Printings,
+} from "./radiance-wave3";
 import { cards, cardsById } from "../data/cards";
 import { buildCardRegistry } from "./card-registry";
 import { reviewedPrintingAliases } from "./printing-aliases";
@@ -261,6 +265,7 @@ Object.assign(
   cardWave26Scripts,
   radianceWave1Scripts,
   radianceDeployScripts,
+  radianceWave3Scripts,
 );
 map["token-tentacle"] = plain;
 map["token-mech"] = plain;
@@ -270,10 +275,19 @@ for (const [printing, source] of Object.entries(reviewedRuleFamilies)) {
   if (!map[source]) throw new Error(`Missing reviewed rules source: ${source}`);
   map[printing] = { ...map[source] };
 }
+// Radiance printings join their family once the source face is implemented.
+const reviewedFamilyPrintings: string[] = [];
+for (const [printing, source] of Object.entries(radianceRuleFamilies))
+  if (map[source]) {
+    map[printing] = { ...map[source] };
+    reviewedFamilyPrintings.push(printing);
+  }
 /** Every Radiance printing reviewed for play, across all rules waves. */
 export const reviewedReferencePrintings: ReadonlySet<string> = new Set([
   ...reviewedRadiancePrintings,
   ...reviewedRadianceDeployPrintings,
+  ...reviewedRadianceWave3Printings,
+  ...reviewedFamilyPrintings,
 ]);
 const reviewedReferences = reviewedReferencePrintings;
 for (const id of reviewedReferences)

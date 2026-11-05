@@ -3,7 +3,11 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import App from "../src/App";
 import { Lobby } from "../src/components/Lobby";
-import { decks, officialPreconDecks } from "../src/data/decks";
+import {
+  decks,
+  officialPreconDecks,
+  playableReferencePrecons,
+} from "../src/data/decks";
 import { LanguageProvider } from "../src/i18n";
 import { deckBattlefieldChoices } from "../src/game/battlefield-selection";
 
@@ -54,15 +58,18 @@ describe("discoverable precon selection", () => {
     expect(officialPreconDecks).toHaveLength(13);
     // The lobby gallery starts collapsed: six cards on desktop, with the rest behind expand.
     expect(html.match(/class="rift-champion /g)).toHaveLength(6);
-    expect(html).toContain("6 of 13 decks");
+    // Fully executable Radiance Showdown lists join the retail precons.
+    const precons =
+      officialPreconDecks.length + playableReferencePrecons.length;
+    expect(html).toContain(`6 of ${precons} decks`);
     expect(html).toContain('aria-expanded="false"');
-    expect(html).toContain("Show all 13 decks");
+    expect(html).toContain(`Show all ${precons} decks`);
     expect(html).toContain(
       '<option value="Precon" selected="">All precons</option>',
     );
     for (const label of ["Your deck", "Opponent’s deck"]) {
       const options = selectMarkup(html, label);
-      for (const deck of officialPreconDecks)
+      for (const deck of [...officialPreconDecks, ...playableReferencePrecons])
         expect(options).toContain(`<option value="${deck.id}"`);
     }
     for (const product of ["Spiritforged", "Unleashed", "Vendetta Showdown"])

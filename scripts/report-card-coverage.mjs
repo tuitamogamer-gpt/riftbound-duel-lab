@@ -37,8 +37,12 @@ try {
   const { cardRegistry } = await server.ssrLoadModule("/src/game/scripts.ts");
   const { reviewedReferencePrintings: reviewedReferences } =
     await server.ssrLoadModule("/src/game/scripts.ts");
-  const { officialPreconDecks, referencePreconDecks, validateDeck } =
-    await server.ssrLoadModule("/src/data/decks.ts");
+  const {
+    officialPreconDecks,
+    referencePreconDecks,
+    playableReferencePreconIds,
+    validateDeck,
+  } = await server.ssrLoadModule("/src/data/decks.ts");
   if (
     providerCards.length !== catalogMeta.count ||
     catalogDigest(providerCards) !== catalogMeta.cardDataSha256
@@ -114,10 +118,18 @@ try {
   };
   const precons = officialPreconDecks.map(preconCoverage);
   const referencePrecons = referencePreconDecks.map(preconCoverage);
-  if (referencePrecons.some((deck) => deck.complete))
-    throw new Error(
-      "Reference precon is executable; review its placement in the playable catalog.",
-    );
+  for (const deck of referencePrecons) {
+    const playable = playableReferencePreconIds.has(deck.id);
+    if (deck.complete && !playable)
+      throw new Error(
+        `Reference precon ${deck.id} is executable; add it to the playable presets.`,
+      );
+    if (!deck.complete && playable)
+      throw new Error(
+        `Playable reference precon ${deck.id} has unsupported cards.`,
+      );
+    deck.playable = playable;
+  }
   const report = {
     schemaVersion: 2,
     catalogFetchedAt: catalogMeta.fetchedAt,
@@ -163,7 +175,12 @@ try {
     "",
     `Retail precons: **${completePrecons} / ${precons.length}** have complete executable coverage. All ${precons.length} lists have valid structure and complete catalog references. Historical retail contents and current tournament legality remain separate.`,
     "",
-    `Additional official lists: **${referencePrecons.length} Radiance Showdown precons** (Seraphine and Evelynn) have valid structure and complete catalog references. They are visible as reference lists and excluded from playable presets and bot matrices.`,
+    `Additional official lists: **${referencePrecons.length} Radiance Showdown precons** (Seraphine and Evelynn) have valid structure and complete catalog references. **${referencePrecons.filter((deck) => deck.playable).length}** ${referencePrecons.filter((deck) => deck.playable).length === 1 ? "is" : "are"} fully executable and playable (${
+      referencePrecons
+        .filter((deck) => deck.playable)
+        .map((deck) => deck.name.split(" · ")[0])
+        .join(", ") || "none"
+    }); the retail bot matrices are unchanged.`,
     summaryEnd,
   ].join("\n");
   for (const file of summaryFiles) {

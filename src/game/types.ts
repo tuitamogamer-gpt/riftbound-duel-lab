@@ -292,6 +292,8 @@ export interface GameState {
     targetId?: string;
   }[];
   revision?: number;
+  /** Turn-scoped Radiance bookkeeping (once-per-turn uses, delayed grants). */
+  radiance?: RadianceState;
   matchConfig?: {
     formatId: string;
     rulesVersion: string;
@@ -429,7 +431,38 @@ export type ActionCategory =
   | "pass"
   | "end"
   | "resource";
+/** Information locked in when a card is shown off (Core Rules 832). */
+export interface ShownInfo {
+  cardId: string;
+  energy: number;
+  power: number;
+  might: number;
+}
+export interface RadianceState {
+  /** `${key}:${player}` → the turn it was last used. */
+  once?: Record<string, number>;
+  /** Last Caress grants waiting for the player's next unit this turn. */
+  lastCaress?: { player: PlayerId; turn: number }[];
+  /** Fanfare draws still owed for the player's next units this turn. */
+  fanfare?: { player: PlayerId; turn: number; remaining: number }[];
+  /** Firelights' Hideout: the player's next unit this turn has [Accelerate]. */
+  accelerateNext?: { player: PlayerId; turn: number }[];
+  /** Hexplosive Minefield: Bombs owed at end of turn. */
+  delayedBombs?: { player: PlayerId; turn: number; count: number }[];
+  /** Runeblade Anvil/Akali: banished cards playable until an Ending Phase. */
+  anvil?: { player: PlayerId; cardId: string; until: number }[];
+  /** Turn-limited base Might replacements. */
+  baseMight?: { unitId: string; turn: number; might: number }[];
+  /** Lady of Clockwork: the gear currently animated by each player. */
+  clockwork?: Partial<Record<PlayerId, string>>;
+  /** Dockside Lock-Up: banished card held by each gear. */
+  lockUp?: Record<string, string>;
+  /** Neeko: legends added while a Neeko is on the board. */
+  neeko?: { player: PlayerId; unitId: string; legendId: string }[];
+}
 export interface GameAction {
+  /** Show Off: the revealed or picked card's locked-in information. */
+  showOff?: ShownInfo & { ref: string };
   draftFinalized?: boolean;
   repeatMask?: number;
   flexibleEnergy?: number;
@@ -620,6 +653,10 @@ export type Effect = {
   fromHidden?: boolean;
   additionalCostPaid?: boolean;
   chosenTargetId?: string | null;
+  /** Show Off information of the played card, when it showed something off. */
+  shown?: ShownInfo;
+  /** Target only units that moved this turn. */
+  movedThisTurn?: boolean;
   condition?: string;
   /** Leading trigger costs are paid while finalizing, before responses. */
   triggerCost?: {
@@ -658,6 +695,12 @@ export interface ActivatedAbility {
   condition?: string;
 }
 export interface CardScript {
+  /** [Show Off] requirement: what may be revealed from hand or picked. */
+  showOff?: {
+    kind: "mech" | "gear" | "card" | "unit" | "hidden" | "cost7";
+    /** The locked-in value that changes the effect, if any. */
+    value?: "power" | "might";
+  };
   cardTypes?: string[];
   asPlayTag?: "any" | "tribe";
   implemented: true;

@@ -78,13 +78,13 @@ Private online duels use a server-authoritative `/api/duel` function, invitation
 
 Saved catalog fetched **6 October 2026**: **1,451 provider printings** in **8 sets**, plus **9 local rules tokens**. Completeness is relative to Riftcodex; its latest reported record update is **21 July 2026**.
 
-Supplemental reference catalog fetched **22 October 2026**: **219 Radiance printings** from **Hextech Analytics**, including all **167 numbered base cards**. **54** individually reviewed printings are playable; the other **165** remain available for browsing and blocked from play pending reviewed rules implementations. Source coverage does not claim every token or promotion.
+Supplemental reference catalog fetched **22 October 2026**: **219 Radiance printings** from **Hextech Analytics**, including all **167 numbered base cards**. **77** individually reviewed printings are playable; the other **142** remain available for browsing and blocked from play pending reviewed rules implementations. Source coverage does not claim every token or promotion.
 
-Executable registration: **1,514 / 1,679 entries**, with **165 unsupported** (1,157 scripted, 37 compiled, 320 aliases). Counts include printings and tokens, rather than only distinct card designs.
+Executable registration: **1,537 / 1,679 entries**, with **142 unsupported** (1,180 scripted, 37 compiled, 320 aliases). Counts include printings and tokens, rather than only distinct card designs.
 
 Retail precons: **13 / 13** have complete executable coverage. All 13 lists have valid structure and complete catalog references. Historical retail contents and current tournament legality remain separate.
 
-Additional official lists: **2 Radiance Showdown precons** (Seraphine and Evelynn) have valid structure and complete catalog references. They are visible as reference lists and excluded from playable presets and bot matrices.
+Additional official lists: **2 Radiance Showdown precons** (Seraphine and Evelynn) have valid structure and complete catalog references. **1** is fully executable and playable (Evelynn); the retail bot matrices are unchanged.
 <!-- card-catalog-summary:end -->
 
 The snapshot contains Origins, Proving Grounds, Spiritforged, Unleashed, Vendetta and three promotional sets. Radiance is supplied separately by the [22 October reference import](docs/IMPORT-RADIANCE-SOURCES.md): 219 printings and the official Seraphine/Evelynn lists are inspectable, with play blocked until their rules are reviewed. The report and library distinguish provider printings, reference entries and local tokens. The library and builder search names, rules text, IDs and equivalent printing codes, including when the library shows base faces only. Combine search terms or quote a phrase, filter by set/domain/type and sort by name, Energy or Might. Reset filters restores the complete result list; the builder also offers an addable-cards filter.

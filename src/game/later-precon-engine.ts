@@ -32,6 +32,7 @@ import { originsMoreModule } from "./origins-more";
 import { vendettaExtraModule } from "./vendetta-extra";
 import { unleashedExtraModule } from "./unleashed-extra";
 import { radianceDeployModule } from "./radiance-deploy";
+import { radianceWave3Module } from "./radiance-wave3";
 /** Typed extension boundary for explicitly scripted expansion precons. */
 import type { Card } from "../data/cards";
 import type {
@@ -211,7 +212,9 @@ export type PreconEvent =
   | "main"
   | "bounce"
   | "stateChanged"
-  | "spellKill";
+  | "spellKill"
+  | "exhausted"
+  | "exhaustBatch";
 export interface ExpansionModule {
   might?: (s: GameState, u: Unit, value: number) => number;
   keywords?: (s: GameState, u: Unit) => string[];
@@ -275,6 +278,7 @@ function modules(): ExpansionModule[] {
     cardWave24Module,
     cardWave25Module,
     radianceDeployModule,
+    radianceWave3Module,
   ];
 }
 export function laterMight(s: GameState, u: Unit, value: number) {
