@@ -376,6 +376,16 @@ function moveGear(
   if (!gear || gear.deployedAt === to) return;
   gear.deployedAt = to;
   ctx.log?.(s, `${cardName(gear.cardId)} moves to ${to}.`, "info", p);
+  // The Ball: "When you play or move this, choose one".
+  if (isFace(gear.cardId, "RAD", 146))
+    ctx.trigger(
+      s,
+      gear.owner,
+      gear.cardId,
+      gear.id,
+      [{ type: "special", custom: "radiance7:ball" }],
+      to,
+    );
 }
 
 /** The battlefield's combat winner: the only player with units left there. */

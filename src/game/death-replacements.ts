@@ -22,7 +22,8 @@ type Replacement = {
     | "altar"
     | "armory"
     | "smite"
-    | "highlander";
+    | "highlander"
+    | "mordekaiser";
   player: PlayerId;
   ids: string[];
   source?: string;
@@ -63,6 +64,22 @@ function replacements(
   }
   for (const u of dying) {
     const player = s.players[u.owner];
+    // Mordekaiser, Twice Slain: once each turn, kill a friendly unit instead.
+    if (
+      textSources(s, u).some((t) => isFace(t.cardId, "RAD", 20)) &&
+      s.radiance?.once?.[`mordekaiser:${u.id}`] !== s.turn
+    )
+      for (const v of s.units.filter(
+        (v) => v.owner === u.owner && v.id !== u.id && !b.ids.includes(v.id),
+      ))
+        add({
+          id: `mordekaiser:${u.id}:${v.id}`,
+          kind: "mordekaiser",
+          player: u.owner,
+          ids: [u.id],
+          source: v.id,
+          optional: true,
+        });
     if (u.deathReplacementTurn === s.turn)
       add({
         id: `highlander:${u.id}`,
@@ -140,6 +157,20 @@ function replace(s: GameState, b: Batch, r: Replacement, ctx: PreconContext) {
     s.players[r.player].legendUsedTurn = s.turn;
   }
   if (r.kind === "altar") ctx.pay(s, r.player, 0, 3);
+  if (r.kind === "mordekaiser") {
+    for (const id of r.ids)
+      ((s.radiance ??= {}).once ??= {})[`mordekaiser:${id}`] = s.turn;
+    // The killed unit dies in its own batch after this one.
+    s.deathBatches!.push({
+      id: `death${s.nextId++}`,
+      ids: [r.source!],
+      used: [],
+      declined: [],
+      actor: r.player,
+      combat: false,
+      credited: [],
+    });
+  }
   if (r.kind === "armory") ctx.pay(s, r.player, 0, 1, ["Fury"]);
   for (const u of s.units.filter((u) => r.ids.includes(u.id))) {
     if (r.kind === "smite") {
@@ -203,7 +234,9 @@ export function advanceDeaths(
       option(
         player,
         `death:${r.id}`,
-        `${r.kind}: ${r.ids.map((id) => getCard(s.units.find((u) => u.id === id)!.cardId).name).join(", ")}`,
+        r.kind === "mordekaiser"
+          ? `Kill ${getCard(s.units.find((u) => u.id === r.source)!.cardId).name} to heal, exhaust and recall Mordekaiser`
+          : `${r.kind}: ${r.ids.map((id) => getCard(s.units.find((u) => u.id === id)!.cardId).name).join(", ")}`,
         [{ type: "special", custom: "death-replacement", cardName: r.id }],
       ),
     );

@@ -22,3 +22,10 @@ export function takeBanished(s: GameState, p: PlayerId, id: string) {
   s.players[p].banishedCards!.splice(index, 1);
   return s.players[p].banished.splice(index, 1)[0];
 }
+/** Take the card at a banishment index, keeping the entry ids in step. */
+export function takeBanishedAt(s: GameState, p: PlayerId, index: number) {
+  s.players[p].banishedCards = banishedCards(s, p);
+  if (index < 0 || index >= s.players[p].banished.length) return undefined;
+  s.players[p].banishedCards!.splice(index, 1);
+  return s.players[p].banished.splice(index, 1)[0];
+}

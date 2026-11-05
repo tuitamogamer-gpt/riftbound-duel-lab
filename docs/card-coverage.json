@@ -47,12 +47,12 @@
     "attribution": "Unofficial fan project. Structured records are from Hextech Analytics, not Riftcodex or an official Riot API. Card names, rules text, and Riot CDN artwork are property of Riot Games, Inc."
   },
   "registered": 1679,
-  "playable": 1668,
+  "playable": 1678,
   "statuses": {
-    "scripted": 1311,
+    "scripted": 1321,
     "compiled": 37,
     "alias": 320,
-    "unsupported": 11
+    "unsupported": 1
   },
   "sets": {
     "JDG": {
@@ -102,8 +102,8 @@
     },
     "RAD": {
       "total": 219,
-      "playable": 208,
-      "unsupported": 11
+      "playable": 218,
+      "unsupported": 1
     }
   },
   "precons": [
@@ -9920,8 +9920,16 @@
       "type": "Unit",
       "cardId": "rad-020-167",
       "rulesCardId": "rad-020-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "assault": 3,
+        "keywords": [
+          "Accelerate",
+          "Assault 3"
+        ]
+      }
     },
     {
       "name": "Mordekaiser, Twice Slain",
@@ -9929,8 +9937,16 @@
       "type": "Unit",
       "cardId": "rad-020a-167",
       "rulesCardId": "rad-020a-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "assault": 3,
+        "keywords": [
+          "Accelerate",
+          "Assault 3"
+        ]
+      }
     },
     {
       "name": "Ekko, Revolutionary",
@@ -10898,8 +10914,20 @@
       "type": "Gear",
       "cardId": "rad-062-167",
       "rulesCardId": "rad-062-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy",
+          "Deathknell"
+        ],
+        "onDeath": [
+          {
+            "type": "draw",
+            "amount": 1
+          }
+        ]
+      }
     },
     {
       "name": "Kai'Sa, Rebel",
@@ -12572,8 +12600,19 @@
       "type": "Gear",
       "cardId": "rad-136-167",
       "rulesCardId": "rad-136-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy"
+        ],
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "radiance7:lockup"
+          }
+        ]
+      }
     },
     {
       "name": "Mordekaiser, Dominating",
@@ -12699,8 +12738,17 @@
       "type": "Spell",
       "cardId": "rad-140-167",
       "rulesCardId": "rad-140-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "xPower": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "radiance7:chronobreak"
+          }
+        ]
+      }
     },
     {
       "name": "Hexplosives Expert",
@@ -12751,8 +12799,10 @@
       "type": "Legend",
       "cardId": "rad-143-167",
       "rulesCardId": "rad-143-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Realm of Death",
@@ -12778,8 +12828,10 @@
       "type": "Legend",
       "cardId": "rad-145-167",
       "rulesCardId": "rad-145-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "The Ball",
@@ -12787,8 +12839,20 @@
       "type": "Gear",
       "cardId": "rad-146-167",
       "rulesCardId": "rad-146-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deploy",
+          "Ganking"
+        ],
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "radiance7:ball"
+          }
+        ]
+      }
     },
     {
       "name": "Pride of Nazumah",
@@ -13198,17 +13262,21 @@
       "type": "Legend",
       "cardId": "rad-170-167",
       "rulesCardId": "rad-170-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Lady of Clockwork",
       "set": "RAD",
       "type": "Legend",
       "cardId": "rad-171-167",
-      "rulesCardId": "rad-145-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "rulesCardId": "rad-171-167",
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Pride of Nazumah",

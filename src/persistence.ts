@@ -284,10 +284,15 @@ const effects = (x: unknown, depth = 0): boolean =>
           ))) &&
       (e.effects === undefined || effects(e.effects, depth + 1)),
   );
-const validUnit = (u: unknown): boolean =>
+/** `animatedGear`: gear ids that are currently also units (Lady of Clockwork). */
+/** `animatedGear`: gear ids that are currently also units (Lady of Clockwork);
+ * `true` accepts any gear, for snapshots of objects that have left the board. */
+const validUnit = (u: unknown, animatedGear: unknown[] | true = []): boolean =>
   isObject(u) &&
   cardId(u.cardId) &&
-  cardsById[u.cardId].type === "Unit" &&
+  (cardsById[u.cardId].type === "Unit" ||
+    ((animatedGear === true || animatedGear.includes(u.id)) &&
+      isCardType(cardsById[u.cardId], "Gear"))) &&
   typeof u.id === "string" &&
   optionalString(u.deathTrashId) &&
   optionalString(u.namedSpell) &&
@@ -346,7 +351,7 @@ const validStackItem = (s: unknown): boolean =>
     optionalBoolean(s[k]),
   ) &&
   optionalBoolean(s.recycleOnLeave) &&
-  (s.sourceSnapshot === undefined || validUnit(s.sourceSnapshot));
+  (s.sourceSnapshot === undefined || validUnit(s.sourceSnapshot, true));
 const combat = (x: unknown): boolean =>
   isObject(x) &&
   field(x.fieldId) &&
@@ -529,7 +534,7 @@ const choice = (x: unknown): boolean =>
         })))) &&
   (x.kind !== "trashTargets" ||
     (isObject(x.trashSelection) && x.effect?.target === "trashCards")) &&
-  (x.sourceSnapshot === undefined || validUnit(x.sourceSnapshot)) &&
+  (x.sourceSnapshot === undefined || validUnit(x.sourceSnapshot, true)) &&
   (x.cardId === undefined || cardId(x.cardId)) &&
   (x.effects === undefined || effects(x.effects)) &&
   (x.afterEffects === undefined || effects(x.afterEffects)) &&
@@ -722,7 +727,14 @@ export function validState(x: unknown, actionable = true): x is GameState {
         cardId(f.cardId) &&
         [null, 0, 1].includes(f.controller),
     ) ||
-    !x.units.every(validUnit) ||
+    !x.units.every((u: unknown) =>
+      validUnit(
+        u,
+        isObject(x.radiance) && isObject(x.radiance.clockwork)
+          ? Object.values(x.radiance.clockwork)
+          : [],
+      ),
+    ) ||
     !x.gears.every(
       (g: unknown) =>
         isObject(g) &&
@@ -835,7 +847,8 @@ export function validState(x: unknown, actionable = true): x is GameState {
             cardId(t.cardId) &&
             typeof t.sourceId === "string" &&
             effects(t.effects) &&
-            (t.sourceSnapshot === undefined || validUnit(t.sourceSnapshot)) &&
+            (t.sourceSnapshot === undefined ||
+              validUnit(t.sourceSnapshot, true)) &&
             (t.locationId === undefined || location(t.locationId)),
         ))) ||
     (x.stagedFields !== undefined &&

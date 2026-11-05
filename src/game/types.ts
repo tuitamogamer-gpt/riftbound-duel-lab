@@ -86,6 +86,8 @@ export interface PlayerState {
   gearPlayPermissions?: { id: string; turn: number }[];
   enemyChoices?: { turn: number; count: number };
   gearPower?: number;
+  /** Iron Revenant: Power spendable only to play units or gear. */
+  permanentPower?: number;
   firstGearAbilityTurn?: number;
   equipmentPlayedTurn?: number;
   nextSpellBonus?: number;
@@ -477,6 +479,8 @@ export interface GameAction {
   songstressUnits?: string;
   /** "You may have me enter ready" (Entrenched Boar). */
   enterReady?: boolean;
+  /** Chronobreak: the amount of Power paid. */
+  xPower?: number;
   draftFinalized?: boolean;
   repeatMask?: number;
   flexibleEnergy?: number;
@@ -759,6 +763,8 @@ export interface CardScript {
   equipCost?: number;
   equipRecycle?: number;
   equipKillUnit?: boolean;
+  /** "As an additional cost, pay any amount of Power" (Chronobreak). */
+  xPower?: boolean;
   /** Equip alternatively by exhausting a ready friendly unit. */
   equipExhaustUnit?: boolean;
   equipXP?: number;

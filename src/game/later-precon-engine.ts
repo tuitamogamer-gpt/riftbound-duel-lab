@@ -36,6 +36,7 @@ import { radianceWave3Module } from "./radiance-wave3";
 import { radianceWave4Module } from "./radiance-wave4";
 import { radianceWave5Module } from "./radiance-wave5";
 import { radianceWave6Module } from "./radiance-wave6";
+import { radianceWave7Module } from "./radiance-wave7";
 /** Typed extension boundary for explicitly scripted expansion precons. */
 import type { Card } from "../data/cards";
 import type {
@@ -286,6 +287,7 @@ function modules(): ExpansionModule[] {
     radianceWave4Module,
     radianceWave5Module,
     radianceWave6Module,
+    radianceWave7Module,
   ];
 }
 export function laterMight(s: GameState, u: Unit, value: number) {

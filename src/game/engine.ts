@@ -27,6 +27,7 @@ import {
   radianceLegendAbilities,
   useBanishedPermission,
 } from "./radiance-wave6";
+import { gravityMoveTax } from "./radiance-wave7";
 import { drainHeimerdinger, queueHeimerdinger } from "./radiance-wave4";
 import {
   deployedGear,
@@ -48,7 +49,7 @@ import {
   draftChoices,
 } from "./effect-drafts";
 import { recycleCards, recycleRunes } from "./zone-events";
-import { banishCard } from "./banishment";
+import { banishCard, takeBanishedAt } from "./banishment";
 import {
   syncHybridObjects,
   uncounterable,
@@ -560,6 +561,8 @@ interface PlayCostOptions {
   accelerated?: boolean;
   locationId?: LocationId;
   songstressUnits?: string;
+  /** Chronobreak: Power paid as "any amount". */
+  xPower?: number;
 }
 function flowCost(
   s: GameState,
@@ -732,8 +735,17 @@ function costFor(
       )
     : 0;
   if (gearPower) groups = discountPower(s, p, groups, gearPower);
+  const permanentPower =
+    isCardType(c, "Unit") || isCardType(c, "Gear")
+      ? Math.min(
+          s.players[p].permanentPower ?? 0,
+          groups.reduce((n, group) => n + group.power, 0),
+        )
+      : 0;
+  if (permanentPower) groups = discountPower(s, p, groups, permanentPower);
   return {
     gearPower,
+    permanentPower,
     spellEnergy,
     unitEnergy,
     spellPower,
@@ -781,6 +793,9 @@ function playCost(
       : []),
     ...(options.accelerated
       ? [{ energy: 1, power: 1, domains: card.domains }]
+      : []),
+    ...(options.xPower
+      ? [{ energy: 0, power: options.xPower, domains: [], required: true }]
       : []),
   ];
   const ez = optionalDiscounts(s, p);
@@ -876,6 +891,7 @@ function playCost(
       spellPower: 0,
       unitEnergy: 0,
       gearPower: 0,
+      permanentPower: 0,
     };
   const flow = flowCost(s, p, card.id, sourceId);
   const jayce = sourceId?.includes(":jayce:");
@@ -1655,6 +1671,7 @@ function beginTurn(s: GameState, p: PlayerId) {
     x.spellEnergy = 0;
     x.spellPower = 0;
     x.gearPower = 0;
+    x.permanentPower = 0;
     x.nextSpellBonus = 0;
     x.nextCardEnergyDiscount = 0;
     x.nextCardPowerDiscount = 0;
@@ -1787,6 +1804,7 @@ function finishTurnStart(s: GameState, p: PlayerId) {
     player.spellEnergy = 0;
     player.spellPower = 0;
     player.gearPower = 0;
+    player.permanentPower = 0;
     player.gearPlayPermissions = [];
     delete player.enemyChoices;
     player.unitEnergy = 0;
@@ -2723,6 +2741,36 @@ function* playVariants(
         label: `${a.label} · enter ready (can't move this turn)`,
         enterReady: true,
       };
+    // "As an additional cost, pay any amount of Power" (Chronobreak).
+    if (sc.xPower)
+      for (let n = 1; n <= s.units.filter((u) => u.owner === p).length; n++) {
+        const cost = playCost(s, p, c, a.targetId, a.sourceId, {
+          ...a,
+          xPower: n,
+        });
+        if (
+          !canPay(
+            s,
+            p,
+            cost.energy,
+            cost.power,
+            playPowerDomains(s, p, c, a.sourceId),
+            cost.extraPower,
+            cost.additionalPower,
+          )
+        )
+          break;
+        yield {
+          ...a,
+          id: `${a.id}|x:${n}`,
+          label: `${a.label} · pay ${n} Power`,
+          xPower: n,
+          effects: (a.effects ?? sc.spell ?? []).map((e) => ({
+            ...e,
+            amount: n,
+          })),
+        };
+      }
     // Core Rules 832: Show Off is chosen as the card is played.
     if (sc.showOff)
       for (const info of showOffCandidates(s, p, a.sourceId, sc.showOff, (u) =>
@@ -3663,7 +3711,15 @@ function* iterateBaseLegalActions(
     }
     if (
       move.unitIds.length &&
-      canPay(s, p, 0, 0, [], groupMoveTax(s, p, move.to, move.unitIds.length))
+      canPay(
+        s,
+        p,
+        gravityMoveTax(s, p, move.to),
+        0,
+        [],
+        groupMoveTax(s, p, move.to, move.unitIds.length) +
+          gravityMoveTax(s, p, move.to),
+      )
     )
       yield add({
         id: "move-confirm",
@@ -4625,7 +4681,17 @@ export function getGroupMoveAction(
     )
   )
     return null;
-  if (!canPay(s, p, 0, 0, [], groupMoveTax(s, p, to, ids.length))) return null;
+  if (
+    !canPay(
+      s,
+      p,
+      gravityMoveTax(s, p, to),
+      0,
+      [],
+      groupMoveTax(s, p, to, ids.length) + gravityMoveTax(s, p, to),
+    )
+  )
+    return null;
   const unitIds = [...ids].sort();
   return {
     id: `move-group:${to}:${unitIds.join(",")}`,
@@ -5011,7 +5077,7 @@ function effectDescription(e: Effect): string {
 let skipPlayVariants = false;
 const isPlayVariantId = (id: string) =>
   id.startsWith("play|") &&
-  /\|(?:additionalCost|repeat|repeat-mask|showoff):|\|enter-ready$/.test(id);
+  /\|(?:additionalCost|repeat|repeat-mask|showoff|x):|\|enter-ready$/.test(id);
 /** Deflect taxes memoized during one read-only legal-action enumeration. */
 let deflectMemo: WeakMap<GameState, Map<string, number>> | null = null;
 function deflect(s: GameState, u: Unit) {
@@ -7679,6 +7745,7 @@ function finishEndTurn(s: GameState, p: PlayerId) {
     player.spellEnergy = 0;
     player.spellPower = 0;
     player.gearPower = 0;
+    player.permanentPower = 0;
     player.gearPlayPermissions = [];
     delete player.enemyChoices;
     player.nextSpellBonus = 0;
@@ -8404,7 +8471,15 @@ function applyActionInternal(
   }
   if (id === "move-confirm") {
     const move = s.pendingMove!;
-    pay(s, p, 0, 0, [], groupMoveTax(s, p, move.to, move.unitIds.length));
+    pay(
+      s,
+      p,
+      gravityMoveTax(s, p, move.to),
+      0,
+      [],
+      groupMoveTax(s, p, move.to, move.unitIds.length) +
+        gravityMoveTax(s, p, move.to),
+    );
     for (const u of s.units.filter((u) => move.unitIds.includes(u.id))) {
       u.ready = false;
       moveUnit(s, u, move.to);
@@ -8540,13 +8615,20 @@ function applyActionInternal(
     x.unitEnergy = Math.max(0, (x.unitEnergy ?? 0) - cost.unitEnergy);
     x.spellPower = Math.max(0, (x.spellPower ?? 0) - cost.spellPower);
     x.gearPower = Math.max(0, (x.gearPower ?? 0) - cost.gearPower);
+    x.permanentPower = Math.max(
+      0,
+      (x.permanentPower ?? 0) - cost.permanentPower,
+    );
     x.powerSpentThisTurn =
-      (x.powerSpentThisTurn ?? 0) + cost.spellPower + cost.gearPower;
+      (x.powerSpentThisTurn ?? 0) +
+      cost.spellPower +
+      cost.gearPower +
+      cost.permanentPower;
     recordRestrictedPayment(
       s,
       p,
       cost.spellEnergy + cost.unitEnergy,
-      cost.spellPower + cost.gearPower,
+      cost.spellPower + cost.gearPower + cost.permanentPower,
     );
     if (legal.additionalCostPaid && script.additionalCost?.xp)
       event(s, "stateChanged", p, c.id);
@@ -8562,7 +8644,7 @@ function applyActionInternal(
     else if (fromTrash)
       takeTrashAt(s, p, Number(legal.sourceId!.split(":")[1]));
     else if (legal.sourceId?.startsWith("banished:")) {
-      x.banished.splice(Number(legal.sourceId.split(":")[1]), 1);
+      takeBanishedAt(s, p, Number(legal.sourceId.split(":")[1]));
       useBanishedPermission(s, p, c.id);
     } else if (instructed) {
       /* Already moved to the pending chain during the parent effect. */

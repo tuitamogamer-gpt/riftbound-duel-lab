@@ -5,6 +5,7 @@ import { getScript } from "./scripts";
 import { canPlayCard } from "./board-rules";
 import { takeTrash, trashCards } from "./trash";
 import { physicalCard, physicalOwner, detach } from "./objects";
+import { takeBanishedAt } from "./banishment";
 import type { PreconContext } from "./later-precon-engine";
 import type {
   CardPlaySpec,
@@ -201,7 +202,7 @@ export function runCardPlay(
     } else if (spec.zone === "hand") {
       cardId = player.hand.splice(index, 1)[0];
       origin = "hand";
-    } else cardId = player.banished.splice(index, 1)[0];
+    } else cardId = takeBanishedAt(s, owner, index);
   }
   if (cardId) queueCardPlay(s, p, cardId, spec, origin, index);
   return true;
