@@ -8,7 +8,7 @@ import {
   referencePreconDecks,
 } from "../src/data/decks";
 import { rulesTokens } from "../src/data/tokens";
-import { LanguageProvider, LANGUAGE_KEY } from "../src/i18n";
+import { LanguageProvider, LANGUAGE_KEY, translate } from "../src/i18n";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -85,13 +85,17 @@ describe("reference catalog presentation", () => {
   });
 
   it.each([
-    ["sr", "Samo za pregled", "Pogledaj Radiance karte"],
-    ["it", "Solo consultazione", "Vedi le carte Radiance"],
-  ])(
+    ["sr", "Samo za pregled", "Igrivo", "Pogledaj Radiance karte"],
+    ["it", "Solo consultazione", "Giocabile", "Vedi le carte Radiance"],
+  ] as const)(
     "translates the reference status and action in %s",
-    (locale, status, action) => {
+    (locale, status, playable, action) => {
       const text = plainText(renderLibrary(locale));
-      expect(text).toContain(status);
+      // Both Radiance lists are playable, so the page shows that status.
+      expect(text).toContain(playable);
+      // Printings that are still blocked keep the translated reference status;
+      // none of them is on the first page of the alphabetical list.
+      expect(translate("Reference only", locale)).toBe(status);
       expect(text).toContain(action);
       expect(text).not.toContain("These decks are not available for play");
     },
