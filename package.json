@@ -13,6 +13,7 @@
     "test:bots": "vitest run tests/ai-acceptance.test.ts tests/new-bot.test.ts tests/bot-tactics.test.ts",
     "bot:benchmark": "vite-node scripts/bot-benchmark.ts",
     "sync:cards": "node scripts/sync-cards.mjs && npm run cards:report",
+    "cards:sources": "node scripts/check-card-sources.mjs",
     "cache:art": "node scripts/cache-playable-art.mjs",
     "format": "prettier --write src tests docs *.json *.ts *.md",
     "cards:report": "node scripts/report-card-coverage.mjs",

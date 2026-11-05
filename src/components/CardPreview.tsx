@@ -304,7 +304,8 @@ export function CardPreviewProvider({ children }: { children: ReactNode }) {
             card={touchPreview.card}
             scripted={
               Boolean(scripts[touchPreview.card.id]) ||
-              touchPreview.card.type === "Rune"
+              (!touchPreview.card.referenceOnly &&
+                touchPreview.card.type === "Rune")
             }
             ready={
               touchPreview.anchor.dataset.cardReady === undefined

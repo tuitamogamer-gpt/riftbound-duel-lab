@@ -36,7 +36,11 @@ import { spiritforgedExtraScripts } from "./spiritforged-extra";
 import { originsMoreScripts } from "./origins-more";
 import { vendettaExtraScripts } from "./vendetta-extra";
 import { unleashedExtraScripts } from "./unleashed-extra";
-import { cards } from "../data/cards";
+import {
+  radianceWave1Scripts,
+  reviewedRadiancePrintings,
+} from "./radiance-wave1";
+import { cards, cardsById } from "../data/cards";
 import { buildCardRegistry } from "./card-registry";
 import { reviewedPrintingAliases } from "./printing-aliases";
 import { compileCardScript } from "./card-script-compiler";
@@ -251,6 +255,7 @@ Object.assign(
   cardWave24Scripts,
   cardWave25Scripts,
   cardWave26Scripts,
+  radianceWave1Scripts,
 );
 map["token-tentacle"] = plain;
 map["token-mech"] = plain;
@@ -260,11 +265,21 @@ for (const [printing, source] of Object.entries(reviewedRuleFamilies)) {
   if (!map[source]) throw new Error(`Missing reviewed rules source: ${source}`);
   map[printing] = { ...map[source] };
 }
+const reviewedReferences = new Set(reviewedRadiancePrintings);
+for (const id of reviewedReferences)
+  if (!cardsById[id]?.referenceOnly)
+    throw new Error(`Reviewed reference printing is not imported: ${id}`);
+// Explicit scripts are copied into the playable map below, so a reference
+// printing must be reviewed before any script may name it.
+for (const id of Object.keys(map))
+  if (cardsById[id]?.referenceOnly && !reviewedReferences.has(id))
+    throw new Error(`Unreviewed reference printing has a script: ${id}`);
 export const cardRegistry = buildCardRegistry(
   cards,
   map,
   compileCardScript,
   reviewedPrintingAliases(cards),
+  reviewedReferences,
 );
 Object.assign(
   map,

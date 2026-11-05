@@ -199,7 +199,7 @@ const BoardInteraction = createContext<{
 }>({ game: null, legal: [], actions: [], choose: () => {} });
 
 const supported = (c: CatalogCard) =>
-  !c.referenceOnly && (Boolean(scripts[c.id]) || c.type === "Rune");
+  Boolean(scripts[c.id]) || (!c.referenceOnly && c.type === "Rune");
 const locationName = (l?: string) =>
   l === "base:0"
     ? "Tvoja baza"

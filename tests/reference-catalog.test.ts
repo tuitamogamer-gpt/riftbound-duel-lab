@@ -29,6 +29,9 @@ import {
   resolveImportCard,
 } from "../src/game/deck-import";
 import { createGame, deserializeGame, serializeGame } from "../src/game/engine";
+import { reviewedRadiancePrintings } from "../src/game/radiance-wave1";
+
+const reviewed = new Set(reviewedRadiancePrintings);
 
 describe("Radiance reference catalog", () => {
   it("imports every base number and retains source identity without modifying the playable snapshot", () => {
@@ -49,11 +52,17 @@ describe("Radiance reference catalog", () => {
         `https://hextechanalytics.com/cards/${card.riftboundId}`,
       );
       expect(new URL(card.image).hostname).toBe("cmsassets.rgpub.io");
-      expect(cardRegistry[card.id].status).toBe("unsupported");
-      expect(isImplemented(card.id)).toBe(false);
+      // Only individually reviewed printings leave the reference-only state.
+      expect(cardRegistry[card.id].status === "unsupported").toBe(
+        !reviewed.has(card.id),
+      );
+      expect(isImplemented(card.id)).toBe(reviewed.has(card.id));
     }
     expect([...supportedCardIds].sort()).toEqual(
-      [...providerCards, ...rulesTokens].map((card) => card.id).sort(),
+      [
+        ...[...providerCards, ...rulesTokens].map((card) => card.id),
+        ...reviewed,
+      ].sort(),
     );
   });
 
@@ -97,17 +106,45 @@ describe("Radiance reference catalog", () => {
       expect(result[card.id].script).toBeUndefined();
       expect(result[card.id].reason).toContain("Reference import");
     }
+
+    // Reviewing one exact ID promotes that printing only.
+    const reviewedOnly = buildCardRegistry(
+      [base, equivalent, explicitReference, reviewedReference],
+      { [base.id]: script, [explicitReference.id]: script },
+      compile,
+      { [reviewedReference.id]: base.id },
+      new Set([explicitReference.id]),
+    );
+    expect(reviewedOnly[explicitReference.id].status).toBe("scripted");
+    for (const card of [equivalent, reviewedReference])
+      expect(reviewedOnly[card.id].status).toBe("unsupported");
+    expect(compile).not.toHaveBeenCalled();
   });
 
-  it("blocks a reference rune even when every other card in an imported deck is supported", () => {
+  it("accepts reviewed Radiance runes but blocks an unreviewed printing in an otherwise supported deck", () => {
     const deck = structuredClone(starterDecks[0]);
-    deck.runes[0].cardId = "rad-r01";
+    const rune = deck.runes[0];
+    const radianceRune = referenceCards.find(
+      (card) =>
+        card.type === "Rune" &&
+        !card.variant &&
+        card.name === getCard(rune.cardId).name,
+    )!;
+    rune.cardId = radianceRune.id;
+    expect(getDeckScriptCoverage(deck).complete).toBe(true);
+    const imported = parseDeckText(exportDeckText(deck));
+    expect(imported.deck?.runes[0].cardId).toBe(radianceRune.id);
+    expect(imported.playable).toBe(true);
+    expect(() => createGame({ playerDeck: deck })).not.toThrow();
+
+    const blocked = referenceCards.find(
+      (card) => card.type === "Unit" && !reviewed.has(card.id),
+    )!;
+    deck.main[0].cardId = blocked.id;
     const coverage = getDeckScriptCoverage(deck);
     expect(coverage.complete).toBe(false);
-    expect(coverage.missing.map((card) => card.cardId)).toEqual(["rad-r01"]);
-    const imported = parseDeckText(exportDeckText(deck));
-    expect(imported.deck?.runes[0].cardId).toBe("rad-r01");
-    expect(imported.playable).toBe(false);
+    expect(coverage.missing.map((card) => card.cardId)).toEqual([blocked.id]);
+    expect(parseDeckText(exportDeckText(deck)).playable).toBe(false);
     expect(() => createGame({ playerDeck: deck })).toThrow("unsupported cards");
   });
 
@@ -147,15 +184,17 @@ describe("Radiance reference catalog", () => {
     ).toBe(true);
   });
 
-  it("keeps existing match compatibility and restores the original playable ID set", () => {
+  it("keeps existing match compatibility and adds only reviewed Radiance printings", () => {
     const state = createGame({ seed: 221026 });
     expect(state.matchConfig?.cardDataVersion).toBe(
       "0861c196b3100198a9fffa7b9465afc76a2e4b07db84e63e8efa6145fea25f6c",
     );
-    expect(state.matchConfig?.supportedCardIds).toHaveLength(1459);
+    expect(state.matchConfig?.supportedCardIds).toHaveLength(
+      1459 + reviewed.size,
+    );
     expect(
-      state.matchConfig?.supportedCardIds.some((id) => id.startsWith("rad-")),
-    ).toBe(false);
+      state.matchConfig?.supportedCardIds.filter((id) => id.startsWith("rad-")),
+    ).toEqual([...reviewed].sort());
     expect(deserializeGame(serializeGame(state))).toEqual(state);
   });
 });

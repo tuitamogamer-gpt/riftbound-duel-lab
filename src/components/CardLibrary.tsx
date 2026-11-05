@@ -36,7 +36,7 @@ import { Card } from "./Card";
 import "./CardLibrary.css";
 
 const supported = (card: CatalogCard) =>
-  !card.referenceOnly && (Boolean(scripts[card.id]) || card.type === "Rune");
+  Boolean(scripts[card.id]) || (!card.referenceOnly && card.type === "Rune");
 const catalogSets = [
   ...new Map(catalog.map((card) => [card.set, card.setName])).entries(),
 ];

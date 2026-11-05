@@ -50,6 +50,10 @@ The public Hextech library returns its card records in JSON inside Next.js fligh
 }
 ```
 
-Run `node scripts/import-reference-cards.mjs /path/to/reviewed-source-export.json`, then `npm run cards:report` and `npm run cards:check`. The importer deliberately rejects changed totals, missing base cards, invalid fields, duplicate identities, removed previous IDs and collisions with the playable provider. A changed source requires review before widening its accepted scope. The import command preserves the original provider snapshot and does not implement game rules.
+`node scripts/hextech-source.mjs set:RAD /path/to/export.json` produces this export. Run `node scripts/import-reference-cards.mjs /path/to/reviewed-source-export.json`, then `npm run cards:report` and `npm run cards:check`. The importer deliberately rejects changed totals, missing base cards, invalid fields, duplicate identities, removed previous IDs and collisions with the playable provider. A changed source requires review before widening its accepted scope. The import command preserves the original provider snapshot and does not implement game rules.
 
 Focused regressions cover all base numbers, the four errata, provenance/hash consistency, every reference registration, compiler/alias bypasses, reference-rune imports, unchanged supported IDs, save round trips, official list structure and reference UI in all three languages. Validation results are recorded by the release task; passing catalog tests does not establish Radiance gameplay support.
+
+## Later checks
+
+On **5 November 2026** a full Hextech download returned the same 219 records and raw-source digest, and Riftcodex still had no Radiance set. See [Radiance wave 1](RADIANCE-WAVE1.md) for the check and the first reviewed playable printings.

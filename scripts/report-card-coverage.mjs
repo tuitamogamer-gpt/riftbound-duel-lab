@@ -35,6 +35,10 @@ try {
     referenceCatalogMeta,
   } = await server.ssrLoadModule("/src/data/cards.ts");
   const { cardRegistry } = await server.ssrLoadModule("/src/game/scripts.ts");
+  const { reviewedRadiancePrintings } = await server.ssrLoadModule(
+    "/src/game/radiance-wave1.ts",
+  );
+  const reviewedReferences = new Set(reviewedRadiancePrintings);
   const { officialPreconDecks, referencePreconDecks, validateDeck } =
     await server.ssrLoadModule("/src/data/decks.ts");
   if (
@@ -60,7 +64,11 @@ try {
     .map((card) => {
       const entry = cardRegistry[card.id];
       if (!entry) throw new Error(`Unregistered card: ${card.id}`);
-      if (card.referenceOnly && entry.script)
+      if (
+        card.referenceOnly &&
+        entry.script &&
+        !reviewedReferences.has(card.id)
+      )
         throw new Error(
           `Unreviewed reference card became playable: ${card.id}`,
         );
@@ -143,12 +151,15 @@ try {
     await writeFile(output, content);
   }
   const completePrecons = precons.filter((deck) => deck.complete).length;
+  const referencePlayable = referenceCards.filter(
+    (card) => cardRegistry[card.id].script,
+  ).length;
   const summary = [
     summaryStart,
     "",
     `Saved catalog fetched **${date(report.catalogFetchedAt)}**: **${count(report.providerPrintings)} provider printings** in **${report.providerSets} sets**, plus **${report.localRulesTokens} local rules tokens**. Completeness is relative to ${report.provider}; its latest reported record update is **${date(report.catalogSourceUpdatedAt)}**.`,
     "",
-    `Supplemental reference catalog fetched **${date(referenceCatalogMeta.fetchedAt)}**: **${count(report.referencePrintings)} Radiance printings** from **${referenceCatalogMeta.provider}**, including all **167 numbered base cards**. These entries are available for browsing and are blocked from play pending reviewed rules implementations. Source coverage does not claim every token or promotion.`,
+    `Supplemental reference catalog fetched **${date(referenceCatalogMeta.fetchedAt)}**: **${count(report.referencePrintings)} Radiance printings** from **${referenceCatalogMeta.provider}**, including all **167 numbered base cards**. **${count(referencePlayable)}** individually reviewed printings are playable; the other **${count(report.referencePrintings - referencePlayable)}** remain available for browsing and blocked from play pending reviewed rules implementations. Source coverage does not claim every token or promotion.`,
     "",
     `Executable registration: **${count(report.playable)} / ${count(report.registered)} entries**, with **${count(statuses.unsupported)} unsupported** (${count(statuses.scripted)} scripted, ${count(statuses.compiled)} compiled, ${count(statuses.alias)} aliases). Counts include printings and tokens, rather than only distinct card designs.`,
     "",

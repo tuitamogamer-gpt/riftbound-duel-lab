@@ -6120,7 +6120,8 @@ function executeEffects(
       case "channel":
         if (!s.players[p].runeDeck.length && e.condition === "drawIfEmpty")
           draw(s, p, 1);
-        else channel(s, p, n, false);
+        // Printed text says "exhausted" unless it plainly channels a rune.
+        else channel(s, p, n, e.ready === true);
         break;
       case "power":
         if (e.condition === "gearOnly")
@@ -6150,11 +6151,13 @@ function executeEffects(
               ? true
               : e.condition === "allBattlefields"
                 ? unit.location.startsWith("field:")
-                : e.condition === "combat"
-                  ? !!s.combat?.engaged && unit.location === s.combat.fieldId
-                  : e.condition === "liveSourceLocation"
-                    ? unit.location === relativeLocation
-                    : unit.location === targetId)
+                : e.condition === "allBases"
+                  ? unit.location.startsWith("base:")
+                  : e.condition === "combat"
+                    ? !!s.combat?.engaged && unit.location === s.combat.fieldId
+                    : e.condition === "liveSourceLocation"
+                      ? unit.location === relativeLocation
+                      : unit.location === targetId)
           ) {
             dealDamage(
               s,

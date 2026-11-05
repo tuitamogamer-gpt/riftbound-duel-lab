@@ -47,12 +47,12 @@
     "attribution": "Unofficial fan project. Structured records are from Hextech Analytics, not Riftcodex or an official Riot API. Card names, rules text, and Riot CDN artwork are property of Riot Games, Inc."
   },
   "registered": 1678,
-  "playable": 1459,
+  "playable": 1492,
   "statuses": {
-    "scripted": 1108,
+    "scripted": 1135,
     "compiled": 37,
-    "alias": 314,
-    "unsupported": 219
+    "alias": 320,
+    "unsupported": 186
   },
   "sets": {
     "JDG": {
@@ -102,8 +102,8 @@
     },
     "RAD": {
       "total": 219,
-      "playable": 0,
-      "unsupported": 219
+      "playable": 33,
+      "unsupported": 186
     }
   },
   "precons": [
@@ -231,7 +231,7 @@
       "name": "Seraphine · Radiance",
       "product": "Radiance Showdown",
       "uniqueCards": 30,
-      "executableCards": 5,
+      "executableCards": 9,
       "complete": false,
       "missingCardIds": [
         "rad-151-167",
@@ -241,20 +241,16 @@
         "rad-065-167",
         "rad-152-167",
         "rad-132-167",
-        "rad-134-167",
         "rad-057-167",
         "rad-125-167",
         "rad-060-167",
         "rad-128-167",
         "rad-127-167",
-        "rad-059-167",
         "rad-124-167",
         "rad-116-167",
         "rad-053-167",
         "rad-048-167",
         "rad-047-167",
-        "rad-119-167",
-        "rad-049-167",
         "rad-118-167",
         "rad-122-167",
         "rad-120-167",
@@ -266,7 +262,7 @@
       "name": "Evelynn · Radiance",
       "product": "Radiance Showdown",
       "uniqueCards": 29,
-      "executableCards": 7,
+      "executableCards": 13,
       "complete": false,
       "missingCardIds": [
         "rad-153-167",
@@ -276,20 +272,14 @@
         "rad-109-167",
         "rad-154-167",
         "rad-108-167",
-        "rad-086-167",
         "rad-103-167",
         "rad-102-167",
         "rad-106-167",
         "rad-081-167",
         "rad-105-167",
-        "rad-104-167",
-        "rad-076-167",
-        "rad-097-167",
         "rad-070-167",
         "rad-100-167",
         "rad-095-167",
-        "rad-099-167",
-        "rad-077-167",
         "rad-098-167"
       ]
     }
@@ -9613,8 +9603,17 @@
       "type": "Unit",
       "cardId": "rad-003-167",
       "rulesCardId": "rad-003-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "damage",
+            "amount": 1,
+            "target": "upToTwoUnits"
+          }
+        ]
+      }
     },
     {
       "name": "Brawl",
@@ -9658,8 +9657,18 @@
       "type": "Unit",
       "cardId": "rad-008-167",
       "rulesCardId": "rad-008-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "onPlay": [
+          {
+            "type": "might",
+            "amount": 2,
+            "target": "anyUnit"
+          }
+        ]
+      }
     },
     {
       "name": "Antagonistic Apparatus",
@@ -9667,8 +9676,22 @@
       "type": "Unit",
       "cardId": "rad-009-167",
       "rulesCardId": "rad-009-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Enters ready"
+        ],
+        "onPlay": [
+          {
+            "type": "token",
+            "amount": 1,
+            "cardName": "Mech",
+            "ready": true,
+            "location": "here"
+          }
+        ]
+      }
     },
     {
       "name": "Forbidden Technique",
@@ -9703,8 +9726,32 @@
       "type": "Spell",
       "cardId": "rad-013-167",
       "rulesCardId": "rad-013-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "action": true,
+        "spellModes": [
+          {
+            "label": "Deal 4 to a unit at a battlefield",
+            "effects": [
+              {
+                "type": "damage",
+                "amount": 4,
+                "target": "unitAtBattlefield"
+              }
+            ]
+          },
+          {
+            "label": "Kill a gear",
+            "effects": [
+              {
+                "type": "kill",
+                "target": "anyGear"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Shimmering Swimmer",
@@ -9838,8 +9885,21 @@
       "type": "Spell",
       "cardId": "rad-025-167",
       "rulesCardId": "rad-025-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "reaction": true,
+        "spell": [
+          {
+            "type": "keyword",
+            "keyword": "Shield 2",
+            "target": "anyUnit"
+          },
+          {
+            "type": "predict"
+          }
+        ]
+      }
     },
     {
       "name": "Entrenched Boar",
@@ -10081,8 +10141,18 @@
       "type": "Unit",
       "cardId": "rad-049-167",
       "rulesCardId": "rad-049-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "token",
+            "amount": 1,
+            "cardName": "Mech",
+            "location": "here"
+          }
+        ]
+      }
     },
     {
       "name": "Mysterious Chronomancer",
@@ -10126,8 +10196,20 @@
       "type": "Unit",
       "cardId": "rad-054-167",
       "rulesCardId": "rad-054-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Disarm"
+        ],
+        "onAttack": [
+          {
+            "type": "might",
+            "amount": -1,
+            "target": "enemyUnitHere"
+          }
+        ]
+      }
     },
     {
       "name": "Clanging Sentry",
@@ -10162,8 +10244,18 @@
       "type": "Unit",
       "cardId": "rad-058-167",
       "rulesCardId": "rad-058-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "onPlay": [
+          {
+            "type": "might",
+            "amount": -3,
+            "target": "enemyUnit"
+          }
+        ]
+      }
     },
     {
       "name": "Supernova",
@@ -10171,8 +10263,21 @@
       "type": "Spell",
       "cardId": "rad-059-167",
       "rulesCardId": "rad-059-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "damage",
+            "amount": 10,
+            "target": "anyUnit"
+          },
+          {
+            "type": "draw",
+            "amount": 2
+          }
+        ]
+      }
     },
     {
       "name": "The Empyrean",
@@ -10351,8 +10456,16 @@
       "type": "Unit",
       "cardId": "rad-076-167",
       "rulesCardId": "rad-076-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onConquer": [
+          {
+            "type": "power",
+            "amount": 1
+          }
+        ]
+      }
     },
     {
       "name": "Wrath of the Freljord",
@@ -10360,8 +10473,15 @@
       "type": "Unit",
       "cardId": "rad-077-167",
       "rulesCardId": "rad-077-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "shield": 3,
+        "keywords": [
+          "Enters ready",
+          "Shield 3"
+        ]
+      }
     },
     {
       "name": "Armored Tusker",
@@ -10378,8 +10498,18 @@
       "type": "Spell",
       "cardId": "rad-079-167",
       "rulesCardId": "rad-079-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "damageAll",
+            "amount": 3,
+            "who": "all",
+            "condition": "allBases"
+          }
+        ]
+      }
     },
     {
       "name": "Bloodscent Swarm",
@@ -10441,8 +10571,22 @@
       "type": "Unit",
       "cardId": "rad-086-167",
       "rulesCardId": "rad-086-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "shield": 2,
+        "keywords": [
+          "Shield 2"
+        ],
+        "onHold": [
+          {
+            "type": "channel",
+            "amount": 1,
+            "ready": true
+          }
+        ]
+      }
     },
     {
       "name": "K'Sante, Courageous",
@@ -10450,8 +10594,22 @@
       "type": "Unit",
       "cardId": "rad-086a-167",
       "rulesCardId": "rad-086a-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "shield": 2,
+        "keywords": [
+          "Shield 2"
+        ],
+        "onHold": [
+          {
+            "type": "channel",
+            "amount": 1,
+            "ready": true
+          }
+        ]
+      }
     },
     {
       "name": "Portable Portal",
@@ -10468,8 +10626,16 @@
       "type": "Unit",
       "cardId": "rad-088-167",
       "rulesCardId": "rad-088-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "assault": 2,
+        "shield": 2,
+        "keywords": [
+          "Assault 2",
+          "Shield 2"
+        ]
+      }
     },
     {
       "name": "Titanic Shrine",
@@ -10567,8 +10733,21 @@
       "type": "Unit",
       "cardId": "rad-097-167",
       "rulesCardId": "rad-097-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Disarm",
+          "Ganking"
+        ],
+        "onAttack": [
+          {
+            "type": "might",
+            "amount": -1,
+            "target": "enemyUnitHere"
+          }
+        ]
+      }
     },
     {
       "name": "Siren's Song",
@@ -10585,8 +10764,21 @@
       "type": "Unit",
       "cardId": "rad-099-167",
       "rulesCardId": "rad-099-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "draw",
+            "amount": 1
+          },
+          {
+            "type": "draw",
+            "amount": 1,
+            "who": "opponent"
+          }
+        ]
+      }
     },
     {
       "name": "The Waters' Wage",
@@ -10630,8 +10822,22 @@
       "type": "Unit",
       "cardId": "rad-104-167",
       "rulesCardId": "rad-104-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "abilities": [
+          {
+            "label": "[Stun] an enemy unit.",
+            "exhaust": true,
+            "effects": [
+              {
+                "type": "stun",
+                "target": "enemyUnit"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "Reckless Innovator",
@@ -10792,8 +10998,21 @@
       "type": "Unit",
       "cardId": "rad-119-167",
       "rulesCardId": "rad-119-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "keywords": [
+          "Deathknell"
+        ],
+        "onDeath": [
+          {
+            "type": "token",
+            "amount": 1,
+            "cardName": "Bird",
+            "location": "base"
+          }
+        ]
+      }
     },
     {
       "name": "Meticulous Restorationist",
@@ -10936,8 +11155,21 @@
       "type": "Spell",
       "cardId": "rad-134-167",
       "rulesCardId": "rad-134-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "spell": [
+          {
+            "type": "special",
+            "custom": "sfd-extra:ready-all"
+          },
+          {
+            "type": "mightAll",
+            "amount": 3,
+            "who": "self"
+          }
+        ]
+      }
     },
     {
       "name": "Remember the Fallen",
@@ -11349,9 +11581,23 @@
       "set": "RAD",
       "type": "Unit",
       "cardId": "rad-178-167",
-      "rulesCardId": "rad-086a-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "rulesCardId": "rad-178-167",
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "accelerating": true,
+        "shield": 2,
+        "keywords": [
+          "Shield 2"
+        ],
+        "onHold": [
+          {
+            "type": "channel",
+            "amount": 1,
+            "ready": true
+          }
+        ]
+      }
     },
     {
       "name": "Aphelios, Exalted",
@@ -11413,8 +11659,10 @@
       "type": "Rune",
       "cardId": "rad-r01",
       "rulesCardId": "rad-r01",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Fury Rune",
@@ -11422,8 +11670,10 @@
       "type": "Rune",
       "cardId": "rad-r01a",
       "rulesCardId": "rad-r01",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Calm Rune",
@@ -11431,8 +11681,10 @@
       "type": "Rune",
       "cardId": "rad-r02",
       "rulesCardId": "rad-r02",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Calm Rune",
@@ -11440,8 +11692,10 @@
       "type": "Rune",
       "cardId": "rad-r02a",
       "rulesCardId": "rad-r02",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Mind Rune",
@@ -11449,8 +11703,10 @@
       "type": "Rune",
       "cardId": "rad-r03",
       "rulesCardId": "rad-r03",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Mind Rune",
@@ -11458,8 +11714,10 @@
       "type": "Rune",
       "cardId": "rad-r03a",
       "rulesCardId": "rad-r03",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Body Rune",
@@ -11467,8 +11725,10 @@
       "type": "Rune",
       "cardId": "rad-r04",
       "rulesCardId": "rad-r04",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Body Rune",
@@ -11476,8 +11736,10 @@
       "type": "Rune",
       "cardId": "rad-r04a",
       "rulesCardId": "rad-r04",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Chaos Rune",
@@ -11485,8 +11747,10 @@
       "type": "Rune",
       "cardId": "rad-r05",
       "rulesCardId": "rad-r05",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Chaos Rune",
@@ -11494,8 +11758,10 @@
       "type": "Rune",
       "cardId": "rad-r05a",
       "rulesCardId": "rad-r05",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Order Rune",
@@ -11503,8 +11769,10 @@
       "type": "Rune",
       "cardId": "rad-r06",
       "rulesCardId": "rad-r06",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Order Rune",
@@ -11512,8 +11780,10 @@
       "type": "Rune",
       "cardId": "rad-r06a",
       "rulesCardId": "rad-r06",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "alias",
+      "script": {
+        "implemented": true
+      }
     },
     {
       "name": "Ahri, Confident",

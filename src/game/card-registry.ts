@@ -12,9 +12,12 @@ export interface CardRegistration {
 
 function unsupportedRulesReason(
   card: Card,
-  script?: CardScript,
+  script: CardScript | undefined,
+  reviewedReferences: ReadonlySet<string>,
 ): string | undefined {
-  if (card.referenceOnly)
+  // A reference printing becomes executable only through its own reviewed ID;
+  // compilation, equivalent printings and aliases never promote it.
+  if (card.referenceOnly && !reviewedReferences.has(card.id))
     return "Reference import: this printing requires reviewed rules and behavior tests before play.";
   // The Vendetta FAQ makes this both Unit and Gear, despite the provider's
   // single-type record. A keyword-only script cannot implement that rules face.
@@ -35,6 +38,7 @@ export function buildCardRegistry(
   explicit: Record<string, CardScript>,
   compile: (card: Card) => CardScript | undefined,
   reviewedAliases: Record<string, string> = {},
+  reviewedReferences: ReadonlySet<string> = new Set(),
 ): Record<string, CardRegistration> {
   const groups = new Map<string, Card[]>();
   const compiled = new Map<string, CardScript>();
@@ -42,7 +46,7 @@ export function buildCardRegistry(
     const key = gameplayFingerprint(card);
     groups.set(key, [...(groups.get(key) ?? []), card]);
     if (
-      !unsupportedRulesReason(card, explicit[card.id]) &&
+      !unsupportedRulesReason(card, explicit[card.id], reviewedReferences) &&
       !explicit[card.id]
     ) {
       const script = compile(card);
@@ -62,8 +66,16 @@ export function buildCardRegistry(
       // Explicit scripts can contain exact-ID engine hooks. Preserve their identity.
       const rulesCard = explicit[card.id] ? card : source;
       const blockedReason =
-        unsupportedRulesReason(card, explicit[rulesCard.id]) ??
-        unsupportedRulesReason(rulesCard, explicit[rulesCard.id]);
+        unsupportedRulesReason(
+          card,
+          explicit[rulesCard.id],
+          reviewedReferences,
+        ) ??
+        unsupportedRulesReason(
+          rulesCard,
+          explicit[rulesCard.id],
+          reviewedReferences,
+        );
       const script = blockedReason
         ? undefined
         : (explicit[rulesCard.id] ?? compiled.get(rulesCard.id));
@@ -97,7 +109,7 @@ export function buildCardRegistry(
       !entry?.script &&
       source?.script &&
       card &&
-      !unsupportedRulesReason(card, source.script)
+      !unsupportedRulesReason(card, source.script, reviewedReferences)
     )
       registry[cardId] = {
         cardId,

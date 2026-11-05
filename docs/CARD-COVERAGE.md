@@ -4,16 +4,16 @@
 
 Saved catalog fetched **6 October 2026**: **1,451 provider printings** in **8 sets**, plus **8 local rules tokens**. Completeness is relative to Riftcodex; its latest reported record update is **21 July 2026**.
 
-Supplemental reference catalog fetched **22 October 2026**: **219 Radiance printings** from **Hextech Analytics**, including all **167 numbered base cards**. These entries are available for browsing and are blocked from play pending reviewed rules implementations. Source coverage does not claim every token or promotion.
+Supplemental reference catalog fetched **22 October 2026**: **219 Radiance printings** from **Hextech Analytics**, including all **167 numbered base cards**. **33** individually reviewed printings are playable; the other **186** remain available for browsing and blocked from play pending reviewed rules implementations. Source coverage does not claim every token or promotion.
 
-Executable registration: **1,459 / 1,678 entries**, with **219 unsupported** (1,108 scripted, 37 compiled, 314 aliases). Counts include printings and tokens, rather than only distinct card designs.
+Executable registration: **1,492 / 1,678 entries**, with **186 unsupported** (1,135 scripted, 37 compiled, 320 aliases). Counts include printings and tokens, rather than only distinct card designs.
 
 Retail precons: **13 / 13** have complete executable coverage. All 13 lists have valid structure and complete catalog references. Historical retail contents and current tournament legality remain separate.
 
 Additional official lists: **2 Radiance Showdown precons** (Seraphine and Evelynn) have valid structure and complete catalog references. They are visible as reference lists and excluded from playable presets and bot matrices.
 <!-- card-catalog-summary:end -->
 
-Provider completeness is checked against both pagination totals and each set's card count. It does not establish that Riftcodex contains every Riot publication or preview. The 22 October refresh returned no provider changes and still omits Radiance; the separate [Radiance reference import](IMPORT-RADIANCE-SOURCES.md) supplies 219 community-source printings and two official decklists without making them playable. The generated summary above and [per-card inventory](card-coverage.json) are maintained by `cards:report` and verified by `cards:check`.
+Provider completeness is checked against both pagination totals and each set's card count. It does not establish that Riftcodex contains every Riot publication or preview. The 22 October and 5 November refreshes returned no provider changes and still omit Radiance; the separate [Radiance reference import](IMPORT-RADIANCE-SOURCES.md) supplies 219 community-source printings and two official decklists. [Radiance wave 1](RADIANCE-WAVE1.md) makes 33 individually reviewed printings playable; the rest stay reference-only. Run `npm run cards:sources` to check the sources again without writing anything. The generated summary above and [per-card inventory](card-coverage.json) are maintained by `cards:report` and verified by `cards:check`.
 
 ## Playable implementation — 7 October 2026
 
