@@ -1,5 +1,9 @@
 # Validation evidence
 
+## Radiance wave 1 — 5 November 2026
+
+The source check found no new provider or Hextech data. The first reviewed Radiance wave (33 printings) passed **2,706 tests in 141 files** outside the precon matrix and **331 precon-matrix tests** in three shards, all with exit 0 and the CI test timeouts. Catalog consistency, TypeScript and the production build also passed. Details are in [Radiance wave 1](RADIANCE-WAVE1.md).
+
 ## Final Spiritforged ownership correction — 8 October 2026
 
 A subsequent legal-action review found two remaining legacy paths: after Possession, Rumble recycled a controlled unit to its controller's deck; after Mystic Reversal, Riposte countered a controlled spell into its controller's trash. Both now use the original physical owner. Rumble also preserves the original card face, detaches its own hybrid Gear alias from a surviving host, removes both board indices once and creates no deck card from a token. Riposte delegates counter finalization to the shared resolver while preserving its separate Might grant.

@@ -77,6 +77,15 @@ Each future wave should keep the same rule: review the complete printed face, ad
 
 ## Validation
 
+Results on 5 November 2026, run the same way as the required CI jobs:
+
+- Full suite without the precon matrix (`--maxWorkers=4 --testTimeout=30000`): **141 files, 2,706 tests passed**, exit 0.
+- Precon matrix (`tests/precon-effects.test.ts`, three `PRECON_SHARD` shards): **331 tests passed** (111 + 110 + 110), each shard exit 0.
+- `npm run cards:check`, TypeScript and the production build passed.
+- An earlier local run with Vitest's default 5-second timeout, started while a production build and other suites ran in parallel, reported two failures and was then stopped at the one-hour limit; the rerun above used the CI timeouts and had no failures.
+
+Test files:
+
 - `tests/radiance-wave1.test.ts`: registry promotion of exactly the reviewed IDs, showcase/rune variants, and behavior for every face above (including Disarm only on attack, both Lost to the Sands modes, Avalanche base-only damage and save/restore).
 - `tests/reference-catalog.test.ts`: reviewed runes are accepted in imported decks; any unreviewed Radiance printing still blocks deck import and game creation; the playable ID set grows only by the reviewed printings.
 - `tests/card-sources.test.ts`: Hextech payload parsing, page completeness and Riftcodex set comparison without network access.
