@@ -1,5 +1,14 @@
 # Validation evidence
 
+## Neeko and multiple legends — 6 November 2026
+
+[Neeko, Blending In](RADIANCE-NEEKO.md) makes all **219** Radiance printings playable (**1,679 / 1,679** registered entries).
+
+- **Engine commit** `7ee1093`: **331 precon-matrix tests** in three shards (111 + 110 + 110), all with exit 0 and the CI timeouts. The full suite on this commit had one failure: a reference catalog test looked for an unreviewed Radiance unit, and none is left. The test was updated in `5d2b552`.
+- **Final commit** `5d2b552`: **2,932 tests in 149 files** outside the precon matrix, exit 0 with the CI timeouts. TypeScript, the production build and catalog consistency also passed. Since `7ee1093` the only changes are the online board's display of added legends and that test, so the matrix above still applies.
+
+New tests cover Neeko adding a legend and using its ability, separate exhausted and Empowered state, an added legend's passive rule, removal when Neeko dies, deck validation, the `Neeko Legends` text section, hidden information and saved games. A bot game check gives the bot Neeko and confirms that it adds a legend and keeps making legal decisions.
+
 ## Radiance waves 5–7 — 5 November 2026
 
 Waves [5](RADIANCE-WAVE5.md), [6](RADIANCE-WAVE6.md) and [7](RADIANCE-WAVE7.md) make **218 of 219** Radiance printings playable; only Neeko, Blending In stays reference-only.
