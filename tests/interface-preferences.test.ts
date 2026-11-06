@@ -40,7 +40,7 @@ describe("interface preferences", () => {
   });
 
   it.each([null, "broken", "null", "42", '"high"', "[]"])(
-    "recovers safe defaults from an absent or invalid stored value: %s",
+    "recovers safe defaults from an absent or invalid stored value: %j",
     (value) => {
       expect(parseInterfacePreferences(value)).toEqual({
         reducedEffects: false,
