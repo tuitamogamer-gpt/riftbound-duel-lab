@@ -22,7 +22,8 @@ import { observationRulesView } from "../game/ai/observation";
 import { getMight } from "../game/engine";
 import { isImplemented } from "../game/scripts";
 import type { OnlineAction } from "../game/online-protocol";
-import type { LocationId, Unit } from "../game/types";
+import type { GameState, LocationId, PlayerId, Unit } from "../game/types";
+import { legendRefs } from "../game/legends";
 import "./OnlineDuel.css";
 
 const errors: Record<string, string> = {
@@ -600,6 +601,18 @@ export default function OnlineDuel({
                             ? source("champion")
                             : inspect(observed.state.players[actor].championId),
                       )}
+                      {legendRefs(
+                        observed.state as unknown as GameState,
+                        actor as PlayerId,
+                      )
+                        .slice(1)
+                        .map((ref) =>
+                          cardPiece(ref.cardId, `legend-${ref.key}`, () =>
+                            actor === seat
+                              ? source(ref.key)
+                              : inspect(ref.cardId),
+                          ),
+                        )}
                     </>
                   )}
                   {observed.state.units
