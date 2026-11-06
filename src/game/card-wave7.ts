@@ -11,6 +11,12 @@ import { isFace } from "./board-rules";
 import type { ExpansionModule } from "./later-precon-engine";
 import { takeTrash, trashTargets } from "./trash";
 import type { CardScript, Effect } from "./types";
+import {
+  addedLegendOwner,
+  findLegend,
+  legendKeyFor,
+  readyLegend,
+} from "./legends";
 
 const plain: CardScript = { implemented: true };
 const fx = (key: string, extra: Partial<Effect> = {}): Effect => ({
@@ -265,22 +271,18 @@ export const cardWave7Module: ExpansionModule = {
     return result;
   },
   event(s, event, p, cardId, sourceId, locationId, ctx) {
-    const legend = s.players[p].legendId;
+    const kayn = findLegend(s, p, (id) => isFace(id, "VEN", 155));
+    if (event === "play" && kayn && ctx.playSource && ctx.playSource !== "hand")
+      ctx.trigger(s, p, kayn.cardId, kayn.key, [fx("empower-legend")]);
+    const ornn = findLegend(s, p, (id) => isFace(id, "VEN", 145));
     if (
-      event === "play" &&
-      isFace(legend, "VEN", 155) &&
-      ctx.playSource &&
-      ctx.playSource !== "hand"
-    )
-      ctx.trigger(s, p, legend, "legend", [fx("empower-legend")]);
-    if (
-      isFace(legend, "VEN", 145) &&
+      ornn &&
       ((event === "cardFinalized" &&
         ["Unit", "Gear"].some((type) => isCardType(getCard(cardId), type)) &&
         (getCard(cardId).energy ?? 0) >= 7) ||
         (event === "abilityActivated" && (ctx.abilityEnergyCost ?? 0) >= 7))
     )
-      ctx.trigger(s, p, legend, "legend", [
+      ctx.trigger(s, p, ornn.cardId, ornn.key, [
         {
           type: "readyRunes",
           amount: 2,
@@ -359,7 +361,7 @@ export const cardWave7Module: ExpansionModule = {
   },
   effect(s, p, e, ctx) {
     if (e.custom === "wave7:empower-legend") {
-      ctx.empower?.(s, p, "legend");
+      ctx.empower?.(s, p, legendKeyFor(s, p, ctx.sourceId));
       return true;
     }
     if (e.custom === "wave7:grant-flow") {
@@ -467,7 +469,9 @@ export const cardWave7Module: ExpansionModule = {
             const rune = player.runes.find((r) => r.id === ctx.targetId);
             if (rune) rune.ready = true;
             if (ctx.targetId === `legend:${player.id}`)
-              player.legendUsedTurn = -1;
+              readyLegend(s, player.id, "legend");
+            if (ctx.targetId && addedLegendOwner(s, ctx.targetId) === player.id)
+              readyLegend(s, player.id, ctx.targetId);
           }
         }
         break;

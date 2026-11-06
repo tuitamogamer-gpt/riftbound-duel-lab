@@ -13,7 +13,20 @@ export const IMPORTED_DECKS_KEY = "riftbound-imported-decks-v1";
 const MAX_TEXT_LENGTH = 100_000;
 const MAX_DECKS = 50;
 type Section =
-  "legend" | "champion" | "main" | "runes" | "battlefields" | "sideboard";
+  | "legend"
+  | "champion"
+  | "main"
+  | "runes"
+  | "battlefields"
+  | "sideboard"
+  | "neekoLegends";
+/** Neeko, Blending In lets a deck choose up to three more legends. */
+export const NEEKO_NAME = "Neeko, Blending In";
+export const MAX_NEEKO_LEGENDS = 3;
+export const deckHasNeeko = (deck: Pick<StarterDeck, "main" | "championId">) =>
+  [deck.championId, ...deck.main.map((entry) => entry.cardId)].some(
+    (id) => cardsById[id]?.name === NEEKO_NAME,
+  );
 export interface DeckIssue {
   code: string;
   message: string;
@@ -63,7 +76,8 @@ const compatible = (card: Card, domains: string[]) =>
 const fieldIds = (deck: StarterDeck) =>
   deck.battlefieldIds?.length ? deck.battlefieldIds : [deck.battlefieldId];
 const sectionType = (section: Section | null, card: Card) => {
-  if (section === "legend") return isCardType(card, "Legend");
+  if (section === "legend" || section === "neekoLegends")
+    return isCardType(card, "Legend");
   if (section === "champion")
     return isCardType(card, "Unit") && card.supertype === "Champion";
   if (section === "runes") return isCardType(card, "Rune");
@@ -176,6 +190,11 @@ function sectionHeader(line: string): Section | null {
   const aliases: Record<string, Section> = {
     legend: "legend",
     legends: "legend",
+    "neeko legends": "neekoLegends",
+    "neeko legend": "neekoLegends",
+    "additional legends": "neekoLegends",
+    "extra legends": "neekoLegends",
+    "dodatne legende": "neekoLegends",
     legenda: "legend",
     champion: "champion",
     "chosen champion": "champion",
@@ -220,10 +239,12 @@ function stableId(
     | "battlefieldIds"
     | "format"
     | "sideboard"
+    | "extraLegendIds"
   >,
 ) {
   const content = JSON.stringify([
     deck.legendId,
+    ...(deck.extraLegendIds?.length ? [[...deck.extraLegendIds].sort()] : []),
     deck.championId,
     deck.battlefieldId,
     deck.battlefieldIds,
@@ -240,6 +261,48 @@ function stableId(
   return `import-${(hash >>> 0).toString(36)}`;
 }
 
+/** Neeko's extra legends: at most three, different names, Neeko in the deck. */
+export function neekoLegendIssues(deck: StarterDeck): DeckIssue[] {
+  const extra = deck.extraLegendIds ?? [];
+  if (!extra.length) return [];
+  const issues: DeckIssue[] = [];
+  if (!deckHasNeeko(deck))
+    issues.push(
+      issue(
+        "neeko-legends-without-neeko",
+        `Dodatne legende su dozvoljene samo uz ${NEEKO_NAME} u špilu.`,
+      ),
+    );
+  if (extra.length > MAX_NEEKO_LEGENDS)
+    issues.push(
+      issue(
+        "neeko-legend-count",
+        `${NEEKO_NAME} dozvoljava najviše ${MAX_NEEKO_LEGENDS} dodatne legende.`,
+      ),
+    );
+  const names = new Set([cardsById[deck.legendId]?.name]);
+  for (const id of extra) {
+    const card = cardsById[id];
+    if (!card) continue;
+    if (!isCardType(card, "Legend"))
+      issues.push(
+        issue("neeko-legend-type", `${card.name} nije Legend karta.`, {
+          cardId: id,
+        }),
+      );
+    else if (names.has(card.name))
+      issues.push(
+        issue(
+          "neeko-legend-duplicate",
+          `Dodatne legende moraju imati različita imena: ${card.name}.`,
+          { cardId: id },
+        ),
+      );
+    names.add(card.name);
+  }
+  return issues;
+}
+
 /** Structural legality is intentionally independent from effect-script coverage. */
 export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
   const issues: DeckIssue[] = [];
@@ -248,6 +311,7 @@ export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
   const entries = [...deck.main, ...deck.runes, ...(deck.sideboard ?? [])];
   const allIds = [
     deck.legendId,
+    ...(deck.extraLegendIds ?? []),
     deck.championId,
     ...fieldIds(deck),
     ...entries.map((entry) => entry.cardId),
@@ -318,6 +382,7 @@ export function validateImportedDeck(deck: StarterDeck): DeckIssue[] {
     );
   if (!isCardType(legend, "Legend"))
     issues.push(issue("legend-type", "Potrebna je tačno jedna Legend karta."));
+  issues.push(...neekoLegendIssues(deck));
   if (!isCardType(champion, "Unit") || champion.supertype !== "Champion")
     issues.push(
       issue("champion-type", "Odabrani champion mora biti Champion Unit."),
@@ -490,6 +555,7 @@ export function getDeckScriptCoverage(deck: StarterDeck): DeckScriptCoverage {
   const ids = [
     ...new Set([
       deck.legendId,
+      ...(deck.extraLegendIds ?? []),
       deck.championId,
       ...fieldIds(deck),
       ...deck.main.map((entry) => entry.cardId),
@@ -521,6 +587,7 @@ export function parseDeckText(
     runes: [],
     battlefields: [],
     sideboard: [],
+    neekoLegends: [],
   };
   let section: Section | null = null;
   let hasMainSection = false;
@@ -718,6 +785,13 @@ export function parseDeckText(
     main: sections.main,
     runes: sections.runes,
     ...(sections.sideboard.length ? { sideboard: sections.sideboard } : {}),
+    ...(sections.neekoLegends.length
+      ? {
+          extraLegendIds: sections.neekoLegends.flatMap((entry) =>
+            Array<string>(entry.count).fill(entry.cardId),
+          ),
+        }
+      : {}),
     source: "Imported deck",
     format,
   };
@@ -750,7 +824,7 @@ export function exportDeckText(deck: StarterDeck): string {
           `${entry.count} ${entry.cardId} # ${cardsById[entry.cardId]?.name ?? entry.cardId}`,
       )
       .join("\n");
-  return `Name: ${deck.name}\nFormat: ${deck.format ?? "standard"}\n\nLegend\n${lines([{ cardId: deck.legendId, count: 1 }])}\n\nChampion\n${lines([{ cardId: deck.championId, count: 1 }])}\n\nMain Deck\n${lines(deck.main)}\n\nRunes\n${lines(deck.runes)}\n\nBattlefields\n${lines(fieldIds(deck).map((cardId) => ({ cardId, count: 1 })))}\n${deck.sideboard?.length ? `\nSideboard\n${lines(deck.sideboard)}\n` : ""}`;
+  return `Name: ${deck.name}\nFormat: ${deck.format ?? "standard"}\n\nLegend\n${lines([{ cardId: deck.legendId, count: 1 }])}\n\nChampion\n${lines([{ cardId: deck.championId, count: 1 }])}\n\nMain Deck\n${lines(deck.main)}\n\nRunes\n${lines(deck.runes)}\n\nBattlefields\n${lines(fieldIds(deck).map((cardId) => ({ cardId, count: 1 })))}\n${deck.extraLegendIds?.length ? `\nNeeko Legends\n${lines(deck.extraLegendIds.map((cardId) => ({ cardId, count: 1 })))}\n` : ""}${deck.sideboard?.length ? `\nSideboard\n${lines(deck.sideboard)}\n` : ""}`;
 }
 
 export interface DeckStorage {

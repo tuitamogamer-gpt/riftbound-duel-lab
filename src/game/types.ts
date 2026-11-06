@@ -105,6 +105,8 @@ export interface PlayerState {
   name: string;
   deckId: string;
   legendId: string;
+  /** Neeko, Blending In: legends chosen at deck building (private until added). */
+  extraLegends?: string[];
   championId: string;
   championAvailable: boolean;
   deck: string[];
@@ -469,8 +471,15 @@ export interface RadianceState {
   returnedEnergy?: { player: PlayerId; turn: number; energy: number };
   /** Heimerdinger, Academy Instructor: tokens that may become Mechs. */
   heimer?: { player: PlayerId; tokenId: string }[];
-  /** Neeko: legends added while a Neeko is on the board. */
-  neeko?: { player: PlayerId; unitId: string; legendId: string }[];
+  /** Neeko: legends added while a Neeko is on the board, each with its own state. */
+  neeko?: {
+    player: PlayerId;
+    unitId: string;
+    legendId: string;
+    /** Turn it was exhausted, or -1 while ready. */
+    usedTurn?: number;
+    empowered?: boolean;
+  }[];
 }
 export interface GameAction {
   /** Show Off: the revealed or picked card's locked-in information. */

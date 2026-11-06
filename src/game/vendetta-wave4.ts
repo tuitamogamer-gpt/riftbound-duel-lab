@@ -17,6 +17,7 @@ import type {
   Unit,
 } from "./types";
 import type { ExpansionModule } from "./later-precon-engine";
+import { legendEmpowered, legendRefs } from "./legends";
 
 const plain: CardScript = { implemented: true };
 const fx = (key: string, extra: Partial<Effect> = {}): Effect => ({
@@ -391,14 +392,13 @@ export const vendettaWave4Module: ExpansionModule = {
     )
       return [];
     const result: GameAction[] = [];
-    const legend = s.players[p];
     const objects = [
       ...s.units.filter((u) => u.owner === p),
-      {
-        id: "legend",
-        cardId: legend.legendId,
-        empowered: legend.legendEmpowered,
-      },
+      ...legendRefs(s, p).map((ref) => ({
+        id: ref.key,
+        cardId: ref.cardId,
+        empowered: legendEmpowered(s, p, ref.key),
+      })),
     ];
     for (const o of objects) {
       const c = empowerCosts[number(o.cardId)];
@@ -427,7 +427,7 @@ export const vendettaWave4Module: ExpansionModule = {
           cardId: u.cardId,
         });
       if (is(u, 60) && u.ready) {
-        for (const [index, id] of legend.hand.entries()) {
+        for (const [index, id] of s.players[p].hand.entries()) {
           if (!isCardType(getCard(id), "Gear")) continue;
           for (const target of s.units.filter(
             (target) =>

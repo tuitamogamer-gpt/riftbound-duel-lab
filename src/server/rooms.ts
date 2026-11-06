@@ -137,7 +137,11 @@ function selectedDeck(selection: OnlineDeckSelection): RoomSeat["deck"] {
       (value.battlefieldIds !== undefined &&
         (!Array.isArray(value.battlefieldIds) ||
           ![1, 3].includes(value.battlefieldIds.length) ||
-          !value.battlefieldIds.every((id) => short(id, 80))))
+          !value.battlefieldIds.every((id) => short(id, 80)))) ||
+      (value.extraLegendIds !== undefined &&
+        (!Array.isArray(value.extraLegendIds) ||
+          value.extraLegendIds.length > 3 ||
+          !value.extraLegendIds.every((id) => short(id, 80))))
     )
       return fail("invalid-deck");
     deck = {
@@ -151,6 +155,9 @@ function selectedDeck(selection: OnlineDeckSelection): RoomSeat["deck"] {
       color: "#bd9b64",
       domains: value.domains as StarterDeck["domains"],
       legendId: value.legendId,
+      ...(Array.isArray(value.extraLegendIds) && value.extraLegendIds.length
+        ? { extraLegendIds: value.extraLegendIds as string[] }
+        : {}),
       championId: value.championId,
       battlefieldId: value.battlefieldId,
       ...(value.battlefieldIds
@@ -184,6 +191,7 @@ function selectedDeck(selection: OnlineDeckSelection): RoomSeat["deck"] {
     return fail("invalid-deck");
   const ids = [
     deck.legendId,
+    ...(deck.extraLegendIds ?? []),
     deck.championId,
     ...(deck.battlefieldIds ?? [deck.battlefieldId]),
     ...deck.main.map((entry) => entry.cardId),

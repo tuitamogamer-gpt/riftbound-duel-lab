@@ -2,6 +2,7 @@ import { getBotAction } from "./bot";
 import { getLegalActions } from "./engine";
 import { filterFriendlyBuffActions } from "./friendly-buff-actions";
 import type { GameAction, GameState } from "./types";
+import { legendCardOf } from "./legends";
 
 /** These only edit the proposed group; movement, payment and combat wait for confirmation. */
 export function isMovementSelection(action: GameAction): boolean {
@@ -94,6 +95,8 @@ export function selectedCardId(game: GameState, selected: string | null) {
     return game.fields.find((field) => field.id === selected)?.cardId;
   if (selected === "champion") return game.players[0].championId;
   if (selected === "legend") return game.players[0].legendId;
+  if (selected?.startsWith("neeko-legend:"))
+    return legendCardOf(game, 0, selected);
   if (selected?.startsWith("hidden:"))
     return game.hidden?.find(
       (card) => card.id === selected.slice(7) && card.owner === 0,

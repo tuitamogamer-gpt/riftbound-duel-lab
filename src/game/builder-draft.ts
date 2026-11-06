@@ -120,6 +120,13 @@ export function parseBuilderDraft(raw: string | null): BuilderDraft | null {
     if (
       !text(deck.legendId, 160) ||
       !isCardType(cardsById[deck.legendId], "Legend") ||
+      (deck.extraLegendIds !== undefined &&
+        (!Array.isArray(deck.extraLegendIds) ||
+          deck.extraLegendIds.length > 3 ||
+          !deck.extraLegendIds.every(
+            (id: unknown) =>
+              text(id, 160) && isCardType(cardsById[id as string], "Legend"),
+          ))) ||
       !text(deck.championId, 160) ||
       (deck.championId !== "" &&
         (cardsById[deck.championId]?.supertype !== "Champion" ||
@@ -179,6 +186,9 @@ export function parseBuilderDraft(raw: string | null): BuilderDraft | null {
         color: deck.color as string,
         domains: [...deck.domains] as Domain[],
         legendId: deck.legendId,
+        ...(Array.isArray(deck.extraLegendIds) && deck.extraLegendIds.length
+          ? { extraLegendIds: [...deck.extraLegendIds] as string[] }
+          : {}),
         championId: deck.championId,
         battlefieldId: deck.battlefieldId,
         battlefieldIds: [...fields] as string[],

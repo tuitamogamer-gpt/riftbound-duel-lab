@@ -10,6 +10,7 @@ import { canonicalCardName } from "../data/card-identity";
 import { isFace } from "./board-rules";
 import type { ExpansionModule } from "./later-precon-engine";
 import type { CardScript, Effect, GameState, PlayerId } from "./types";
+import { hasLegend } from "./legends";
 
 const plain: CardScript = { implemented: true };
 const fx = (key: string, extra: Partial<Effect> = {}): Effect => ({
@@ -89,7 +90,7 @@ export const hasSandWeaponmaster = (
   p: PlayerId,
   cardId: string,
 ) =>
-  isFace(s.players[p].legendId, "SFD", 197) &&
+  hasLegend(s, p, (id) => isFace(id, "SFD", 197)) &&
   getCard(cardId).tags.includes("Sand Soldier");
 
 export const cardWave9Module: ExpansionModule = {

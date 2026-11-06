@@ -6,6 +6,7 @@ import { detach, physicalCard, physicalOwner } from "./objects";
 import { useOncePerTurn } from "./radiance-rules";
 import { textSources } from "./text-sources";
 import type { CardScript, Effect, GameState, PlayerId, Unit } from "./types";
+import { findLegend } from "./legends";
 
 /**
  * Radiance wave 3: the Evelynn Showdown list and other face-down cards.
@@ -181,13 +182,13 @@ export const radianceWave3Module: ExpansionModule = {
             u.location,
           );
         // Agony's Embrace (legend): once each turn.
-        const legend = s.players[p].legendId;
-        if (isFace(legend, "RAD", 153) && useOncePerTurn(s, "agony", p))
+        const agony = findLegend(s, p, (id) => isFace(id, "RAD", 153));
+        if (agony && useOncePerTurn(s, "agony", p))
           ctx.trigger(
             s,
             p,
-            legend,
-            "legend",
+            agony.cardId,
+            agony.key,
             [{ type: "draw", amount: 1 }, rd("agony-discard")],
             `base:${p}`,
           );

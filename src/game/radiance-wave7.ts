@@ -17,6 +17,7 @@ import type {
   PlayerId,
   Unit,
 } from "./types";
+import { exhaustLegend, findLegend, legendReady, legendRefs } from "./legends";
 
 /**
  * Radiance wave 7: the last cards, built on new shared rules — a gear that
@@ -63,6 +64,8 @@ export const radianceWave7Scripts: Record<string, CardScript> = {
   // Lady of Clockwork: Main Phase trigger (module).
   "rad-145-167": plain,
   // The Ball.
+  // Neeko, Blending In: adds one of the deck's chosen legends while on the board.
+  "rad-167-167": { ...plain, onPlay: [rd7("neeko")] },
   "rad-146-167": {
     ...plain,
     keywords: ["Deploy", "Ganking"],
@@ -184,6 +187,13 @@ export const radianceWave7Module: ExpansionModule = {
     return value;
   },
   event(s, name, p, cardId, sourceId, locationId, ctx) {
+    // Neeko leaves the board: her legend leaves the Legend Zone.
+    if (
+      (name === "death" || name === "bounce" || name === "banish") &&
+      sourceId &&
+      s.radiance?.neeko?.some((n) => n.unitId === sourceId)
+    )
+      s.radiance.neeko = s.radiance.neeko.filter((n) => n.unitId !== sourceId);
     // Dockside Lock-Up: when you hold here, kill this to play the banished card.
     if (name === "hold" && locationId)
       for (const g of deployedGear(s, locationId, p).filter(
@@ -198,12 +208,13 @@ export const radianceWave7Module: ExpansionModule = {
           locationId,
         );
     // Lady of Clockwork: at the start of your Main Phase.
+    const lady = findLegend(s, p, (id) => isFace(id, "RAD", 145));
     if (
       name === "main" &&
-      isFace(s.players[p].legendId, "RAD", 145) &&
+      lady &&
       s.gears.some((g) => g.owner === p && !g.attachedTo)
     )
-      ctx.trigger(s, p, s.players[p].legendId, "legend", [
+      ctx.trigger(s, p, lady.cardId, lady.key, [
         rd7("clockwork", { optional: true, triggerCost: { energy: 1 } }),
       ]);
     // The Ball as a unit: when it moves.
@@ -215,10 +226,10 @@ export const radianceWave7Module: ExpansionModule = {
   },
   actions(s, p) {
     // Iron Revenant: [Reaction] banish a unit or gear from your trash, exhaust: add 1.
-    const x = s.players[p];
+    const revenant = findLegend(s, p, (id) => isFace(id, "RAD", 143));
     if (
-      !isFace(x.legendId, "RAD", 143) ||
-      x.legendUsedTurn >= 0 ||
+      !revenant ||
+      !legendReady(s, p, revenant.key) ||
       s.priorityPlayer !== p ||
       s.pendingChoice ||
       !["main", "showdown"].includes(s.phase)
@@ -238,8 +249,8 @@ export const radianceWave7Module: ExpansionModule = {
           id: `radiance:revenant:${t.id}`,
           category: "resource" as const,
           player: p,
-          sourceId: "legend",
-          cardId: x.legendId,
+          sourceId: revenant.key,
+          cardId: revenant.cardId,
           label: `Iron Revenant: banish ${card.name} from your trash, add 1 Power for units or gear`,
         },
       ];
@@ -254,7 +265,7 @@ export const radianceWave7Module: ExpansionModule = {
     if (!cardId) return true;
     banishCard(s, p, cardId);
     ctx.cardEvent(s, "banish", p, cardId);
-    x.legendUsedTurn = s.turn;
+    exhaustLegend(s, p, action.sourceId ?? "legend");
     x.permanentPower = (x.permanentPower ?? 0) + 1;
     ctx.log?.(
       s,
@@ -389,6 +400,51 @@ export const radianceWave7Module: ExpansionModule = {
       case "animate":
         animate(s, p, e.cardName!);
         return true;
+      case "neeko": {
+        const neeko = s.units.find((u) => u.id === ctx.sourceId);
+        if (!neeko) return true;
+        // "Different" legends: none may share a name with one already in play.
+        const inZone = new Set(
+          legendRefs(s, p).map((ref) => getCard(ref.cardId).name),
+        );
+        const options = (s.players[p].extraLegends ?? []).filter(
+          (id) => !inZone.has(getCard(id).name),
+        );
+        if (options.length)
+          choices(
+            s,
+            p,
+            ctx,
+            options.map((id) =>
+              option(
+                p,
+                `neeko:${id}`,
+                `Add ${cardName(id)} to your Legend Zone`,
+                [rd7("neeko-add", { cardName: id })],
+              ),
+            ),
+          );
+        return true;
+      }
+      case "neeko-add": {
+        const neeko = s.units.find((u) => u.id === ctx.sourceId);
+        if (!neeko || !e.cardName) return true;
+        ((s.radiance ??= {}).neeko ??= []).push({
+          player: p,
+          unitId: neeko.id,
+          legendId: e.cardName,
+          usedTurn: -1,
+          empowered: false,
+        });
+        ctx.cardEvent(s, "reveal", p, e.cardName);
+        ctx.log?.(
+          s,
+          `${s.players[p].name} adds ${cardName(e.cardName)} to their Legend Zone.`,
+          "play",
+          p,
+        );
+        return true;
+      }
       case "modal":
         return true;
       case "ball-damage": {

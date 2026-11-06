@@ -3,6 +3,19 @@ export const builderMessages: Record<string, [string, string, string]> = {
   Power: ["Power", "Moć", "Potere"],
   Might: ["Might", "Might", "Forza"],
   "Deck builder": ["Deck builder", "Graditelj špilova", "Costruttore di mazzi"],
+  "Neeko legends": ["Neeko legends", "Neeko legende", "Leggende di Neeko"],
+  "Neeko legend {number}": [
+    "Neeko legend {number}",
+    "Neeko legenda {number}",
+    "Leggenda di Neeko {number}",
+  ],
+  "No legend": ["No legend", "Bez legende", "Nessuna leggenda"],
+  "Neeko, Blending In lets this deck choose up to three more legends with different names. Playing her adds one of them to your Legend Zone.":
+    [
+      "Neeko, Blending In lets this deck choose up to three more legends with different names. Playing her adds one of them to your Legend Zone.",
+      "Neeko, Blending In dozvoljava ovom špilu do tri dodatne legende različitih imena. Kad je odigraš, jedna od njih ulazi u tvoju zonu legende.",
+      "Neeko, Blending In permette a questo mazzo di scegliere fino a tre leggende in più con nomi diversi. Giocarla ne aggiunge una alla tua zona delle leggende.",
+    ],
   "YOUR CARDS · YOUR STRATEGY": [
     "YOUR CARDS · YOUR STRATEGY",
     "TVOJE KARTE · TVOJA STRATEGIJA",

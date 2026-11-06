@@ -17,6 +17,7 @@ import type {
   PlayerId,
   Unit,
 } from "./types";
+import { legendReady, legendRefs, readyLegend } from "./legends";
 
 /**
  * Radiance wave 6: the remaining cards that build on existing rules, plus
@@ -765,12 +766,22 @@ export const radianceWave6Module: ExpansionModule = {
         x.deck.push(...top.filter((_, j) => j !== i));
         return true;
       }
-      case "ready-legend":
-        if (x.legendUsedTurn >= 0) {
-          x.legendUsedTurn = -1;
-          ctx.log?.(s, `${x.name} readies their legend.`, "info", p);
+      case "ready-legend": {
+        // "Ready a friendly legend": the first exhausted one.
+        const legend = legendRefs(s, p).find(
+          (ref) => !legendReady(s, p, ref.key),
+        );
+        if (legend) {
+          readyLegend(s, p, legend.key);
+          ctx.log?.(
+            s,
+            `${x.name} readies ${cardName(legend.cardId)}.`,
+            "info",
+            p,
+          );
         }
         return true;
+      }
       case "riven-modes": {
         if (!self) return true;
         const key = (mode: string) => `riven:${self.id}:${mode}`;

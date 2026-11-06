@@ -18,6 +18,16 @@ import type {
   Unit,
 } from "./types";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
+import {
+  exhaustLegend,
+  findLegend,
+  legendCardOf,
+  legendEmpowered,
+  legendKeyFor,
+  legendReady,
+  legendRefs,
+  setLegendEmpowered,
+} from "./legends";
 
 const plain: CardScript = { implemented: true };
 const fx = (custom: string, extra: Partial<Effect> = {}): Effect => ({
@@ -445,13 +455,9 @@ export const vendettaWave3Module: ExpansionModule = {
             source.location,
           );
       }
-      if (
-        sourceId !== "legend" &&
-        [151, 153].includes(number(s.players[p].legendId))
-      )
-        ctx.trigger(s, p, s.players[p].legendId, "legend", [
-          fx("empower-legend"),
-        ]);
+      const mage = findLegend(s, p, (id) => [151, 153].includes(number(id)));
+      if (mage && sourceId !== mage.key)
+        ctx.trigger(s, p, mage.cardId, mage.key, [fx("empower-legend")]);
     }
     if (event === "target" && source && source.owner !== p)
       data(s).targetedEnemy[p] = true;
@@ -539,18 +545,17 @@ export const vendettaWave3Module: ExpansionModule = {
     const showdown =
       s.phase === "showdown" && !s.stack.length && s.focusPlayer === p;
     const result: GameAction[] = [];
-    const legend = s.players[p],
-      ln = number(legend.legendId);
+    const refs = legendRefs(s, p);
     if (open) {
       const objects = [
         ...s.units
           .filter((u) => u.owner === p)
           .map((u) => ({ id: u.id, cardId: u.cardId, empowered: u.empowered })),
-        {
-          id: "legend",
-          cardId: legend.legendId,
-          empowered: legend.legendEmpowered,
-        },
+        ...refs.map((ref) => ({
+          id: ref.key,
+          cardId: ref.cardId,
+          empowered: legendEmpowered(s, p, ref.key),
+        })),
       ];
       for (const o of objects) {
         const c = costs[number(o.cardId)];
@@ -583,11 +588,17 @@ export const vendettaWave3Module: ExpansionModule = {
             sourceId: u.id,
           });
     }
-    if (
-      legend.legendUsedTurn < 0 &&
-      ((ln === 139 && s.currentPlayer === p && showdown) ||
-        (open && [151, 153].includes(ln) && legend.legendEmpowered))
-    ) {
+    for (const ref of refs) {
+      const ln = number(ref.cardId);
+      const empowered = legendEmpowered(s, p, ref.key);
+      if (
+        !legendReady(s, p, ref.key) ||
+        !(
+          (ln === 139 && s.currentPlayer === p && showdown) ||
+          (open && [151, 153].includes(ln) && empowered)
+        )
+      )
+        continue;
       for (const u of s.units) {
         if (ln === 139 && (u.owner !== p || u.location !== s.combat?.fieldId))
           continue;
@@ -600,17 +611,17 @@ export const vendettaWave3Module: ExpansionModule = {
         const tax = ctx.targetTax?.(s, p, u.id) ?? 0;
         if (!ctx.canPay(s, p, 0, 0, [], (ln === 153 ? 1 : 0) + tax)) continue;
         result.push({
-          id: `ven-wave3:legend:${u.id}`,
+          id: `ven-wave3:legend:${u.id}${ref.key === "legend" ? "" : `:${ref.key}`}`,
           label:
             ln === 139
-              ? `Move ${getCard(u.cardId).name} to base${legend.legendEmpowered ? " and ready it" : ""}`
+              ? `Move ${getCard(u.cardId).name} to base${empowered ? " and ready it" : ""}`
               : ln === 151
                 ? `Disempower and give ${getCard(u.cardId).name} -2 Might`
                 : `Disempower, pay 1 power, ready ${getCard(u.cardId).name}`,
           category: "ability",
           player: p,
-          cardId: legend.legendId,
-          sourceId: "legend",
+          cardId: ref.cardId,
+          sourceId: ref.key,
           targetId: u.id,
         });
       }
@@ -645,15 +656,16 @@ export const vendettaWave3Module: ExpansionModule = {
       return true;
     }
     if (a.id.startsWith("ven-wave3:legend:")) {
-      const n = number(s.players[p].legendId),
+      const key = legendKeyFor(s, p, a.sourceId);
+      const n = number(legendCardOf(s, p, key) ?? a.cardId!),
         tax = ctx.targetTax?.(s, p, a.targetId) ?? 0;
       ctx.pay(s, p, 0, 0, [], (n === 153 ? 1 : 0) + tax);
-      s.players[p].legendUsedTurn = s.turn;
-      if (n !== 139) s.players[p].legendEmpowered = false;
+      exhaustLegend(s, p, key);
+      if (n !== 139) setLegendEmpowered(s, p, key, false);
       ctx.pushStack(s, {
         player: p,
         cardId: a.cardId!,
-        sourceId: "legend",
+        sourceId: key,
         targetId: a.targetId,
         kind: "ability",
         effects:
@@ -736,7 +748,7 @@ export const vendettaWave3Module: ExpansionModule = {
         if (ctx.sourceId) ctx.empower!(s, p, ctx.sourceId);
         break;
       case "empower-legend":
-        ctx.empower!(s, p, "legend");
+        ctx.empower!(s, p, legendKeyFor(s, p, ctx.sourceId));
         break;
       case "predict": {
         const top = s.players[p].deck.slice(0, e.lookCount ?? e.amount ?? 1);
@@ -810,7 +822,7 @@ export const vendettaWave3Module: ExpansionModule = {
           target.location === s.combat?.fieldId
         ) {
           ctx.moveUnit(s, target, `base:${p}`, p);
-          if (s.players[p].legendEmpowered)
+          if (legendEmpowered(s, p, legendKeyFor(s, p, ctx.sourceId)))
             run([{ type: "ready", target: "friendlyUnit" }]);
         }
         break;

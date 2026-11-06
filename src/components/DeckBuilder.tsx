@@ -38,7 +38,11 @@ import {
   sortCatalogCards,
   type CatalogSort,
 } from "../catalog-query";
-import { exportDeckText } from "../game/deck-import";
+import {
+  deckHasNeeko,
+  exportDeckText,
+  MAX_NEEKO_LEGENDS,
+} from "../game/deck-import";
 import { isImplemented } from "../game/scripts";
 import {
   balancedBuilderRunes,
@@ -881,6 +885,53 @@ export function DeckBuilder({
             </select>
           </label>
         </div>
+        {(deckHasNeeko(draft) || !!draft.extraLegendIds?.length) && (
+          <fieldset className="builder-neeko-legends">
+            <legend>{t("Neeko legends")}</legend>
+            <p>
+              {t(
+                "Neeko, Blending In lets this deck choose up to three more legends with different names. Playing her adds one of them to your Legend Zone.",
+              )}
+            </p>
+            {Array.from({ length: MAX_NEEKO_LEGENDS }, (_, slot) => {
+              const chosen = draft.extraLegendIds ?? [];
+              const taken = new Set(
+                [draft.legendId, ...chosen.filter((_, i) => i !== slot)].map(
+                  (id) => cardsById[id]?.name,
+                ),
+              );
+              return (
+                <label key={slot}>
+                  {t("Neeko legend {number}", { number: slot + 1 })}
+                  <select
+                    value={chosen[slot] ?? ""}
+                    onChange={(event) => {
+                      const next = [...chosen];
+                      next[slot] = event.target.value;
+                      const ids = next.filter(Boolean);
+                      update({
+                        ...draft,
+                        extraLegendIds: ids.length ? ids : undefined,
+                      });
+                    }}
+                  >
+                    <option value="">{t("No legend")}</option>
+                    {legends
+                      .filter(
+                        (card) =>
+                          card.id === chosen[slot] || !taken.has(card.name),
+                      )
+                      .map((card) => (
+                        <option key={card.id} value={card.id}>
+                          {card.name}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              );
+            })}
+          </fieldset>
+        )}
         <p className="builder-identity-note">
           {t(
             "Changing the legend keeps your main cards for review and balances its runes.",

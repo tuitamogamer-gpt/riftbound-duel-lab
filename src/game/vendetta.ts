@@ -19,6 +19,15 @@ import type {
   Unit,
 } from "./types";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
+import {
+  exhaustLegend,
+  findLegend,
+  legendCardOf,
+  legendEmpowered,
+  legendKeyFor,
+  legendReady,
+  setLegendEmpowered,
+} from "./legends";
 
 // Collector numbers identify the exact scripted faces, including duplicate provider records.
 const number = (id: string) =>
@@ -423,18 +432,18 @@ export const vendettaModule: ExpansionModule = {
           });
       }
     if (actionTiming) {
-      const player = s.players[p] as VPlayer;
+      const talon = findLegend(s, p, (id) => number(id) === 143);
       if (
-        number(player.legendId) === 143 &&
-        player.legendEmpowered &&
-        player.legendUsedTurn < 0
+        talon &&
+        legendEmpowered(s, p, talon.key) &&
+        legendReady(s, p, talon.key)
       )
         result.push({
           id: "ven-legend",
           label: "Master of Shadows — disempower, discard 1, draw 1",
           category: "ability",
           player: p,
-          sourceId: `legend:${p}`,
+          sourceId: talon.key === "legend" ? `legend:${p}` : talon.key,
         });
       for (const u of textUnits(s).filter((u) => u.owner === p && is(u, 112)))
         if (ctx.canPay(s, p, 1, 1, ["Chaos"]))
@@ -477,13 +486,13 @@ export const vendettaModule: ExpansionModule = {
       return true;
     }
     if (a.id === "ven-legend") {
-      const p = s.players[a.player] as VPlayer;
-      p.legendEmpowered = false;
-      p.legendUsedTurn = s.turn;
+      const key = legendKeyFor(s, a.player, a.sourceId);
+      setLegendEmpowered(s, a.player, key, false);
+      exhaustLegend(s, a.player, key);
       ctx.pushStack(s, {
         player: a.player,
-        cardId: p.legendId,
-        sourceId: `legend:${a.player}`,
+        cardId: legendCardOf(s, a.player, key) ?? s.players[a.player].legendId,
+        sourceId: key === "legend" ? `legend:${a.player}` : key,
         kind: "ability",
         effects: [
           { type: "discard", amount: 1 },
@@ -527,11 +536,12 @@ export const vendettaModule: ExpansionModule = {
         );
     }
     const u = s.units.find((x) => x.id === sourceId) as VUnit | undefined;
-    if (event === "banish" && number(s.players[p].legendId) === 143)
+    const talon = findLegend(s, p, (id) => number(id) === 143);
+    if (event === "banish" && talon)
       ctx.pushStack(s, {
         player: p,
-        cardId: s.players[p].legendId,
-        sourceId: `legend:${p}`,
+        cardId: talon.cardId,
+        sourceId: talon.key === "legend" ? `legend:${p}` : talon.key,
         kind: "trigger",
         effects: [special("empower-legend")],
       });
@@ -605,7 +615,7 @@ export const vendettaModule: ExpansionModule = {
     const here = source?.location ?? ctx.locationId;
     switch (key) {
       case "empower-legend":
-        s.players[p].legendEmpowered = true;
+        setLegendEmpowered(s, p, legendKeyFor(s, p, ctx.sourceId), true);
         break;
       case "empower":
         if (source) empower(s, source, ctx);

@@ -24,6 +24,8 @@ export interface StarterDeck {
   color: string;
   domains: Domain[];
   legendId: string;
+  /** Neeko, Blending In: up to three more legends chosen at deck building. */
+  extraLegendIds?: string[];
   championId: string;
   battlefieldId: string;
   main: DeckEntry[];

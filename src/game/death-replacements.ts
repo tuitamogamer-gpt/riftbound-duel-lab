@@ -11,6 +11,7 @@ import { banishCard } from "./banishment";
 import { option } from "./card-wave16";
 import type { GameState, PlayerId, Unit } from "./types";
 import type { PreconContext } from "./later-precon-engine";
+import { exhaustLegend, findLegend, legendReady } from "./legends";
 type Batch = NonNullable<GameState["deathBatches"]>[number];
 type Replacement = {
   id: string;
@@ -97,10 +98,11 @@ function replacements(
         ids: [u.id],
         optional: true,
       });
+    const sett = findLegend(s, u.owner, (id) => isFace(id, "OGN", 269));
     if (
-      isFace(player.legendId, "OGN", 269) &&
+      sett &&
       u.buff &&
-      player.legendUsedTurn < 0 &&
+      legendReady(s, u.owner, sett.key) &&
       ctx.canPay(s, u.owner, 0, 1)
     )
       add({
@@ -108,6 +110,7 @@ function replacements(
         kind: "sett",
         player: u.owner,
         ids: [u.id],
+        source: sett.key,
         optional: true,
       });
     if (
@@ -154,7 +157,7 @@ function replace(s: GameState, b: Batch, r: Replacement, ctx: PreconContext) {
   if (r.kind === "guardian" || r.kind === "zhonya") ctx.killGear(s, r.source!);
   if (r.kind === "sett") {
     ctx.pay(s, r.player, 0, 1);
-    s.players[r.player].legendUsedTurn = s.turn;
+    exhaustLegend(s, r.player, r.source ?? "legend");
   }
   if (r.kind === "altar") ctx.pay(s, r.player, 0, 3);
   if (r.kind === "mordekaiser") {

@@ -17,6 +17,7 @@ import type {
   Unit,
 } from "./types";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
+import { legendEmpowered, legendRefs } from "./legends";
 
 const plain: CardScript = { implemented: true };
 const fx = (custom: string, extra: Partial<Effect> = {}): Effect => ({
@@ -183,7 +184,7 @@ const empowered = (s: GameState, id?: string) =>
     (s.gears.find((g) => g.id === id) as EmpoweredGear | undefined)?.empowered,
   );
 const allEmpowered = (s: GameState, p: PlayerId) =>
-  s.players[p].legendEmpowered ||
+  legendRefs(s, p).some((ref) => legendEmpowered(s, p, ref.key)) ||
   s.units.some((u) => u.owner === p && u.empowered) ||
   s.gears.some((g) => g.owner === p && (g as EmpoweredGear).empowered);
 function empower(

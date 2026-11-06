@@ -31,14 +31,9 @@ The alternate printings of Mordekaiser, Iron Revenant and Lady of Clockwork use 
 - **Iron Revenant**: one option is offered for each different unit or gear card in your trash.
 - **Lady of Clockwork**: only gear that is not attached to a unit can be chosen.
 
-## Not playable: Neeko, Blending In
+## Neeko, Blending In
 
-Neeko stays reference-only. Her deck-building rule lets you choose up to three more legends, and playing her adds one of them to your Legend Zone. Supporting her needs:
-
-1. a deck field for the extra legends, with builder controls, import and export;
-2. a second legend in play, with its own abilities and exhausted state. About 116 legend checks in 35 engine files assume one legend per player.
-
-Treating her as a plain unit would be a legal choice (no extra legends) but would hide most of the card, so she is not offered for play.
+When this wave was written, Neeko stayed reference-only. She is now playable; see [Neeko: more than one legend](RADIANCE-NEEKO.md).
 
 ## Validation
 

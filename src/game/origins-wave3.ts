@@ -17,6 +17,14 @@ import type {
   PlayerId,
   Unit,
 } from "./types";
+import {
+  hasLegend,
+  hasLegendId,
+  legendKeyFor,
+  legendRefs,
+  readyLegend,
+  setLegendUsed,
+} from "./legends";
 const plain: CardScript = { implemented: true };
 const special = (custom: string, extra: Partial<Effect> = {}): Effect => ({
   type: "special",
@@ -198,21 +206,47 @@ export const originsWave3Module: ExpansionModule = {
         throw new Error(
           "Royal Entourage's choices must be finalized before resolution.",
         );
-      case "royal-state":
-        choose(s, p, ctx, [
-          opt(p, "royal-ready", "Ready the chosen legend", [
-            special("legend-state", { amount: e.amount, ready: true }),
-          ]),
-          opt(p, "royal-exhaust", "Exhaust the chosen legend", [
-            special("legend-state", { amount: e.amount, ready: false }),
-          ]),
-        ]);
+      case "royal-state": {
+        // A Neeko-added legend is in the same Legend Zone and can be chosen too.
+        const refs = legendRefs(s, e.amount as PlayerId);
+        choose(
+          s,
+          p,
+          ctx,
+          refs.flatMap((ref, i) => {
+            const name =
+              refs.length > 1 ? getCard(ref.cardId).name : "the chosen legend";
+            const suffix = i ? `:${i}` : "";
+            return [
+              opt(p, `royal-ready${suffix}`, `Ready ${name}`, [
+                special("legend-state", {
+                  amount: e.amount,
+                  ready: true,
+                  cardName: ref.key,
+                }),
+              ]),
+              opt(p, `royal-exhaust${suffix}`, `Exhaust ${name}`, [
+                special("legend-state", {
+                  amount: e.amount,
+                  ready: false,
+                  cardName: ref.key,
+                }),
+              ]),
+            ];
+          }),
+        );
         break;
+      }
       case "legend-state":
-        s.players[e.amount as PlayerId].legendUsedTurn = e.ready ? -1 : s.turn;
+        setLegendUsed(
+          s,
+          e.amount as PlayerId,
+          e.cardName ?? "legend",
+          e.ready ? -1 : s.turn,
+        );
         break;
       case "ready-legend":
-        s.players[p].legendUsedTurn = -1;
+        readyLegend(s, p, legendKeyFor(s, p, ctx.sourceId));
         break;
       case "gold":
         ctx.spawnToken(s, p, "Gold", `base:${p}`, false);
@@ -325,14 +359,14 @@ export const originsWave3Module: ExpansionModule = {
       event === "play" &&
       u &&
       isCardType(getCard(cardId), "Unit") &&
-      ruleFamily(s.players[p].legendId) === "ogn-249-298" &&
+      hasLegend(s, p, (id) => ruleFamily(id) === "ogn-249-298") &&
       ctx.getMight(s, u) >= 5
     )
       ctx.trigger(
         s,
         p,
         "ogn-249-298",
-        "legend",
+        legendKeyFor(s, p, undefined, (id) => ruleFamily(id) === "ogn-249-298"),
         paid([{ type: "channel", amount: 1 }], { exhaust: true }),
         locationId,
       );
@@ -376,12 +410,12 @@ export const originsWave3Module: ExpansionModule = {
           ),
           `base:${p}`,
         );
-      if (s.players[p].legendId === "sfd-195-221")
+      if (hasLegendId(s, p, "sfd-195-221"))
         ctx.trigger(
           s,
           p,
           "sfd-195-221",
-          "legend",
+          legendKeyFor(s, p, undefined, (id) => id === "sfd-195-221"),
           paid([{ type: "ready", chosenTargetId: u.id }], {
             power: 1,
             exhaust: true,
@@ -390,12 +424,12 @@ export const originsWave3Module: ExpansionModule = {
         );
     }
     if (event === "conquer") {
-      if (s.players[p].legendId === "sfd-195-221")
+      if (hasLegendId(s, p, "sfd-195-221"))
         ctx.trigger(
           s,
           p,
           "sfd-195-221",
-          "legend",
+          legendKeyFor(s, p, undefined, (id) => id === "sfd-195-221"),
           paid([special("ready-legend")], { energy: 1 }),
           locationId,
         );
@@ -422,12 +456,12 @@ export const originsWave3Module: ExpansionModule = {
             ]);
         }
     }
-    if (event === "hold" && s.players[p].legendId === "sfd-201-221")
+    if (event === "hold" && hasLegendId(s, p, "sfd-201-221"))
       ctx.trigger(
         s,
         p,
         "sfd-201-221",
-        "legend",
+        legendKeyFor(s, p, undefined, (id) => id === "sfd-201-221"),
         paid([special("gold")], { exhaust: true }),
         locationId,
       );
@@ -533,10 +567,7 @@ export const originsWave3Module: ExpansionModule = {
       else s.players[a.player].power = (s.players[a.player].power ?? 0) + n;
       return true;
     }
-    if (
-      a.id.startsWith("gold:") &&
-      s.players[a.player].legendId === "sfd-201-221"
-    ) {
+    if (a.id.startsWith("gold:") && hasLegendId(s, a.player, "sfd-201-221")) {
       ctx.killGear(s, a.sourceId!);
       s.players[a.player].power = (s.players[a.player].power ?? 0) + 1;
       if (s.players[a.player].points >= 5) s.players[a.player].energy++;

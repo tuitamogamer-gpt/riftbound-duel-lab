@@ -19,6 +19,7 @@ import type {
   PlayerId,
   Unit,
 } from "./types";
+import { findLegend, hasLegend, legendKeyFor } from "./legends";
 
 const plain: CardScript = { implemented: true };
 const fx = (custom: string, extra: Partial<Effect> = {}): Effect => ({
@@ -192,14 +193,20 @@ export const originsWave4Module: ExpansionModule = {
     if (event === "attack" && source) {
       const defender = other(source.owner);
       if (
-        ruleFamily(s.players[defender].legendId) === "ogn-255-298" &&
+        hasLegend(s, defender, (id) => ruleFamily(id) === "ogn-255-298") &&
         s.fields.find((f) => f.id === locationId)?.controller === defender
       )
         ctx.trigger(
           s,
           defender,
-          s.players[defender].legendId,
-          "legend",
+          findLegend(s, defender, (id) => ruleFamily(id) === "ogn-255-298")!
+            .cardId,
+          legendKeyFor(
+            s,
+            defender,
+            undefined,
+            (id) => ruleFamily(id) === "ogn-255-298",
+          ),
           [
             {
               type: "might",

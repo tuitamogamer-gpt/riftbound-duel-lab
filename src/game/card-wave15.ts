@@ -19,6 +19,13 @@ import type {
   LocationId,
   PlayerId,
 } from "./types";
+import {
+  addedLegendOwner,
+  isLegendSource,
+  legendEmpowered,
+  legendRefs,
+  setLegendEmpowered,
+} from "./legends";
 const plain: CardScript = { implemented: true };
 const fx = (key: string, rest: Partial<Effect> = {}): Effect => ({
   type: "special",
@@ -231,7 +238,11 @@ export function triggerBoardSources(
     return [...s.units, ...s.gears]
       .filter((o) => o.owner === p && o.empowered)
       .map((o) => o.id)
-      .concat(s.players[p].legendEmpowered ? ["legend"] : []);
+      .concat(
+        legendRefs(s, p)
+          .filter((ref) => legendEmpowered(s, p, ref.key))
+          .map((ref) => ref.key),
+      );
   return own(s, p)
     .filter((u) => u.location === locationId)
     .map((u) => u.id);
@@ -249,7 +260,7 @@ export function payTriggerBoard(
     for (const id of ids)
       if (s.gears.some((g) => g.id === id)) ctx.killGear(s, id);
   } else if (kind === "disempower") {
-    if (id === "legend") s.players[p].legendEmpowered = false;
+    if (isLegendSource(id)) setLegendEmpowered(s, p, id, false);
     else {
       const o = [...s.units, ...s.gears].find((o) => o.id === id);
       if (o) disempower(o);
@@ -767,9 +778,15 @@ export const cardWave15Module: ExpansionModule = {
           ctx.runEffects(s, p, [{ type: "score", amount: 1 }]);
         break;
       case "empower-target": {
+        const added =
+          ctx.targetId !== undefined
+            ? addedLegendOwner(s, ctx.targetId)
+            : undefined;
         if (ctx.targetId?.startsWith("legend:")) {
           const owner = Number(ctx.targetId.split(":")[1]) as PlayerId;
           ctx.empower!(s, owner, "legend");
+        } else if (added !== undefined) {
+          ctx.empower!(s, added, ctx.targetId!);
         } else {
           const o = [...s.units, ...s.gears].find((o) => o.id === ctx.targetId);
           if (o) ctx.empower!(s, o.owner, o.id);

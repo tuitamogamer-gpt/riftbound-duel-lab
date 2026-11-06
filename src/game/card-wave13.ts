@@ -2,6 +2,7 @@ import { cards, getCard } from "../data/cards";
 import { isFace } from "./board-rules";
 import type { ExpansionModule } from "./later-precon-engine";
 import type { CardPlaySpec, CardScript, Effect } from "./types";
+import { findLegend } from "./legends";
 
 const plain: CardScript = { implemented: true };
 export const instructedPlay = (
@@ -190,12 +191,13 @@ export const cardWave13Module: ExpansionModule = {
     return {};
   },
   event(s, event, p, _cardId, _sourceId, locationId, ctx) {
-    if (event === "conquer" && isFace(s.players[p].legendId, "SFD", 187))
+    const ornn = findLegend(s, p, (id) => isFace(id, "SFD", 187));
+    if (event === "conquer" && ornn)
       ctx.trigger(
         s,
         p,
-        s.players[p].legendId,
-        "legend",
+        ornn.cardId,
+        ornn.key,
         [discover({ revealed: true, optional: true })].map((e) => ({
           ...e,
           triggerCost: { exhaust: true },

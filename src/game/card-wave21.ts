@@ -13,6 +13,7 @@ import { instructedPlay } from "./card-wave13";
 import { choices, option } from "./card-wave16";
 import type { CardScript, Effect, GameState, PlayerId } from "./types";
 import type { ExpansionModule } from "./later-precon-engine";
+import { findLegend, readyLegend } from "./legends";
 const plain: CardScript = { implemented: true };
 const fx = (key: string, rest: Partial<Effect> = {}): Effect => ({
   type: "special",
@@ -106,9 +107,10 @@ export const cardWave21Module: ExpansionModule = {
           textEffects(u, [{ type: "buff", target: "friendlyUnit" }]),
           u.location,
         );
-    if (name === "recycleRunes" && isFace(s.players[p].legendId, "SFD", 203))
+    const gp = findLegend(s, p, (id) => isFace(id, "SFD", 203));
+    if (name === "recycleRunes" && gp)
       for (let i = 0; i < (ctx.amount ?? 1); i++)
-        ctx.trigger(s, p, s.players[p].legendId, "legend", [
+        ctx.trigger(s, p, gp.cardId, gp.key, [
           {
             type: "token",
             cardName: "Gold",
@@ -118,22 +120,29 @@ export const cardWave21Module: ExpansionModule = {
         ]);
     if (name === "death" && s.units.some((u) => u.id === sourceId)) {
       const enemy = (1 - p) as PlayerId;
-      if (isFace(s.players[enemy].legendId, "SFD", 203))
-        s.players[enemy].legendUsedTurn = -1;
+      const enemyGp = findLegend(s, enemy, (id) => isFace(id, "SFD", 203));
+      if (enemyGp) readyLegend(s, enemy, enemyGp.key);
     }
+    const jhin = findLegend(s, p, (id) => isFace(id, "UNL", 181));
     if (
       name === "spellResolved" &&
-      isFace(s.players[p].legendId, "UNL", 181) &&
+      jhin &&
       (ctx.resolvedSpell?.energySpent ?? 0) >= 4 &&
       ctx.spellTrashId
     )
-      ctx.trigger(s, p, s.players[p].legendId, `legend:${p}`, [
-        fx("jhin", {
-          optional: true,
-          cardName: ctx.spellTrashId,
-          amount: ctx.resolvedSpell!.originalOwner ?? p,
-        }),
-      ]);
+      ctx.trigger(
+        s,
+        p,
+        jhin.cardId,
+        jhin.key === "legend" ? `legend:${p}` : jhin.key,
+        [
+          fx("jhin", {
+            optional: true,
+            cardName: ctx.spellTrashId,
+            amount: ctx.resolvedSpell!.originalOwner ?? p,
+          }),
+        ],
+      );
   },
   effect(s, p, e, ctx) {
     if (!e.custom?.startsWith("wave21:")) return false;

@@ -20,6 +20,7 @@ import type {
   PlayerId,
   Unit,
 } from "./types";
+import { exhaustLegend, findLegend, legendReady } from "./legends";
 const plain: CardScript = { implemented: true };
 const effect = (custom: string, extra: Partial<Effect> = {}): Effect => ({
   type: "special",
@@ -727,9 +728,10 @@ export const originsMoreModule: ExpansionModule = {
       }
   },
   actions(s, p) {
+    const darius = findLegend(s, p, (id) => id === "ogn-253-298");
     if (
-      s.players[p].legendId !== "ogn-253-298" ||
-      s.players[p].legendUsedTurn >= 0 ||
+      !darius ||
+      !legendReady(s, p, darius.key) ||
       !s.players[p].cardsPlayedThisTurn
     )
       return [];
@@ -738,7 +740,7 @@ export const originsMoreModule: ExpansionModule = {
         id: "origins-more:darius-energy",
         category: "resource",
         player: p,
-        sourceId: "legend",
+        sourceId: darius.key,
         cardId: "ogn-253-298",
         label: "Exhaust Darius: add 1 Energy",
       },
@@ -746,7 +748,7 @@ export const originsMoreModule: ExpansionModule = {
   },
   apply(s, a) {
     if (a.id !== "origins-more:darius-energy") return false;
-    s.players[a.player].legendUsedTurn = s.turn;
+    exhaustLegend(s, a.player, a.sourceId ?? "legend");
     s.players[a.player].energy++;
     return true;
   },

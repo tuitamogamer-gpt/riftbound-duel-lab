@@ -188,7 +188,8 @@ export function getHighlights(review: Review | null): Highlights {
   for (const id of review.action.unitIds ?? []) markTarget(id);
   if (
     review.action.sourceId === "champion" ||
-    review.action.sourceId === "legend"
+    review.action.sourceId === "legend" ||
+    review.action.sourceId?.startsWith("neeko-legend:")
   )
     h.players.add(review.action.player);
   // Passing priority may resolve an item whose target is absent from the Pass action.

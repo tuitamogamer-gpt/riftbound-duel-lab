@@ -17,6 +17,7 @@ import type {
   GameState,
   PlayerId,
 } from "./types";
+import { hasLegendId, legendKeyFor } from "./legends";
 
 const plain: CardScript = { implemented: true };
 const fx = (custom: string, extra: Partial<Effect> = {}): Effect => ({
@@ -166,11 +167,15 @@ export const cardWave5Module: ExpansionModule = {
       event === "stun" &&
       source &&
       source.owner !== p &&
-      s.players[p].legendId === "ogn-261-298"
+      hasLegendId(s, p, "ogn-261-298")
     )
-      ctx.trigger(s, p, "ogn-261-298", "legend", [
-        { type: "buff", target: "friendlyUnit" },
-      ]);
+      ctx.trigger(
+        s,
+        p,
+        "ogn-261-298",
+        legendKeyFor(s, p, undefined, (id) => id === "ogn-261-298"),
+        [{ type: "buff", target: "friendlyUnit" }],
+      );
     if (event === "attach") {
       const gear = s.gears.find((g) => g.id === sourceId);
       const unit = s.units.find((u) => u.id === gear?.attachedTo);

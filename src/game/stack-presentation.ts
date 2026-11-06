@@ -4,6 +4,7 @@ import type { CatalogCard } from "../catalog";
 import type { Review } from "../components/StepFlow";
 import { getEffectView } from "./effect-presentation";
 import type { GameState, PlayerId, StackItem } from "./types";
+import { legendCardOf } from "./legends";
 
 export interface PresentedStackCard {
   id: string;
@@ -25,9 +26,7 @@ export function pendingChoiceCardId(game: GameState) {
     game.units.find((unit) => unit.id === choice.sourceId)?.cardId ??
     game.gears.find((gear) => gear.id === choice.sourceId)?.cardId ??
     game.fields.find((field) => field.id === choice.sourceId)?.cardId ??
-    (choice.sourceId === "legend"
-      ? game.players[choice.actor ?? choice.player].legendId
-      : undefined) ??
+    legendCardOf(game, choice.actor ?? choice.player, choice.sourceId) ??
     game.resolvingAbilities?.at(-1)?.cardId ??
     game.resolving?.at(-1)?.cardId
   );

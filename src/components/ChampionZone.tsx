@@ -2,6 +2,11 @@ import { findCard, type CatalogCard } from "../catalog";
 import { Info, Sparkles } from "lucide-react";
 import { readableText } from "../data/cards";
 import type { GameAction, GameState, PlayerId } from "../game/types";
+import {
+  legendEmpowered,
+  legendReady as addedLegendReady,
+  legendRefs,
+} from "../game/legends";
 import { useI18n } from "../i18n";
 import { Card } from "./Card";
 import { useHighlights } from "./StepFlow";
@@ -32,6 +37,10 @@ export function ChampionZone({
   const hasAction = (source: string) =>
     own && legal.some((a) => a.player === player && a.sourceId === source);
   const legendReady = p.legendUsedTurn < 0;
+  // Neeko, Blending In adds legends to the same Legend Zone while she is in play.
+  const added = legendRefs(game, player)
+    .slice(1)
+    .map((ref) => ({ ...ref, card: findCard(ref.cardId) }));
 
   return (
     <section
@@ -163,6 +172,55 @@ export function ChampionZone({
             )}
           </div>
         </article>
+      )}
+      {added.map(
+        ({ key, card }) =>
+          card && (
+            <article
+              key={key}
+              className={`setup-card legend-zone added-legend ${own && selected === key ? "is-selected" : ""}`}
+            >
+              <Card
+                card={card}
+                small
+                ready={addedLegendReady(game, player, key)}
+                playable={hasAction(key)}
+                selected={own && selected === key}
+                onClick={() => (own ? select(key) : inspect(card, key))}
+              />
+              <div className="setup-card-copy">
+                <div className="setup-card-heading">
+                  <span>{t("Added by Neeko")}</span>
+                  <span
+                    className={`setup-status ${addedLegendReady(game, player, key) ? "is-ready" : ""}`}
+                  >
+                    {t(
+                      addedLegendReady(game, player, key)
+                        ? "Ready"
+                        : "Exhausted",
+                    )}
+                  </span>
+                </div>
+                <button
+                  className="setup-card-name"
+                  data-card-preview={card.id}
+                  onClick={() => inspect(card, key)}
+                >
+                  {card.name}
+                </button>
+                {legendEmpowered(game, player, key) && (
+                  <span className="setup-status is-ready">
+                    {t("Empowered")}
+                  </span>
+                )}
+                {hasAction(key) && (
+                  <button className="setup-action" onClick={() => select(key)}>
+                    {t("Choose Legend ability")} →
+                  </button>
+                )}
+              </div>
+            </article>
+          ),
       )}
     </section>
   );

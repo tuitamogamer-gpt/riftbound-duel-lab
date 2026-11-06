@@ -77,6 +77,9 @@ export function cloneDeckForBuilder(deck: StarterDeck): StarterDeck {
     ...deck,
     domains: [...deck.domains],
     legendId: canonicalBuilderId(deck.legendId),
+    ...(deck.extraLegendIds?.length
+      ? { extraLegendIds: deck.extraLegendIds.map(canonicalBuilderId) }
+      : {}),
     championId: canonicalBuilderId(deck.championId),
     battlefieldId: canonicalBuilderId(deck.battlefieldId),
     battlefieldIds: (deck.battlefieldIds ?? [deck.battlefieldId]).map(

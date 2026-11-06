@@ -56,4 +56,4 @@ Focused regressions cover all base numbers, the four errata, provenance/hash con
 
 ## Later checks
 
-On **5 November 2026** a full Hextech download returned the same 219 records and raw-source digest, and Riftcodex still had no Radiance set. See [Radiance wave 1](RADIANCE-WAVE1.md) for the check and the first reviewed playable printings. Rules waves 1–7 later made 218 of the 219 printings playable; Neeko, Blending In stays reference-only ([wave 7](RADIANCE-WAVE7.md#not-playable-neeko-blending-in)).
+On **5 November 2026** a full Hextech download returned the same 219 records and raw-source digest, and Riftcodex still had no Radiance set. See [Radiance wave 1](RADIANCE-WAVE1.md) for the check and the first reviewed playable printings. Rules waves 1–7 later made 218 of the 219 printings playable, and [Neeko, Blending In](RADIANCE-NEEKO.md) completed the set.

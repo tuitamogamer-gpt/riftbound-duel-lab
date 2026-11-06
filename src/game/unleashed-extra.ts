@@ -20,6 +20,13 @@ import type {
   PlayerId,
   Unit,
 } from "./types";
+import {
+  exhaustLegend,
+  findLegend,
+  hasLegendId,
+  legendKeyFor,
+  legendUsedTurn,
+} from "./legends";
 
 const id = (n: number) => `unl-${String(n).padStart(3, "0")}-219`;
 const base = (p: PlayerId): LocationId => `base:${p}`;
@@ -390,7 +397,7 @@ export const unleashedExtraModule: ExpansionModule = {
         ).length;
     }
     if (u.token) value += live(s, u.owner, 77).length;
-    if (s.players[u.owner].legendId === id(191) && xp(s, u.owner) >= 6) value++;
+    if (hasLegendId(s, u.owner, id(191)) && xp(s, u.owner) >= 6) value++;
     if (
       s.combat &&
       (s.combat.engaged ?? true) &&
@@ -767,7 +774,7 @@ export const unleashedExtraModule: ExpansionModule = {
         trigger(s, source, [self("ready"), xpEffect(3)], ctx);
       if (
         ([id(16), id(151)].includes(cardId) && xp(s, p) >= 3) ||
-        (s.players[p].legendId === id(191) && xp(s, p) >= 11)
+        (hasLegendId(s, p, id(191)) && xp(s, p) >= 11)
       )
         source.ready = true;
       if (source.token)
@@ -776,10 +783,14 @@ export const unleashedExtraModule: ExpansionModule = {
       for (const unit of live(s, p, 104))
         if (unit.id === sourceId || getCard(cardId).tags.includes("Dragon"))
           trigger(s, unit, [runes], ctx);
-      if (s.players[p].legendId === id(183))
-        ctx.trigger(s, p, id(183), "legend", [
-          { type: "might", amount: 1, target: "anyUnit" },
-        ]);
+      if (hasLegendId(s, p, id(183)))
+        ctx.trigger(
+          s,
+          p,
+          id(183),
+          legendKeyFor(s, p, undefined, (c) => c === id(183)),
+          [{ type: "might", amount: 1, target: "anyUnit" }],
+        );
     }
     if (event === "play") {
       if (cardId === id(78)) {
@@ -870,8 +881,15 @@ export const unleashedExtraModule: ExpansionModule = {
       ))
         trigger(s, unit, [{ type: "draw", amount: 1 }], ctx);
     if (event === "hold") {
-      if (s.players[p].legendId === id(203))
-        ctx.trigger(s, p, id(203), "legend", [xpEffect()], locationId);
+      if (hasLegendId(s, p, id(203)))
+        ctx.trigger(
+          s,
+          p,
+          id(203),
+          legendKeyFor(s, p, undefined, (c) => c === id(203)),
+          [xpEffect()],
+          locationId,
+        );
     }
     if (event === "beginning")
       for (const field of s.fields.filter((f) => f.cardId === id(212)))
@@ -924,27 +942,28 @@ export const unleashedExtraModule: ExpansionModule = {
         add("poro-birds", unit.cardId, unit.id, "Exhaust: play two Birds");
     }
     const player = s.players[p];
-    if (player.legendUsedTurn !== s.turn) {
-      if (player.legendId === id(203) && xp(s, p) >= 3)
-        add(
-          "legend-draw",
-          player.legendId,
-          "legend",
-          "Spend 3 XP and exhaust: draw 1",
-        );
-      const price = Math.max(
-        0,
-        4 - s.units.filter((u) => u.owner === p && u.temporary).length,
+    const unused = (key: string) => legendUsedTurn(s, p, key) !== s.turn;
+    const ezreal = findLegend(s, p, (c) => c === id(203));
+    if (ezreal && unused(ezreal.key) && xp(s, p) >= 3)
+      add(
+        "legend-draw",
+        ezreal.cardId,
+        ezreal.key,
+        "Spend 3 XP and exhaust: draw 1",
       );
-      if (player.legendId === id(189) && ctx.canPay(s, p, price, 0))
-        add(
-          "legend-sprite",
-          player.legendId,
-          "legend",
-          `Pay ${price} Energy and exhaust: play a ready Sprite`,
-          { amount: price },
-        );
-    }
+    const price = Math.max(
+      0,
+      4 - s.units.filter((u) => u.owner === p && u.temporary).length,
+    );
+    const lillia = findLegend(s, p, (c) => c === id(189));
+    if (lillia && unused(lillia.key) && ctx.canPay(s, p, price, 0))
+      add(
+        "legend-sprite",
+        lillia.cardId,
+        lillia.key,
+        `Pay ${price} Energy and exhaust: play a ready Sprite`,
+        { amount: price },
+      );
     if (data(s, false).paidSpell[p] && ctx.canPay(s, p, 0, 1, ["Mind"]))
       for (const entry of [
         ...player.hand.map((cardId, index) => ({
@@ -985,12 +1004,12 @@ export const unleashedExtraModule: ExpansionModule = {
         break;
       case "legend-draw":
         gain(s, p, -3, ctx);
-        s.players[p].legendUsedTurn = s.turn;
+        exhaustLegend(s, p, action.sourceId ?? "legend");
         effects = [{ type: "draw", amount: 1 }];
         break;
       case "legend-sprite":
         ctx.pay(s, p, action.amount ?? 0, 0);
-        s.players[p].legendUsedTurn = s.turn;
+        exhaustLegend(s, p, action.sourceId ?? "legend");
         effects = [{ type: "token", cardName: "Sprite", ready: true }];
         break;
       case "jhin-play": {

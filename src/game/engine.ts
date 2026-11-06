@@ -28,6 +28,22 @@ import {
   useBanishedPermission,
 } from "./radiance-wave6";
 import { gravityMoveTax } from "./radiance-wave7";
+import {
+  addedLegendOwner,
+  addedLegendRefs,
+  exhaustLegend,
+  hasLegendId,
+  isLegendSource,
+  legendCardOf,
+  legendEmpowered,
+  legendReady,
+  legendRefs,
+  readyAllLegends,
+  readyLegendRef,
+  setLegendEmpowered,
+  findLegend,
+  hasLegend,
+} from "./legends";
 import { drainHeimerdinger, queueHeimerdinger } from "./radiance-wave4";
 import {
   deployedGear,
@@ -378,7 +394,7 @@ export function getMight(s: GameState, u: Unit, clamp = true): number {
         : (sc?.shield ?? 0) + (u.combatShield ?? 0);
     if (
       u.owner === s.combat.defender &&
-      s.players[u.owner].legendId === "ogs-019-024" &&
+      hasLegendId(s, u.owner, "ogs-019-024") &&
       s.units.filter((x) => x.owner === u.owner && x.location === u.location)
         .length === 1
     )
@@ -1346,6 +1362,7 @@ function createPlayer(
     imported ?? decks.find((x) => x.id === deckId) ?? decks[id % decks.length];
   const deckIds = [
     d.legendId,
+    ...(d.extraLegendIds ?? []),
     d.championId,
     ...(d.battlefieldIds?.length ? d.battlefieldIds : [d.battlefieldId]),
     ...d.main.map((entry) => entry.cardId),
@@ -1364,6 +1381,9 @@ function createPlayer(
     name: id === 0 ? "You" : "Nexus AI",
     deckId: d.id,
     legendId: getRulesCardId(d.legendId),
+    ...(d.extraLegendIds?.length
+      ? { extraLegends: d.extraLegendIds.map(getRulesCardId) }
+      : {}),
     championId: getRulesCardId(d.championId),
     championAvailable: true,
     deck: main,
@@ -1530,12 +1550,13 @@ function scoreField(
   try {
     if (
       !hold &&
-      x.legendId === "ogs-023-024" &&
+      hasLegendId(s, p, "ogs-023-024") &&
       s.units.filter((u) => u.owner === p && u.location === field).length >= 4
     )
       pushStack(s, {
         player: p,
-        cardId: x.legendId,
+        cardId: "ogs-023-024",
+        sourceId: findLegend(s, p, (id) => id === "ogs-023-024")?.key,
         effects: [{ type: "draw", amount: 2 }],
         kind: "trigger",
       });
@@ -1700,7 +1721,7 @@ function beginTurn(s: GameState, p: PlayerId) {
     g.ready = true;
     g.usedAbilities = [];
   }
-  x.legendUsedTurn = -1;
+  readyAllLegends(s, p);
   log(s, `Turn ${s.turn} — ${x.name}: ready units, gear and runes.`, "turn", p);
   for (const unit of readied)
     event(s, "ready", p, unit.cardId, unit.id, unit.location);
@@ -1739,7 +1760,11 @@ function startBeginning(s: GameState, p: PlayerId) {
   ))
     killGear(s, g.id);
   for (const source of [
-    { cardId: x.legendId, id: "legend" },
+    ...legendRefs(s, p).map((ref) => ({
+      cardId: ref.cardId,
+      id: ref.key,
+      deployedAt: undefined as LocationId | undefined,
+    })),
     ...s.gears.filter((g) => g.owner === p),
     ...textUnits(s).filter((u) => u.owner === p),
   ]) {
@@ -2072,6 +2097,7 @@ function* iterateTargets(
       ...gears.map((g) => g.id),
       "legend:0",
       "legend:1",
+      ...addedLegendRefs(s).map((ref) => ref.key),
     ];
     return;
   }
@@ -2125,6 +2151,11 @@ function* iterateTargets(
         ...(x.legendUsedTurn >= 0 && !(sourceId === "legend" && x.id === p)
           ? [`legend:${x.id}`]
           : []),
+        ...addedLegendRefs(s, x.id)
+          .filter(
+            (ref) => !legendReady(s, x.id, ref.key) && ref.key !== sourceId,
+          )
+          .map((ref) => ref.key),
       ]),
     ];
     return;
@@ -2513,6 +2544,9 @@ function targetLabel(s: GameState, id?: string): string {
       )
     );
   }
+  const added = addedLegendOwner(s, id);
+  if (added !== undefined)
+    return ` → ${cardName(legendCardOf(s, added, id) ?? "")}`;
   const rune = s.players.flatMap((p) => p.runes).find((r) => r.id === id);
   if (rune) return ` → ${rune.domain} rune`;
   if (id.startsWith("field:") && !id.includes("~"))
@@ -3802,7 +3836,8 @@ function* iterateBaseLegalActions(
         ))
           for (const cost of [
             hideCost(s, p),
-            ...(isFace(x.legendId, "OGN", 263) && x.freeHideTurn !== s.turn
+            ...(hasLegend(s, p, (id) => isFace(id, "OGN", 263)) &&
+            x.freeHideTurn !== s.turn
               ? [{ energy: 1, power: 0 }]
               : []),
           ].filter((cost) => canPay(s, p, cost.energy, 0, [], cost.power)))
@@ -3920,7 +3955,7 @@ function* iterateBaseLegalActions(
     if (!script || !canPlayCard(s, p, c)) continue;
     if (
       entry.paidAdditional &&
-      ((script.additionalCost?.exhaustLegend && x.legendUsedTurn >= 0) ||
+      ((script.additionalCost?.exhaustLegend && !readyLegendRef(s, p)) ||
         (x.xp ?? 0) < (script.additionalCost?.xp ?? 0) ||
         (script.additionalCost?.condition === "playedSpell" &&
           !(x.spellsPlayedThisTurn ?? 0)))
@@ -4376,7 +4411,11 @@ function* iterateBaseLegalActions(
           });
   }
   const sources = [
-    { id: "legend", cardId: x.legendId, ready: x.legendUsedTurn < 0 },
+    ...legendRefs(s, p).map((ref) => ({
+      id: ref.key,
+      cardId: ref.cardId,
+      ready: legendReady(s, p, ref.key),
+    })),
     ...s.units
       .filter((u) => u.owner === p)
       .map((u) => ({ id: u.id, cardId: u.cardId, ready: u.ready })),
@@ -4396,7 +4435,9 @@ function* iterateBaseLegalActions(
         continue;
       if (
         a.disempowerSelf &&
-        !(source.id === "legend" ? x.legendEmpowered : object?.empowered)
+        !(isLegendSource(source.id)
+          ? legendEmpowered(s, p, source.id)
+          : object?.empowered)
       )
         continue;
       if (a.condition === "playedEquipment" && x.equipmentPlayedTurn !== s.turn)
@@ -4419,12 +4460,16 @@ function* iterateBaseLegalActions(
       );
       if (
         a.condition === "sourceEmpowered" &&
-        !(source.id === "legend" ? x.legendEmpowered : object?.empowered)
+        !(isLegendSource(source.id)
+          ? legendEmpowered(s, p, source.id)
+          : object?.empowered)
       )
         continue;
       if (
         a.condition === "sourceNotEmpowered" &&
-        (source.id === "legend" ? x.legendEmpowered : object?.empowered)
+        (isLegendSource(source.id)
+          ? legendEmpowered(s, p, source.id)
+          : object?.empowered)
       )
         continue;
       if (
@@ -4722,13 +4767,13 @@ export function getAbilities(
         effects: textEffects(unit, a.effects),
       })),
     ),
-    ...(cardId === s.players[p].legendId
+    ...((sourceId ? isLegendSource(sourceId) : cardId === s.players[p].legendId)
       ? [...grantedLegendAbilities(s, p), ...radianceLegendAbilities(s, p)]
       : []),
   ];
   if (cardId !== "ogn-111-298") return own;
   const ids = new Set([
-    s.players[p].legendId,
+    ...legendRefs(s, p).map((ref) => ref.cardId),
     ...s.units
       .filter((u) => u.owner === p && u.cardId !== cardId)
       .map((u) => u.cardId),
@@ -5173,8 +5218,8 @@ function* iterateTriggerActions(
     return;
   if (
     (cost.exhaust &&
-      !(sourceId === "legend"
-        ? player.legendUsedTurn < 0
+      !(isLegendSource(sourceId)
+        ? legendReady(s, p, sourceId)
         : source?.owner === p && source.ready)) ||
     (player.xp ?? 0) < cost.xp
   )
@@ -5231,8 +5276,8 @@ function* iterateTriggerActions(
           label: `${
             costSourceId
               ? `${cost.board === "disempower" ? "Disempower" : cost.board === "returnUnitHere" ? "Return to hand" : "Kill"} ${
-                  costSourceId === "legend"
-                    ? cardName(player.legendId)
+                  isLegendSource(costSourceId)
+                    ? cardName(legendCardOf(s, p, costSourceId) ?? "")
                     : costSourceId
                         .split("~")
                         .map((id) =>
@@ -5339,7 +5384,12 @@ function finalizeTrigger(
   );
   player.xp = (player.xp ?? 0) - cost.xp;
   if (cost.exhaust) {
-    if (item.sourceId === "legend") player.legendUsedTurn = s.turn;
+    if (isLegendSource(item.sourceId))
+      exhaustLegend(
+        s,
+        item.player,
+        item.sourceId!.startsWith("legend:") ? "legend" : item.sourceId,
+      );
     else {
       const source =
         s.units.find((u) => u.id === item.sourceId) ??
@@ -5420,10 +5470,17 @@ function context(
     targetId,
     shuffle,
     empower: (state, player, id) => {
-      if (id === "legend") {
-        if (state.players[player].legendEmpowered) return;
-        state.players[player].legendEmpowered = true;
-        event(state, "empower", player, state.players[player].legendId, id);
+      if (isLegendSource(id)) {
+        const key = id.startsWith("legend:") ? "legend" : id;
+        if (legendEmpowered(state, player, key)) return;
+        setLegendEmpowered(state, player, key, true);
+        event(
+          state,
+          "empower",
+          player,
+          legendCardOf(state, player, key) ?? state.players[player].legendId,
+          key,
+        );
         return;
       }
       const unit = state.units.find((u) => u.id === id);
@@ -5918,7 +5975,7 @@ function runEffects(
       s.units.find((u) => u.id === sourceId)?.cardId ??
       s.gears.find((g) => g.id === sourceId)?.cardId ??
       s.fields.find((f) => f.id === sourceId)?.cardId ??
-      (sourceId === "legend" ? s.players[p].legendId : undefined);
+      legendCardOf(s, p, sourceId);
     withStepEffect(
       s,
       {
@@ -6976,10 +7033,11 @@ function spellPlayed(s: GameState, p: PlayerId, cardId: string) {
         kind: "trigger",
       });
   }
-  if (s.players[p].legendId === "ogs-021-024" && (card.energy ?? 0) >= 5)
+  if (hasLegendId(s, p, "ogs-021-024") && (card.energy ?? 0) >= 5)
     pushStack(s, {
       player: p,
-      cardId: s.players[p].legendId,
+      cardId: "ogs-021-024",
+      sourceId: findLegend(s, p, (id) => id === "ogs-021-024")?.key,
       effects: [{ type: "draw", amount: 1 }],
       kind: "trigger",
     });
@@ -8536,7 +8594,11 @@ function applyActionInternal(
   if (id === "end-turn") {
     event(s, "end", p, x.legendId, "legend");
     for (const source of [
-      { id: "legend", cardId: x.legendId, location: base(p) },
+      ...legendRefs(s, p).map((ref) => ({
+        id: ref.key,
+        cardId: ref.cardId,
+        location: base(p),
+      })),
       ...textUnits(s).filter((u) => u.owner === p),
       ...s.gears
         .filter((g) => g.owner === p)
@@ -8553,7 +8615,8 @@ function applyActionInternal(
           source.location,
         );
     }
-    if (x.legendId === "ogs-017-024" || x.endReadyRunes) {
+    const sentinel = hasLegendId(s, p, "ogs-017-024");
+    if (sentinel || x.endReadyRunes) {
       s.pendingEndTurn = p;
       pushStack(s, {
         player: p,
@@ -8561,8 +8624,7 @@ function applyActionInternal(
         effects: [
           {
             type: "readyRunes",
-            amount:
-              (x.legendId === "ogs-017-024" ? 2 : 0) + (x.endReadyRunes ?? 0),
+            amount: (sentinel ? 2 : 0) + (x.endReadyRunes ?? 0),
           },
         ],
         kind: "trigger",
@@ -8597,7 +8659,7 @@ function applyActionInternal(
         (g) => g.id !== legal.sourceId!.split(":jayce:")[1],
       );
     if (legal.additionalCostPaid && script.additionalCost?.exhaustLegend)
-      x.legendUsedTurn = s.turn;
+      exhaustLegend(s, p, readyLegendRef(s, p)?.key ?? "legend");
     if (legal.additionalCostPaid)
       x.xp = (x.xp ?? 0) - (script.additionalCost?.xp ?? 0);
     const costTriggers: Array<() => void> = [];
@@ -8661,7 +8723,11 @@ function applyActionInternal(
       payBoardCost(s, p, script, legal.costSourceId!);
     }
     if (legal.songstressUnits) {
-      x.legendUsedTurn = s.turn;
+      exhaustLegend(
+        s,
+        p,
+        findLegend(s, p, (id) => isFace(id, "RAD", 151))?.key ?? "legend",
+      );
       for (const id of legal.songstressUnits.split(",")) {
         const unit = s.units.find((u) => u.id === id && u.owner === p);
         if (unit) unit.ready = false;
@@ -9014,7 +9080,7 @@ function applyActionInternal(
     );
     if (object && !unit) x.firstGearAbilityTurn = s.turn;
     if (ability.disempowerSelf) {
-      if (source === "legend") x.legendEmpowered = false;
+      if (isLegendSource(source)) setLegendEmpowered(s, p, source!, false);
       else if (unit) disempower(unit);
       else if (object) object.empowered = false;
     }
@@ -9036,7 +9102,7 @@ function applyActionInternal(
       recycleCards(s, p, shuffle(s, recycled));
     }
     if (ability.exhaust) {
-      if (source === "legend") x.legendUsedTurn = s.turn;
+      if (isLegendSource(source)) exhaustLegend(s, p, source!);
       else {
         const target =
           s.units.find((u) => u.id === source) ??
@@ -9215,6 +9281,11 @@ export function getGameView(s: GameState, viewer: PlayerId): PublicGameView {
       runeList:
         p.id === viewer || s.matchConfig?.openDecklists
           ? p.runeList
+          : undefined,
+      // Neeko's chosen legends stay private until one is added to play.
+      extraLegends:
+        p.id === viewer || s.matchConfig?.openDecklists
+          ? p.extraLegends
           : undefined,
       deckId:
         p.id === viewer || s.matchConfig?.openDecklists ? p.deckId : "private",

@@ -16,6 +16,12 @@ import type {
   Unit,
 } from "./types";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
+import {
+  exhaustLegend,
+  findLegend,
+  legendKeyFor,
+  legendReady,
+} from "./legends";
 
 const unl = (n: number) => `unl-${String(n).padStart(3, "0")}-219`;
 const special = (custom: string, extra: Partial<Effect> = {}): Effect => ({
@@ -639,7 +645,7 @@ export const unleashedModule: ExpansionModule = {
           ctx.moveUnit(s, source, ctx.locationId, p);
         break;
       case "vex-hold":
-        if (s.players[p].legendUsedTurn < 0)
+        if (legendReady(s, p, legendKeyFor(s, p, ctx.sourceId)))
           options(
             s,
             p,
@@ -653,13 +659,13 @@ export const unleashedModule: ExpansionModule = {
           );
         break;
       case "vex-draw":
-        if (s.players[p].legendUsedTurn < 0) {
-          s.players[p].legendUsedTurn = s.turn;
+        if (legendReady(s, p, legendKeyFor(s, p, ctx.sourceId))) {
+          exhaustLegend(s, p, legendKeyFor(s, p, ctx.sourceId));
           ctx.draw(s, p, 1);
         }
         break;
       case "vi-conquer":
-        if (s.players[p].legendUsedTurn < 0)
+        if (legendReady(s, p, legendKeyFor(s, p, ctx.sourceId)))
           options(
             s,
             p,
@@ -672,8 +678,8 @@ export const unleashedModule: ExpansionModule = {
           );
         break;
       case "vi-ready":
-        if (unit && s.players[p].legendUsedTurn < 0) {
-          s.players[p].legendUsedTurn = s.turn;
+        if (unit && legendReady(s, p, legendKeyFor(s, p, ctx.sourceId))) {
+          exhaustLegend(s, p, legendKeyFor(s, p, ctx.sourceId));
           ctx.runEffects(s, p, [{ type: "ready", target: "anyUnit" }], unit.id);
         }
         break;
@@ -945,8 +951,17 @@ export const unleashedModule: ExpansionModule = {
       if (gear) gear.ready = false;
     }
     if (event === "hold") {
-      if (s.players[p].legendId === unl(193) && s.players[p].legendUsedTurn < 0)
-        trigger(s, p, unl(193), `legend:${p}`, "vex-hold", ctx, locationId);
+      const vex = findLegend(s, p, (id) => id === unl(193));
+      if (vex && legendReady(s, p, vex.key))
+        trigger(
+          s,
+          p,
+          unl(193),
+          vex.key === "legend" ? `legend:${p}` : vex.key,
+          "vex-hold",
+          ctx,
+          locationId,
+        );
       if (s.fields.find((f) => f.id === locationId)?.cardId === unl(207))
         trigger(s, p, unl(207), locationId!, "amateur", ctx, locationId);
       if (
@@ -958,8 +973,17 @@ export const unleashedModule: ExpansionModule = {
         data.nami[p] = s.turn;
     }
     if (event === "conquer" && excess(s) >= 3) {
-      if (s.players[p].legendId === unl(187))
-        trigger(s, p, unl(187), `legend:${p}`, "vi-conquer", ctx, locationId);
+      const vi = findLegend(s, p, (id) => id === unl(187));
+      if (vi)
+        trigger(
+          s,
+          p,
+          unl(187),
+          vi.key === "legend" ? `legend:${p}` : vi.key,
+          "vi-conquer",
+          ctx,
+          locationId,
+        );
       if (s.fields.find((f) => f.id === locationId)?.cardId === unl(217))
         trigger(s, p, unl(217), locationId!, "bird", ctx, locationId);
       for (const u of s.units.filter(

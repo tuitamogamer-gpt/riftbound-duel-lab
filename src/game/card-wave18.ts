@@ -10,6 +10,7 @@ import { copyUnit, detach } from "./objects";
 import { choices, option } from "./card-wave16";
 import type { CardScript, Effect } from "./types";
 import type { ExpansionModule } from "./later-precon-engine";
+import { findLegend, legendCardOf, legendKeyFor } from "./legends";
 const plain: CardScript = { implemented: true };
 const fx = (custom: string, rest: Partial<Effect> = {}): Effect => ({
   type: "special",
@@ -104,22 +105,23 @@ export const cardWave18Module: ExpansionModule = {
           (u) => u.owner === p && u.location === locationId,
         ))
           u.conqueredTurn = s.turn;
-      const legend = s.players[p].legendId;
-      if (isFace(legend, "UNL", 195))
+      const teemo = findLegend(s, p, (id) => isFace(id, "UNL", 195));
+      if (teemo)
         ctx.trigger(
           s,
           p,
-          legend,
-          "legend",
+          teemo.cardId,
+          teemo.key,
           [fx("brush", { optional: true, triggerCost: { exhaust: true } })],
           locationId,
         );
-      if (isFace(legend, "UNL", 199))
+      const leblanc = findLegend(s, p, (id) => isFace(id, "UNL", 199));
+      if (leblanc)
         ctx.trigger(
           s,
           p,
-          legend,
-          "legend",
+          leblanc.cardId,
+          leblanc.key,
           [
             fx("leblanc", {
               optional: true,
@@ -209,8 +211,8 @@ export const cardWave18Module: ExpansionModule = {
           ctx.trigger(
             s,
             p,
-            s.players[p].legendId,
-            "legend",
+            legendCardOf(s, p, ctx.sourceId) ?? s.players[p].legendId,
+            legendKeyFor(s, p, ctx.sourceId),
             [fx("reflection-copy", { target: "unitHere", cardName: token.id })],
             ctx.locationId,
           );

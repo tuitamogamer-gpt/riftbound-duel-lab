@@ -123,7 +123,12 @@ export function mobileReviewFocus(
     objectLocations(shown, id)[0] ??
     (before ? objectLocations(before, id)[0] : undefined);
   const sourceLocation = (id?: string, player?: PlayerId) => {
-    if ((id === "legend" || id === "champion") && player !== undefined)
+    if (
+      (id === "legend" ||
+        id === "champion" ||
+        id?.startsWith("neeko-legend:")) &&
+      player !== undefined
+    )
       return `base:${player}` as LocationId;
     const boardLocation = locate(id);
     if (boardLocation) return boardLocation;

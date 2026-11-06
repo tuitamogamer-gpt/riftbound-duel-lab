@@ -5,6 +5,14 @@ import { deployedGear, hasDeploy } from "./deploy";
 import type { ExpansionModule } from "./later-precon-engine";
 import { physicalOwner, returnBoardCardsToHand } from "./objects";
 import type { CardScript, Effect, GameState, Unit } from "./types";
+import {
+  exhaustLegend,
+  findLegend,
+  hasLegend,
+  legendCardOf,
+  legendKeyFor,
+  legendReady,
+} from "./legends";
 
 /**
  * Radiance wave 2: [Deploy] gear, Bomb tokens and the cards built around
@@ -187,13 +195,13 @@ export const radianceDeployModule: ExpansionModule = {
       locationId?.startsWith("field:") &&
       isCardType(getCard(cardId), "Gear") &&
       hasDeploy(cardId) &&
-      isFace(s.players[p].legendId, "RAD", 155)
+      hasLegend(s, p, (id) => isFace(id, "RAD", 155))
     )
       ctx.trigger(
         s,
         p,
-        s.players[p].legendId,
-        "legend",
+        findLegend(s, p, (id) => isFace(id, "RAD", 155))!.cardId,
+        legendKeyFor(s, p, undefined, (id) => isFace(id, "RAD", 155)),
         [rd("exemplar")],
         locationId,
       );
@@ -354,10 +362,13 @@ export const radianceDeployModule: ExpansionModule = {
         const units = s.units.filter(
           (u) => u.owner === p && u.location !== here,
         );
+        const exemplar = legendKeyFor(s, p, ctx.sourceId, (id) =>
+          isFace(id, "RAD", 155),
+        );
         if (
           here &&
-          x.legendUsedTurn < 0 &&
-          isFace(x.legendId, "RAD", 155) &&
+          legendReady(s, p, exemplar) &&
+          isFace(legendCardOf(s, p, exemplar) ?? "", "RAD", 155) &&
           units.length &&
           ctx.canPay(s, p, 0, 1)
         )
@@ -379,14 +390,17 @@ export const radianceDeployModule: ExpansionModule = {
         const unit = s.units.find(
           (u) => u.id === ctx.targetId && u.owner === p,
         );
+        const exemplar = legendKeyFor(s, p, ctx.sourceId, (id) =>
+          isFace(id, "RAD", 155),
+        );
         if (
           unit &&
           here &&
-          x.legendUsedTurn < 0 &&
+          legendReady(s, p, exemplar) &&
           unit.location !== here &&
           ctx.canPay(s, p, 0, 1)
         ) {
-          x.legendUsedTurn = s.turn;
+          exhaustLegend(s, p, exemplar);
           ctx.pay(s, p, 0, 1);
           ctx.moveUnit(s, unit, here, p);
         }

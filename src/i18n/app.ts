@@ -93,6 +93,7 @@ export const appMessages: Record<string, [string, string, string]> = {
     "Leggenda e campione avversari",
   ],
   "Legend zone": ["Legend zone", "Zona legende", "Zona della leggenda"],
+  "Added by Neeko": ["Added by Neeko", "Dodala Neeko", "Aggiunta da Neeko"],
   "Champion zone": ["Champion zone", "Zona šampiona", "Zona del campione"],
   Ready: ["Ready", "Spremna", "Pronta"],
   Exhausted: ["Exhausted", "Iscrpljena", "Esausta"],

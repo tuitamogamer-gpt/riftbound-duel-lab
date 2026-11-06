@@ -1,6 +1,7 @@
 import type { CardScript } from "./types";
 import type { ExpansionModule } from "./later-precon-engine";
 import { isFace } from "./board-rules";
+import { findLegend, readyLegend } from "./legends";
 const plain: CardScript = { implemented: true };
 export const cardWave17Scripts: Record<string, CardScript> = {
   "ogn-023-298": {
@@ -39,8 +40,8 @@ export const cardWave17Scripts: Record<string, CardScript> = {
 };
 export const cardWave17Module: ExpansionModule = {
   event(s, name, p) {
-    if (name === "conquer" && isFace(s.players[p].legendId, "OGN", 269))
-      s.players[p].legendUsedTurn = -1;
+    const sett = findLegend(s, p, (id) => isFace(id, "OGN", 269));
+    if (name === "conquer" && sett) readyLegend(s, p, sett.key);
   },
   effect(s, _p, e, ctx) {
     if (!e.custom?.startsWith("wave17:")) return false;

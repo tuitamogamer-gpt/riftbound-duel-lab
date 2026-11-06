@@ -623,6 +623,10 @@ export function validState(x: unknown, actionable = true): x is GameState {
         (p.runeList === undefined ||
           (Array.isArray(p.runeList) && p.runeList.every(domain))) &&
         cardId(p.legendId) &&
+        (p.extraLegends === undefined ||
+          (Array.isArray(p.extraLegends) &&
+            p.extraLegends.length <= 3 &&
+            p.extraLegends.every(cardId))) &&
         cardId(p.championId) &&
         ["championAvailable", "hasBegun", "mulliganDone"].every(
           (k) => typeof p[k] === "boolean",

@@ -19,6 +19,7 @@ import type {
   PlayerId,
   Unit,
 } from "./types";
+import { hasLegendId, legendKeyFor } from "./legends";
 const plain: CardScript = { implemented: true };
 const sf = (custom: string, extra: Partial<Effect> = {}): Effect => ({
   type: "special",
@@ -272,7 +273,7 @@ export const spiritforgedExtraModule: ExpansionModule = {
             (v) => v.owner !== u.owner && v.location === u.location,
           ).length;
       }
-      if (s.players[u.owner].legendId === "sfd-183-221")
+      if (hasLegendId(s, u.owner, "sfd-183-221"))
         value += u.gear.filter((id) => {
           const g = s.gears.find((g) => g.id === id);
           return g && getScript(g.cardId)?.equipCost !== undefined;
@@ -291,7 +292,7 @@ export const spiritforgedExtraModule: ExpansionModule = {
         if (n) result.push(`Assault ${n}`);
       }
     }
-    if (s.players[u.owner].legendId === "sfd-183-221" && u.gear.length)
+    if (hasLegendId(s, u.owner, "sfd-183-221") && u.gear.length)
       result.push(`Assault ${u.gear.length}`);
     return result;
   },
@@ -589,7 +590,7 @@ export const spiritforgedExtraModule: ExpansionModule = {
       const survivors = s.units.filter((u) => u.location === locationId);
       for (const owner of [0, 1] as const)
         if (
-          s.players[owner].legendId === "sfd-185-221" &&
+          hasLegendId(s, owner, "sfd-185-221") &&
           survivors.length &&
           survivors.every((u) => u.owner === owner)
         )
@@ -597,7 +598,7 @@ export const spiritforgedExtraModule: ExpansionModule = {
             s,
             owner,
             "sfd-185-221",
-            "legend",
+            legendKeyFor(s, owner, undefined, (id) => id === "sfd-185-221"),
             [{ type: "draw", amount: 1 }],
             locationId,
           );

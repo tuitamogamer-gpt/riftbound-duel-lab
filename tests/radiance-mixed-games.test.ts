@@ -52,6 +52,10 @@ function radianceDeck(k: number): StarterDeck {
     ...starterDecks[0],
     id: `radiance-mixed-${k}`,
     legendId: legends[k % legends.length],
+    // Decks with Neeko also choose extra legends, so bots play with two legends.
+    ...(main.includes(rad(167))
+      ? { extraLegendIds: ["ogn-257-298", "ogn-265-298", "sfd-197-221"] }
+      : {}),
     battlefieldId: battlefields[k % battlefields.length],
     battlefieldIds: undefined,
     main: [...new Set(main)].map((cardId) => ({

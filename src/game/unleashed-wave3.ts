@@ -18,6 +18,13 @@ import type {
   PlayerId,
   Unit,
 } from "./types";
+import {
+  exhaustLegend,
+  findLegend,
+  hasLegendId,
+  legendKeyFor,
+  legendUsedTurn,
+} from "./legends";
 
 const id = (n: number) => `unl-${String(n).padStart(3, "0")}-219`;
 const plain: CardScript = { implemented: true };
@@ -482,9 +489,16 @@ export const unleashedWave3Module: ExpansionModule = {
       for (const owner of [0, 1] as const)
         if (
           survivors.some((u) => u.owner === owner) &&
-          s.players[owner].legendId === id(201)
+          hasLegendId(s, owner, id(201))
         )
-          ctx.trigger(s, owner, id(201), "legend", [xp(1)], locationId);
+          ctx.trigger(
+            s,
+            owner,
+            id(201),
+            legendKeyFor(s, owner, undefined, (c) => c === id(201)),
+            [xp(1)],
+            locationId,
+          );
     }
   },
   actions(s, p, ctx) {
@@ -552,15 +566,13 @@ export const unleashedWave3Module: ExpansionModule = {
             { targetId: u.id },
           );
     }
-    if (
-      s.players[p].legendId === id(201) &&
-      s.players[p].legendUsedTurn !== s.turn
-    ) {
+    const azir = findLegend(s, p, (c) => c === id(201));
+    if (azir && legendUsedTurn(s, p, azir.key) !== s.turn) {
       if (currentXP(s, p) >= 1)
         for (const u of anyTargets(s, p, ctx))
           add(
             "legend-buff",
-            "legend",
+            azir.key,
             id(201),
             "Spend 1 XP and exhaust: buff a unit",
             { targetId: u.id },
@@ -571,7 +583,7 @@ export const unleashedWave3Module: ExpansionModule = {
         ))
           add(
             "legend-return",
-            "legend",
+            azir.key,
             id(201),
             "Spend 2 XP and exhaust: move an exhausted friendly unit to base",
             { targetId: u.id },
@@ -609,7 +621,7 @@ export const unleashedWave3Module: ExpansionModule = {
     } else return false;
     ctx.pay(s, p, 0, 0, [], ctx.targetTax?.(s, p, action.targetId) ?? 0);
     if (gear) gear.ready = false;
-    else s.players[p].legendUsedTurn = s.turn;
+    else exhaustLegend(s, p, action.sourceId ?? "legend");
     ctx.pushStack(s, {
       player: p,
       cardId: action.cardId!,

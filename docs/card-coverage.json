@@ -47,12 +47,12 @@
     "attribution": "Unofficial fan project. Structured records are from Hextech Analytics, not Riftcodex or an official Riot API. Card names, rules text, and Riot CDN artwork are property of Riot Games, Inc."
   },
   "registered": 1679,
-  "playable": 1678,
+  "playable": 1679,
   "statuses": {
-    "scripted": 1321,
+    "scripted": 1322,
     "compiled": 37,
     "alias": 320,
-    "unsupported": 1
+    "unsupported": 0
   },
   "sets": {
     "JDG": {
@@ -102,8 +102,8 @@
     },
     "RAD": {
       "total": 219,
-      "playable": 218,
-      "unsupported": 1
+      "playable": 219,
+      "unsupported": 0
     }
   },
   "precons": [
@@ -13212,8 +13212,16 @@
       "type": "Unit",
       "cardId": "rad-167-167",
       "rulesCardId": "rad-167-167",
-      "status": "unsupported",
-      "reason": "Reference import: this printing requires reviewed rules and behavior tests before play."
+      "status": "scripted",
+      "script": {
+        "implemented": true,
+        "onPlay": [
+          {
+            "type": "special",
+            "custom": "radiance7:neeko"
+          }
+        ]
+      }
     },
     {
       "name": "Boy Who Shattered Time",

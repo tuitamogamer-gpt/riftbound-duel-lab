@@ -24,6 +24,13 @@ import type {
 } from "./types";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
 import { getScript } from "./scripts";
+import {
+  exhaustLegend,
+  findLegend,
+  hasLegendId,
+  legendKeyFor,
+  legendReady,
+} from "./legends";
 
 const plain: CardScript = { implemented: true };
 const sf = (custom: string, extra: Partial<Effect> = {}): Effect => ({
@@ -258,15 +265,13 @@ function detectMighty(s: SpiritState, ctx: PreconContext) {
     next[u.id] = now;
     if (!now || old[u.id]) continue;
     const p = u.owner;
-    if (
-      s.players[p].legendId === "sfd-205-221" &&
-      s.players[p].legendUsedTurn < 0
-    )
+    const fiora = findLegend(s, p, (id) => id === "sfd-205-221");
+    if (fiora && legendReady(s, p, fiora.key))
       ctx.trigger(
         s,
         p,
         "sfd-205-221",
-        "legend",
+        fiora.key,
         [sf("fiora-channel", { cardName: u.id })],
         u.location,
       );
@@ -298,7 +303,7 @@ export const spiritforgedModule: ExpansionModule = {
             .filter((x) => x.cardId === "sfd-026-221").length;
         if (
           s.combat.defender === u.owner &&
-          s.players[u.owner].legendId === "sfd-181-221"
+          hasLegendId(s, u.owner, "sfd-181-221")
         )
           value++;
       }
@@ -320,7 +325,7 @@ export const spiritforgedModule: ExpansionModule = {
         .flatMap((u) => textSources(s, u))
         .filter((x) => x.cardId === "sfd-026-221")
         .map(() => "Assault"),
-      ...(s.players[u.owner].legendId === "sfd-181-221" ? ["Shield"] : []),
+      ...(hasLegendId(s, u.owner, "sfd-181-221") ? ["Shield"] : []),
     ];
   },
   cost(s, p, c, ctx) {
@@ -437,7 +442,7 @@ export const spiritforgedModule: ExpansionModule = {
         break;
       }
       case "fiora-channel":
-        if (s.players[p].legendUsedTurn < 0)
+        if (legendReady(s, p, legendKeyFor(s, p, ctx.sourceId)))
           choose(s, p, ctx, [
             option(p, "channel", "Exhaust Fiora to channel a rune exhausted", [
               sf("pay-fiora"),
@@ -445,8 +450,8 @@ export const spiritforgedModule: ExpansionModule = {
           ]);
         break;
       case "pay-fiora":
-        if (s.players[p].legendUsedTurn < 0) {
-          s.players[p].legendUsedTurn = s.turn;
+        if (legendReady(s, p, legendKeyFor(s, p, ctx.sourceId))) {
+          exhaustLegend(s, p, legendKeyFor(s, p, ctx.sourceId));
           ctx.channel(s, p, 1, false);
         }
         break;

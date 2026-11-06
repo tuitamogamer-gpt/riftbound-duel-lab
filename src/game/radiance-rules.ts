@@ -9,6 +9,7 @@ import type {
   PlayerId,
   Unit,
 } from "./types";
+import { findLegend, hasLegend, legendReady } from "./legends";
 
 /** Last Caress: the player's next unit this turn may go to any battlefield. */
 export const lastCaressActive = (s: GameState, p: PlayerId) =>
@@ -37,7 +38,8 @@ export const usedThisTurn = (s: GameState, key: string, p: PlayerId) =>
  */
 export function songstressOptions(s: GameState, p: PlayerId): string[] {
   const x = s.players[p];
-  if (x.legendUsedTurn >= 0 || !isFace(x.legendId, "RAD", 151)) return [];
+  const songstress = findLegend(s, p, (id) => isFace(id, "RAD", 151));
+  if (!songstress || !legendReady(s, p, songstress.key)) return [];
   const ready = s.units.filter(
     (u) => u.owner === p && u.ready && !s.gears.some((g) => g.id === u.id),
   );
@@ -85,7 +87,7 @@ export function radianceEntersReady(
   if (s.units.some((u) => isFace(u.cardId, "RAD", 19))) return true;
   // The Exile: units you play to battlefields you control enter ready.
   if (
-    isFace(s.players[p].legendId, "RAD", 149) &&
+    hasLegend(s, p, (id) => isFace(id, "RAD", 149)) &&
     s.fields.some((f) => f.id === location && f.controller === p)
   )
     return true;

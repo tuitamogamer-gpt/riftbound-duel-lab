@@ -268,7 +268,15 @@ export function getObservation(s: GameState, viewer: PlayerId): Observation {
   const revealedHand = inspectedHand(s, viewer);
   const batchPositions = inspectedPositions(s, viewer);
   state.players = s.players.map((p) => {
-    const { deck, runeDeck, hand, deckList, runeList, ...publicPlayer } = p;
+    const {
+      deck,
+      runeDeck,
+      hand,
+      deckList,
+      runeList,
+      extraLegends,
+      ...publicPlayer
+    } = p;
     const own = p.id === viewer,
       open = !!s.matchConfig?.openDecklists;
     const registered = own || open ? decksById[p.deckId] : undefined;
@@ -283,6 +291,9 @@ export function getObservation(s: GameState, viewer: PlayerId): Observation {
       ...publicData,
       name: `Player ${p.id + 1}`,
       deckId: own || open ? p.deckId : "private",
+      ...(extraLegends && (own || open)
+        ? { extraLegends: [...extraLegends] }
+        : {}),
       hand: own ? [...hand] : [],
       handCount: hand.length,
       deckCount: deck.length,

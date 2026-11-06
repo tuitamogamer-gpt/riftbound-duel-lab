@@ -86,6 +86,7 @@ export function validateSeriesDeck(
     .map((issue) => issue.message);
   const fixed = JSON.stringify([
     original.legendId,
+    [...(original.extraLegendIds ?? [])].sort(),
     original.championId,
     original.domains,
     original.runes,
@@ -95,6 +96,7 @@ export function validateSeriesDeck(
   ]);
   const current = JSON.stringify([
     deck.legendId,
+    [...(deck.extraLegendIds ?? [])].sort(),
     deck.championId,
     deck.domains,
     deck.runes,
@@ -364,6 +366,13 @@ function deckShape(value: unknown): value is StarterDeck {
     !Array.isArray(value.domains) ||
     value.domains.length > 7 ||
     !value.domains.every((domain) => domainNames.includes(domain))
+  )
+    return false;
+  if (
+    value.extraLegendIds !== undefined &&
+    (!Array.isArray(value.extraLegendIds) ||
+      value.extraLegendIds.length > 3 ||
+      !value.extraLegendIds.every((id) => typeof id === "string"))
   )
     return false;
   const entries = (raw: unknown) =>
