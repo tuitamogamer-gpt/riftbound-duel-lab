@@ -120,7 +120,7 @@ describe("Radiance reference catalog", () => {
     expect(compile).not.toHaveBeenCalled();
   });
 
-  it("accepts reviewed Radiance runes but blocks an unreviewed printing in an otherwise supported deck", () => {
+  it("accepts reviewed Radiance runes but blocks an unsupported printing in an otherwise supported deck", () => {
     const deck = structuredClone(starterDecks[0]);
     const rune = deck.runes[0];
     const radianceRune = referenceCards.find(
@@ -136,9 +136,10 @@ describe("Radiance reference catalog", () => {
     expect(imported.playable).toBe(true);
     expect(() => createGame({ playerDeck: deck })).not.toThrow();
 
-    const blocked = referenceCards.find(
-      (card) => card.type === "Unit" && !reviewed.has(card.id),
-    )!;
+    // Every Radiance printing has now been reviewed, so an unknown printing
+    // (as a future reference import would add) stands in for an unreviewed one.
+    expect(referenceCards.filter((card) => !reviewed.has(card.id))).toEqual([]);
+    const blocked = { id: "rad-999-167" };
     deck.main[0].cardId = blocked.id;
     const coverage = getDeckScriptCoverage(deck);
     expect(coverage.complete).toBe(false);
