@@ -57,13 +57,15 @@ No card data changed. The retail 13×13 bot matrix is unchanged: eight fixed-see
 
 ## Left open
 
-- **Starry-Eyed Songstress** is not offered for a spell that has another additional cost (Parallel Convergence).
-- **Runeblade Anvil and Akali, Brash** store the permission by card, not by banished copy. If another effect holds an identical banished card (Dockside Lock-Up), the wrong copy can be played.
-- **Last Caress** is used up and buffs a unit token, but a token still cannot use its "any battlefield" placement.
-- **Heimerdinger, Academy Instructor**: the replaced token and the Mech both count as played (the documented "replace after it enters" simplification). Fanfare counts the pair once.
-- **Predict 2+** puts recycled cards on the bottom in their original order.
-- **Ruined Monastery** keeps the "discard 1 to channel" reading.
-- **Spells need a legal target for their first targeted effect** (Satchel Charge without a friendly unit). This is the engine's rule for every set.
+The [follow-up of the same day](RADIANCE-FOLLOWUP.md) resolves most of these; each item ends with its status.
+
+- **Starry-Eyed Songstress** is not offered for a spell that has another additional cost (Parallel Convergence). _Corrected._
+- **Runeblade Anvil and Akali, Brash** store the permission by card, not by banished copy. If another effect holds an identical banished card (Dockside Lock-Up), the wrong copy can be played. _Corrected._
+- **Last Caress** is used up and buffs a unit token, but a token still cannot use its "any battlefield" placement. _Corrected for tokens whose effect leaves the location open; a token played "to your base" stays there (rule 185.2.a)._
+- **Heimerdinger, Academy Instructor**: the replaced token and the Mech both count as played (the documented "replace after it enters" simplification). Fanfare counts the pair once. _Still open._
+- **Predict 2+** puts recycled cards on the bottom in their original order. _Corrected: random order (rule 416.5)._
+- **Ruined Monastery** keeps the "discard 1 to channel" reading. _Corrected: an empty hand still channels (rules 383.3.a and 359.3.e.11)._
+- **Spells need a legal target for their first targeted effect** (Satchel Charge without a friendly unit). This is the engine's rule for every set. _Confirmed by rule 355.8._
 
 ## Validation
 

@@ -1,5 +1,12 @@
 # Validation evidence
 
+## Radiance review follow-up — 10 November 2026
+
+The [follow-up](RADIANCE-FOLLOWUP.md) corrects five items the review left open and five cards that recycled without the recycle event. Rule 355.8 confirms one more item; Heimerdinger, Academy Instructor stays simplified.
+
+- **Code as of commit `1ee2aa4`**: **3,011 tests in 156 files** outside the precon matrix and **331 precon-matrix tests** in three shards (111 + 110 + 110), all with exit 0 and the CI timeouts. The weekly workflow's report checks pass: **3,234 unique tests**, none failed or missing, and all **169 ordered pairings**. TypeScript, the production build and catalog consistency also passed.
+- Eight fixed-seed bot games between retail decks end in identical states on `edbf77c` and on the new code.
+
 ## Radiance script review — 10 November 2026
 
 A card-by-card [review of the Radiance scripts](RADIANCE-REVIEW.md) against their printed text reported 48 differences; 42 are corrected, each with a regression test, and the rest are listed there as open. The same pass corrected where the online board, the replay viewer and target labels show [Deploy] gear.
