@@ -13,6 +13,7 @@ import {
 import { predictN } from "./radiance-wave4";
 import { getScript } from "./scripts";
 import { textSources } from "./text-sources";
+import { recycleCards } from "./zone-events";
 import type {
   CardScript,
   Effect,
@@ -681,7 +682,7 @@ export const radianceWave5Module: ExpansionModule = {
         ctx.log?.(s, `${x.name} reveals ${card.name}.`, "info", p);
         if (isCardType(card, "Unit") && (card.might ?? 0) >= 5)
           ctx.draw(s, p, 1);
-        else x.deck.push(x.deck.shift()!);
+        else recycleCards(s, p, [x.deck.shift()!]);
         return true;
       }
       case "tusker": {
@@ -875,7 +876,9 @@ export const radianceWave5Module: ExpansionModule = {
           ctx.cardEvent(s, "reveal", p, top[i]);
           ctx.cardEvent(s, "draw", p, top[i]);
         }
-        x.deck.push(...top.filter((_, j) => j !== i));
+        // "Recycle the rest": one event, in a random order (rule 416.5).
+        const rest = top.filter((_, j) => j !== i);
+        recycleCards(s, p, ctx.shuffle?.(s, rest) ?? rest);
         return true;
       }
       case "jarvan-call": {

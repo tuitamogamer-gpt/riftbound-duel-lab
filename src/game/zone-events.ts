@@ -14,6 +14,29 @@ export function recycleCards(
     amount: cards.length,
   });
 }
+/**
+ * "Each player reveals ... Recycle the rest": each card goes to the bottom of
+ * its owner's deck (rule 416.1.c), as one recycle event for the batch.
+ */
+export function recycleOwnedCards(
+  s: GameState,
+  cards: { owner: PlayerId; cardId: string }[],
+  actor: PlayerId,
+) {
+  if (!cards.length) return;
+  for (const { owner, cardId } of cards) s.players[owner].deck.push(cardId);
+  emitGameEvent(
+    s,
+    "recycleCards",
+    actor,
+    cards[0].cardId,
+    undefined,
+    undefined,
+    {
+      amount: cards.length,
+    },
+  );
+}
 export function recycleRunes(
   s: GameState,
   owner: PlayerId,

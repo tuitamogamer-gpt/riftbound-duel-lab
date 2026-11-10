@@ -196,11 +196,9 @@ function askPredict(
   const x = s.players[p];
   x.deck = [...final.map((i) => top[i]), ...x.deck.slice(n)];
   // One recycle event for the batch ("when you recycle one or more cards").
-  recycleCards(
-    s,
-    p,
-    recycled.map((i) => top[i]),
-  );
+  // Two or more go to the bottom in a random order (rule 416.5).
+  const bottom = recycled.map((i) => top[i]);
+  recycleCards(s, p, ctx.shuffle?.(s, bottom) ?? bottom);
   ctx.log?.(
     s,
     `${x.name} predicts ${n}: keeps ${final.length}, recycles ${recycled.length}.`,
@@ -502,12 +500,17 @@ export const radianceWave4Module: ExpansionModule = {
         if (self) self.baseMightOverride = e.amount ?? 0;
         return true;
       case "monastery":
-        if (x.hand.length)
+        // "You may discard 1 and channel 1 rune exhausted": the "may" decides
+        // whether to perform the ability (rule 383.3.a). Discarding is not a
+        // cost, so an empty hand still channels (rule 359.3.e.11).
+        if (x.hand.length || x.runeDeck.length)
           choices(s, p, ctx, [
             option(
               p,
               "monastery:yes",
-              "Discard 1 and channel 1 rune exhausted",
+              x.hand.length
+                ? "Discard 1 and channel 1 rune exhausted"
+                : "Channel 1 rune exhausted (no card to discard)",
               [
                 { type: "discard", amount: 1 },
                 { type: "channel", amount: 1 },

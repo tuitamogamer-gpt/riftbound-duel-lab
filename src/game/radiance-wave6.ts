@@ -1,4 +1,5 @@
 import { getCard, isCardType } from "../data/cards";
+import { banishCard, banishedCards } from "./banishment";
 import { isFace } from "./board-rules";
 import { choices, option } from "./card-wave16";
 import { deployedGear, hasDeploy } from "./deploy";
@@ -9,6 +10,7 @@ import { shieldValue } from "./radiance-wave5";
 import { ballTrigger } from "./radiance-wave7";
 import { textSources } from "./text-sources";
 import { takeTrash, trashCards } from "./trash";
+import { recycleCards, recycleOwnedCards } from "./zone-events";
 import type {
   ActivatedAbility,
   CardScript,
@@ -324,33 +326,53 @@ export function gearAbilityBonus(
   return own(s, p).filter((u) => has(s, u, 23)).length;
 }
 
-/** Runeblade Anvil and Akali: banished cards the player may still play. */
+/**
+ * Runeblade Anvil and Akali: banished cards the player may still play. Each
+ * permission names the banished copy it was given for, so an identical card
+ * banished by another effect (Dockside Lock-Up) is not offered in its place.
+ * Permissions saved before entries were named match any identical card.
+ */
 export function banishedPlayable(s: GameState, p: PlayerId) {
   const grants = (s.radiance?.anvil ?? []).filter(
     (g) => g.player === p && s.turn <= g.until,
   );
+  if (!grants.length) return [];
+  const entries = banishedCards(s, p);
+  const offered = new Set<number>();
+  for (const g of grants) {
+    if (!g.entryId) continue;
+    const index = entries.findIndex((c) => c.id === g.entryId);
+    if (index >= 0) offered.add(index);
+  }
   const left = new Map<string, number>();
-  for (const g of grants) left.set(g.cardId, (left.get(g.cardId) ?? 0) + 1);
-  const out: { id: string; index: number }[] = [];
-  s.players[p].banished.forEach((id, index) => {
-    const n = left.get(id) ?? 0;
-    if (n > 0) {
-      out.push({ id, index });
-      left.set(id, n - 1);
+  for (const g of grants)
+    if (!g.entryId) left.set(g.cardId, (left.get(g.cardId) ?? 0) + 1);
+  entries.forEach((c, index) => {
+    const n = left.get(c.cardId) ?? 0;
+    if (n > 0 && !offered.has(index)) {
+      offered.add(index);
+      left.set(c.cardId, n - 1);
     }
   });
-  return out;
+  return [...offered]
+    .sort((a, b) => a - b)
+    .map((index) => ({ id: entries[index].cardId, index }));
 }
 /** The banished card was played: its permission is used. */
 export function useBanishedPermission(
   s: GameState,
   p: PlayerId,
   cardId: string,
+  entryId?: string,
 ) {
   const grants = s.radiance?.anvil ?? [];
-  const i = grants.findIndex(
-    (g) => g.player === p && g.cardId === cardId && s.turn <= g.until,
-  );
+  const live = (g: (typeof grants)[number]) =>
+    g.player === p && s.turn <= g.until;
+  let i = entryId
+    ? grants.findIndex((g) => live(g) && g.entryId === entryId)
+    : -1;
+  if (i < 0)
+    i = grants.findIndex((g) => live(g) && !g.entryId && g.cardId === cardId);
   if (i >= 0) grants.splice(i, 1);
 }
 
@@ -358,7 +380,7 @@ function banishTop(s: GameState, p: PlayerId, ctx: PreconContext) {
   const x = s.players[p];
   const top = x.deck.shift();
   if (!top) return;
-  x.banished.push(top);
+  const entryId = banishCard(s, p, top);
   ctx.cardEvent(s, "banish", p, top);
   ctx.log?.(
     s,
@@ -369,6 +391,7 @@ function banishTop(s: GameState, p: PlayerId, ctx: PreconContext) {
   ((s.radiance ??= {}).anvil ??= []).push({
     player: p,
     cardId: top,
+    entryId,
     until: s.currentPlayer === p ? s.turn : s.turn + 1,
   });
 }
@@ -798,7 +821,9 @@ export const radianceWave6Module: ExpansionModule = {
           ctx.cardEvent(s, "reveal", p, top[i]);
           ctx.cardEvent(s, "draw", p, top[i]);
         }
-        x.deck.push(...top.filter((_, j) => j !== i));
+        // "Recycle the rest": one event, in a random order (rule 416.5).
+        const rest = top.filter((_, j) => j !== i);
+        recycleCards(s, p, ctx.shuffle?.(s, rest) ?? rest);
         return true;
       }
       case "ready-legend": {
@@ -977,7 +1002,7 @@ export const radianceWave6Module: ExpansionModule = {
           "info",
           owner,
         );
-        if (match) deck.push(deck.shift()!);
+        if (match) recycleCards(s, owner, [deck.shift()!]);
         else ctx.draw(s, owner, 1);
         return true;
       }
@@ -1025,13 +1050,16 @@ export const radianceWave6Module: ExpansionModule = {
           "info",
           p,
         );
+        // "Recycle the rest": each card to its owner's deck, as one event.
+        const rest: { owner: PlayerId; cardId: string }[] = [];
         for (const q of [0, 1] as PlayerId[]) {
           const id = tops[q];
           if (!id) continue;
           if (q === p && (getCard(id).energy ?? 0) === lowest)
             ctx.draw(s, q, 1);
-          else s.players[q].deck.push(s.players[q].deck.shift()!);
+          else rest.push({ owner: q, cardId: s.players[q].deck.shift()! });
         }
+        recycleOwnedCards(s, rest, p);
         return true;
       }
       case "angler": {

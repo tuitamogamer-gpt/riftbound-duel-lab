@@ -67,7 +67,7 @@ import {
   draftChoices,
 } from "./effect-drafts";
 import { recycleCards, recycleRunes } from "./zone-events";
-import { banishCard, takeBanishedAt } from "./banishment";
+import { banishCard, banishedCards, takeBanishedAt } from "./banishment";
 import {
   syncHybridObjects,
   uncounterable,
@@ -2637,12 +2637,22 @@ function boardCostPayable(
   sourceId: string | undefined,
   cost: ReturnType<typeof playCost>,
   domains: string[],
+  /** Units exhausted first for another nonstandard cost (Songstress). */
+  exhaustedFirst: string[] = [],
 ) {
-  if (!sourceId || script.additionalCost?.board?.minMight === undefined)
-    return true;
+  if (!sourceId) return true;
+  // A unit already exhausted for another cost can't be exhausted again.
+  if (
+    script.additionalCost?.board?.kind === "exhaustUnit" &&
+    exhaustedFirst.includes(sourceId)
+  )
+    return false;
+  if (script.additionalCost?.board?.minMight === undefined) return true;
   // Core rule 357 pays Energy/Power before nonstandard costs. Recycling runes
   // or spending Power can change Might before the unit is sacrificed.
   const projected: GameState = structuredClone(s);
+  for (const u of projected.units)
+    if (u.owner === p && exhaustedFirst.includes(u.id)) u.ready = false;
   pay(
     projected,
     p,
@@ -3694,11 +3704,22 @@ function* iterateBaseLegalActions(
     }
     if (choice.kind === "token") {
       const face = tokenCard(choice.effect?.cardName ?? "Recruit");
+      // Last Caress: the next unit you play, a token included, may go to any
+      // battlefield when the effect leaves its location to you (rule 185.2.a).
+      // It covers one unit, so not a group that must share one location.
+      const anyField =
+        Boolean(face && isCardType(face, "Unit")) &&
+        lastCaressActive(s, p) &&
+        !(
+          choice.effect?.condition === "singleLocation" && choice.remaining > 1
+        );
       for (const locationId of (face && hasDeploy(face.id)
         ? s.fields.map((f) => f.id)
         : [
             base(p),
-            ...s.fields.filter((f) => f.controller === p).map((f) => f.id),
+            ...s.fields
+              .filter((f) => anyField || f.controller === p)
+              .map((f) => f.id),
           ]
       ).filter(
         (locationId) =>
@@ -4295,17 +4316,24 @@ function* iterateBaseLegalActions(
             player: p,
           });
         // Starry-Eyed Songstress: exhaust the legend and three friendly units
-        // as an additional cost to reduce this spell's cost by 2.
+        // as an additional cost to reduce this spell's cost by 2. It combines
+        // with the spell's own additional cost when that cost names a single
+        // board object (Parallel Convergence, Sacrifice) or no object at all.
+        // Nonstandard costs are paid in any order (rule 357.2), so a unit
+        // can be exhausted and then returned or killed for the other cost.
         if (
           songstress.length &&
           isCardType(c, "Spell") &&
-          !entry.paidAdditional &&
-          !entry.costSourceId &&
-          !entry.namedTag
+          !entry.namedTag &&
+          (!entry.paidAdditional ||
+            (!script.additionalCost?.exhaustLegend &&
+              (!script.additionalCost?.board || entry.costSourceId)))
         ) {
           const reduced = playCost(s, p, c, targetId, entry.source, {
             locationId,
             songstressUnits: "reduced",
+            additionalCostPaid: entry.paidAdditional,
+            costSourceId: entry.costSourceId,
           });
           if (
             canPay(
@@ -4318,10 +4346,22 @@ function* iterateBaseLegalActions(
               reduced.additionalPower,
             )
           )
-            for (const ids of songstress)
+            for (const ids of songstress) {
+              if (
+                !boardCostPayable(
+                  s,
+                  p,
+                  script,
+                  entry.costSourceId,
+                  reduced,
+                  domains,
+                  ids.split(","),
+                )
+              )
+                continue;
               yield add({
-                id: `play|${entry.source}|${locationId ?? ""}|${targetId ?? ""}${entry.mode ? `|mode:${entry.modeIndex}` : ""}|songstress:${ids}`,
-                label: `Play ${cardName(c.id)}${entry.mode ? ` · ${entry.mode.label}` : ""}${targetLabel(s, targetId)} · exhaust Songstress, ${ids
+                id: `play|${entry.source}|${locationId ?? ""}|${targetId ?? ""}${entry.mode ? `|mode:${entry.modeIndex}` : ""}${entry.paidAdditional ? "|additional" : ""}${entry.costSourceId ? `|cost:${entry.costSourceId}` : ""}|songstress:${ids}`,
+                label: `Play ${cardName(c.id)}${entry.mode ? ` · ${entry.mode.label}` : ""}${!entry.costSourceId && entry.paidAdditional ? (script.additionalCost?.xp ? ` · spend ${script.additionalCost.xp} XP` : " · pay additional cost") : ""}${targetLabel(s, targetId)}${boardCostLabel(s, script, entry.costSourceId)} · exhaust Songstress, ${ids
                   .split(",")
                   .map((id) =>
                     cardName(s.units.find((u) => u.id === id)!.cardId),
@@ -4334,8 +4374,13 @@ function* iterateBaseLegalActions(
                 locationId,
                 detail: `${reduced.energy} energy · ${reduced.power + reduced.extraPower} power`,
                 songstressUnits: ids,
+                ...(entry.paidAdditional ? { additionalCostPaid: true } : {}),
+                ...(entry.costSourceId
+                  ? { costSourceId: entry.costSourceId }
+                  : {}),
                 ...(entry.mode || isFace(c.id, "UNL", 142) ? { effects } : {}),
               });
+            }
         }
         if (c.id === "ogn-048-298")
           for (const unit of s.units.filter((u) => u.owner === p && u.ready))
@@ -4812,7 +4857,8 @@ export function locationName(id: LocationId) {
       : "enemy base"
     : `battlefield ${Number(id.split(":")[1]) + 1}`;
 }
-function tokenCard(name: string) {
+/** The card face a token effect plays, by the token's name. */
+export function tokenCard(name: string) {
   return name === "Sprite"
     ? getCard("ogn-274-298")
     : name === "Recruit"
@@ -8737,8 +8783,10 @@ function applyActionInternal(
     else if (fromTrash)
       takeTrashAt(s, p, Number(legal.sourceId!.split(":")[1]));
     else if (legal.sourceId?.startsWith("banished:")) {
-      takeBanishedAt(s, p, Number(legal.sourceId.split(":")[1]));
-      useBanishedPermission(s, p, c.id);
+      const index = Number(legal.sourceId.split(":")[1]);
+      const entryId = banishedCards(s, p)[index]?.id;
+      takeBanishedAt(s, p, index);
+      useBanishedPermission(s, p, c.id, entryId);
     } else if (instructed) {
       /* Already moved to the pending chain during the parent effect. */
     } else {
@@ -8750,9 +8798,8 @@ function applyActionInternal(
     if (legal.cardIndices?.length && !legal.sourceId?.startsWith("hand:"))
       x.hand = x.hand.filter((_, i) => !legal.cardIndices?.includes(i));
     if (discarded.length) discardCards(s, p, discarded);
-    if (legal.additionalCostPaid && script.additionalCost?.board) {
-      payBoardCost(s, p, script, legal.costSourceId!);
-    }
+    // Starry-Eyed Songstress is paid before a board cost: a unit exhausted
+    // for her may then be returned or killed for the spell's own cost.
     if (legal.songstressUnits) {
       exhaustLegend(
         s,
@@ -8769,6 +8816,9 @@ function applyActionInternal(
         "play",
         p,
       );
+    }
+    if (legal.additionalCostPaid && script.additionalCost?.board) {
+      payBoardCost(s, p, script, legal.costSourceId!);
     }
     x.cardsPlayedThisTurn++;
     const playOrdinal = x.cardsPlayedThisTurn;

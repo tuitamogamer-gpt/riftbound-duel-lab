@@ -122,7 +122,12 @@ describe("Radiance wave 6 review fixes", () => {
     expect(s.gears.some((g) => g.id === "anvil")).toBe(false);
     expect(s.players[0].banished).toEqual(["rad-012-167", "ogn-010-298"]);
     expect(s.radiance?.anvil).toEqual([
-      { player: 0, cardId: "ogn-010-298", until: s.turn + 1 },
+      {
+        player: 0,
+        cardId: "ogn-010-298",
+        entryId: s.players[0].banishedCards![1].id,
+        until: s.turn + 1,
+      },
     ]);
   });
 

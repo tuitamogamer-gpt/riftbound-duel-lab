@@ -459,8 +459,16 @@ export interface RadianceState {
   accelerateNext?: { player: PlayerId; turn: number }[];
   /** Hexplosive Minefield: Bombs owed at end of turn. */
   delayedBombs?: { player: PlayerId; turn: number; count: number }[];
-  /** Runeblade Anvil/Akali: banished cards playable until an Ending Phase. */
-  anvil?: { player: PlayerId; cardId: string; until: number }[];
+  /**
+   * Runeblade Anvil/Akali: banished cards playable until an Ending Phase.
+   * `entryId` names the banished copy; older saves match by card only.
+   */
+  anvil?: {
+    player: PlayerId;
+    cardId: string;
+    entryId?: string;
+    until: number;
+  }[];
   /** Turn-limited base Might replacements. */
   baseMight?: { unitId: string; turn: number; might: number }[];
   /** Lady of Clockwork: the gear currently animated by each player. */

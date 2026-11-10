@@ -6,6 +6,7 @@ import {
   getMight,
   getKeywords,
   otherPlayer,
+  tokenCard,
 } from "./engine";
 import { getScript } from "./scripts";
 import { battleBalance, damageScores, planAttack } from "./bot-tactics";
@@ -333,6 +334,15 @@ export function getReferenceAction(
     if (a.id.startsWith("choose-token:")) {
       const f = s.fields.find((f) => f.id === a.locationId);
       if (!f) return 10;
+      // Last Caress can open an enemy battlefield to a unit token: alone
+      // there it only starts a fight it is unlikely to win.
+      const name = s.pendingChoice?.effect?.cardName ?? "Recruit";
+      if (
+        f.controller !== player &&
+        enemies.some((u) => u.location === f.id) &&
+        isCardType(tokenCard(name), "Unit")
+      )
+        return 5;
       return 20 - own.filter((u) => u.location === f.id).length * 2;
     }
     if (a.id.startsWith("choose-trigger:")) {
