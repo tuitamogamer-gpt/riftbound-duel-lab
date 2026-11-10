@@ -114,6 +114,21 @@ jobs:
           tests/card-wave24.test.ts
           tests/card-wave25.test.ts
           tests/card-wave26.test.ts
+          tests/radiance-wave1.test.ts
+          tests/radiance-deploy.test.ts
+          tests/radiance-wave3.test.ts
+          tests/radiance-wave4.test.ts
+          tests/radiance-wave5.test.ts
+          tests/radiance-wave6.test.ts
+          tests/radiance-wave7.test.ts
+          tests/radiance-neeko.test.ts
+          tests/radiance-review-wave1.test.ts
+          tests/radiance-review-wave34.test.ts
+          tests/radiance-review-wave5.test.ts
+          tests/radiance-review-wave6.test.ts
+          tests/radiance-review-neeko.test.ts
+          tests/legend-zones.test.ts
+          tests/online-board.test.tsx
           tests/imported-interactions.test.ts
           --maxWorkers=2 --testTimeout=30000
           --reporter=default --reporter=json
