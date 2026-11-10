@@ -6,7 +6,7 @@ if [ ! -d node_modules ]; then
   npm install || exit 1
 fi
 npm run build || exit 1
-if curl --silent --fail "$riftbound_url" | rg -q 'Riftbound'; then
+if curl --silent --fail "$riftbound_url" | grep -q 'Riftbound'; then
   open "$riftbound_url"
   exit 0
 fi
