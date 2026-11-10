@@ -21,7 +21,7 @@ This wave adds the last **7 Radiance faces** that the engine can run. With **3 a
 | Chronobreak              | Pay any amount of Power; banish that many of your units, then each owner plays them back to the same place or base, in the order you choose |
 | Iron Revenant            | Reaction: exhaust and banish a unit or gear from your trash to add 1 Power for units or gear                                                |
 | Lady of Clockwork        | Start of your Main Phase: may pay 1 Energy to turn a friendly gear into a unit                                                              |
-| The Ball                 | Deploy, Ganking as a unit; when played or moved: draw 1, or deal 2 to each enemy unit at its battlefield                                    |
+| The Ball                 | Deploy, Ganking as a unit; when you play or move it: draw 1, or deal 2 to each enemy unit at its battlefield                                |
 
 The alternate printings of Mordekaiser, Iron Revenant and Lady of Clockwork use the same rules.
 

@@ -4,7 +4,7 @@ import { isFace } from "./board-rules";
 import { choices, option } from "./card-wave16";
 import { queueCardPlay } from "./card-play";
 import { syncHybridObjects } from "./card-wave19";
-import { deployedGear } from "./deploy";
+import { gearHere } from "./deploy";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
 import { detach, physicalCard, physicalOwner } from "./objects";
 import { takeTrash, trashCards } from "./trash";
@@ -17,7 +17,13 @@ import type {
   PlayerId,
   Unit,
 } from "./types";
-import { exhaustLegend, findLegend, legendReady, legendRefs } from "./legends";
+import {
+  exhaustLegend,
+  findLegend,
+  legendNameKey,
+  legendReady,
+  legendRefs,
+} from "./legends";
 
 /**
  * Radiance wave 7: the last cards, built on new shared rules — a gear that
@@ -76,7 +82,7 @@ export const radianceWave7Scripts: Record<string, CardScript> = {
 /** Gravity Field: opponents pay 1 Energy and 1 Power per move to its battlefield. */
 export function gravityMoveTax(s: GameState, p: PlayerId, to: LocationId) {
   if (!to.startsWith("field:")) return 0;
-  return deployedGear(s, to).filter(
+  return gearHere(s, to).filter(
     (g) => g.owner !== p && isFace(g.cardId, "RAD", 62),
   ).length;
 }
@@ -141,27 +147,37 @@ function animate(s: GameState, p: PlayerId, gearId: string) {
   (state.clockwork ??= {})[p] = gear.id;
   syncHybridObjects(s);
 }
-/** The previously chosen gear stops being a unit. */
+/** A gear's own fields; everything else on a unit gear is unit-only state. */
+const gearFields = [
+  "id",
+  "cardId",
+  "owner",
+  "ready",
+  "originalOwner",
+  "originalCardId",
+  "copiedText",
+  "copiedTokenTurn",
+  "namedTag",
+  "attachedTurn",
+  "empowered",
+  "token",
+  "temporary",
+  "usedAbilities",
+] as const satisfies readonly (keyof Gear)[];
+/** The previously chosen gear stops being a unit and keeps its gear state. */
 function restore(s: GameState, gearId: string) {
-  const unit = s.units.find((u) => u.id === gearId);
+  const unit = s.units.find((u) => u.id === gearId) as
+    (Unit & Gear) | undefined;
   if (!unit) return;
+  // Equipment cannot stay on something that is no longer a unit.
+  for (const g of s.gears.filter((g) => g.attachedTo === gearId)) detach(s, g);
   s.units = s.units.filter((u) => u.id !== gearId);
-  const gear: Gear = {
-    id: unit.id,
-    cardId: unit.cardId,
-    owner: unit.owner,
-    ready: unit.ready,
-    ...(unit.originalOwner !== undefined
-      ? { originalOwner: unit.originalOwner }
-      : {}),
-    ...(unit.token ? { token: true } : {}),
-    ...(unit.location.startsWith("field:")
-      ? { deployedAt: unit.location }
-      : {}),
-    ...((unit as Unit & Gear).usedAbilities
-      ? { usedAbilities: (unit as Unit & Gear).usedAbilities }
-      : {}),
-  };
+  const gear = Object.fromEntries(
+    gearFields
+      .filter((key) => unit[key] !== undefined)
+      .map((key) => [key, unit[key]]),
+  ) as unknown as Gear;
+  if (unit.location.startsWith("field:")) gear.deployedAt = unit.location;
   s.gears = s.gears.map((g) => (g.id === gearId ? gear : g));
   syncHybridObjects(s);
 }
@@ -196,7 +212,7 @@ export const radianceWave7Module: ExpansionModule = {
       s.radiance.neeko = s.radiance.neeko.filter((n) => n.unitId !== sourceId);
     // Dockside Lock-Up: when you hold here, kill this to play the banished card.
     if (name === "hold" && locationId)
-      for (const g of deployedGear(s, locationId, p).filter(
+      for (const g of gearHere(s, locationId, p).filter(
         (g) => isFace(g.cardId, "RAD", 136) && s.radiance?.lockUp?.[g.id],
       ))
         ctx.trigger(
@@ -212,15 +228,18 @@ export const radianceWave7Module: ExpansionModule = {
     if (
       name === "main" &&
       lady &&
-      s.gears.some((g) => g.owner === p && !g.attachedTo)
+      // Only when a gear can be chosen: the current unit gear is not offered.
+      s.gears.some(
+        (g) => g.owner === p && !g.attachedTo && !isUnitObject(s, g.id),
+      )
     )
       ctx.trigger(s, p, lady.cardId, lady.key, [
         rd7("clockwork", { optional: true, triggerCost: { energy: 1 } }),
       ]);
-    // The Ball as a unit: when it moves.
+    // The Ball as a unit: "when you move this" (p is the player moving it).
     if (name === "move" && sourceId) {
       const u = s.units.find((v) => v.id === sourceId);
-      if (u && isFace(u.cardId, "RAD", 146))
+      if (u && u.owner === p && isFace(u.cardId, "RAD", 146))
         ctx.trigger(s, u.owner, u.cardId, u.id, [ballTrigger], u.location);
     }
   },
@@ -282,17 +301,21 @@ export const radianceWave7Module: ExpansionModule = {
         const gear = s.gears.find((g) => g.id === ctx.sourceId);
         const here = gear?.deployedAt;
         if (!gear || !here) return true;
-        const units = s.units.filter((u) => u.location === here);
+        // The unit is chosen: "can't be chosen" and [Deflect] apply.
+        const units = s.units.filter(
+          (u) => u.location === here && (ctx.canTargetUnit?.(s, p, u) ?? true),
+        );
         if (units.length)
           choices(
             s,
             p,
             ctx,
-            units.map((u) =>
-              option(p, `lockup:${u.id}`, `Banish ${cardName(u.cardId)}`, [
+            units.map((u) => ({
+              ...option(p, `lockup:${u.id}`, `Banish ${cardName(u.cardId)}`, [
                 rd7("lockup-banish", { cardName: u.id }),
               ]),
-            ),
+              targetId: u.id,
+            })),
           );
         return true;
       }
@@ -405,10 +428,10 @@ export const radianceWave7Module: ExpansionModule = {
         if (!neeko) return true;
         // "Different" legends: none may share a name with one already in play.
         const inZone = new Set(
-          legendRefs(s, p).map((ref) => getCard(ref.cardId).name),
+          legendRefs(s, p).map((ref) => legendNameKey(cardName(ref.cardId))),
         );
         const options = (s.players[p].extraLegends ?? []).filter(
-          (id) => !inZone.has(getCard(id).name),
+          (id) => !inZone.has(legendNameKey(cardName(id))),
         );
         if (options.length)
           choices(

@@ -192,8 +192,10 @@ describe("Radiance wave 5", () => {
     s.gears.push({ id: "bloom", cardId: rad(35), owner: 0, ready: true });
     expect(actions(s).some((a) => a.sourceId === "bloom")).toBe(false);
     s.units.push(unit("big", 0, "base:0", 6));
-    s = act(s, (a) => a.sourceId === "bloom");
-    s = settle(until(s, "Exhaust Playful Phantom: draw 1"));
+    // Exhausting the Mighty unit is part of the cost, paid on activation.
+    s = settle(
+      act(s, (a) => a.label.includes("Exhaust Playful Phantom: draw 1")),
+    );
     expect(byId(s, "big").ready).toBe(false);
     expect(s.players[0].hand).toHaveLength(1);
   });

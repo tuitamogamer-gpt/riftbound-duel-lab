@@ -20,7 +20,6 @@ import type {
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
 import {
   exhaustLegend,
-  findLegend,
   legendCardOf,
   legendEmpowered,
   legendKeyFor,
@@ -455,9 +454,10 @@ export const vendettaWave3Module: ExpansionModule = {
             source.location,
           );
       }
-      const mage = findLegend(s, p, (id) => [151, 153].includes(number(id)));
-      if (mage && sourceId !== mage.key)
-        ctx.trigger(s, p, mage.cardId, mage.key, [fx("empower-legend")]);
+      // "When you empower something else, empower me": each such legend.
+      for (const mage of legendRefs(s, p))
+        if ([151, 153].includes(number(mage.cardId)) && sourceId !== mage.key)
+          ctx.trigger(s, p, mage.cardId, mage.key, [fx("empower-legend")]);
     }
     if (event === "target" && source && source.owner !== p)
       data(s).targetedEnemy[p] = true;

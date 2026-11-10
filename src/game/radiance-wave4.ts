@@ -6,6 +6,7 @@ import { useOncePerTurn } from "./radiance-rules";
 import { textSources } from "./text-sources";
 import { trashCards } from "./trash";
 import type { CardScript, Effect, GameState, PlayerId, Unit } from "./types";
+import { recycleCards } from "./zone-events";
 
 /**
  * Radiance wave 4: the Seraphine Showdown list (exhaustion, Show Off, base
@@ -137,6 +138,17 @@ const has = (s: GameState, u: Unit, n: number) =>
   textSources(s, u).some((t) => isFace(t.cardId, "RAD", n));
 const exhaustedFriends = (s: GameState, p: PlayerId, except?: string) =>
   s.units.filter((u) => u.owner === p && !u.ready && u.id !== except).length;
+/** Fanfare: each of the next three units you play this turn draws 1. */
+function fanfareDraws(s: GameState, p: PlayerId, ctx: PreconContext) {
+  for (const grant of (s.radiance?.fanfare ?? []).filter(
+    (g) => g.player === p && g.turn === s.turn && g.remaining > 0,
+  )) {
+    grant.remaining--;
+    ctx.trigger(s, p, "rad-047-167", "legend", [{ type: "draw", amount: 1 }]);
+  }
+}
+/** Set while Heimerdinger's Mech replaces a token: still one unit played. */
+let replacingToken = false;
 
 /** Predict N: look at the top N, recycle any, put the rest back in any order. */
 function askPredict(
@@ -182,11 +194,13 @@ function askPredict(
   const final = [...order, ...left];
   const recycled = [...decisions].flatMap((d, i) => (d === "r" ? [i] : []));
   const x = s.players[p];
-  x.deck = [
-    ...final.map((i) => top[i]),
-    ...x.deck.slice(n),
-    ...recycled.map((i) => top[i]),
-  ];
+  x.deck = [...final.map((i) => top[i]), ...x.deck.slice(n)];
+  // One recycle event for the batch ("when you recycle one or more cards").
+  recycleCards(
+    s,
+    p,
+    recycled.map((i) => top[i]),
+  );
   ctx.log?.(
     s,
     `${x.name} predicts ${n}: keeps ${final.length}, recycles ${recycled.length}.`,
@@ -251,8 +265,9 @@ export const radianceWave4Module: ExpansionModule = {
     let bonus = 0;
     // Seraphine, Not Alone: +1 for each other exhausted unit you control.
     if (has(s, u, 138)) bonus += exhaustedFriends(s, u.owner, u.id);
-    // Steadfast Outrider: +2 with two or more other friendly units/gear here.
-    if (has(s, u, 128)) {
+    // Steadfast Outrider: +2 with two or more other friendly units/gear at
+    // its battlefield (a base is not a battlefield).
+    if (has(s, u, 128) && u.location.startsWith("field:")) {
       const others =
         s.units.filter(
           (v) =>
@@ -297,9 +312,10 @@ export const radianceWave4Module: ExpansionModule = {
           ctx.trigger(s, p, u.cardId, u.id, [rd4("may-draw")], u.location);
     if (name === "play") {
       const card = getCard(cardId);
-      // Piltovan Guidebot.
+      // Piltovan Guidebot: "When you play a card" (tokens are not cards).
+      const token = s.gears.some((g) => g.id === sourceId && g.token);
       for (const u of own(s, p).filter(
-        (u) => has(s, u, 57) && u.id !== sourceId,
+        (u) => !token && has(s, u, 57) && u.id !== sourceId,
       ))
         ctx.trigger(
           s,
@@ -310,15 +326,7 @@ export const radianceWave4Module: ExpansionModule = {
           u.location,
         );
       // Fanfare.
-      if (isCardType(card, "Unit"))
-        for (const grant of (s.radiance?.fanfare ?? []).filter(
-          (g) => g.player === p && g.turn === s.turn && g.remaining > 0,
-        )) {
-          grant.remaining--;
-          ctx.trigger(s, p, "rad-047-167", "legend", [
-            { type: "draw", amount: 1 },
-          ]);
-        }
+      if (isCardType(card, "Unit")) fanfareDraws(s, p, ctx);
       // Meticulous Restorationist: play me from your trash for Order Power.
       if ((card.energy ?? 0) >= 7)
         for (const t of trashCards(s, p).filter(
@@ -333,6 +341,13 @@ export const radianceWave4Module: ExpansionModule = {
             },
           ]);
     }
+    // Fanfare: a unit token is a unit you play; it raises only "unitPlayed".
+    if (
+      name === "unitPlayed" &&
+      !replacingToken &&
+      s.units.find((u) => u.id === sourceId)?.token
+    )
+      fanfareDraws(s, p, ctx);
     // Black Rose Sanctum: first non-token unit of each player dying here each turn.
     if (name === "death" && locationId?.startsWith("field:")) {
       const field = s.fields.find((f) => f.id === locationId);
@@ -379,7 +394,13 @@ export const radianceWave4Module: ExpansionModule = {
       case "empyrean":
         if (e.shown) {
           predictN(s, p, { ...ctx }, e.shown.power);
-          ctx.draw(s, p, 2);
+          // "..., then draw 2": the draw waits for the Predict choices.
+          if (s.pendingChoice)
+            s.pendingChoice.afterEffects = [
+              ...(s.pendingChoice.afterEffects ?? []),
+              { type: "draw", amount: 2 },
+            ];
+          else ctx.draw(s, p, 2);
         }
         return true;
       case "predict-step": {
@@ -455,7 +476,7 @@ export const radianceWave4Module: ExpansionModule = {
         const top = x.deck.splice(0, 2);
         const i = e.amount ?? 0;
         x.deck.unshift(top[i]);
-        x.deck.push(top[1 - i]);
+        recycleCards(s, p, [top[1 - i]]);
         ctx.draw(s, p, 1);
         return true;
       }
@@ -499,13 +520,19 @@ export const radianceWave4Module: ExpansionModule = {
         const token = s.units.find((u) => u.id === e.cardName);
         if (token) {
           s.units = s.units.filter((u) => u.id !== token.id);
-          const mech = ctx.spawnToken(
-            s,
-            token.owner,
-            "Mech",
-            token.location,
-            token.ready,
-          );
+          let mech: Unit | undefined;
+          replacingToken = true;
+          try {
+            mech = ctx.spawnToken(
+              s,
+              token.owner,
+              "Mech",
+              token.location,
+              token.ready,
+            );
+          } finally {
+            replacingToken = false;
+          }
           if (mech)
             ctx.log?.(
               s,

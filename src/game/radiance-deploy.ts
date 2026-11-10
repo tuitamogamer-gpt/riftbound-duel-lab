@@ -205,6 +205,26 @@ export const radianceDeployModule: ExpansionModule = {
         [rd("exemplar")],
         locationId,
       );
+    // Bomb: "...and kill all other Bombs you control here" does not depend on
+    // the damage. When no enemy unit here can be chosen, the targeted
+    // Deathknell never reaches the chain, so that part triggers on its own.
+    if (
+      name === "death" &&
+      cardId === "token-bomb" &&
+      sourceId &&
+      locationId &&
+      deployedGear(s, locationId, p).some(
+        (g) => g.cardId === "token-bomb" && g.id !== sourceId,
+      ) &&
+      !s.units.some(
+        (u) =>
+          u.owner !== p &&
+          u.location === locationId &&
+          (ctx.canTargetUnit?.(s, p, u) ?? true) &&
+          ctx.canPay(s, p, 0, 0, [], ctx.targetTax?.(s, p, u.id) ?? 0),
+      )
+    )
+      ctx.trigger(s, p, cardId, sourceId, [rd("bombs-here")], locationId);
   },
   effect(s, p, e, ctx) {
     // CR 830.1.b: "When an opponent holds here, kill this."

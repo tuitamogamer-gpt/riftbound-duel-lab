@@ -23,6 +23,25 @@ export function deployedGear(
   );
 }
 
+/**
+ * Gear whose own "here" rules apply at a battlefield: deployed there, or a
+ * unit gear (Lady of Clockwork) standing there. The [Deploy] keyword's
+ * "an opponent holds here" rule stays with deployedGear (CR 830.1.b).
+ */
+export function gearHere(
+  s: GameState,
+  location: LocationId,
+  owner?: PlayerId,
+): Gear[] {
+  return s.gears.filter(
+    (g) =>
+      !g.attachedTo &&
+      (owner === undefined || g.owner === owner) &&
+      (s.units.find((u) => u.id === g.id)?.location ?? g.deployedAt) ===
+        location,
+  );
+}
+
 /** Jarvan IV, Martial Paragon: "Your gear with [Deploy] have [Action]." */
 export function deployGearHasAction(
   s: GameState,

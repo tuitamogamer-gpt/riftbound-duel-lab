@@ -10343,19 +10343,6 @@
             "amount": 3,
             "target": "friendlyUnit"
           }
-        ],
-        "abilities": [
-          {
-            "label": "Exhaust a friendly Mighty unit: draw 1",
-            "exhaust": true,
-            "condition": "radiance:mighty-ready",
-            "effects": [
-              {
-                "type": "special",
-                "custom": "radiance5:bloom"
-              }
-            ]
-          }
         ]
       }
     },
@@ -11137,7 +11124,7 @@
       "status": "scripted",
       "script": {
         "implemented": true,
-        "equipCost": 1,
+        "equipCost": 0,
         "equipEnergy": 1,
         "equipment": {
           "text": "[Shield 2]",
@@ -12322,7 +12309,7 @@
       "status": "scripted",
       "script": {
         "implemented": true,
-        "equipCost": 1,
+        "equipCost": 0,
         "equipEnergy": 1,
         "equipment": {
           "text": "[Tank]",
@@ -12330,9 +12317,16 @@
             "Tank"
           ]
         },
+        "gearMight": 1,
         "reaction": true,
         "keywords": [
           "Quick-Draw"
+        ],
+        "onPlay": [
+          {
+            "type": "equip",
+            "target": "friendlyUnit"
+          }
         ]
       }
     },
@@ -12587,7 +12581,34 @@
               "maxEnergy": 3,
               "maxPower": 1,
               "ignoreCost": true,
-              "count": 3,
+              "optional": true
+            }
+          },
+          {
+            "type": "playCard",
+            "play": {
+              "zone": "trash",
+              "cardTypes": [
+                "Unit",
+                "Gear"
+              ],
+              "maxEnergy": 3,
+              "maxPower": 1,
+              "ignoreCost": true,
+              "optional": true
+            }
+          },
+          {
+            "type": "playCard",
+            "play": {
+              "zone": "trash",
+              "cardTypes": [
+                "Unit",
+                "Gear"
+              ],
+              "maxEnergy": 3,
+              "maxPower": 1,
+              "ignoreCost": true,
               "optional": true
             }
           }

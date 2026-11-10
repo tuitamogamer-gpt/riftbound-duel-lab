@@ -20,7 +20,9 @@ import type {
 import {
   hasLegend,
   hasLegendId,
+  isLegendSource,
   legendKeyFor,
+  legendReady,
   legendRefs,
   readyLegend,
   setLegendUsed,
@@ -246,7 +248,15 @@ export const originsWave3Module: ExpansionModule = {
         );
         break;
       case "ready-legend":
-        readyLegend(s, p, legendKeyFor(s, p, ctx.sourceId));
+        // "Ready your legend" from another source: the first exhausted one.
+        readyLegend(
+          s,
+          p,
+          isLegendSource(ctx.sourceId)
+            ? legendKeyFor(s, p, ctx.sourceId)
+            : (legendRefs(s, p).find((ref) => !legendReady(s, p, ref.key))
+                ?.key ?? "legend"),
+        );
         break;
       case "gold":
         ctx.spawnToken(s, p, "Gold", `base:${p}`, false);

@@ -20,9 +20,8 @@ function matches(card: Card, kind: ShowOff["kind"]) {
     case "unit":
       return isCardType(card, "Unit");
     case "hidden":
-      return (
-        Boolean(getScript(card.id)?.hidden) || /\[Hidden\]/.test(card.text)
-      );
+      // The card must have [Hidden]; text that only mentions it is not enough.
+      return Boolean(getScript(card.id)?.hidden);
     case "cost7":
       return (card.energy ?? 0) >= 7;
     case "card":
@@ -56,7 +55,11 @@ export function showOffCandidates(
         might: card.might ?? 0,
       });
   });
-  for (const u of s.units.filter((u) => u.owner === p)) {
+  // Tokens are not cards: only "a Mech", "a unit" or "a gear" can pick one.
+  const tokens = ["mech", "unit", "gear"].includes(req.kind);
+  for (const u of s.units.filter(
+    (u) => u.owner === p && (tokens || !u.token),
+  )) {
     const card = getCard(u.cardId);
     if (matches(card, req.kind))
       out.push({
@@ -68,7 +71,10 @@ export function showOffCandidates(
       });
   }
   for (const g of s.gears.filter(
-    (g) => g.owner === p && !s.units.some((u) => u.id === g.id),
+    (g) =>
+      g.owner === p &&
+      (tokens || !g.token) &&
+      !s.units.some((u) => u.id === g.id),
   )) {
     const card = getCard(g.cardId);
     if (matches(card, req.kind))

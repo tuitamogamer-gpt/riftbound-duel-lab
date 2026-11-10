@@ -1,3 +1,4 @@
+import { canonicalCardName } from "../data/card-identity";
 import type { GameState, PlayerId } from "./types";
 
 /**
@@ -14,6 +15,14 @@ export interface LegendRef {
 }
 
 const NEEKO = "neeko-legend:";
+
+/**
+ * A legend's printed name, for "different means none match names": printing
+ * labels and the champion prefix some catalog records add ("Mel - Soul's
+ * Reflection" and "Soul's Reflection" are one legend) do not count.
+ */
+export const legendNameKey = (name: string) =>
+  canonicalCardName(name.split(" - ").at(-1)!);
 
 /** Neeko's added legends that are still in play (Neeko is on the board). */
 function addedLegends(s: GameState, p: PlayerId) {
@@ -54,10 +63,16 @@ export const hasLegend = (
 export const hasLegendId = (s: GameState, p: PlayerId, cardId: string) =>
   hasLegend(s, p, (id) => id === cardId);
 
+/** The live entry behind a Neeko key: her legend while she is on the board. */
 function added(s: GameState, p: PlayerId, key: string) {
   if (!key.startsWith(NEEKO)) return undefined;
   const unitId = key.slice(NEEKO.length);
-  return s.radiance?.neeko?.find((n) => n.player === p && n.unitId === unitId);
+  return s.radiance?.neeko?.find(
+    (n) =>
+      n.player === p &&
+      n.unitId === unitId &&
+      s.units.some((u) => u.id === unitId),
+  );
 }
 
 /** The legend card behind a source id, if it is a legend in play. */
@@ -74,6 +89,8 @@ export function legendCardOf(
 export function legendReady(s: GameState, p: PlayerId, key = "legend") {
   const extra = added(s, p, key);
   if (extra) return (extra.usedTurn ?? -1) < 0;
+  // A legend whose Neeko left the board is never the starting legend.
+  if (key.startsWith(NEEKO)) return false;
   return s.players[p].legendUsedTurn < 0;
 }
 /** Exhaust (turn) or ready (-1) one legend. */
@@ -94,7 +111,9 @@ export const readyLegend = (s: GameState, p: PlayerId, key = "legend") =>
 /** The turn a legend was exhausted, or -1 while it is ready. */
 export function legendUsedTurn(s: GameState, p: PlayerId, key = "legend") {
   const extra = added(s, p, key);
-  return extra ? (extra.usedTurn ?? -1) : s.players[p].legendUsedTurn;
+  if (extra) return extra.usedTurn ?? -1;
+  // Gone with Neeko: it cannot be used, so it reads as exhausted this turn.
+  return key.startsWith(NEEKO) ? s.turn : s.players[p].legendUsedTurn;
 }
 /** Ready every legend the player has (Awaken). */
 export function readyAllLegends(s: GameState, p: PlayerId) {
@@ -105,6 +124,7 @@ export function readyAllLegends(s: GameState, p: PlayerId) {
 export function legendEmpowered(s: GameState, p: PlayerId, key = "legend") {
   const extra = added(s, p, key);
   if (extra) return Boolean(extra.empowered);
+  if (key.startsWith(NEEKO)) return false;
   return Boolean(s.players[p].legendEmpowered);
 }
 export function setLegendEmpowered(

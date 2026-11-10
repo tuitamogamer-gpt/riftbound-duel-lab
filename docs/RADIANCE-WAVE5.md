@@ -61,7 +61,7 @@ This wave adds **59 Radiance faces** outside the two Showdown lists. With **8 al
 | Lulu, Whimsical           | When she moves, another unit's base Might may become 4 this turn                              |
 | One-Two Punch             | Action; Buff a friendly unit and Stun an enemy unit                                           |
 | Protector's Shield        | Quick-Draw, Equip 1; Tank                                                                     |
-| Mournful Spirit           | Deathknell: may kill a unit or gear at its battlefield                                        |
+| Mournful Spirit           | Deathknell: may kill a unit or gear where it died, including Equipment on a unit there        |
 | Trifarian Captain         | Look at 4; may draw a unit or gear costing up to 3 Energy and 1 Power                         |
 | Demacian Illuminators     | Buff a friendly unit once for each group of friendly units that die together                  |
 | Jarvan IV, Royal Heir     | Assault, Tank; when he attacks, may move a friendly unit to his battlefield                   |

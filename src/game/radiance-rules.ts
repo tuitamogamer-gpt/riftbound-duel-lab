@@ -70,6 +70,26 @@ export const markDied = (s: GameState, p: PlayerId) => {
 export const diedThisTurn = (s: GameState, p: PlayerId) =>
   s.players[p].firstDeathTurn === s.turn ||
   s.radiance?.once?.[`died:${p}`] === s.turn;
+/**
+ * Spending a Gold token kills it ("Kill this, :rb_exhaust:: [Add]"). Only
+ * Lingering Animus reads that death, so it is recorded only in a game that
+ * holds one; games without it keep exactly the same state.
+ */
+export function goldSpent(s: GameState, p: PlayerId) {
+  const animus = (cardId: string) => isFace(cardId, "RAD", 5);
+  if (
+    s.units.some((u) => animus(u.cardId)) ||
+    (s.hidden ?? []).some((h) => animus(h.cardId)) ||
+    s.players.some(
+      (x) =>
+        animus(x.championId) ||
+        [x.hand, x.deck, x.discard, x.banished].some((zone) =>
+          zone.some(animus),
+        ),
+    )
+  )
+    markDied(s, p);
+}
 
 /** Conditional "I enter ready" and "units enter ready" rules. */
 export function radianceEntersReady(
@@ -93,6 +113,17 @@ export function radianceEntersReady(
     return true;
   return false;
 }
+/** Marks a unit that nothing can move this turn (Hunker Down). */
+export const CANNOT_MOVE = "Cannot move";
+/**
+ * "I can't move this turn" (Entrenched Boar) and "It can't move this turn"
+ * (Hunker Down): effects don't move the unit either. A bare `moveLockedTurn`
+ * (Vex: "They can't move it") only takes away its controller's move action.
+ */
+export const cannotBeMoved = (s: GameState, u: Unit) =>
+  u.moveLockedTurn === s.turn &&
+  (isFace(u.cardId, "RAD", 26) ||
+    Boolean(u.temporaryKeywords?.includes(CANNOT_MOVE)));
 /** Firebrand Raider: units don't ready during the Awaken Phase. */
 export const awakenReadyBlocked = (s: GameState) =>
   s.units.some((u) => isFace(u.cardId, "RAD", 19));

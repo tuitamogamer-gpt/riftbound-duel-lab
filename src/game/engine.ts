@@ -10,11 +10,13 @@ import { showOffCandidates, withShown } from "./show-off";
 import {
   accelerateGranted,
   battlefieldTargetAllowed,
+  cannotBeMoved,
   radianceAbilityAllowed,
   setMightProvider,
   awakenReadyBlocked,
   extraChannels,
   gearDeflect,
+  goldSpent,
   lastCaressActive,
   radianceEntersReady,
   spellsHaveReaction,
@@ -1765,7 +1767,10 @@ function startBeginning(s: GameState, p: PlayerId) {
       id: ref.key,
       deployedAt: undefined as LocationId | undefined,
     })),
-    ...s.gears.filter((g) => g.owner === p),
+    // A gear that is also a unit is listed once, with the units.
+    ...s.gears.filter(
+      (g) => g.owner === p && !s.units.some((u) => u.id === g.id),
+    ),
     ...textUnits(s).filter((u) => u.owner === p),
   ]) {
     const effects = getScript(source.cardId)?.onBegin;
@@ -3557,13 +3562,26 @@ function* iterateBaseLegalActions(
         const newTargets = selected.filter(
           (u) => !(choice.targetId ?? "").split("~").includes(u.id),
         );
+        // Chosen gear can have [Deflect] too (Watchful Curator).
+        const newGear = (a.targetId ?? "")
+          .split("~")
+          .filter(
+            (id) =>
+              !(choice.targetId ?? "").split("~").includes(id) &&
+              !selected.some((u) => u.id === id) &&
+              s.gears.some((g) => g.id === id),
+          );
         return canPay(
           s,
           p,
           0,
           0,
           [],
-          targetTax(s, p, newTargets.map((u) => u.id).join("~")),
+          targetTax(
+            s,
+            p,
+            [...newTargets.map((u) => u.id), ...newGear].join("~"),
+          ),
         );
       });
       yield* (
@@ -4646,10 +4664,7 @@ function* iterateBaseLegalActions(
             sc.equipCost,
             equipDomains(g.cardId),
           );
-          if (
-            !canPay(s, p, cost.energy, cost.power, cost.domains, cost.anyPower)
-          )
-            continue;
+          // Exhausting a unit replaces the Equip cost: no Power is needed.
           if (sc.equipExhaustUnit)
             for (const v of s.units.filter((v) => v.owner === p && v.ready))
               yield add({
@@ -4661,6 +4676,10 @@ function* iterateBaseLegalActions(
                 targetId: u.id,
                 cardId: g.cardId,
               });
+          if (
+            !canPay(s, p, cost.energy, cost.power, cost.domains, cost.anyPower)
+          )
+            continue;
           const sacrifices = sc.equipKillUnit
             ? s.units.filter((v) => v.owner === p).map((v) => v.id)
             : [undefined];
@@ -4845,6 +4864,8 @@ function spawnToken(
     location,
     ready:
       ready ||
+      // Tokens are units you play: "units enter ready" rules cover them too.
+      radianceEntersReady(s, p, c.id, location) ||
       s.players[p].unitsEnterReadyTurn === s.turn ||
       textUnits(s).some((u) => u.owner === p && u.cardId === "ogn-011-298"),
     damage: 0,
@@ -5920,6 +5941,8 @@ function moveUnit(
   actor: PlayerId = u.owner,
 ) {
   if (u.location === destination) return;
+  // "can't move this turn" (Entrenched Boar, Hunker Down) covers effects too.
+  if (cannotBeMoved(s, u)) return;
   if (
     actor !== u.owner &&
     getKeywords(s, u).includes("Cannot be moved by enemies")
@@ -6194,7 +6217,7 @@ function executeEffects(
         : (relativeSource?.location ??
           (relativeGear
             ? gearPlace(relativeGear)
-            : sourceId === "legend" || e.condition === "deathLocation"
+            : isLegendSource(sourceId) || e.condition === "deathLocation"
               ? locationId
               : undefined));
     const u =
@@ -6578,7 +6601,8 @@ function executeEffects(
         break;
       case "damageAll":
         if (n <= 0) break;
-        for (const unit of textUnits(s)) {
+        // Each unit once: copied text (Svellsongur) is not a second unit.
+        for (const unit of s.units) {
           if (
             (e.who === "all" || unit.owner === targetPlayer) &&
             (e.condition === "allLocations"
@@ -8582,6 +8606,8 @@ function applyActionInternal(
     x.firstGearAbilityTurn = s.turn;
     const gear = s.gears.find((g) => g.id === legal.sourceId)!;
     s.gears = s.gears.filter((g) => g.id !== gear.id);
+    // "Kill this": the Gold died (Lingering Animus).
+    goldSpent(s, gear.owner);
     x.power = (x.power ?? 0) + 1;
     event(s, "abilityActivated", p, gear.cardId, gear.id);
     log(s, `${x.name} spends Gold and adds one universal power.`, "play", p);
@@ -8600,8 +8626,9 @@ function applyActionInternal(
         location: base(p),
       })),
       ...textUnits(s).filter((u) => u.owner === p),
+      // A gear that is also a unit is already listed with the units.
       ...s.gears
-        .filter((g) => g.owner === p)
+        .filter((g) => g.owner === p && !s.units.some((u) => u.id === g.id))
         .map((g) => ({ ...g, location: gearPlace(g) })),
     ]) {
       const effects = getScript(source.cardId)?.onEnd;
@@ -8615,12 +8642,16 @@ function applyActionInternal(
           source.location,
         );
     }
-    const sentinel = hasLegendId(s, p, "ogs-017-024");
+    const sentinel = findLegend(s, p, (id) => id === "ogs-017-024");
     if (sentinel || x.endReadyRunes) {
       s.pendingEndTurn = p;
       pushStack(s, {
         player: p,
-        cardId: x.legendId,
+        cardId: sentinel?.cardId ?? x.legendId,
+        // A Neeko-added Annie is the source; the starting legend's item is unchanged.
+        ...(sentinel && sentinel.key !== "legend"
+          ? { sourceId: sentinel.key }
+          : {}),
         effects: [
           {
             type: "readyRunes",

@@ -4,13 +4,19 @@ import { choices, option } from "./card-wave16";
 import { deployedGear } from "./deploy";
 import { attachedEquipment } from "./equipment";
 import type { ExpansionModule } from "./later-precon-engine";
-import { markDied, useOncePerTurn } from "./radiance-rules";
+import {
+  CANNOT_MOVE,
+  cannotBeMoved,
+  markDied,
+  useOncePerTurn,
+} from "./radiance-rules";
 import { predictN } from "./radiance-wave4";
 import { getScript } from "./scripts";
 import { textSources } from "./text-sources";
 import type {
   CardScript,
   Effect,
+  GameAction,
   GameState,
   LocationId,
   PlayerId,
@@ -32,9 +38,10 @@ const disarm = (n = 1): Effect => ({
   amount: -n,
   target: "enemyUnitHere",
 });
+/** "[Equip] 1 Energy": `equipCost` is the Power part, so it stays 0. */
 const equip = (text: string, keywords: string[], shield = 0): CardScript => ({
   ...plain,
-  equipCost: 1,
+  equipCost: 0,
   equipEnergy: 1,
   equipment: { text, keywords, ...(shield ? { shield } : {}) },
 });
@@ -110,17 +117,11 @@ export const radianceWave5Scripts: Record<string, CardScript> = {
       { type: "draw", amount: 1 },
     ],
   },
+  // The draw ability is offered by the module's `actions`: exhausting a Mighty
+  // unit is a cost, so each unit that can pay it is its own activation.
   "rad-035-167": {
     ...plain,
     onPlay: [{ type: "might", amount: 3, target: "friendlyUnit" }],
-    abilities: [
-      {
-        label: "Exhaust a friendly Mighty unit: draw 1",
-        exhaust: true,
-        condition: "radiance:mighty-ready",
-        effects: [rd5("bloom")],
-      },
-    ],
   },
   "rad-037-167": plain,
   "rad-039-167": plain,
@@ -230,8 +231,11 @@ export const radianceWave5Scripts: Record<string, CardScript> = {
   },
   "rad-123-167": {
     ...equip("[Tank]", ["Tank"]),
+    gearMight: 1,
     reaction: true,
     keywords: ["Quick-Draw"],
+    // Printed [Quick-Draw]: "When you play it, attach it to a unit you control."
+    onPlay: [{ type: "equip", target: "friendlyUnit" }],
   },
   "rad-126-167": { ...plain, onDeath: [rd5("mournful")] },
   "rad-129-167": { ...plain, onPlay: [rd5("captain")] },
@@ -242,22 +246,21 @@ export const radianceWave5Scripts: Record<string, CardScript> = {
     keywords: ["Assault", "Tank"],
     onAttack: [rd5("jarvan-call")],
   },
+  // "Play up to 3": three separate optional plays (a count applies only to
+  // looking at the top of a deck).
   "rad-135-167": {
     ...plain,
-    spell: [
-      {
-        type: "playCard",
-        play: {
-          zone: "trash",
-          cardTypes: ["Unit", "Gear"],
-          maxEnergy: 3,
-          maxPower: 1,
-          ignoreCost: true,
-          count: 3,
-          optional: true,
-        },
+    spell: [0, 1, 2].map((): Effect => ({
+      type: "playCard",
+      play: {
+        zone: "trash",
+        cardTypes: ["Unit", "Gear"],
+        maxEnergy: 3,
+        maxPower: 1,
+        ignoreCost: true,
+        optional: true,
       },
-    ],
+    })),
   },
   "rad-137-167": {
     ...plain,
@@ -292,7 +295,6 @@ export const radianceWave5Scripts: Record<string, CardScript> = {
 
 type State = GameState & {
   radiancePride?: { unitId: string; turn: number }[];
-  radianceIllumBatch?: string;
 };
 const own = (s: GameState, p: PlayerId) => s.units.filter((u) => u.owner === p);
 const has = (s: GameState, u: Unit, n: number) =>
@@ -335,6 +337,14 @@ const friendlyGearHere = (s: GameState, u: Unit) =>
           (v) => v.id === g.attachedTo && v.location === u.location,
         )),
   );
+/** Where a gear is: with the unit it is attached to, else deployed or in its base. */
+const gearLocation = (
+  s: GameState,
+  g: GameState["gears"][number],
+): LocationId =>
+  s.units.find((u) => u.id === g.attachedTo)?.location ??
+  g.deployedAt ??
+  `base:${g.owner}`;
 
 export const radianceWave5Module: ExpansionModule = {
   might(s, u, value) {
@@ -395,13 +405,13 @@ export const radianceWave5Module: ExpansionModule = {
       // Unit deaths are already recorded by the engine (firstDeathTurn).
       if (isCardType(card, "Gear") && !s.units.some((u) => u.id === sourceId))
         markDied(s, p);
-      // Demacian Illuminators: once for each batch of friendly deaths.
-      const batch = `${s.turn}:${p}:${(ctx.dyingUnitIds ?? [sourceId]).join(",")}`;
-      if (
-        isCardType(card, "Unit") &&
-        (s as State).radianceIllumBatch !== batch
-      ) {
-        (s as State).radianceIllumBatch = batch;
+      // Demacian Illuminators: once for each batch of friendly deaths. Units
+      // that die together share one event batch, in board order, so the batch
+      // triggers on its first unit owned by this player.
+      const firstOwn = (ctx.dyingUnitIds ?? [sourceId]).find(
+        (id) => s.units.find((u) => u.id === id)?.owner === p,
+      );
+      if (isCardType(card, "Unit") && sourceId === firstOwn) {
         for (const u of own(s, p).filter((u) => has(s, u, 131)))
           ctx.trigger(
             s,
@@ -413,9 +423,14 @@ export const radianceWave5Module: ExpansionModule = {
           );
       }
     }
-    if (name === "play") {
+    // A unit token is a unit you play too. It raises only "unitPlayed"; a card
+    // also raises "play", which is the event handled for it.
+    const token =
+      name === "unitPlayed" &&
+      Boolean(s.units.find((u) => u.id === sourceId)?.token);
+    if (name === "play" || token) {
       const card = getCard(cardId);
-      if ((card.energy ?? 0) >= 7)
+      if (name === "play" && (card.energy ?? 0) >= 7)
         // Sanctum Conservator: ready me.
         for (const u of own(s, p).filter((u) => has(s, u, 30)))
           ctx.trigger(
@@ -484,22 +499,39 @@ export const radianceWave5Module: ExpansionModule = {
         );
     }
   },
-  actions(s, p) {
-    // Black Market: once on each of your turns, Power x2: draw 1.
-    const field = s.fields.find((f) => isFace(f.cardId, "RAD", 158));
+  actions(s, p, ctx) {
     if (
-      !field ||
       s.currentPlayer !== p ||
       s.priorityPlayer !== p ||
       s.phase !== "main" ||
-      s.stack.length ||
-      s.radiance?.once?.[`black-market:${p}`] === s.turn
+      s.stack.length
     )
       return [];
-    const x = s.players[p];
-    const runes = x.runes.filter((r) => r.ready).length + (x.power ?? 0);
-    if (runes < 2) return [];
+    // Invigorating Bloom: "Exhaust a friendly [Mighty] unit, :rb_exhaust:: Draw
+    // 1." Both exhaustions are costs, paid as the ability is activated.
+    const bloom: GameAction[] = s.gears
+      .filter((g) => g.owner === p && g.ready && isFace(g.cardId, "RAD", 35))
+      .flatMap((g) =>
+        s.units
+          .filter((u) => u.owner === p && u.ready && ctx.getMight(s, u) >= 5)
+          .map((u) => ({
+            id: `radiance:bloom:${g.id}:${u.id}`,
+            label: `${getCard(g.cardId).name}: Exhaust ${getCard(u.cardId).name}: draw 1`,
+            category: "ability" as const,
+            player: p,
+            sourceId: g.id,
+            cardId: g.cardId,
+            costSourceId: u.id,
+          })),
+      );
+    // Black Market: once on each of your turns, Power x2: draw 1.
+    const field = s.fields.find((f) => isFace(f.cardId, "RAD", 158));
+    if (!field || s.radiance?.once?.[`black-market:${p}`] === s.turn)
+      return bloom;
+    // Power is paid by recycling any rune, ready or not, or from a pool.
+    if (!ctx.canPay(s, p, 0, 2)) return bloom;
     return [
+      ...bloom,
       {
         id: `radiance:black-market:${field.id}`,
         label: "Black Market: pay 2 Power to draw 1",
@@ -511,6 +543,21 @@ export const radianceWave5Module: ExpansionModule = {
     ];
   },
   apply(s, action, ctx) {
+    if (action.id.startsWith("radiance:bloom:")) {
+      const gear = s.gears.find((g) => g.id === action.sourceId);
+      const unit = s.units.find((u) => u.id === action.costSourceId);
+      if (!gear?.ready || !unit?.ready) return true;
+      unit.ready = false;
+      gear.ready = false;
+      ctx.pushStack(s, {
+        player: action.player,
+        cardId: gear.cardId,
+        sourceId: gear.id,
+        effects: [{ type: "draw", amount: 1 }],
+        kind: "ability",
+      });
+      return true;
+    }
     if (!action.id.startsWith("radiance:black-market:")) return false;
     const p = action.player;
     if (!ctx.canPay(s, p, 0, 2)) return true;
@@ -576,7 +623,10 @@ export const radianceWave5Module: ExpansionModule = {
       case "ferryman": {
         if (!self || !self.location.startsWith("field:")) return true;
         const others = own(s, p).filter(
-          (u) => u.id !== self.id && u.location === self.location,
+          (u) =>
+            u.id !== self.id &&
+            u.location === self.location &&
+            !cannotBeMoved(s, u),
         );
         if (others.length)
           choices(s, p, ctx, [
@@ -607,36 +657,10 @@ export const radianceWave5Module: ExpansionModule = {
         if (target) {
           ctx.runEffects(s, p, [{ type: "ready" }], target.id);
           target.moveLockedTurn = s.turn;
+          // Effects can't move it either (see `cannotBeMoved`).
+          (target.temporaryKeywords ??= []).push(CANNOT_MOVE);
         }
         return true;
-      case "bloom": {
-        const mighty = s.units.filter(
-          (u) => u.owner === p && u.ready && ctx.getMight(s, u) >= 5,
-        );
-        if (!mighty.length) return true;
-        choices(
-          s,
-          p,
-          ctx,
-          mighty.map((u) =>
-            option(
-              p,
-              `bloom:${u.id}`,
-              `Exhaust ${getCard(u.cardId).name}: draw 1`,
-              [rd5("exhaust-draw", { cardName: u.id })],
-            ),
-          ),
-        );
-        return true;
-      }
-      case "exhaust-draw": {
-        const unit = s.units.find((u) => u.id === e.cardName);
-        if (unit?.ready) {
-          unit.ready = false;
-          ctx.draw(s, p, 1);
-        }
-        return true;
-      }
       case "predict":
         predictN(s, p, ctx, e.amount ?? 1);
         return true;
@@ -702,7 +726,13 @@ export const radianceWave5Module: ExpansionModule = {
             f.controller !== p &&
             s.units.some((u) => u.owner !== p && u.location === f.id),
         );
-        if (!target || target.owner !== p || !fields.length) return true;
+        if (
+          !target ||
+          target.owner !== p ||
+          !fields.length ||
+          cannotBeMoved(s, target)
+        )
+          return true;
         if (fields.length === 1) ctx.moveUnit(s, target, fields[0].id, p);
         else
           choices(
@@ -776,8 +806,10 @@ export const radianceWave5Module: ExpansionModule = {
         return true;
       case "mournful": {
         const unitsHere = s.units.filter((u) => u.location === here);
+        // Gear "here": deployed here, in this base, or attached to a unit here.
         const gearHere = s.gears.filter(
-          (g) => g.deployedAt === here && !s.units.some((u) => u.id === g.id),
+          (g) =>
+            gearLocation(s, g) === here && !s.units.some((u) => u.id === g.id),
         );
         if (unitsHere.length + gearHere.length)
           choices(s, p, ctx, [
@@ -790,11 +822,16 @@ export const radianceWave5Module: ExpansionModule = {
               ),
               targetId: u.id,
             })),
-            ...gearHere.map((g) =>
-              option(p, `mournful:${g.id}`, `Kill ${getCard(g.cardId).name}`, [
-                rd5("kill-gear", { cardName: g.id }),
-              ]),
-            ),
+            // Choosing a gear names it as a target, so its [Deflect] applies.
+            ...gearHere.map((g) => ({
+              ...option(
+                p,
+                `mournful:${g.id}`,
+                `Kill ${getCard(g.cardId).name}`,
+                [rd5("kill-gear", { cardName: g.id })],
+              ),
+              targetId: g.id,
+            })),
             option(p, "mournful:none", "Do not kill anything", []),
           ]);
         return true;
@@ -844,7 +881,10 @@ export const radianceWave5Module: ExpansionModule = {
       case "jarvan-call": {
         if (!self) return true;
         const units = own(s, p).filter(
-          (u) => u.id !== self.id && u.location !== self.location,
+          (u) =>
+            u.id !== self.id &&
+            u.location !== self.location &&
+            !cannotBeMoved(s, u),
         );
         if (units.length)
           choices(s, p, ctx, [
@@ -886,8 +926,8 @@ export const radianceWave5Module: ExpansionModule = {
             ),
             targetId: u.id,
           })),
-          ...gears.map((g) =>
-            option(
+          ...gears.map((g) => ({
+            ...option(
               p,
               `morde:${g.id}`,
               `Discard 1 to kill ${getCard(g.cardId).name}`,
@@ -896,7 +936,8 @@ export const radianceWave5Module: ExpansionModule = {
                 rd5("kill-gear", { cardName: g.id }),
               ],
             ),
-          ),
+            targetId: g.id,
+          })),
           option(p, "morde:none", "Do not discard", []),
         ]);
         return true;
@@ -909,6 +950,16 @@ export const radianceWave5Module: ExpansionModule = {
         if (!first || !second) return true;
         if (e.custom.endsWith("realm")) {
           second.temporaryMight -= 2;
+          // This reduces an enemy unit's Might (Ahri, Confident).
+          if (second.owner !== p)
+            ctx.cardEvent(
+              s,
+              "mightReduced",
+              p,
+              second.cardId,
+              second.id,
+              second.location,
+            );
           first.temporaryMight += 2;
           const a = ctx.getMight(s, first),
             b = ctx.getMight(s, second);

@@ -8,6 +8,7 @@ import {
 } from "../data/decks";
 import { isImplemented } from "./scripts";
 import { gameplayFingerprint, hasUnlimitedCopies } from "../data/card-identity";
+import { legendNameKey } from "./legends";
 
 export const IMPORTED_DECKS_KEY = "riftbound-imported-decks-v1";
 const MAX_TEXT_LENGTH = 100_000;
@@ -280,17 +281,20 @@ export function neekoLegendIssues(deck: StarterDeck): DeckIssue[] {
         `${NEEKO_NAME} dozvoljava najviše ${MAX_NEEKO_LEGENDS} dodatne legende.`,
       ),
     );
-  const names = new Set([cardsById[deck.legendId]?.name]);
+  // Printings of one legend share a name whatever their catalog label says.
+  const startingName = cardsById[deck.legendId]?.name;
+  const names = new Set(startingName ? [legendNameKey(startingName)] : []);
   for (const id of extra) {
     const card = cardsById[id];
     if (!card) continue;
+    const name = legendNameKey(card.name);
     if (!isCardType(card, "Legend"))
       issues.push(
         issue("neeko-legend-type", `${card.name} nije Legend karta.`, {
           cardId: id,
         }),
       );
-    else if (names.has(card.name))
+    else if (names.has(name))
       issues.push(
         issue(
           "neeko-legend-duplicate",
@@ -298,7 +302,7 @@ export function neekoLegendIssues(deck: StarterDeck): DeckIssue[] {
           { cardId: id },
         ),
       );
-    names.add(card.name);
+    names.add(name);
   }
   return issues;
 }

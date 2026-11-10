@@ -3,6 +3,7 @@ import { isFace } from "./board-rules";
 import { choices, option } from "./card-wave16";
 import { deployedGear, hasDeploy } from "./deploy";
 import type { ExpansionModule, PreconContext } from "./later-precon-engine";
+import { physicalCard, physicalOwner } from "./objects";
 import { useOncePerTurn, usedThisTurn } from "./radiance-rules";
 import { shieldValue } from "./radiance-wave5";
 import { ballTrigger } from "./radiance-wave7";
@@ -42,6 +43,11 @@ const plainGear = (s: GameState, p: PlayerId) =>
   s.gears.filter((g) => g.owner === p && !isUnitObject(s, g.id));
 const cardName = (id: string) => getCard(id).name;
 const both = (effects: Effect[]) => ({ onAttack: effects, onDefend: effects });
+/**
+ * Orianna, Mechanical Marvel: the gear whose cost, as last worked out on this
+ * state, took her discount (`player:card`). Only that play uses it up.
+ */
+const oriannaDiscounts = new WeakMap<GameState, Set<string>>();
 
 export const radianceWave6Scripts: Record<string, CardScript> = {
   // Scorched Earth: 5 damage split among units at a single battlefield.
@@ -400,13 +406,21 @@ export const radianceWave6Module: ExpansionModule = {
     let energy = 0,
       power = 0;
     // Orianna, Mechanical Marvel: once each turn, a gear costs 1 and 1 less.
-    if (
-      isCardType(card, "Gear") &&
-      !usedThisTurn(s, "orianna-mm", p) &&
-      own(s, p).some((u) => has(s, u, 68) && u.location.startsWith("field:"))
-    ) {
-      energy -= 1;
-      power -= 1;
+    // A cost with nothing left to pay (a free play) does not take it.
+    if (isCardType(card, "Gear")) {
+      const key = `${p}:${card.id}`;
+      if (
+        (card.energy || card.power) &&
+        !usedThisTurn(s, "orianna-mm", p) &&
+        own(s, p).some((u) => has(s, u, 68) && u.location.startsWith("field:"))
+      ) {
+        energy -= 1;
+        power -= 1;
+        oriannaDiscounts.set(
+          s,
+          (oriannaDiscounts.get(s) ?? new Set<string>()).add(key),
+        );
+      } else oriannaDiscounts.get(s)?.delete(key);
     }
     // Boy Who Shattered Time: the next unit this turn.
     if (
@@ -452,14 +466,12 @@ export const radianceWave6Module: ExpansionModule = {
         (g) => isFace(g.cardId, "RAD", 69) && g.id !== sourceId,
       ))
         ctx.trigger(s, p, g.cardId, g.id, [{ type: "draw", amount: 2 }]);
-      if (isCardType(card, "Gear") && !usedThisTurn(s, "orianna-mm", p)) {
-        if (
-          own(s, p).some(
-            (u) => has(s, u, 68) && u.location.startsWith("field:"),
-          )
-        )
-          useOncePerTurn(s, "orianna-mm", p);
-      }
+      // Orianna: the discount is used by the gear whose cost took it.
+      if (
+        isCardType(card, "Gear") &&
+        oriannaDiscounts.get(s)?.delete(`${p}:${card.id}`)
+      )
+        useOncePerTurn(s, "orianna-mm", p);
       if (
         isCardType(card, "Unit") &&
         s.radiance?.once?.[`boy-grant:${p}`] === s.turn
@@ -487,9 +499,9 @@ export const radianceWave6Module: ExpansionModule = {
           ctx.trigger(s, u.owner, u.cardId, u.id, [rd6("banish-top")]);
       }
     }
-    // Runeblade Anvil: when this leaves the board.
+    // Runeblade Anvil: when this leaves the board (killed, returned, banished).
     if (
-      (name === "death" || name === "bounce") &&
+      (name === "death" || name === "bounce" || name === "banish") &&
       sourceId &&
       card &&
       isFace(cardId, "RAD", 12) &&
@@ -511,15 +523,25 @@ export const radianceWave6Module: ExpansionModule = {
       const where =
         gear?.deployedAt ??
         s.units.find((u) => u.id === gear?.attachedTo)?.location;
-      if (gear && !dying && !gear.token && where?.startsWith("field:"))
+      if (gear && !dying && !gear.token && where?.startsWith("field:")) {
+        // The gear reaches its owner's trash after this event: its own visit
+        // is the one that is not among the copies already there.
+        const owner = physicalOwner(gear),
+          dead = physicalCard(gear);
+        const known = trashCards(s, owner)
+          .filter((t) => t.cardId === dead)
+          .map((t) => t.id);
         for (const a of own(s, gear.owner).filter((a) => has(s, a, 130)))
           ctx.trigger(s, gear.owner, a.cardId, a.id, [
             rd6("armorer", {
               optional: true,
               triggerCost: { energy: 1 },
-              cardName: gear.cardId,
+              cardName: dead,
+              amount: owner,
+              keyword: JSON.stringify(known),
             }),
           ]);
+      }
     }
     // Riven, Broken Blade / Riven, Deserter / Resplendent Rostrum.
     if (name === "exhausted" && sourceId) {
@@ -557,8 +579,9 @@ export const radianceWave6Module: ExpansionModule = {
           [rd6("self-might", { amount: 1 })],
           a.location,
         );
-    // Blossoming Dreamroot: when you win a combat here, draw 1.
-    if (name === "combatEnd" && locationId) {
+    // Blossoming Dreamroot: when you win a combat here, draw 1. A showdown
+    // that never became a combat is not won.
+    if (name === "combatEnd" && locationId && s.combat?.engaged) {
       const winner = combatWinner(s, locationId);
       if (winner !== undefined)
         for (const g of deployedGear(s, locationId, winner).filter((g) =>
@@ -574,17 +597,18 @@ export const radianceWave6Module: ExpansionModule = {
           );
     }
     if (name === "end") {
-      // Hexplosive Minefield: play the owed Bombs to a single battlefield.
+      // Hexplosive Minefield: the Bombs owed for this turn go to a single
+      // battlefield, whoever's turn it is. Older entries are dropped.
       const owed = (s.radiance?.delayedBombs ?? []).filter(
-        (d) => d.player === p && d.turn === s.turn,
+        (d) => d.turn === s.turn,
       );
       if (s.radiance?.delayedBombs)
         s.radiance.delayedBombs = s.radiance.delayedBombs.filter(
-          (d) => !owed.includes(d),
+          (d) => d.turn > s.turn,
         );
       for (const d of owed)
         if (d.count > 0)
-          ctx.trigger(s, p, "rad-142-167", "legend", [
+          ctx.trigger(s, d.player, "rad-142-167", "legend", [
             { ...bomb, amount: d.count, condition: "singleLocation" },
           ]);
       // Boy Who Shattered Time: "Kill me at end of turn."
@@ -709,7 +733,18 @@ export const radianceWave6Module: ExpansionModule = {
         if (isUnitObject(s, id)) ctx.killUnits(s, [id]);
         else if (s.gears.some((g) => g.id === id)) ctx.killGear(s, id);
         else return true;
-        ctx.spawnToken(s, p, e.keyword ?? "Recruit", `base:${p}`, false);
+        const name = e.keyword ?? "Recruit";
+        // No location is printed: the usual choice of where a unit token goes
+        // (your base while a death replacement is still being chosen).
+        if (s.pendingChoice) ctx.spawnToken(s, p, name, `base:${p}`, false);
+        else
+          ctx.runEffects(
+            s,
+            p,
+            [{ type: "token", cardName: name }],
+            undefined,
+            ctx.sourceId,
+          );
         return true;
       }
       case "command-move": {
@@ -1054,6 +1089,17 @@ export const radianceWave6Module: ExpansionModule = {
         if (!cost?.ready) return true;
         cost.ready = false;
         ctx.runEffects(s, p, [{ type: "ready" }], e.keyword);
+        // The cost was also the unit readied: it still became exhausted,
+        // which comparing the board before and after this action cannot see.
+        if (s.units.some((u) => u.id === e.cardName && u.ready))
+          ctx.cardEvent(
+            s,
+            "exhausted",
+            cost.owner,
+            cost.cardId,
+            cost.id,
+            cost.location,
+          );
         return true;
       }
       case "transpose": {
@@ -1075,10 +1121,12 @@ export const radianceWave6Module: ExpansionModule = {
         return true;
       }
       case "armorer": {
-        const owner = p;
-        const entry = trashCards(s, owner)
-          .filter((t) => t.cardId === e.cardName)
-          .at(-1);
+        // Only the gear that died: its own visit to its owner's trash.
+        const owner = (e.amount ?? p) as PlayerId;
+        const known: string[] = JSON.parse(e.keyword ?? "[]");
+        const entry = trashCards(s, owner).find(
+          (t) => t.cardId === e.cardName && !known.includes(t.id),
+        );
         if (!entry) return true;
         takeTrash(s, owner, entry.id);
         s.players[owner].hand.push(entry.cardId);

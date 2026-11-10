@@ -43,6 +43,7 @@ import {
   exportDeckText,
   MAX_NEEKO_LEGENDS,
 } from "../game/deck-import";
+import { legendNameKey } from "../game/legends";
 import { isImplemented } from "../game/scripts";
 import {
   balancedBuilderRunes,
@@ -897,7 +898,7 @@ export function DeckBuilder({
               const chosen = draft.extraLegendIds ?? [];
               const taken = new Set(
                 [draft.legendId, ...chosen.filter((_, i) => i !== slot)].map(
-                  (id) => cardsById[id]?.name,
+                  (id) => legendNameKey(cardsById[id]?.name ?? ""),
                 ),
               );
               return (
@@ -919,7 +920,8 @@ export function DeckBuilder({
                     {legends
                       .filter(
                         (card) =>
-                          card.id === chosen[slot] || !taken.has(card.name),
+                          card.id === chosen[slot] ||
+                          !taken.has(legendNameKey(card.name)),
                       )
                       .map((card) => (
                         <option key={card.id} value={card.id}>

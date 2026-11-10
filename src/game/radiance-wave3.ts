@@ -7,6 +7,7 @@ import { useOncePerTurn } from "./radiance-rules";
 import { textSources } from "./text-sources";
 import type { CardScript, Effect, GameState, PlayerId, Unit } from "./types";
 import { findLegend } from "./legends";
+import { recycleCards } from "./zone-events";
 
 /**
  * Radiance wave 3: the Evelynn Showdown list and other face-down cards.
@@ -106,8 +107,17 @@ function recycleUnit(s: GameState, unit: Unit) {
   }
   s.units = s.units.filter((u) => u.id !== unit.id);
   s.gears = s.gears.filter((g) => g.id !== unit.id);
-  if (!unit.token) s.players[physicalOwner(unit)].deck.push(physicalCard(unit));
+  // A recycle event, so "when you recycle" abilities see it.
+  if (!unit.token)
+    recycleCards(s, physicalOwner(unit), [physicalCard(unit)], unit.owner);
 }
+/** Only Hold 'Em reads `radianceFieldPlays`. */
+const holdEmInGame = (s: GameState) =>
+  s.players.some((x) =>
+    [x.hand, x.deck, x.discard, x.banished].some((zone) =>
+      zone.some((id) => isFace(id, "RAD", 70)),
+    ),
+  );
 const openFields = (s: GameState) =>
   s.fields.filter(
     (f) => f.controller === null && !s.units.some((u) => u.location === f.id),
@@ -125,11 +135,18 @@ export const radianceWave3Module: ExpansionModule = {
     return {};
   },
   event(s, name, p, cardId, sourceId, locationId, ctx) {
-    if (name === "play") {
+    // A unit token is a unit you play; it raises only "unitPlayed".
+    const tokenPlay =
+      name === "unitPlayed" &&
+      Boolean(s.units.find((u) => u.id === sourceId)?.token);
+    if (name === "play" || tokenPlay) {
       const card = getCard(cardId);
       const permanent = isCardType(card, "Unit") || isCardType(card, "Gear");
       if (permanent && locationId?.startsWith("field:")) {
-        ((s as State).radianceFieldPlays ??= {})[String(p)] = s.turn;
+        // A token records its play only in a game that has a Hold 'Em, so
+        // games without Radiance cards keep the same state.
+        if (!tokenPlay || holdEmInGame(s))
+          ((s as State).radianceFieldPlays ??= {})[String(p)] = s.turn;
         const field = s.fields.find((f) => f.id === locationId);
         if (
           field &&
