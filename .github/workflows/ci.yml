@@ -127,6 +127,7 @@ jobs:
           tests/radiance-review-wave5.test.ts
           tests/radiance-review-wave6.test.ts
           tests/radiance-review-neeko.test.ts
+          tests/radiance-followup.test.ts
           tests/legend-zones.test.ts
           tests/online-board.test.tsx
           tests/imported-interactions.test.ts
