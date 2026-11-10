@@ -1,5 +1,15 @@
 # Validation evidence
 
+## Radiance script review — 10 November 2026
+
+A card-by-card [review of the Radiance scripts](RADIANCE-REVIEW.md) against their printed text reported 48 differences; 42 are corrected, each with a regression test, and the rest are listed there as open. The same pass corrected where the online board, the replay viewer and target labels show [Deploy] gear.
+
+- **Before**, commit `c06acac`: **2,932 tests in 149 files** outside the precon matrix, exit 0 with the CI timeouts.
+- **After**, code as of commit `879ee6f`: **2,994 tests in 155 files** outside the precon matrix and **331 precon-matrix tests** in three shards (111 + 110 + 110), all with exit 0 and the CI timeouts. The weekly workflow's report checks pass: **3,217 unique tests**, none failed or missing, and all **169 ordered pairings**. TypeScript, the production build and catalog consistency also passed.
+- Eight fixed-seed bot games between retail decks took the same actions to the same result before and after the changes.
+
+The Radiance rule tests now run in the required checks as well as in the weekly regression.
+
 ## Neeko and multiple legends — 6 November 2026
 
 [Neeko, Blending In](RADIANCE-NEEKO.md) makes all **219** Radiance printings playable (**1,679 / 1,679** registered entries).
