@@ -134,6 +134,20 @@ describe("mobile board minimap", () => {
     ).toEqual(["base:0", "field:1", "base:1"]);
   });
 
+  it("finds [Deploy] gear at its battlefield rather than its owner's base", () => {
+    const game = table();
+    game.gears.push({
+      id: "deployed",
+      cardId: "ogn-183-298",
+      owner: 1,
+      ready: true,
+      deployedAt: "field:1",
+    });
+    expect(mobileTargetZones(game, [action({ targetId: "deployed" })])).toEqual(
+      ["field:1"],
+    );
+  });
+
   it("does not mistake a playable source for a target or invent absent zones", () => {
     const game = table();
     expect(

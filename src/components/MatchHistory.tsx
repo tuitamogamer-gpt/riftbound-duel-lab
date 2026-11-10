@@ -1256,7 +1256,8 @@ export function MatchHistory({
                                 ? view.units.find(
                                     (unit) => unit.id === gear.attachedTo,
                                   )?.location
-                                : `base:${gear.owner}`) === zone.id,
+                                : (gear.deployedAt ?? `base:${gear.owner}`)) ===
+                              zone.id,
                           )
                           .map((gear) => {
                             const card = findCard(gear.cardId);

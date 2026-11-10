@@ -57,6 +57,7 @@ export function publicActionTargets(
       unit?.location ??
       (gear
         ? (game.units.find((item) => item.id === gear.attachedTo)?.location ??
+          gear.deployedAt ??
           `base:${gear.owner}`)
         : field?.id);
     return [{ id, card, owner, location: locationLabel(location) }];

@@ -24,7 +24,9 @@ function objectLocations(game: GameState, value?: string): LocationId[] {
     const gear = game.gears.find((entry) => entry.id === id);
     if (gear) {
       const bearer = game.units.find((entry) => entry.id === gear.attachedTo);
-      locations.add(bearer?.location ?? `base:${gear.owner}`);
+      locations.add(
+        bearer?.location ?? gear.deployedAt ?? `base:${gear.owner}`,
+      );
     }
   }
   return [...locations];

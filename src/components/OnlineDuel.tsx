@@ -649,23 +649,23 @@ export default function OnlineDuel({
                         )}
                       </div>
                     ))}
-                  {zone === `base:${actor}` &&
-                    observed.state.gears
-                      .filter(
-                        (gear) =>
-                          gear.owner === actor &&
-                          !gear.attachedTo &&
-                          !observed.state.units.some(
-                            (unit) => unit.id === gear.id,
-                          ),
-                      )
-                      .map((gear) =>
-                        cardPiece(gear.cardId, gear.id, () =>
-                          actor === seat
-                            ? source(gear.id)
-                            : inspect(gear.cardId),
+                  {/* Unattached gear sits in its controller's base unless
+                      [Deploy] placed it at a battlefield. */}
+                  {observed.state.gears
+                    .filter(
+                      (gear) =>
+                        gear.owner === actor &&
+                        !gear.attachedTo &&
+                        (gear.deployedAt ?? `base:${actor}`) === zone &&
+                        !observed.state.units.some(
+                          (unit) => unit.id === gear.id,
                         ),
-                      )}
+                    )
+                    .map((gear) =>
+                      cardPiece(gear.cardId, gear.id, () =>
+                        actor === seat ? source(gear.id) : inspect(gear.cardId),
+                      ),
+                    )}
                   {!(
                     observed.state.units.some(
                       (unit) => unit.location === zone && unit.owner === actor,

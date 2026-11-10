@@ -97,6 +97,25 @@ describe("public target identity in the decision bar", () => {
       }).map((item) => item.id),
     ).toEqual(["ally-base", "ally-field"]);
   });
+  it("places [Deploy] gear at its battlefield and other loose gear in its base", () => {
+    const game = position();
+    game.gears = [
+      { id: "loose", cardId: ogn(183), owner: 1, ready: true },
+      {
+        id: "deployed",
+        cardId: ogn(183),
+        owner: 1,
+        ready: true,
+        deployedAt: "field:1",
+      },
+    ];
+    expect(
+      publicActionTargets(game, { targetId: "loose~deployed" }),
+    ).toMatchObject([
+      { id: "loose", owner: 1, location: "Protivnička baza" },
+      { id: "deployed", owner: 1, location: "Desno bojište" },
+    ]);
+  });
   it("never resolves a private hand, deck, or hidden card as a target face", () => {
     const game = position();
     game.players[1].hand = [ogn(88)];
