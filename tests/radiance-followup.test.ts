@@ -400,3 +400,109 @@ describe("Radiance review follow-up", () => {
     expect(t.radiance?.anvil ?? []).toHaveLength(0);
   });
 });
+
+describe("Heimerdinger, Academy Instructor replaces the token's play", () => {
+  const heimer = () => ({
+    ...unit("heimer", 0, "field:0", 5),
+    cardId: rad(132),
+  });
+  const recruitToBase: Effect[] = [
+    { type: "token", cardName: "Recruit", location: "base" },
+  ];
+  const mechs = (s: GameState) =>
+    s.units.filter((u) => u.cardId === "token-mech");
+  const recruits = (s: GameState) =>
+    s.units.filter((u) => u.token && u.cardId !== "token-mech");
+
+  it("Last Caress buffs the Mech played instead of the token", () => {
+    let s = fixture();
+    s.units = [heimer()];
+    s.players[0].hand = [rad(154)];
+    s = settle(play(s, rad(154)));
+    s = ability(s, rad(127), recruitToBase);
+    s = settle(until(s, "Play a 3 Might Mech instead"));
+    expect(recruits(s)).toHaveLength(0);
+    expect(mechs(s).map((u) => [u.location, u.buff])).toEqual([["base:0", 1]]);
+    expect(s.radiance?.lastCaress ?? []).toHaveLength(0);
+  });
+
+  it("a kept token is played once and takes Last Caress", () => {
+    let s = fixture();
+    s.units = [heimer()];
+    s.players[0].hand = [rad(154)];
+    s = settle(play(s, rad(154)));
+    s = ability(s, rad(127), recruitToBase);
+    s = settle(until(s, "Keep Recruit"));
+    expect(mechs(s)).toHaveLength(0);
+    expect(recruits(s).map((u) => u.buff)).toEqual([1]);
+  });
+
+  it("a replaced token is not announced as played", () => {
+    // Ephemeral Ward: "When you play a unit, kill this." Its trigger counts
+    // the units you play.
+    let s = fixture();
+    s.units = [heimer()];
+    s.gears.push({ id: "ward", cardId: rad(39), owner: 0, ready: true });
+    s = ability(s, rad(127), recruitToBase);
+    s = until(s, "Play a 3 Might Mech instead");
+    const wardTriggers = s.log.filter((l) =>
+      /Ephemeral Ward.*trigger/i.test(l.text),
+    ).length;
+    expect(wardTriggers).toBeLessThanOrEqual(1);
+    s = settle(s);
+    expect(
+      s.log.filter((l) => /Ephemeral Ward.*trigger/i.test(l.text)),
+    ).toHaveLength(1);
+    expect(s.gears.some((g) => g.id === "ward")).toBe(false);
+  });
+
+  it("Zilean's additional copy follows the Mech that was played", () => {
+    let s = fixture();
+    s.units = [
+      heimer(),
+      { ...unit("zilean", 0, "field:1", 3), cardId: "unl-086-219" },
+    ];
+    s.fields[1].controller = 0;
+    s = ability(s, rad(127), recruitToBase);
+    s = until(s, "Play a 3 Might Mech instead");
+    s = settle(until(s, "Play one additional token"));
+    expect(recruits(s)).toHaveLength(0);
+    expect(mechs(s).map((u) => u.location)).toEqual(["base:0", "base:0"]);
+  });
+
+  it("a choice saved before the change does not count the token twice", () => {
+    let s = fixture();
+    s.units = [
+      heimer(),
+      {
+        ...unit("old-recruit", 0, "base:0", 1),
+        cardId: "ogn-271-298",
+        token: true,
+      },
+    ];
+    // Older saves announced the token as it entered and queued only its id.
+    s.radiance = {
+      heimer: [{ player: 0, tokenId: "old-recruit" }],
+      fanfare: [{ player: 0, turn: s.turn, remaining: 2 }],
+    };
+    const hand = s.players[0].hand.length;
+    s = ability(s, rad(127), [{ type: "energy", amount: 0 }]);
+    s = settle(until(s, "Play a 3 Might Mech instead"));
+    expect(mechs(s)).toHaveLength(1);
+    expect(s.units.some((u) => u.id === "old-recruit")).toBe(false);
+    expect(s.players[0].hand.length).toBe(hand);
+    expect(s.radiance?.fanfare?.[0].remaining).toBe(2);
+  });
+
+  it("a real card played through the token flow is not offered the Mech", () => {
+    let s = fixture();
+    s.units = [heimer()];
+    s.players[0].discard = ["ogn-006-298"];
+    s = ability(s, "ogn-006-298", [special("flameChompers")]);
+    s = until(s, "Pay Fury power");
+    s = act(s, "choose-token:base:0");
+    s = settle(s);
+    expect(s.units.some((u) => u.cardId === "ogn-006-298")).toBe(true);
+    expect(mechs(s)).toHaveLength(0);
+  });
+});

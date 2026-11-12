@@ -122,6 +122,14 @@ export interface PreconContext {
     location: LocationId,
     ready?: boolean,
   ) => Unit | undefined;
+  /** Announce a unit token whose play waited for a replacement choice. */
+  finishTokenPlay?: (
+    s: GameState,
+    p: PlayerId,
+    unit: Unit,
+    name: string,
+    ready: boolean,
+  ) => void;
   killUnits: (s: GameState, ids: string[], delayedSpell?: string) => void;
   getMight: (s: GameState, u: Unit, clamp?: boolean) => number;
   canTargetUnit?: (s: GameState, p: PlayerId, u: Unit) => boolean;

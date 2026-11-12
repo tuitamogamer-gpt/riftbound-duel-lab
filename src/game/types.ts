@@ -477,8 +477,18 @@ export interface RadianceState {
   lockUp?: Record<string, string>;
   /** Spirit of the Forge: Energy cost of the gear returned as a cost. */
   returnedEnergy?: { player: PlayerId; turn: number; energy: number };
-  /** Heimerdinger, Academy Instructor: tokens that may become Mechs. */
-  heimer?: { player: PlayerId; tokenId: string }[];
+  /**
+   * Heimerdinger, Academy Instructor: tokens that may become Mechs. A
+   * `deferred` token's play is announced only after the choice; entries from
+   * older saves announced it when the token entered.
+   */
+  heimer?: {
+    player: PlayerId;
+    tokenId: string;
+    name?: string;
+    ready?: boolean;
+    deferred?: boolean;
+  }[];
   /** Neeko: legends added while a Neeko is on the board, each with its own state. */
   neeko?: {
     player: PlayerId;

@@ -4925,16 +4925,29 @@ function spawnToken(
     summonedTurn: s.turn,
   };
   s.units.push(u);
-  queueHeimerdinger(s, p, u);
   log(
     s,
     `${s.players[p].name} plays a ${name} at ${locationName(location)}.`,
     "play",
     p,
   );
-  unitPlayed(s, p, u);
-  queueTokenReplacements(s, p, u, name, ready);
+  // Heimerdinger, Academy Instructor may play a Mech instead of a unit token.
+  // The play is then announced once, for whichever unit is played.
+  if (c.supertype === "Token" && queueHeimerdinger(s, p, u, name, ready))
+    return u;
+  finishTokenPlay(s, p, u, name, ready);
   return u;
+}
+/** Announce a played unit token: "unitPlayed" and Zilean's extra copy. */
+function finishTokenPlay(
+  s: GameState,
+  p: PlayerId,
+  unit: Unit,
+  name: string,
+  ready: boolean,
+) {
+  unitPlayed(s, p, unit);
+  queueTokenReplacements(s, p, unit, name, ready);
 }
 function unitPlayed(s: GameState, p: PlayerId, unit: Unit) {
   event(s, "unitPlayed", p, unit.cardId, unit.id, unit.location);
@@ -5581,6 +5594,7 @@ function context(
     trigger,
     pushStack,
     spawnToken,
+    finishTokenPlay,
     takeSpell,
     killUnits: (state, ids, delayedSpell) =>
       killUnits(state, ids, false, delayedSpell),

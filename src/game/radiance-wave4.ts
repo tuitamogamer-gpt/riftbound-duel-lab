@@ -147,7 +147,7 @@ function fanfareDraws(s: GameState, p: PlayerId, ctx: PreconContext) {
     ctx.trigger(s, p, "rad-047-167", "legend", [{ type: "draw", amount: 1 }]);
   }
 }
-/** Set while Heimerdinger's Mech replaces a token: still one unit played. */
+/** Set while a Mech replaces a token already announced (older saves). */
 let replacingToken = false;
 
 /** Predict N: look at the top N, recycle any, put the rest back in any order. */
@@ -218,8 +218,19 @@ export function predictN(
   else askPredict(s, p, ctx, n, "", []);
 }
 
-/** Heimerdinger, Academy Instructor: replacement offered after a token enters. */
-export function queueHeimerdinger(s: GameState, p: PlayerId, token: Unit) {
+/**
+ * Heimerdinger, Academy Instructor: "If you would play a unit token ... you may
+ * play a 3 Might Mech unit token to that same location instead." The token is
+ * placed, but its play waits for the choice, so only the unit actually played
+ * is announced. Returns whether the choice was queued.
+ */
+export function queueHeimerdinger(
+  s: GameState,
+  p: PlayerId,
+  token: Unit,
+  name = "Recruit",
+  ready = false,
+) {
   if (
     token.cardId === "token-mech" ||
     !s.units.some(
@@ -230,8 +241,15 @@ export function queueHeimerdinger(s: GameState, p: PlayerId, token: Unit) {
         isFace(u.cardId, "RAD", 132),
     )
   )
-    return;
-  ((s.radiance ??= {}).heimer ??= []).push({ player: p, tokenId: token.id });
+    return false;
+  ((s.radiance ??= {}).heimer ??= []).push({
+    player: p,
+    tokenId: token.id,
+    name,
+    ready,
+    deferred: true,
+  });
+  return true;
 }
 export function drainHeimerdinger(s: GameState, ctx: PreconContext) {
   if (s.pendingChoice) return;
@@ -245,13 +263,26 @@ export function drainHeimerdinger(s: GameState, ctx: PreconContext) {
         next.player,
         `heimer:${token.id}:mech`,
         `Play a 3 Might Mech instead of ${getCard(token.cardId).name}`,
-        [rd4("heimer-swap", { cardName: token.id })],
+        [
+          rd4("heimer-swap", {
+            cardName: token.id,
+            ...(next.deferred ? { keyword: "deferred" } : {}),
+          }),
+        ],
       ),
       option(
         next.player,
         `heimer:${token.id}:keep`,
         `Keep ${getCard(token.cardId).name}`,
-        [],
+        next.deferred
+          ? [
+              rd4("heimer-keep", {
+                cardName: token.id,
+                keyword: next.name ?? "Recruit",
+                ready: Boolean(next.ready),
+              }),
+            ]
+          : [],
       ),
     ]);
     return;
@@ -524,7 +555,9 @@ export const radianceWave4Module: ExpansionModule = {
         if (token) {
           s.units = s.units.filter((u) => u.id !== token.id);
           let mech: Unit | undefined;
-          replacingToken = true;
+          // The Mech is the unit played. A token from an older save was
+          // already announced, so Fanfare does not count the Mech again.
+          replacingToken = e.keyword !== "deferred";
           try {
             mech = ctx.spawnToken(
               s,
@@ -544,6 +577,19 @@ export const radianceWave4Module: ExpansionModule = {
               p,
             );
         }
+        return true;
+      }
+      case "heimer-keep": {
+        // The token is played after all: announce it now.
+        const token = s.units.find((u) => u.id === e.cardName);
+        if (token)
+          ctx.finishTokenPlay?.(
+            s,
+            token.owner,
+            token,
+            e.keyword ?? "Recruit",
+            Boolean(e.ready),
+          );
         return true;
       }
     }
