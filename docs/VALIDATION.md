@@ -1,5 +1,12 @@
 # Validation evidence
 
+## Heimerdinger and local Radiance art — 12 November 2026
+
+[Heimerdinger, Academy Instructor](RADIANCE-FOLLOWUP.md#12-november-2026-heimerdinger-and-local-art) now plays only one unit when it replaces a token, and the Seraphine and Evelynn lists have local card art (335 cached images).
+
+- **Code as of commit `2e2d8bd`**: **3,018 tests in 156 files** outside the precon matrix and **331 precon-matrix tests** in three shards (111 + 110 + 110), all with exit 0 and the CI timeouts. The weekly workflow's report checks pass: **3,241 unique tests**, none failed or missing, and all **169 ordered pairings**. TypeScript, the production build and catalog consistency also passed.
+- Eight fixed-seed bot games between retail decks end in identical states on `fe9857f` and on the new code.
+
 ## Radiance review follow-up — 10 November 2026
 
 The [follow-up](RADIANCE-FOLLOWUP.md) corrects five items the review left open and five cards that recycled without the recycle event. Rule 355.8 confirms one more item; Heimerdinger, Academy Instructor stays simplified.
