@@ -145,7 +145,7 @@ The existing table layout and image-only public-card hover previews remain in pl
 - `scripts/sync-cards.mjs`: paginated, validated Riftcodex catalog refresh.
 - `docs/`: official rules research, API sources, and actual validation results.
 
-The game and AI execute in the browser. The playable-art cache now contains **285 local card images** (28,047,582 bytes), recorded with source URLs and checksums in `src/data/card-art-manifest.json`. Generated playmats, token fallbacks, and fonts are also local. Bundled precon and practice matches use these local assets after the app is served. The rest of the full catalog uses remote images and falls back to text cards if those images fail. No saved match is sent to an AI service. Refresh the playable art with `npm run cache:art`.
+The game and AI execute in the browser. The playable-art cache now contains **335 local card images** (33,286,036 bytes), recorded with source URLs and checksums in `src/data/card-art-manifest.json`. They cover every card in the playable presets, including the Seraphine and Evelynn Radiance lists. Generated playmats, token fallbacks, and fonts are also local. Bundled precon and practice matches use these local assets after the app is served. The rest of the full catalog uses remote images and falls back to text cards if those images fail. No saved match is sent to an AI service. Refresh the playable art with `npm run cache:art`.
 
 ## Sources and publication status
 

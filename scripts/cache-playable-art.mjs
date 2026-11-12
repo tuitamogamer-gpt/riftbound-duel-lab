@@ -31,9 +31,14 @@ const ffprobe = process.env.FFPROBE_PATH || "ffprobe";
 const quality = 86;
 const maxWidth = 744;
 const concurrency = 4;
-const catalog = JSON.parse(
-  await readFile(join(root, "src/data/cards.json"), "utf8"),
-);
+// Playable Radiance lists use the reference catalog, whose art is also on
+// Riot's public CDN.
+const catalog = [
+  ...JSON.parse(await readFile(join(root, "src/data/cards.json"), "utf8")),
+  ...JSON.parse(
+    await readFile(join(root, "src/data/reference-cards.json"), "utf8"),
+  ),
+];
 const catalogById = new Map(catalog.map((card) => [card.id, card]));
 const bundled = await build({
   entryPoints: [join(root, "src/data/decks.ts")],
@@ -200,7 +205,7 @@ try {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
     source:
-      "Official Riot public card art URLs in src/data/cards.json; catalog obtained through Riftcodex.",
+      "Official Riot public card art URLs in src/data/cards.json (catalog obtained through Riftcodex) and src/data/reference-cards.json (Radiance reference catalog from Hextech Analytics).",
     cardCount: cardIds.length,
     bytes,
     cards: ordered,

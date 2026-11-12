@@ -19,7 +19,7 @@ The existing `cards.json` and `catalog-meta.json` were preserved rather than cha
 
 The supplement contains all **167 numbered base records**, **40 additional alternate/overnumbered/showcase printings**, and **12 rune printings**. This is complete relative to the source's Radiance query, not a claim to contain every Riot promotional printing or token. The five `RAD-SP` showcase codes are classified as variants even where the source's alternate-art boolean is false. Other type, cost, tag, text and artwork fields retain the source values. The source does not publish a record-update timestamp, so `sourceUpdatedAt` is `null`.
 
-Artwork URLs point to the Riot CDN supplied by the source. They remain remote catalog artwork; this import does not add them to the playable-deck offline cache. Reference rune records omit the `Basic` supertype. Name-only rune imports continue to select existing reviewed basic printings; an explicit Radiance ID is preserved and remains blocked.
+Artwork URLs point to the Riot CDN supplied by the source. This import did not add them to the playable-deck offline cache. Since 12 November 2026 the art of every card in the two playable lists (Seraphine and Evelynn) is cached locally; other Radiance printings remain remote catalog artwork. Reference rune records omit the `Basic` supertype. Name-only rune imports continue to select existing reviewed basic printings; an explicit Radiance ID is preserved and remains blocked.
 
 The separate [reference metadata](../src/data/reference-catalog-meta.json) records the retrieval date, raw-source digest, normalized-data digest, scope and official links. The [coverage inventory](card-coverage.json) records all 219 unsupported entries and their reason.
 

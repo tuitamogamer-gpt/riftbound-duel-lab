@@ -7,6 +7,7 @@ import {
   localCardArtBytes,
   localCardArtCount,
 } from "../src/data/art";
+import { decks, practiceCardIds } from "../src/data/decks";
 
 describe("compact card art index", () => {
   it("preserves every audited path and total without shipping provenance", () => {
@@ -23,6 +24,17 @@ describe("compact card art index", () => {
       expect(hasLocalCardArt(id)).toBe(true);
       expect(cardArtUrl({ id, image: card.sourceUrl })).toBe(card.path);
     }
+  });
+  it("has local art for every card in the playable presets", () => {
+    expect(decks.map((deck) => deck.id)).toEqual(
+      expect.arrayContaining([
+        "reference-precon-seraphine",
+        "reference-precon-evelynn",
+      ]),
+    );
+    expect([...practiceCardIds].filter((id) => !hasLocalCardArt(id))).toEqual(
+      [],
+    );
   });
   it("retains remote art for uncached printings", () => {
     const card = {
