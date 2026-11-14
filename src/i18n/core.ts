@@ -107,6 +107,113 @@ function render(template: string, values: Values): string {
   );
 }
 
+/**
+ * The human player is named "You" ("Ti", "Tu"), and the engine writes its log
+ * in the third person ("You plays Firestorm"). The verb is agreed at display
+ * time, for the verbs the log uses; saved text keeps the engine's wording.
+ */
+const secondPerson: Record<
+  Locale,
+  { subject: string; and: string; verbs: Record<string, string> }
+> = {
+  en: {
+    subject: "You",
+    and: "and",
+    verbs: {
+      adds: "add",
+      assigns: "assign",
+      banishes: "banish",
+      becomes: "become",
+      channels: "channel",
+      conquers: "conquer",
+      controls: "control",
+      draws: "draw",
+      ends: "end",
+      exhausts: "exhaust",
+      gains: "gain",
+      has: "have",
+      hides: "hide",
+      is: "are",
+      moves: "move",
+      passes: "pass",
+      plays: "play",
+      predicts: "predict",
+      readies: "ready",
+      returns: "return",
+      reveals: "reveal",
+      shows: "show",
+      spends: "spend",
+      wins: "win",
+    },
+  },
+  sr: {
+    subject: "Ti",
+    and: "i",
+    verbs: {
+      dobija: "dobijaš",
+      dodaje: "dodaješ",
+      dodeljuje: "dodeljuješ",
+      igra: "igraš",
+      ima: "imaš",
+      kontroliše: "kontrolišeš",
+      osvaja: "osvajaš",
+      pobeđuje: "pobeđuješ",
+      premešta: "premeštaš",
+      prepušta: "prepuštaš",
+      skriva: "skrivaš",
+      troši: "trošiš",
+      završava: "završavaš",
+    },
+  },
+  it: {
+    subject: "Tu",
+    and: "e",
+    verbs: {
+      aggiunge: "aggiungi",
+      assegna: "assegni",
+      conquista: "conquisti",
+      consuma: "consumi",
+      controlla: "controlli",
+      ha: "hai",
+      nasconde: "nascondi",
+      ottiene: "ottieni",
+      passa: "passi",
+      spende: "spendi",
+      sposta: "sposti",
+      termina: "termini",
+      vince: "vinci",
+    },
+  },
+};
+function agreeWithPlayer(text: string, locale: Locale): string {
+  const { subject, and, verbs } = secondPerson[locale];
+  if (!text.includes(`${subject} `)) return text;
+  // One sentence at a time, only where the player is its subject.
+  return text.replace(
+    new RegExp(`(^|[.!?] )${subject} ([^.!?]*)`, "gu"),
+    (sentence, lead: string, rest: string) => {
+      const [first, ...words] = rest.split(" ");
+      const mark = /[:,;]$/.exec(first)?.[0] ?? "";
+      const verb = mark ? first.slice(0, -1) : first;
+      if (!Object.hasOwn(verbs, verb)) return sentence;
+      let tail = words
+        .map((word, i) =>
+          words[i - 1] === and && Object.hasOwn(verbs, word)
+            ? verbs[word]
+            : word,
+        )
+        .join(" ");
+      if (locale === "en") tail = tail.replace(/\btheir\b/g, "your");
+      return `${lead}${subject} ${verbs[verb]}${mark}${tail ? ` ${tail}` : ""}`;
+    },
+  );
+}
+/** Untranslated engine text stays English, so English agreement always runs. */
+const agree = (text: string, locale: Locale) =>
+  locale === "en"
+    ? agreeWithPlayer(text, "en")
+    : agreeWithPlayer(agreeWithPlayer(text, "en"), locale);
+
 /** Translate at presentation time so saves, action IDs and card identities stay stable. */
 export function translate(
   text: string | undefined | null,
@@ -128,8 +235,12 @@ export function translate(
           translate(match[i + 1], locale, undefined, depth + 1),
         ]),
       );
-      return render(pattern.translations[localeIndex[locale]], captured);
+      const rendered = render(
+        pattern.translations[localeIndex[locale]],
+        captured,
+      );
+      return depth === 0 ? agree(rendered, locale) : rendered;
     }
   }
-  return text;
+  return depth === 0 ? agree(text, locale) : text;
 }

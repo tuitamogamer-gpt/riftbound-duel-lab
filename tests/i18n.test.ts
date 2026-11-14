@@ -67,6 +67,38 @@ describe("translation coverage", () => {
       translate("Assign combat damage: You 3 · Nexus AI 4.", "it"),
     ).not.toContain("Nexus AI");
   });
+  it("agrees the verb with the human player, who is named You", () => {
+    // Engine log lines are written in the third person.
+    expect(translate("Showdown at battlefield 1. You has focus.")).toBe(
+      "Showdown at battlefield 1. You have focus.",
+    );
+    expect(translate("You plays Firestorm.")).toBe("You play Firestorm.");
+    expect(translate("You draws 2 card(s).")).toBe("You draw 2 card(s).");
+    expect(translate("You spends Gold and adds one universal power.")).toBe(
+      "You spend Gold and add one universal power.",
+    );
+    // A line without a template: the pronoun follows the subject too.
+    expect(
+      translate(
+        "You banishes Legion Rearguard and may play it until their next Ending Phase.",
+      ),
+    ).toBe(
+      "You banish Legion Rearguard and may play it until your next Ending Phase.",
+    );
+    // The opponent stays in the third person, and interface copy is untouched.
+    expect(translate("Nexus AI plays Firestorm.")).toBe(
+      "Nexus AI plays Firestorm.",
+    );
+    expect(translate("You have priority")).toBe("You have priority");
+    expect(translate("You plays Firestorm.", "sr")).toBe("Ti igraš Firestorm.");
+    expect(translate("Showdown at battlefield 1. You has focus.", "sr")).toBe(
+      "Okršaj na: bojište 1. Ti imaš fokus.",
+    );
+    expect(translate("You wins the match.", "it")).toBe("Tu vinci la partita.");
+    expect(translate("Nexus AI wins the match.", "it")).toBe(
+      "Nexus IA vince la partita.",
+    );
+  });
   it.each([
     ["en", "How to play", "Set up your duel"],
     ["sr", "Kako igrati", "Pripremi svoj duel"],
