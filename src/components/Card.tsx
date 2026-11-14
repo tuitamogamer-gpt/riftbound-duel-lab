@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Zap, Shield, Search, X } from "lucide-react";
 import type { CatalogCard } from "../catalog";
 import { cardArtUrl } from "../data/art";
@@ -41,9 +41,22 @@ export function Card({
   const { t } = useI18n();
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [card.id]);
+  // The art that has finished loading: lets catalog views show a placeholder
+  // shimmer and fade the image in. The table itself does not style this.
+  const src = cardArtUrl(card);
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const image = useRef<HTMLImageElement>(null);
+  useEffect(() => {
+    const img = image.current;
+    if (img?.complete && img.naturalWidth > 0) setLoadedSrc(src);
+  }, [src]);
+  const showsArt = !failed && Boolean(card.image);
   return (
     <button
       className={`game-card ${small ? "small" : ""} ${selected ? "selected" : ""} ${disabled ? "muted" : ""} ${playable ? "playable" : ""} ${ready === false ? "exhausted" : ""}`}
+      data-art={
+        showsArt ? (loadedSrc === src ? "ready" : "loading") : undefined
+      }
       onClick={onClick}
       aria-pressed={selected}
       aria-label={
@@ -68,12 +81,14 @@ export function Card({
         } as React.CSSProperties
       }
     >
-      {!failed && card.image ? (
+      {showsArt ? (
         <img
-          src={cardArtUrl(card)}
+          ref={image}
+          src={src}
           alt={card.name}
           loading="lazy"
           draggable={false}
+          onLoad={() => setLoadedSrc(src)}
           onError={() => setFailed(true)}
         />
       ) : (

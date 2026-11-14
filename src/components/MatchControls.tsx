@@ -216,7 +216,9 @@ export function MatchControls({
         : opening
           ? "Choose your opening hand"
           : game.winner !== null
-            ? "Match complete"
+            ? game.winner === 0
+              ? "Pobjeda je tvoja."
+              : "Rift pripada protivniku."
             : (card?.name ?? matchStatus(game).label);
   const hint = paused
     ? (review?.frames[review.index]?.label ?? "Resume when you are ready.")
@@ -226,35 +228,38 @@ export function MatchControls({
         ? "The opponent is choosing a move. Play continues automatically."
         : opening
           ? "Click up to two cards in your hand to replace them, or keep your hand."
-          : card
-            ? hiddenStatus
-              ? hiddenStatus.hint
-              : hiddenSetup && hiddenPlayMode === "hide"
-                ? hiddenSetup.hint
-                : actions.length
-                  ? selectedAction && isFriendlyBuffAction(game, selectedAction)
-                    ? cardEffectSummary(card.text) ||
-                      "Choose a highlighted target or an available move."
-                    : actions.some((action) => action.targetId)
-                      ? "Choose a highlighted target or an available move."
-                      : readableText(card.text) || "Choose a move."
-                  : (blockedReason ??
-                    "This card has no legal target, destination or available effect in this position.")
-            : game.phase === "damage"
-              ? "Click a highlighted enemy to assign your damage."
-              : game.phase === "move"
-                ? "Click your units to add or remove them, then confirm the move."
-                : game.phase === "choice"
-                  ? "Choose one of the available effects."
-                  : forcedPass
-                    ? "No available response. Passing priority shortly."
-                    : hiddenAvailable
-                      ? "A Hidden card is ready. Reveal it here or select it on the battlefield."
-                      : ending?.category === "pass"
-                        ? window === "reaction"
-                          ? "Play a highlighted card to respond, or let the effect resolve."
-                          : "Play an Action or Reaction, or pass focus to continue the showdown."
-                        : "Click a glowing card to play it, or a ready unit to move. End your turn when finished.";
+          : game.winner !== null
+            ? "The duel is over. Start a new duel or review its key moments."
+            : card
+              ? hiddenStatus
+                ? hiddenStatus.hint
+                : hiddenSetup && hiddenPlayMode === "hide"
+                  ? hiddenSetup.hint
+                  : actions.length
+                    ? selectedAction &&
+                      isFriendlyBuffAction(game, selectedAction)
+                      ? cardEffectSummary(card.text) ||
+                        "Choose a highlighted target or an available move."
+                      : actions.some((action) => action.targetId)
+                        ? "Choose a highlighted target or an available move."
+                        : readableText(card.text) || "Choose a move."
+                    : (blockedReason ??
+                      "This card has no legal target, destination or available effect in this position.")
+              : game.phase === "damage"
+                ? "Click a highlighted enemy to assign your damage."
+                : game.phase === "move"
+                  ? "Click your units to add or remove them, then confirm the move."
+                  : game.phase === "choice"
+                    ? "Choose one of the available effects."
+                    : forcedPass
+                      ? "No available response. Passing priority shortly."
+                      : hiddenAvailable
+                        ? "A Hidden card is ready. Reveal it here or select it on the battlefield."
+                        : ending?.category === "pass"
+                          ? window === "reaction"
+                            ? "Play a highlighted card to respond, or let the effect resolve."
+                            : "Play an Action or Reaction, or pass focus to continue the showdown."
+                          : "Click a glowing card to play it, or a ready unit to move. End your turn when finished.";
   return (
     <section
       className={`match-controls visual-controls window-${window} ${sourceCard ? "has-source" : ""} ${hasTargetOptions ? "has-target-options" : ""} ${pageSize === 2 ? "paired-targets" : ""} ${hiddenSetup ? "has-hidden-modes" : ""} ${review || busy ? "is-busy" : ""} ${forcedPass && !busy && !paused ? "is-forced-pass" : ""}`}
@@ -275,11 +280,13 @@ export function MatchControls({
                   ? "Resolving effects"
                   : opening
                     ? "Opening hand"
-                    : game.pendingChoice
-                      ? "Choose an effect"
-                      : window === "reaction"
-                        ? "Your reaction"
-                        : "Your next move",
+                    : game.winner !== null
+                      ? "Match complete"
+                      : game.pendingChoice
+                        ? "Choose an effect"
+                        : window === "reaction"
+                          ? "Your reaction"
+                          : "Your next move",
             )}
             {review && (
               <span className="review-progress">

@@ -1,0 +1,1464 @@
+/* Premium finish. Loads last on purpose.
+   This sheet owns light, surface depth, metal accents, type detail and motion.
+   It never moves or resizes a zone: geometry stays with the layout sheets
+   (match-layout, desktop-table, native-table, mobile-table, LobbyUpgrade). */
+:root {
+  --lux-ink-0: #04090d;
+  --lux-ink-1: #071218;
+  --lux-ink-2: #0b1a22;
+  --lux-surface-top: #15272fe0;
+  --lux-surface-bottom: #0c1920eb;
+  --lux-hairline: #c4dde61c;
+  --lux-hairline-strong: #c4dde633;
+  --lux-highlight: #ffffff14;
+  --lux-gold-1: #fdf1d0;
+  --lux-gold-2: #edd294;
+  --lux-gold-3: #d2ab5c;
+  --lux-gold-4: #9f7632;
+  --lux-teal: #64dcc8;
+  --lux-coral: #f29d96;
+  --lux-ease: cubic-bezier(0.22, 0.8, 0.24, 1);
+  --lux-shadow-1: inset 0 1px 0 #ffffff0d, 0 14px 30px -20px #000000d9;
+  --lux-shadow-2:
+    inset 0 1px 0 #ffffff14, 0 28px 56px -28px #000000f2, 0 2px 8px #00000047;
+  --lux-metal: linear-gradient(
+    180deg,
+    var(--lux-gold-1) 0%,
+    var(--lux-gold-2) 38%,
+    var(--lux-gold-3) 100%
+  );
+  /* Fine film grain: removes banding from the large dark gradients. */
+  --lux-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .055 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  scrollbar-color: #3f5c69 transparent;
+  scrollbar-width: thin;
+}
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+::selection {
+  background: #e8c98747;
+  color: #fff;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: #3f5c69 padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #5b7f8f padding-box;
+}
+
+/* ---------- Atmosphere ---------- */
+.app:not(.is-game) {
+  background:
+    var(--lux-grain),
+    radial-gradient(80% 55% at 100% -8%, #1f6b6a33, transparent 62%),
+    radial-gradient(60% 45% at -6% 2%, #c9a85c17, transparent 58%),
+    radial-gradient(110% 70% at 50% 112%, #0e33403d, transparent 62%),
+    linear-gradient(180deg, #071319 0%, #050c11 72%);
+}
+@media (hover: hover) and (pointer: fine) {
+  .app:not(.is-game) {
+    background-attachment: scroll, fixed, fixed, fixed, fixed;
+  }
+}
+
+/* ---------- Header ---------- */
+.app .topbar {
+  position: relative;
+  background: linear-gradient(180deg, #0b1920f5, #08141af0);
+  border-bottom-color: #c4dde614;
+  box-shadow:
+    inset 0 1px 0 #ffffff0a,
+    0 18px 36px -30px #000;
+}
+.app .topbar::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #e8c98759 22%,
+    #64dcc840 62%,
+    transparent
+  );
+}
+.app .brand-symbol {
+  border-color: #e8c9878c;
+  background:
+    radial-gradient(120% 90% at 30% 0%, #3a6b5f, transparent 62%),
+    linear-gradient(150deg, #1d3b38, #0d1e24);
+  box-shadow:
+    inset 0 1px 0 #ffffff26,
+    inset 0 -10px 16px -10px #000000a6,
+    0 6px 18px -8px #e8c9875c;
+}
+.app .brand > span:last-child {
+  background: linear-gradient(180deg, #fff6dd 10%, #e6c887 62%, #c39c52);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #f3e4be;
+}
+.app .brand small {
+  -webkit-text-fill-color: #8fa5b0;
+}
+.app .topbar nav button {
+  position: relative;
+  transition: color 0.2s var(--lux-ease);
+}
+.app .topbar nav button::before {
+  content: "";
+  position: absolute;
+  inset: 16px -10px;
+  border-radius: 10px;
+  background: #ffffff0a;
+  opacity: 0;
+  transition: opacity 0.2s var(--lux-ease);
+  pointer-events: none;
+}
+.app .topbar nav button:hover::before,
+.app .topbar nav button:focus-visible::before {
+  opacity: 1;
+}
+.app .topbar nav button.active::after {
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(90deg, #cfa85a, #fbeecb 50%, #cfa85a);
+  box-shadow: 0 -6px 18px 0 #e8c98759;
+}
+.app .nav-count {
+  border-color: #c4dde626;
+  background: #ffffff08;
+  font-variant-numeric: tabular-nums;
+}
+.app .topbar .icon-button {
+  color: #a9bdc7;
+  border-radius: 11px;
+  transition:
+    color 0.2s var(--lux-ease),
+    background 0.2s var(--lux-ease),
+    box-shadow 0.2s var(--lux-ease);
+}
+.app .topbar .icon-button:hover,
+.app .topbar .icon-button:focus-visible {
+  color: #fff3d6;
+  background: #ffffff0f;
+  box-shadow: inset 0 0 0 1px #c4dde626;
+}
+.app .language-selector select {
+  background-color: #0f2029;
+  border-color: #c4dde626;
+  box-shadow: inset 0 1px 0 #ffffff0a;
+  transition:
+    border-color 0.2s var(--lux-ease),
+    box-shadow 0.2s var(--lux-ease);
+}
+.app .language-selector select:hover {
+  border-color: #e8c98766;
+}
+
+/* ---------- Shared controls ---------- */
+/* Champagne metal: the one primary action on a screen. */
+.app
+  :is(
+    .gold-button:not(.secondary-ending),
+    .rift-primary,
+    .builder-button.primary,
+    .history-button.primary,
+    .series-button.primary,
+    .online-setup-actions > button:first-child
+  ):not(:disabled) {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: #f7e3b0;
+  background: var(--lux-metal);
+  color: #1b1405;
+  box-shadow:
+    inset 0 1px 0 #ffffffa6,
+    inset 0 -1px 0 #7a5a2180,
+    0 10px 26px -12px #e8c98799,
+    0 2px 6px #0000004d;
+  text-shadow: 0 1px 0 #ffffff40;
+  transition:
+    transform 0.18s var(--lux-ease),
+    box-shadow 0.25s var(--lux-ease),
+    filter 0.25s var(--lux-ease);
+}
+.app
+  :is(
+    .gold-button:not(.secondary-ending),
+    .rift-primary,
+    .builder-button.primary,
+    .history-button.primary,
+    .series-button.primary,
+    .online-setup-actions > button:first-child
+  ):not(:disabled)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    #ffffff8c 50%,
+    transparent 62%
+  );
+  transform: translateX(-120%);
+}
+.app
+  :is(
+    .gold-button:not(.secondary-ending),
+    .rift-primary,
+    .builder-button.primary,
+    .history-button.primary,
+    .series-button.primary,
+    .online-setup-actions > button:first-child
+  ):not(:disabled):hover {
+  filter: brightness(1.05) saturate(1.05);
+  box-shadow:
+    inset 0 1px 0 #ffffffbf,
+    inset 0 -1px 0 #7a5a2180,
+    0 16px 36px -12px #e8c987c7,
+    0 2px 8px #00000059;
+}
+.app
+  :is(
+    .gold-button:not(.secondary-ending),
+    .rift-primary,
+    .builder-button.primary,
+    .history-button.primary,
+    .series-button.primary,
+    .online-setup-actions > button:first-child
+  ):not(:disabled):hover::after {
+  transform: translateX(120%);
+  transition: transform 0.7s var(--lux-ease);
+}
+.app
+  :is(
+    .gold-button:not(.secondary-ending),
+    .rift-primary,
+    .builder-button.primary,
+    .history-button.primary,
+    .series-button.primary,
+    .online-setup-actions > button:first-child
+  ):not(:disabled):active {
+  transform: translateY(1px);
+  filter: brightness(0.97);
+}
+/* Quiet glass: every secondary action. */
+.app .outline-button,
+.app .ghost-button,
+.app .secondary-decision,
+.app .builder-button.secondary,
+.app .history-button:not(.primary):not(.danger) {
+  border-color: #c4dde62e;
+  background: linear-gradient(180deg, #1a303ad9, #11222bd9);
+  box-shadow:
+    inset 0 1px 0 #ffffff12,
+    0 8px 18px -14px #000;
+  transition:
+    border-color 0.2s var(--lux-ease),
+    background 0.2s var(--lux-ease),
+    box-shadow 0.2s var(--lux-ease),
+    transform 0.18s var(--lux-ease),
+    color 0.2s var(--lux-ease);
+}
+.app .outline-button:not(:disabled):hover,
+.app .ghost-button:not(:disabled):hover,
+.app .secondary-decision:not(:disabled):hover,
+.app .builder-button.secondary:not(:disabled):hover,
+.app .history-button:not(.primary):not(.danger):not(:disabled):hover {
+  border-color: #e8c98780;
+  background: linear-gradient(180deg, #21404ce6, #15303ae6);
+  box-shadow:
+    inset 0 1px 0 #ffffff1f,
+    0 12px 24px -14px #000,
+    0 0 0 3px #e8c98712;
+}
+.app
+  :where(
+    input[type="text"],
+    input[type="search"],
+    input:not([type]),
+    select,
+    textarea
+  ) {
+  transition:
+    border-color 0.2s var(--lux-ease),
+    box-shadow 0.2s var(--lux-ease),
+    background-color 0.2s var(--lux-ease);
+}
+
+/* ---------- Lobby ---------- */
+.app .rift-lobby-upgrade .rift-hero {
+  border-color: #c4dde62b;
+  background: #0b1a22;
+  box-shadow:
+    inset 0 1px 0 #ffffff14,
+    0 40px 70px -50px #000,
+    0 0 0 1px #00000040;
+}
+.app .rift-lobby-upgrade .rift-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 3;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #fbeecb80 30%,
+    #64dcc859 70%,
+    transparent
+  );
+}
+.app .rift-lobby-upgrade .rift-hero-image {
+  opacity: 0.86;
+  filter: saturate(1.08) contrast(1.04);
+}
+.app .rift-lobby-upgrade .rift-hero-wash {
+  background:
+    radial-gradient(60% 120% at 0% 0%, #64dcc812, transparent 60%),
+    linear-gradient(
+      90deg,
+      #0b1a22 0%,
+      #0b1a22f7 30%,
+      #0b1a22a3 49%,
+      #0b1a221f 80%
+    ),
+    linear-gradient(0deg, #0b1a2280, transparent 65%);
+}
+.app .rift-lobby-upgrade .rift-hero h1 {
+  background: linear-gradient(180deg, #ffffff 20%, #e9dfc6 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 6px 22px #00000080);
+}
+.app .rift-lobby-upgrade .rift-arena-status i {
+  box-shadow:
+    0 0 0 3px #64dcc826,
+    0 0 12px #64dcc8;
+}
+.app .rift-lobby-upgrade .rift-hero-selection small {
+  letter-spacing: 0.2em;
+}
+.app .rift-lobby-upgrade .rift-hero-selection strong {
+  background: linear-gradient(180deg, #fff8e6, #e6c887);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 10px #000000b3);
+}
+.app .rift-lobby-upgrade .rift-link {
+  transition:
+    color 0.2s var(--lux-ease),
+    transform 0.2s var(--lux-ease);
+}
+.app .rift-lobby-upgrade .rift-link svg:last-child {
+  transition: transform 0.25s var(--lux-ease);
+}
+.app .rift-lobby-upgrade .rift-link:hover svg:last-child {
+  transform: translateX(3px);
+}
+.app .rift-lobby-upgrade .rift-section-heading h2 {
+  letter-spacing: -0.045em;
+}
+.app .rift-lobby-upgrade .rift-step-heading > span {
+  border-color: #e8c98761;
+  background: linear-gradient(160deg, #e8c9872e, #e8c98708);
+  color: #f6dfa8;
+  box-shadow:
+    inset 0 1px 0 #ffffff1f,
+    0 6px 14px -8px #e8c98780;
+  font-variant-numeric: tabular-nums;
+}
+.app .rift-lobby-upgrade .rift-deck-search,
+.app .rift-lobby-upgrade .rift-collection-select select,
+.app .rift-lobby-upgrade .rift-player-select select,
+.app .rift-lobby-upgrade .rift-opponent-select select {
+  border-color: #c4dde62b;
+  background-color: #0a1921;
+  box-shadow:
+    inset 0 1px 0 #ffffff08,
+    inset 0 0 0 1px #00000033;
+}
+.app .rift-lobby-upgrade .rift-deck-search:focus-within,
+.app .rift-lobby-upgrade .rift-collection-select select:hover,
+.app .rift-lobby-upgrade .rift-player-select select:hover,
+.app .rift-lobby-upgrade .rift-opponent-select select:hover {
+  border-color: #64dcc880;
+  box-shadow:
+    inset 0 1px 0 #ffffff0d,
+    0 0 0 4px #64dcc814;
+}
+/* Deck gallery */
+.app .rift-lobby-upgrade .rift-champion {
+  border-color: #c4dde626;
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 #ffffff14,
+    0 18px 30px -24px #000;
+  transition:
+    transform 0.28s var(--lux-ease),
+    box-shadow 0.28s var(--lux-ease),
+    border-color 0.28s var(--lux-ease);
+}
+.app .rift-lobby-upgrade .rift-champion img {
+  transition:
+    transform 0.6s var(--lux-ease),
+    filter 0.4s var(--lux-ease);
+  filter: saturate(0.94) brightness(0.94);
+}
+.app .rift-lobby-upgrade .rift-champion::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    #ffffff1f 50%,
+    transparent 65%
+  );
+  opacity: 0;
+  transform: translateX(-30%);
+  transition:
+    opacity 0.3s var(--lux-ease),
+    transform 0.7s var(--lux-ease);
+}
+.app .rift-lobby-upgrade .rift-champion:hover,
+.app .rift-lobby-upgrade .rift-champion:focus-visible {
+  transform: translateY(-3px);
+  border-color: #e8c98799;
+  box-shadow:
+    inset 0 1px 0 #ffffff24,
+    0 26px 44px -26px #000,
+    0 0 0 4px #e8c98714;
+}
+.app .rift-lobby-upgrade .rift-champion:hover img,
+.app .rift-lobby-upgrade .rift-champion:focus-visible img {
+  transform: scale(1.045);
+  filter: saturate(1.08) brightness(1.04);
+}
+.app .rift-lobby-upgrade .rift-champion:hover::before,
+.app .rift-lobby-upgrade .rift-champion:focus-visible::before {
+  opacity: 1;
+  transform: translateX(30%);
+}
+.app .rift-lobby-upgrade .rift-champion.is-selected {
+  border-color: #64dcc8;
+  box-shadow:
+    inset 0 1px 0 #ffffff29,
+    0 0 0 1px #64dcc8,
+    0 0 0 5px #64dcc81f,
+    0 26px 48px -24px #1fd0b680;
+}
+.app .rift-lobby-upgrade .rift-champion.is-selected img {
+  filter: saturate(1.08) brightness(1.03);
+}
+.app .rift-lobby-upgrade .rift-selection-check {
+  background: linear-gradient(180deg, #8ff2e1, #46c9b3);
+  box-shadow:
+    inset 0 1px 0 #ffffff80,
+    0 6px 14px -4px #1fd0b6b3;
+}
+/* Opponent panel: the launch console */
+.app .rift-lobby-upgrade .rift-opponent {
+  border-color: #c4dde62b;
+  border-top-color: #e8c98780;
+  background:
+    radial-gradient(90% 40% at 50% 0%, #e8c98714, transparent 70%),
+    linear-gradient(180deg, #13252ef2, #0c1a22f5);
+  box-shadow:
+    inset 0 1px 0 #ffffff17,
+    0 40px 70px -46px #000,
+    0 0 0 1px #00000033;
+}
+.app .rift-lobby-upgrade .rift-duel-preview {
+  border-color: #c4dde633;
+  box-shadow:
+    inset 0 1px 0 #ffffff1a,
+    0 18px 30px -22px #000;
+}
+.app .rift-lobby-upgrade .rift-versus {
+  border-color: #f3dfae;
+  background: radial-gradient(circle at 50% 30%, #2a4450, #0c1b23 70%);
+  color: #fbeecb;
+  box-shadow:
+    inset 0 1px 0 #ffffff33,
+    0 0 0 4px #0c1b23cc,
+    0 6px 18px -4px #e8c98780;
+}
+.app .rift-lobby-upgrade .rift-difficulty label > span {
+  border-color: #c4dde626;
+  background: linear-gradient(180deg, #14272fbf, #0e1c24bf);
+  box-shadow: inset 0 1px 0 #ffffff0d;
+  transition:
+    border-color 0.2s var(--lux-ease),
+    background 0.2s var(--lux-ease),
+    box-shadow 0.2s var(--lux-ease),
+    color 0.2s var(--lux-ease),
+    transform 0.18s var(--lux-ease);
+}
+.app .rift-lobby-upgrade .rift-difficulty label:hover > span {
+  border-color: #e8c98766;
+  transform: translateY(-1px);
+}
+.app .rift-lobby-upgrade .rift-difficulty input:checked + span {
+  border-color: #f3dfae;
+  background: linear-gradient(180deg, #e8c98733, #e8c9870f);
+  color: #fbeecb;
+  box-shadow:
+    inset 0 1px 0 #ffffff26,
+    0 0 0 3px #e8c98717,
+    0 10px 20px -12px #e8c98780;
+}
+.app .rift-lobby-upgrade .rift-primary.rift-start {
+  border-radius: 10px;
+  letter-spacing: 0.14em;
+}
+.app .rift-lobby-upgrade .rift-primary svg:last-child {
+  transition: transform 0.25s var(--lux-ease);
+}
+.app .rift-lobby-upgrade .rift-primary:not(:disabled):hover svg:last-child {
+  transform: translateX(4px);
+}
+.app .rift-lobby-upgrade .battlefield-picker,
+.app .rift-lobby-upgrade .rift-setup-disclosure {
+  border-color: #c4dde624;
+  background: linear-gradient(180deg, #10212ad9, #0b1920d9);
+  box-shadow: inset 0 1px 0 #ffffff0d;
+  transition:
+    border-color 0.2s var(--lux-ease),
+    box-shadow 0.2s var(--lux-ease);
+}
+.app .rift-lobby-upgrade .battlefield-picker:hover,
+.app .rift-lobby-upgrade .rift-setup-disclosure:hover,
+.app .rift-lobby-upgrade .battlefield-picker[open],
+.app .rift-lobby-upgrade .rift-setup-disclosure[open] {
+  border-color: #e8c98759;
+  box-shadow:
+    inset 0 1px 0 #ffffff14,
+    0 16px 30px -24px #000;
+}
+/* Guide cards */
+.app .rift-lobby-upgrade .rift-guide-grid article {
+  border-color: #c4dde621;
+  background:
+    radial-gradient(80% 60% at 0% 0%, #64dcc80f, transparent 70%),
+    linear-gradient(180deg, #12242cb3, #0b1920b3);
+  box-shadow: var(--lux-shadow-1);
+  transition:
+    transform 0.28s var(--lux-ease),
+    border-color 0.28s var(--lux-ease),
+    box-shadow 0.28s var(--lux-ease);
+}
+.app .rift-lobby-upgrade .rift-guide-grid article:hover {
+  transform: translateY(-3px);
+  border-color: #e8c98766;
+  box-shadow: var(--lux-shadow-2);
+}
+.app .rift-lobby-upgrade .rift-guide-grid article > svg {
+  color: #f3dfae;
+  filter: drop-shadow(0 4px 10px #e8c98766);
+}
+.app .footer {
+  border-top-color: #c4dde61f;
+}
+
+/* ---------- Motion preferences ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .app .rift-lobby-upgrade .rift-champion,
+  .app .rift-lobby-upgrade .rift-champion img,
+  .app .rift-lobby-upgrade .rift-guide-grid article,
+  .app .rift-lobby-upgrade .rift-difficulty label > span {
+    transform: none !important;
+  }
+  .app
+    :is(
+      .gold-button,
+      .rift-primary,
+      .builder-button.primary,
+      .history-button.primary,
+      .series-button.primary,
+      .online-setup-actions > button:first-child
+    )::after,
+  .app .rift-lobby-upgrade .rift-champion::before {
+    display: none;
+  }
+}
+:root[data-effects="reduced"]
+  .app
+  :is(
+    .gold-button,
+    .rift-primary,
+    .builder-button.primary,
+    .history-button.primary,
+    .series-button.primary,
+    .online-setup-actions > button:first-child
+  )::after,
+:root[data-effects="reduced"] .app .rift-lobby-upgrade .rift-champion::before {
+  display: none;
+}
+
+/* =====================================================================
+   Match table. Paint only: no sizes, margins, grids or positions.
+   ===================================================================== */
+.app.is-game {
+  --dock-surface: #0f2530;
+  background:
+    var(--lux-grain),
+    radial-gradient(70% 50% at 100% 0%, #c9a85c14, transparent 68%),
+    radial-gradient(60% 55% at 0% 100%, #1f6f6824, transparent 70%),
+    radial-gradient(90% 70% at 50% 50%, #0b202a66, transparent 72%), #050c11;
+}
+
+/* ---------- Chrome: toolbar and turn sequence ---------- */
+.app.is-game .match-brand {
+  background: linear-gradient(180deg, #fff6dd 10%, #e6c887 62%, #c39c52);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.app.is-game .match-brand small {
+  -webkit-text-fill-color: #8fa5b0;
+}
+.app.is-game .match-toolbar .icon-button,
+.app.is-game .match-toolbar .text-button {
+  border-radius: 9px;
+  transition:
+    color 0.2s var(--lux-ease),
+    background 0.2s var(--lux-ease),
+    box-shadow 0.2s var(--lux-ease);
+}
+.app.is-game .match-toolbar .icon-button:hover,
+.app.is-game .match-toolbar .text-button:hover,
+.app.is-game .match-toolbar .icon-button:focus-visible,
+.app.is-game .match-toolbar .text-button:focus-visible {
+  color: #fff3d6;
+  background: #ffffff0f;
+  box-shadow: inset 0 0 0 1px #c4dde626;
+}
+.app.is-game .turn-indicator {
+  background: linear-gradient(180deg, #17303bf2, #0e212af2);
+  box-shadow:
+    inset 0 1px 0 #ffffff1f,
+    0 0 0 3px #e8c98714,
+    0 8px 20px -10px #e8c98766;
+}
+.app.is-game .turn-flow {
+  background:
+    radial-gradient(40% 180% at 0% 50%, #64dcc812, transparent 70%),
+    linear-gradient(100deg, #14303bf5, #0b1b24f5);
+  border-top-color: #c4dde62e;
+  border-right-color: #c4dde61f;
+  border-bottom-color: #c4dde614;
+  box-shadow:
+    inset 0 1px 0 #ffffff12,
+    0 14px 26px -20px #000;
+}
+.app.is-game .turn-steps li b {
+  box-shadow: inset 0 1px 0 #ffffff14;
+}
+.app.is-game .turn-steps li.is-current b {
+  background: var(--lux-metal);
+  box-shadow:
+    inset 0 1px 0 #ffffffa6,
+    0 0 0 3px #e8c98726,
+    0 0 16px #e8c98780;
+}
+.app.is-game .turn-steps li.is-current span {
+  color: #fbeecb;
+}
+
+/* ---------- The table ---------- */
+.app.is-game .playmat {
+  background:
+    var(--lux-grain),
+    radial-gradient(75% 60% at 50% 38%, #123240 0%, #0b1e28 52%, #07141b 100%);
+  border-color: #c4dde626;
+  box-shadow:
+    inset 0 1px 0 #ffffff12,
+    inset 0 0 0 1px #00000040,
+    0 40px 80px -50px #000;
+}
+.app.is-game .player-bar {
+  box-shadow:
+    inset 0 1px 0 #ffffff12,
+    inset 0 -1px 0 #00000040;
+}
+.app.is-game .player-bar .legend-portrait {
+  box-shadow:
+    0 0 0 2px #0a1921,
+    0 4px 10px -2px #000000b3;
+}
+.app.is-game .player-bar .player-name strong {
+  letter-spacing: 0.01em;
+}
+.app.is-game .score > span {
+  text-shadow: 0 0 18px currentColor;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Quiet zones: bases, runes and the legend/champion rail */
+.app.is-game .base-zone,
+.app.is-game .rune-zone,
+.app.is-game .setup-card {
+  background: linear-gradient(165deg, #13303bd9, #0a1c26e6);
+  box-shadow:
+    inset 0 1px 0 #ffffff0f,
+    inset 0 -18px 30px -24px #000000a6,
+    0 12px 22px -20px #000;
+}
+.app.is-game .setup-card .game-card,
+.app.is-game .setup-empty-art {
+  box-shadow:
+    0 0 0 1px #ffffff1a,
+    0 10px 18px -8px #000000d9;
+}
+.app.is-game .setup-card-heading > span:first-child {
+  letter-spacing: 0.12em;
+}
+.app.is-game .zone-label {
+  background: linear-gradient(180deg, #17303b, #0e212a);
+  box-shadow:
+    inset 0 1px 0 #ffffff14,
+    0 4px 10px -6px #000;
+}
+.app.is-game .rune-card {
+  transition:
+    transform 0.18s var(--lux-ease),
+    filter 0.2s var(--lux-ease),
+    box-shadow 0.2s var(--lux-ease);
+}
+.app.is-game .rune-card.ready {
+  filter: drop-shadow(0 4px 8px #00000099);
+}
+
+/* Battlefields: the two objects that matter most */
+.app.is-game .battlefield {
+  box-shadow:
+    inset 0 1px 0 #ffffff1a,
+    0 0 0 1px #00000059,
+    0 26px 44px -30px #000;
+}
+.app.is-game .battlefield.owned {
+  box-shadow:
+    inset 0 1px 0 #ffffff24,
+    inset 0 0 0 1px #5ad8c633,
+    0 0 0 1px #5ad8c62e,
+    0 0 34px -6px #5ad8c640,
+    0 26px 44px -30px #000;
+}
+.app.is-game .battlefield.enemy-owned {
+  box-shadow:
+    inset 0 1px 0 #ffffff24,
+    inset 0 0 0 1px #f29a9a33,
+    0 0 0 1px #f29a9a2e,
+    0 0 34px -6px #f29a9a38,
+    0 26px 44px -30px #000;
+}
+.app.is-game .field-heading {
+  background: linear-gradient(180deg, #050b11f2, #050b11a6 70%, #050b1166);
+  box-shadow: inset 0 1px 0 #ffffff0f;
+}
+.app.is-game .field-heading button {
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 10px #000;
+}
+.app.is-game .control-badge {
+  box-shadow:
+    inset 0 1px 0 #ffffff1f,
+    0 4px 10px -6px #000;
+  letter-spacing: 0.08em;
+}
+.app.is-game .field-might-side {
+  box-shadow:
+    inset 0 1px 0 #ffffff24,
+    inset 0 -8px 12px -8px #00000080,
+    0 8px 16px -10px #000;
+}
+.app.is-game .field-might-side.player-0 {
+  background: linear-gradient(180deg, #1d4a52, #133139);
+  border-color: #5ad8c6a6;
+}
+.app.is-game .field-might-side.player-1 {
+  background: linear-gradient(180deg, #4a3541, #32262f);
+  border-color: #f29a9a99;
+}
+.app.is-game .field-might-side b {
+  text-shadow: 0 0 14px currentColor;
+  font-variant-numeric: tabular-nums;
+}
+.app.is-game .field-might-label {
+  filter: drop-shadow(0 2px 6px #000);
+}
+
+/* Cards on the table: a real object with weight */
+.app.is-game .unit-wrap .game-card {
+  box-shadow:
+    0 0 0 1px #ffffff1f,
+    0 2px 3px #00000080,
+    0 14px 22px -10px #000000e6;
+}
+.app.is-game .game-card {
+  transition:
+    box-shadow 0.22s var(--lux-ease),
+    filter 0.22s var(--lux-ease),
+    transform 0.22s var(--lux-ease);
+}
+
+/* Hand */
+.app.is-game .hand-tray {
+  background:
+    radial-gradient(60% 90% at 50% 0%, #5ad8c612, transparent 70%),
+    linear-gradient(165deg, #12303bf2, #0a1b24f5);
+  border-color: #5ad8c638;
+  box-shadow:
+    inset 0 1px 0 #ffffff17,
+    inset 0 -30px 40px -34px #000000b3,
+    0 26px 44px -30px #000;
+}
+.app.is-game .hand-title-name {
+  letter-spacing: 0.14em;
+}
+.app.is-game .hand-card-wrap .game-card {
+  box-shadow:
+    0 0 0 1px #ffffff1f,
+    0 2px 3px #00000080,
+    0 18px 26px -12px #000000f2;
+}
+.app.is-game .hand-card-wrap .game-card.playable {
+  box-shadow:
+    0 0 0 1px #64dcc8cc,
+    0 0 0 4px #64dcc821,
+    0 0 26px -4px #64dcc873,
+    0 18px 26px -12px #000000f2;
+}
+.app.is-game .hand-card-wrap .game-card.selected {
+  box-shadow:
+    0 0 0 2px #fbeecb,
+    0 0 0 6px #e8c98733,
+    0 0 34px -2px #e8c987a6,
+    0 18px 26px -12px #000000f2;
+}
+.app.is-game .pile-caption b {
+  text-shadow: 0 0 12px #e8c98766;
+  font-variant-numeric: tabular-nums;
+}
+.app.is-game .pile-art {
+  box-shadow:
+    0 0 0 1px #00000066,
+    0 10px 18px -8px #000000d9;
+}
+
+.app.is-game .empty-hand-label {
+  color: #8fa5b0;
+  letter-spacing: 0.04em;
+}
+
+/* Command dock */
+.app.is-game .match-controls.visual-controls {
+  --dock-accent: #64dcc8;
+  background:
+    radial-gradient(90% 60% at 50% 0%, #64dcc817, transparent 70%),
+    linear-gradient(165deg, #153541, var(--dock-surface) 70%);
+  box-shadow:
+    inset 0 1px 0 #ffffff1f,
+    0 0 0 1px #00000059,
+    0 -1px 24px -6px color-mix(in srgb, var(--dock-accent) 45%, transparent),
+    0 26px 44px -28px #000;
+}
+.app.is-game .match-controls.visual-controls.window-reaction {
+  --dock-accent: #c7a8ff;
+  --dock-surface: #1a1f38;
+  background:
+    radial-gradient(90% 60% at 50% 0%, #c7a8ff1f, transparent 70%),
+    linear-gradient(165deg, #2a2545, var(--dock-surface) 70%);
+}
+.app.is-game .match-controls.visual-controls.window-damage {
+  --dock-accent: #ffb28a;
+  --dock-surface: #1f2126;
+  background:
+    radial-gradient(90% 60% at 50% 0%, #ffb28a1c, transparent 70%),
+    linear-gradient(165deg, #33282a, var(--dock-surface) 70%);
+}
+.app.is-game .visual-controls .decision-kicker {
+  letter-spacing: 0.14em;
+}
+.app.is-game .visual-controls .decision-copy > strong,
+.app.is-game .visual-controls .decision-title {
+  letter-spacing: -0.01em;
+}
+.app.is-game .visual-controls .context-action,
+.app.is-game .visual-controls .reaction-response {
+  box-shadow:
+    inset 0 1px 0 #ffffff14,
+    0 10px 18px -14px #000;
+  transition:
+    transform 0.18s var(--lux-ease),
+    border-color 0.2s var(--lux-ease),
+    box-shadow 0.2s var(--lux-ease),
+    background 0.2s var(--lux-ease);
+}
+.app.is-game .visual-controls .context-action:not(:disabled):hover,
+.app.is-game .visual-controls .reaction-response:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 #ffffff24,
+    0 0 0 3px color-mix(in srgb, var(--dock-accent) 16%, transparent),
+    0 14px 22px -14px #000;
+}
+.app.is-game .visual-controls .gold-button.secondary-ending {
+  background: linear-gradient(180deg, #1c343ef2, #12252ef2);
+  border-color: #c4dde640;
+  box-shadow:
+    inset 0 1px 0 #ffffff14,
+    0 10px 18px -14px #000;
+}
+.app.is-game
+  .visual-controls
+  .gold-button.secondary-ending:not(:disabled):hover {
+  border-color: #e8c98799;
+  color: #fbeecb;
+}
+.app.is-game .playing-indicator i {
+  box-shadow: 0 0 10px currentColor;
+}
+
+/* The pinned closing action (see native-table.css) covers what scrolls
+   beneath it with the dock's own surface. */
+@media (min-width: 1100px) and (min-height: 650px) {
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:not(:has(> .reaction-responses))
+    > .gold-button:last-child:not(.secondary-ending):not(:disabled) {
+    box-shadow:
+      inset 0 1px 0 #ffffffa6,
+      inset 0 -1px 0 #7a5a2180,
+      0 0 0 12px var(--dock-surface),
+      0 -22px 18px -6px var(--dock-surface);
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:not(:has(> .reaction-responses))
+    > .gold-button.secondary-ending:last-child,
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:not(:has(> .reaction-responses))
+    > .gold-button:last-child:disabled {
+    background: linear-gradient(180deg, #1c343e, #12252e);
+    box-shadow:
+      inset 0 1px 0 #ffffff14,
+      0 0 0 12px var(--dock-surface),
+      0 -22px 18px -6px var(--dock-surface);
+  }
+}
+
+/* Action chain */
+.app.is-game .action-stack-heading {
+  box-shadow:
+    inset 0 1px 0 #ffffff14,
+    0 8px 16px -10px #000;
+}
+.app.is-game .action-stack-entry .game-card,
+.app.is-game .action-stack-card {
+  box-shadow:
+    0 0 0 1px #ffffff24,
+    0 16px 26px -10px #000000f2;
+}
+
+/* Clearer table keeps its flat, high-contrast surfaces. */
+:root[data-board-contrast="high"] .app.is-game .playmat {
+  background: #091820;
+}
+:root[data-board-contrast="high"] .app.is-game .base-zone,
+:root[data-board-contrast="high"] .app.is-game .setup-card,
+:root[data-board-contrast="high"] .app.is-game .rune-zone,
+:root[data-board-contrast="high"] .app.is-game .hand-tray {
+  background: #0d222c;
+  box-shadow: none;
+}
+
+/* =====================================================================
+   Supporting screens: library, builder, training, history, dialogs.
+   ===================================================================== */
+.app .library h1,
+.app .deck-builder h1,
+.app .training-lab h1,
+.app .match-history h1 {
+  background: linear-gradient(180deg, #ffffff 25%, #e9dfc6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Card art placeholders: a calm shimmer until the image arrives. */
+@keyframes lux-shimmer {
+  from {
+    background-position: 160% 0;
+  }
+  to {
+    background-position: -60% 0;
+  }
+}
+.app .library.card-library .catalog-grid .game-card[data-art="loading"],
+.app .builder-card-art img[data-art="loading"],
+.app .builder-deck-heading img[data-art="loading"] {
+  background:
+    linear-gradient(100deg, transparent 30%, #ffffff12 50%, transparent 70%) 0
+      0 / 220% 100% no-repeat,
+    linear-gradient(160deg, #14272f, #0c1920);
+  animation: lux-shimmer 1.5s linear infinite;
+}
+.app .library.card-library .catalog-grid .game-card > img,
+.app .builder-card-art img {
+  transition: opacity 0.4s var(--lux-ease);
+}
+.app .library.card-library .catalog-grid .game-card[data-art="loading"] > img,
+.app .builder-card-art img[data-art="loading"] {
+  opacity: 0;
+}
+/* Library */
+.app .library.card-library .catalog-grid .game-card {
+  border-color: #c4dde626;
+  background: linear-gradient(160deg, #14272f, #0c1920);
+  box-shadow:
+    inset 0 1px 0 #ffffff0f,
+    0 16px 28px -18px #000;
+  transition:
+    transform 0.28s var(--lux-ease),
+    border-color 0.28s var(--lux-ease),
+    box-shadow 0.28s var(--lux-ease);
+}
+.app .library.card-library .catalog-grid .game-card:hover,
+.app .library.card-library .catalog-grid .game-card:focus-visible {
+  transform: translateY(-4px);
+  border-color: #e8c987b3;
+  box-shadow:
+    inset 0 1px 0 #ffffff1a,
+    0 0 0 4px #e8c98714,
+    0 28px 40px -20px #000,
+    0 0 30px -8px #e8c98759;
+}
+.app .library-toolbar {
+  border-color: #c4dde626;
+  background: linear-gradient(180deg, #13252ef5, #0d1b23f5);
+  box-shadow:
+    inset 0 1px 0 #ffffff12,
+    0 22px 34px -26px #000;
+}
+.app .library-toolbar .search-input,
+.app .library-toolbar .library-sort,
+.app .library-toolbar .library-refinement > summary {
+  border-color: #c4dde62b;
+  box-shadow: inset 0 1px 0 #ffffff08;
+  transition:
+    border-color 0.2s var(--lux-ease),
+    box-shadow 0.2s var(--lux-ease);
+}
+.app .library-toolbar .search-input:focus-within,
+.app .library-toolbar .library-sort:hover,
+.app .library-toolbar .library-refinement > summary:hover {
+  border-color: #64dcc880;
+  box-shadow:
+    inset 0 1px 0 #ffffff0d,
+    0 0 0 4px #64dcc814;
+}
+.app .library-references,
+.app .library-reference-deck {
+  border-color: #c4dde624;
+  box-shadow: inset 0 1px 0 #ffffff0d;
+}
+.app .library-refinement-panel {
+  box-shadow: var(--lux-shadow-2);
+}
+.app .scripted-badge {
+  letter-spacing: 0.02em;
+}
+
+/* Deck builder */
+.app .builder-card {
+  transition:
+    background 0.2s var(--lux-ease),
+    box-shadow 0.2s var(--lux-ease);
+}
+.app .builder-card:hover {
+  background: #ffffff08;
+}
+.app .builder-card-art {
+  box-shadow:
+    0 0 0 1px #ffffff14,
+    0 10px 16px -10px #000;
+}
+.app .builder-deck {
+  border-color: #c4dde62b;
+  background:
+    radial-gradient(90% 30% at 50% 0%, #e8c98712, transparent 70%),
+    linear-gradient(180deg, #13252ef2, #0c1a22f5);
+  box-shadow: var(--lux-shadow-2);
+}
+.app .builder-counts strong {
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 18px #64dcc840;
+}
+.app .builder-curve-bars span {
+  background: linear-gradient(180deg, #8ff2e1, #2f9e8d);
+  box-shadow:
+    inset 0 1px 0 #ffffff66,
+    0 0 14px -2px #64dcc880;
+}
+.app .builder-footer {
+  border-color: #c4dde62e;
+  border-top-color: #e8c98759;
+  background: linear-gradient(180deg, #14272ff7, #0c1920f7);
+  box-shadow:
+    inset 0 1px 0 #ffffff14,
+    0 -18px 40px -22px #000,
+    0 26px 44px -24px #000;
+}
+
+/* Training lab */
+.app .training-exercise .eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.app .training-decision {
+  background:
+    radial-gradient(90% 40% at 50% 0%, #64dcc814, transparent 70%),
+    linear-gradient(180deg, #14272ff2, #0c1920f5);
+  box-shadow: var(--lux-shadow-2);
+}
+.app .training-next-hint {
+  background: linear-gradient(180deg, #0f2a31, #0a2027);
+  box-shadow: inset 0 1px 0 #ffffff0a;
+}
+.app .training-actions > button:not(:disabled) {
+  position: relative;
+  overflow: hidden;
+  border-color: #f7e3b0;
+  background: var(--lux-metal);
+  color: #1b1405;
+  font-weight: 600;
+  box-shadow:
+    inset 0 1px 0 #ffffffa6,
+    inset 0 -1px 0 #7a5a2180,
+    0 10px 26px -12px #e8c98799;
+  transition:
+    transform 0.18s var(--lux-ease),
+    filter 0.25s var(--lux-ease),
+    box-shadow 0.25s var(--lux-ease);
+}
+.app .training-actions > button:not(:disabled):hover {
+  filter: brightness(1.05);
+  box-shadow:
+    inset 0 1px 0 #ffffffbf,
+    inset 0 -1px 0 #7a5a2180,
+    0 16px 36px -12px #e8c987c7;
+}
+.app .training-actions > button:not(:disabled):active {
+  transform: translateY(1px);
+}
+.app .training-lessons > button,
+.app .training-lessons > li > button {
+  transition:
+    transform 0.22s var(--lux-ease),
+    border-color 0.22s var(--lux-ease),
+    box-shadow 0.22s var(--lux-ease);
+}
+.app .training-lessons > button:hover,
+.app .training-lessons > li > button:hover {
+  transform: translateY(-2px);
+  border-color: #e8c98780;
+  box-shadow: var(--lux-shadow-1);
+}
+
+/* Dialogs */
+.modal-backdrop.app-dialog-backdrop {
+  background:
+    radial-gradient(80% 60% at 50% 40%, #0b1f28b3, transparent 80%), #02080cd1;
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+}
+@keyframes lux-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+}
+.app .modal.app-dialog {
+  border-color: #c4dde62e;
+  border-top-color: #e8c98766;
+  background:
+    radial-gradient(90% 26% at 50% 0%, #e8c98712, transparent 70%),
+    linear-gradient(180deg, #14272f, #0d1b23);
+  box-shadow:
+    inset 0 1px 0 #ffffff17,
+    0 50px 110px -30px #000,
+    0 0 0 1px #00000059;
+  /* No fill mode: once it ends, the dialog keeps no transform of its own. */
+  animation: lux-dialog-in 0.32s var(--lux-ease);
+}
+.app .modal.app-dialog .close-button {
+  border-color: #c4dde62e;
+  background: linear-gradient(180deg, #1a303a, #11222b);
+  box-shadow: inset 0 1px 0 #ffffff12;
+  transition:
+    color 0.2s var(--lux-ease),
+    border-color 0.2s var(--lux-ease),
+    transform 0.2s var(--lux-ease);
+}
+.app .modal.app-dialog .close-button:hover {
+  color: #fff3d6;
+  border-color: #e8c98780;
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app .library.card-library .catalog-grid .game-card[data-art="loading"],
+  .app .builder-card-art img[data-art="loading"],
+  .app .builder-deck-heading img[data-art="loading"],
+  .app .modal.app-dialog {
+    animation: none;
+  }
+  .app .library.card-library .catalog-grid .game-card,
+  .app .training-lessons > button,
+  .app .training-lessons > li > button,
+  .app .modal.app-dialog .close-button {
+    transform: none !important;
+  }
+}
+:root[data-effects="reduced"]
+  .app
+  .library.card-library
+  .catalog-grid
+  .game-card[data-art="loading"],
+:root[data-effects="reduced"] .app .builder-card-art img[data-art="loading"],
+:root[data-effects="reduced"] .app .modal.app-dialog {
+  animation: none;
+}
+
+/* A little more of the battlefield illustration on the desktop table. Cards
+   and Might plates are opaque, and Clearer table still dims the art. */
+@media (min-width: 1100px) and (min-height: 650px) {
+  .app.is-game .battlefield .field-art {
+    filter: saturate(0.9) brightness(0.52);
+  }
+}
+
+/* =====================================================================
+   The result: the one ceremonial moment of a duel.
+   ===================================================================== */
+@keyframes lux-result-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.97);
+  }
+}
+.app.is-game .result-banner.match-result-panel {
+  --result-tone: #e8c987;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-color: color-mix(in srgb, var(--result-tone) 55%, transparent);
+  background:
+    radial-gradient(
+      90% 52% at 50% 0%,
+      color-mix(in srgb, var(--result-tone) 16%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(170deg, #17303cfa, #0a1820fc);
+  box-shadow:
+    inset 0 1px 0 #ffffff26,
+    0 0 0 6px color-mix(in srgb, var(--result-tone) 9%, transparent),
+    0 0 110px -18px color-mix(in srgb, var(--result-tone) 45%, transparent),
+    0 50px 140px #000;
+  animation: lux-result-in 0.5s var(--lux-ease);
+}
+.app.is-game .result-banner.match-result-panel.is-defeat {
+  --result-tone: #f29d96;
+}
+.app.is-game .result-banner.match-result-panel > svg {
+  box-sizing: content-box;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--result-tone) 80%, #fff);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 28%, #2b4650, #0d1c24 72%);
+  color: color-mix(in srgb, var(--result-tone) 70%, #fff);
+  box-shadow:
+    inset 0 1px 0 #ffffff40,
+    0 0 0 6px color-mix(in srgb, var(--result-tone) 10%, transparent),
+    0 14px 34px -8px color-mix(in srgb, var(--result-tone) 60%, transparent);
+  filter: none;
+}
+.app.is-game .result-banner.match-result-panel .eyebrow {
+  letter-spacing: 0.28em;
+  color: color-mix(in srgb, var(--result-tone) 85%, #fff);
+}
+.app.is-game .result-banner.match-result-panel h2 {
+  margin: 10px 0 6px;
+  font:
+    600 clamp(26px, 4vw, 38px) / 1.15 "Cinzel",
+    serif;
+  letter-spacing: 0;
+  background: linear-gradient(
+    180deg,
+    #ffffff 15%,
+    color-mix(in srgb, var(--result-tone) 55%, #fff) 95%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-wrap: balance;
+}
+.app.is-game .result-banner.match-result-panel .result-score {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  margin: 8px 0 0;
+}
+.app.is-game .result-banner .result-score-points {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  font:
+    800 clamp(34px, 6vw, 46px) / 1 "Exo 2",
+    sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+.app.is-game .result-banner .result-score-points b {
+  font-weight: 800;
+}
+.app.is-game .result-banner .result-score-points b.is-you {
+  color: #7ff0dc;
+  text-shadow: 0 0 26px #5ad8c680;
+}
+.app.is-game .result-banner .result-score-points b.is-foe {
+  color: #f6aaa4;
+  text-shadow: 0 0 26px #f29a9a66;
+}
+.app.is-game .result-banner .result-score-points i {
+  color: #6f8792;
+  font-style: normal;
+  font-weight: 600;
+  transform: translateY(-0.08em);
+}
+.app.is-game .result-banner .result-score-turns {
+  color: #9fb3bd;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.app.is-game .result-banner .result-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.app.is-game .result-banner .result-actions {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 340px);
+  margin-top: 26px;
+}
+.app.is-game .result-banner .result-actions > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  margin: 0;
+  padding: 10px 18px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.app.is-game .result-banner .result-actions > .gold-button {
+  min-height: 52px;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+.app.is-game .result-banner.match-result-panel > p[role="alert"] {
+  margin: 14px 0 0;
+  color: #f6c3bd;
+}
+@media (prefers-reduced-motion: reduce) {
+  .app.is-game .result-banner.match-result-panel {
+    animation: none;
+  }
+}
+:root[data-effects="reduced"] .app.is-game .result-banner.match-result-panel {
+  animation: none;
+}
+
+/* Hover preview: the card lifts off the table. */
+.card-preview {
+  box-shadow:
+    0 0 0 1px #e8c98759,
+    0 0 70px -12px #e8c98747,
+    0 34px 80px -14px #000,
+    0 12px 36px #000b;
+}
+/* Small labels above dialog and page titles. */
+.app .modal .eyebrow,
+.app .online-duel .eyebrow,
+.app .match-history .eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Phone launch bar: frosted, with the same champagne hairline as the panels. */
+.app .rift-lobby-upgrade .rift-mobile-launch {
+  border-top-color: #e8c98752;
+  background: linear-gradient(180deg, #0c1a22e0, #08131aeb);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 #ffffff0f,
+    0 -22px 40px -22px #000;
+}
+
+/* Screens arrive with a short fade. Opacity only: nothing moves or resizes. */
+@keyframes lux-screen-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-effects="reduced"]) .app > main {
+    animation: lux-screen-in 0.28s ease-out;
+  }
+}

@@ -572,6 +572,11 @@ export const flowMessages: Record<string, [string, string, string]> = {
   "Resume game": ["Resume game", "Nastavi igru", "Riprendi partita"],
   "Pause game": ["Pause game", "Pauziraj igru", "Metti in pausa"],
   "Match complete": ["Match complete", "Meč je završen", "Partita terminata"],
+  "The duel is over. Start a new duel or review its key moments.": [
+    "The duel is over. Start a new duel or review its key moments.",
+    "Duel je završen. Počni novi duel ili pregledaj ključne trenutke.",
+    "Il duello è finito. Inizia un nuovo duello o rivedi i momenti chiave.",
+  ],
   "Choose a damage target": [
     "Choose a damage target",
     "Izaberi metu za štetu",

@@ -123,6 +123,12 @@ function BuilderArt({
 }) {
   const src = cardArtUrl(card);
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const image = useRef<HTMLImageElement>(null);
+  useEffect(() => {
+    const img = image.current;
+    if (src && img?.complete && img.naturalWidth > 0) setLoadedSrc(src);
+  }, [src]);
   if (!src || failedSrc === src)
     return (
       <span
@@ -135,9 +141,12 @@ function BuilderArt({
     );
   return (
     <img
+      ref={image}
       src={src}
       alt=""
+      data-art={loadedSrc === src ? "ready" : "loading"}
       loading={lazy ? "lazy" : undefined}
+      onLoad={() => setLoadedSrc(src)}
       onError={() => setFailedSrc(src)}
     />
   );

@@ -1152,6 +1152,14 @@ export default function App() {
       </div>
     </header>
   );
+  // A finished game of a best-of-three: the series decides the next step.
+  const seriesStep =
+    series &&
+    game &&
+    seriesMatchesGame(series, game) &&
+    series.phase !== "playing"
+      ? series
+      : null;
   return (
     <HighlightContext.Provider
       value={{ ...highlights, game: game || undefined }}
@@ -1923,7 +1931,7 @@ export default function App() {
               </AppDialog>
             )}
             {!review && game.winner !== null && (
-              <MatchResultPanel>
+              <MatchResultPanel won={game.winner === 0}>
                 <Trophy size={40} />
                 <span className="eyebrow"> {t("DUEL JE ZAVRŠEN")} </span>
                 <h2 id="match-result-title">
@@ -1931,26 +1939,18 @@ export default function App() {
                     ? t("Pobjeda je tvoja.")
                     : t("Rift pripada protivniku.")}
                 </h2>
-                <p>
-                  {game.players[0].points} : {game.players[1].points} ·{" "}
-                  {game.turn} {t("poteza")}{" "}
+                <p className="result-score">
+                  <span className="result-score-points">
+                    <b className="is-you">{game.players[0].points}</b>
+                    <i aria-hidden="true">:</i>
+                    <span className="result-visually-hidden"> : </span>
+                    <b className="is-foe">{game.players[1].points}</b>
+                  </span>
+                  <span className="result-score-turns">
+                    <span className="result-visually-hidden"> · </span>
+                    {game.turn} {t("poteza")}
+                  </span>
                 </p>
-                {series &&
-                  seriesMatchesGame(series, game) &&
-                  series.phase !== "playing" && (
-                    <button
-                      className="gold-button"
-                      onClick={() => setScreen("series")}
-                    >
-                      <Trophy size={17} />
-                      {t(
-                        series.phase === "complete"
-                          ? "Series results"
-                          : "Next game · sideboard",
-                      )}{" "}
-                      · {series.scores[0]}–{series.scores[1]}
-                    </button>
-                  )}
                 {seriesSaveError && series && (
                   <p role="alert">
                     {t(
@@ -1958,28 +1958,49 @@ export default function App() {
                     )}
                   </p>
                 )}
-                <button className="gold-button" onClick={requestNewGame}>
-                  {t("Novi duel")} <RotateCcw size={17} />
-                </button>
-                {completedHistoryId && (
+                {/* One primary action: the series step when a series waits,
+                    otherwise a new duel. */}
+                <div className="result-actions">
+                  {seriesStep && (
+                    <button
+                      className="gold-button"
+                      onClick={() => setScreen("series")}
+                    >
+                      <Trophy size={17} />
+                      {t(
+                        seriesStep.phase === "complete"
+                          ? "Series results"
+                          : "Next game · sideboard",
+                      )}{" "}
+                      · {seriesStep.scores[0]}–{seriesStep.scores[1]}
+                    </button>
+                  )}
                   <button
-                    className="gold-button"
-                    onClick={() => {
-                      setHistoryFocusId(completedHistoryId);
-                      setScreen("history");
-                    }}
+                    className={seriesStep ? "outline-button" : "gold-button"}
+                    onClick={requestNewGame}
                   >
-                    <BookOpen size={17} />
-                    {t("Review key moments")}
+                    {t("Novi duel")} <RotateCcw size={17} />
                   </button>
-                )}
-                <button
-                  className="outline-button"
-                  onClick={() => setScreen("history")}
-                >
-                  <History size={16} />
-                  {t("Match history")}
-                </button>
+                  {completedHistoryId && (
+                    <button
+                      className="outline-button"
+                      onClick={() => {
+                        setHistoryFocusId(completedHistoryId);
+                        setScreen("history");
+                      }}
+                    >
+                      <BookOpen size={17} />
+                      {t("Review key moments")}
+                    </button>
+                  )}
+                  <button
+                    className="outline-button"
+                    onClick={() => setScreen("history")}
+                  >
+                    <History size={16} />
+                    {t("Match history")}
+                  </button>
+                </div>
                 {historySaveError && (
                   <p role="alert">
                     {t(
