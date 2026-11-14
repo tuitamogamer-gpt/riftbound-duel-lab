@@ -278,6 +278,12 @@ let stepFrames: StepFrame[] | null = null;
 const executingEffects = new WeakSet<GameState>();
 // Costs can cause triggers, but their choices wait until the play is finalized.
 const finalizingBoardCostPlay = new WeakMap<GameState, Array<() => void>>();
+/**
+ * Units exhausted as a cost that left the board in the same action (a unit
+ * exhausted for Starry-Eyed Songstress, then returned for the spell's own
+ * cost). They still became exhausted, with their last known information.
+ */
+const exhaustedThenLeft = new WeakMap<GameState, Unit[]>();
 const effectActors = new WeakMap<GameState, PlayerId>();
 const scoreTriggerRepeats = new WeakMap<
   GameState,
@@ -5640,6 +5646,7 @@ export function emitGameEvent(
     | "abilityEnergyCost"
     | "resolvedSpell"
     | "spellTrashId"
+    | "lastUnit"
   >,
 ) {
   if (name === "attach") {
@@ -8832,7 +8839,15 @@ function applyActionInternal(
       );
     }
     if (legal.additionalCostPaid && script.additionalCost?.board) {
+      const exhaustedForSongstress = (legal.songstressUnits?.split(",") ?? [])
+        .map((id) => s.units.find((u) => u.id === id && u.owner === p))
+        .filter((u): u is Unit => Boolean(u))
+        .map((u) => structuredClone(u));
       payBoardCost(s, p, script, legal.costSourceId!);
+      const left = exhaustedForSongstress.filter(
+        (old) => !s.units.some((u) => u.id === old.id),
+      );
+      if (left.length) exhaustedThenLeft.set(s, left);
     }
     x.cardsPlayedThisTurn++;
     const playOrdinal = x.cardsPlayedThisTurn;
@@ -9248,11 +9263,20 @@ function applyActionInternal(
  * same time (Seraphine, Inspiring).
  */
 function emitExhaustions(before: GameState, next: GameState) {
-  const exhausted = next.units.filter(
-    (u) => !u.ready && before.units.some((old) => old.id === u.id && old.ready),
+  const wasReady = (id: string) =>
+    before.units.some((old) => old.id === id && old.ready);
+  const exhausted = next.units.filter((u) => !u.ready && wasReady(u.id));
+  // Exhausted as a cost, then gone: announced with last known information.
+  const left = (exhaustedThenLeft.get(next) ?? []).filter(
+    (u) => wasReady(u.id) && !next.units.some((v) => v.id === u.id),
   );
+  exhaustedThenLeft.delete(next);
   for (const u of exhausted)
     event(next, "exhausted", u.owner, u.cardId, u.id, u.location);
+  for (const u of left)
+    event(next, "exhausted", u.owner, u.cardId, u.id, u.location, {
+      lastUnit: u,
+    });
   for (const g of next.gears.filter(
     (g) =>
       !g.ready &&
@@ -9261,7 +9285,7 @@ function emitExhaustions(before: GameState, next: GameState) {
   ))
     event(next, "exhausted", g.owner, g.cardId, g.id, gearPlace(g));
   for (const p of [0, 1] as PlayerId[]) {
-    const count = exhausted.filter((u) => u.owner === p).length;
+    const count = [...exhausted, ...left].filter((u) => u.owner === p).length;
     if (count)
       event(
         next,

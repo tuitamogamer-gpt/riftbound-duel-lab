@@ -217,9 +217,10 @@ export const radianceWave3Module: ExpansionModule = {
       if (field && isFace(field.cardId, "RAD", 157))
         ctx.trigger(s, p, field.cardId, field.id, [gold], field.id);
     }
-    // Reckless Innovator: when I become exhausted, choose one.
+    // Reckless Innovator: when I become exhausted, choose one. A unit that
+    // was exhausted as a cost and then left is known by `ctx.lastUnit`.
     if (name === "exhausted" && sourceId) {
-      const unit = s.units.find((u) => u.id === sourceId);
+      const unit = s.units.find((u) => u.id === sourceId) ?? ctx.lastUnit;
       if (
         unit &&
         textSources(s, unit).some((t) => isFace(t.cardId, "RAD", 105))

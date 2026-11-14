@@ -322,7 +322,8 @@ export const radianceWave4Module: ExpansionModule = {
   },
   event(s, name, p, cardId, sourceId, locationId, ctx) {
     if (name === "exhausted" && sourceId) {
-      const unit = s.units.find((u) => u.id === sourceId);
+      // A unit exhausted as a cost that then left is known by `ctx.lastUnit`.
+      const unit = s.units.find((u) => u.id === sourceId) ?? ctx.lastUnit;
       if (unit && has(s, unit, 53))
         ctx.trigger(
           s,

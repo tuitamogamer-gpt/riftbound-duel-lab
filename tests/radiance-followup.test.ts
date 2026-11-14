@@ -506,3 +506,75 @@ describe("Heimerdinger, Academy Instructor replaces the token's play", () => {
     expect(mechs(s)).toHaveLength(0);
   });
 });
+
+describe("a unit exhausted for Songstress that then leaves the board", () => {
+  /** Songstress with three ready units; Parallel Convergence returns one. */
+  const setup = (extra: GameState["units"] = []) => {
+    const s = fixture();
+    s.players[0].legendId = rad(151);
+    s.units = [
+      unit("a", 0, "base:0", 2),
+      unit("b", 0, "base:0", 2),
+      unit("c", 0, "base:0", 2),
+      unit("enemy", 1, "field:0", 4),
+      ...extra,
+    ];
+    // No Energy: Parallel Convergence (2 Energy) needs the Songstress discount.
+    s.players[0].energy = 0;
+    s.players[0].hand = [rad(51)];
+    return s;
+  };
+  const playReturning = (s: GameState, returned: string) => {
+    const pick = actions(s).find(
+      (a) =>
+        a.cardId === rad(51) &&
+        a.costSourceId === returned &&
+        a.songstressUnits === "a,b,c" &&
+        a.targetId === "enemy",
+    );
+    expect(pick).toBeDefined();
+    return act(s, pick!.id);
+  };
+  const triggered = (s: GameState, name: string) =>
+    s.log.filter((l) => l.text.startsWith(`${name}: triggered ability`)).length;
+
+  it("still raises its own 'when I become exhausted' ability", () => {
+    // Strigian Oracle: "When I become exhausted, [Predict]."
+    let s = setup();
+    s.units[2] = { ...s.units[2], cardId: rad(53) };
+    s = settle(playReturning(s, "c"));
+    expect(s.units.some((u) => u.id === "c")).toBe(false);
+    expect(s.players[0].hand).toContain(rad(53));
+    expect(triggered(s, "Strigian Oracle")).toBe(1);
+  });
+
+  it("counts toward Seraphine, Inspiring's three exhausted units", () => {
+    // "Once each turn, when you exhaust three or more friendly units at the
+    // same time, you may draw 1." She stays ready herself.
+    let s = setup([{ ...unit("si", 0, "base:0", 4), cardId: rad(65) }]);
+    s = settle(playReturning(s, "c"));
+    expect(triggered(s, "Seraphine, Inspiring")).toBe(1);
+  });
+
+  it("is seen by Riven, Deserter as a friendly unit becoming exhausted", () => {
+    // "When another friendly unit becomes exhausted, give me +1 Might this turn."
+    let s = setup([{ ...unit("rd", 0, "base:0", 5), cardId: rad(114) }]);
+    s = settle(playReturning(s, "c"));
+    expect(byId(s, "rd").temporaryMight).toBe(3);
+  });
+
+  it("does nothing extra when the returned unit was not exhausted for her", () => {
+    // A fourth unit pays Parallel Convergence's cost; it was never exhausted.
+    let s = setup([{ ...unit("d", 0, "base:0", 2), cardId: rad(53) }]);
+    const pick = actions(s).find(
+      (a) =>
+        a.cardId === rad(51) &&
+        a.costSourceId === "d" &&
+        a.songstressUnits === "a,b,c" &&
+        a.targetId === "enemy",
+    );
+    expect(pick).toBeDefined();
+    s = settle(act(s, pick!.id));
+    expect(triggered(s, "Strigian Oracle")).toBe(0);
+  });
+});

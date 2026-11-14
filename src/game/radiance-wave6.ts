@@ -569,11 +569,14 @@ export const radianceWave6Module: ExpansionModule = {
     // Riven, Broken Blade / Riven, Deserter / Resplendent Rostrum.
     if (name === "exhausted" && sourceId) {
       const u = s.units.find((v) => v.id === sourceId);
+      // Riven, Broken Blade's modes all act on her, so she must still be here.
       if (u && has(s, u, 43))
         ctx.trigger(s, p, u.cardId, u.id, [rd6("riven-modes")], u.location);
-      if (u)
-        for (const r of own(s, u.owner).filter(
-          (r) => r.id !== u.id && has(s, r, 114),
+      // Riven, Deserter also sees a unit that became exhausted and then left.
+      const became = u ?? ctx.lastUnit;
+      if (became)
+        for (const r of own(s, became.owner).filter(
+          (r) => r.id !== became.id && has(s, r, 114),
         ))
           ctx.trigger(
             s,
