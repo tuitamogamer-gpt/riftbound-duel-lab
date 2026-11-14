@@ -105,6 +105,8 @@ Open **Appearance** from the header, match toolbar or mobile **Duel menu** to ch
 
 The existing table layout and image-only public-card hover previews remain in place. See [the interface upgrade](docs/UI-UX-UPGRADE.md) for screen changes, preference behavior and artwork provenance.
 
+A [premium finish](docs/PREMIUM-FINISH.md) adds one layer of light and depth on top: a champagne-metal primary action on every screen, glass panels, battlefields that glow in their controller's colour, card art that shimmers while it loads, and a result panel with the score and a single next step. On desktop, the command dock keeps its heading at the top and its closing action at the bottom, and only the list of options between them scrolls. Reduced motion and **Reduce effects** turn the transitions off.
+
 ## Native match flow
 
 - Desktop keeps the complete table and one decision bar in the viewport. On phones, a public minimap shows every base and battlefield, including control, unit counts, Might, combat, Hidden counts and available targets. The selected zone has the opponent above your units; crowded rows scroll horizontally without shrinking touch targets.

@@ -1,5 +1,14 @@
 # Validation evidence
 
+## Premium finish, desktop dock and Songstress — 14 November 2026
+
+The [premium finish](PREMIUM-FINISH.md) restyles the app and lays out the desktop command dock so that its buttons are never cut off. The same pass corrects the last open item of the Radiance follow-up: a unit exhausted for [Starry-Eyed Songstress that then leaves](RADIANCE-FOLLOWUP.md#14-november-2026-songstress-and-a-unit-that-leaves).
+
+- **Code as of commit `e68cdc9`** (the two later commits change only one style sheet): **3,026 tests in 156 files** outside the precon matrix and **331 precon-matrix tests** in three shards (111 + 110 + 110), all with exit 0 and the CI timeouts. The weekly workflow's report checks pass: **3,249 unique tests**, none failed or missing, and all **169 ordered pairings**. TypeScript, the production build and catalog consistency also passed.
+- **Dock**: 115 dock states in three languages at six desktop sizes, 2,070 measurements. Content was taller than the dock in 1,192 before and in none after.
+- **Browser checks**: the 22 scripts ran against the earlier and the new code in headless Chromium. Three that failed now pass or pass further, none is worse, and the remaining failures are identical in both versions. The [table](PREMIUM-FINISH.md#browser-checks-before-and-after) lists each one.
+- Eight fixed-seed bot games between retail decks end in identical states on `87b140b` and on the new code.
+
 ## Heimerdinger and local Radiance art — 12 November 2026
 
 [Heimerdinger, Academy Instructor](RADIANCE-FOLLOWUP.md#12-november-2026-heimerdinger-and-local-art) now plays only one unit when it replaces a token, and the Seraphine and Evelynn lists have local card art (335 cached images).

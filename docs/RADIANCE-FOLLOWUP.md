@@ -41,7 +41,7 @@ The reference policy (the heuristic that also seeds the planner's candidates) no
 ## Still open
 
 - ~~**Heimerdinger, Academy Instructor**: the token is played and then replaced by the Mech, so both count as played.~~ Corrected on [12 November](#12-november-2026-heimerdinger-and-local-art).
-- **Songstress and a unit that then leaves**: a unit exhausted for Songstress and then returned or killed for the spell's cost leaves before the play is complete. Its own "when I become exhausted" ability (Strigian Oracle, Reckless Innovator, Seraphine, Not Alone) does not trigger, and it does not count toward Seraphine, Inspiring's three units.
+- ~~**Songstress and a unit that then leaves**: a unit exhausted for Songstress and then returned or killed for the spell's cost leaves before the play is complete, so its own "when I become exhausted" ability does not trigger.~~ Corrected on [14 November](#14-november-2026-songstress-and-a-unit-that-leaves).
 
 ## Validation
 
@@ -77,3 +77,25 @@ The Seraphine and Evelynn lists became playable presets, but their art still cam
 - **7 new tests**: six for Heimerdinger in `tests/radiance-followup.test.ts` (three failed on the earlier code; the others guard Zilean, kept tokens and older saves) and one in `tests/art-runtime-index.test.ts`, which failed with the earlier art manifest.
 - TypeScript, the production build and catalog consistency pass.
 - **Retail games**: the eight fixed-seed bot games end in identical states on `fe9857f` and on the new code, as they did on `edbf77c`.
+
+## 14 November 2026: Songstress and a unit that leaves
+
+A unit exhausted for Starry-Eyed Songstress and then returned or killed for the spell's own cost (Parallel Convergence, Sacrifice) left the board before the engine compared ready states, so it never "became exhausted".
+
+- It is now announced with its last known information. Strigian Oracle, Reckless Innovator and Seraphine, Not Alone trigger, and Riven, Deserter sees a friendly unit become exhausted.
+- It counts toward Seraphine, Inspiring's "three or more friendly units at the same time".
+- Riven, Broken Blade does not trigger in this case: each of her modes acts on her, and she is gone.
+- A unit that pays the spell's cost without being exhausted for Songstress raises nothing.
+
+With this, every item the review left open is either corrected or confirmed by the rules. One limit remains from the Heimerdinger correction: a token that leaves the board before its replacement choice is not announced as played.
+
+### Validation
+
+<!-- validation:start -->
+
+- **Code as of commit `e68cdc9`**: **3,026 tests in 156 files** outside the precon matrix and **331 precon-matrix tests** in three shards (111 + 110 + 110), all with exit 0 and the CI timeouts. The report checks pass: **3,249 unique tests**, none failed or missing, and all **169 ordered pairings**. The commits after the rules change (`b47a97e`) touch only the interface.
+- **4 new tests** in `tests/radiance-followup.test.ts`. Three fail on the earlier code; the fourth guards a unit that pays the cost without being exhausted for Songstress.
+- TypeScript, the production build and catalog consistency pass.
+- **Retail games**: the eight fixed-seed bot games end in identical states on `87b140b` and on the new code.
+
+<!-- validation:end -->
