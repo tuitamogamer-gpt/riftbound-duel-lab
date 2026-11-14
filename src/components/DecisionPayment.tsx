@@ -6,6 +6,40 @@ import {
 import type { GameAction, GameState } from "../game/types";
 import { useI18n } from "../i18n";
 
+const paymentPreviewFor = (game: GameState, action: GameAction) =>
+  ["play", "ability", "move", "resource"].includes(action.category) &&
+  !action.id.startsWith("move-start:") &&
+  !action.id.startsWith("move-toggle:")
+    ? getPaymentPreview(game, action)
+    : null;
+
+const signatures = new WeakMap<GameState, Map<string, string | null>>();
+
+/**
+ * Identifies everything a receipt shows. Options whose receipts are equal can
+ * show the receipt once instead of repeating it in every option.
+ */
+export function paymentSignature(game: GameState, action: GameAction) {
+  let known = signatures.get(game);
+  if (!known) signatures.set(game, (known = new Map()));
+  if (!known.has(action.id)) {
+    const preview = paymentPreviewFor(game, action);
+    known.set(
+      action.id,
+      preview
+        ? JSON.stringify([
+            preview.energy,
+            preview.power,
+            preview.runes.map((rune) => rune.status),
+            preview.retained.map((rune) => rune.ready),
+            preview.pools,
+          ])
+        : null,
+    );
+  }
+  return known.get(action.id) ?? null;
+}
+
 /** Only the receipt at payment time is shown, never the outcome of the effect. */
 export function DecisionPayment({
   game,
@@ -16,12 +50,7 @@ export function DecisionPayment({
 }) {
   const { t } = useI18n();
   const preview = useMemo(
-    () =>
-      ["play", "ability", "move", "resource"].includes(action.category) &&
-      !action.id.startsWith("move-start:") &&
-      !action.id.startsWith("move-toggle:")
-        ? getPaymentPreview(game, action)
-        : null,
+    () => paymentPreviewFor(game, action),
     [game, action],
   );
   if (!preview) return null;

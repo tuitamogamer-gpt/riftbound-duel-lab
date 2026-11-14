@@ -3,7 +3,7 @@ import { ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { findCard, type CatalogCard } from "../catalog";
 import { cardArtUrl } from "../data/art";
 import { Card } from "./Card";
-import { DecisionPayment } from "./DecisionPayment";
+import { DecisionPayment, paymentSignature } from "./DecisionPayment";
 import { reactionSources } from "../game/reaction-presentation";
 import { useCompactTable } from "../hooks/useCompactTable";
 import {
@@ -187,6 +187,20 @@ export function MatchControls({
   const pageKey = `${selected}:${target}:${hiddenPlayMode}:${pageSize}:${actions.map((action) => action.id).join(";")}`;
   const page = pageState.key === pageKey ? pageState.page : 0;
   const pageCount = Math.ceil(actions.length / pageSize);
+  const shownActions = actions.slice(
+    page * pageSize,
+    page * pageSize + pageSize,
+  );
+  // When every listed option costs the same, the receipt is also given once in
+  // the heading; a layout with a narrow list can then drop the repeats.
+  const sharedPayment =
+    shownActions.length > 1 &&
+    shownActions.every((action, _index, all) => {
+      const signature = paymentSignature(game, action);
+      return signature !== null && signature === paymentSignature(game, all[0]);
+    })
+      ? shownActions[0]
+      : null;
   const opening = game.phase === "mulligan" && !game.players[0].mulliganDone;
   const keep = legal.find(
     (action) =>
@@ -322,6 +336,11 @@ export function MatchControls({
               </span>
             )}
           </strong>
+          {sharedPayment && !paused && !review && !busy && !opening && (
+            <div className="decision-shared-payment">
+              <DecisionPayment game={game} action={sharedPayment} />
+            </div>
+          )}
           {pendingCard && (
             <div className="reaction-threat">
               <span>
@@ -518,92 +537,102 @@ export function MatchControls({
                 </div>
               </div>
             )}
-            <div className="context-actions">
+            <div
+              className="context-actions"
+              data-shared-payment={sharedPayment ? "" : undefined}
+            >
               {namingSpell && !actions.length && (
                 <span>{t("No matching spells")}</span>
               )}
-              {actions
-                .slice(page * pageSize, page * pageSize + pageSize)
-                .map((action) => {
-                  const targets = publicActionTargets(game, action);
-                  const optionCard = findCard(
-                    targets[0]?.card.id ?? inspectedTop ?? action.cardId,
-                  );
-                  return (
-                    <button
-                      key={action.id}
-                      className={`context-action ${targets.length ? "has-target" : ""}`}
-                      data-action-id={action.id}
-                      data-target-id={action.targetId}
-                      aria-describedby={`${detailsId}-${action.id}`}
-                      aria-label={
-                        t(action.label) +
-                        (targets.length
-                          ? ` · ${targets.map((item) => [item.owner === undefined ? "" : t(item.owner === 0 ? "Ti" : "Protivnik"), item.card.name, t(item.location)].filter(Boolean).join(" · ")).join(" + ")}`
-                          : "")
-                      }
-                      onClick={() => dispatch(action)}
-                      title={
-                        t(action.label) +
-                        (action.detail ? ` · ${t(action.detail)}` : "")
-                      }
-                    >
-                      {optionCard?.image && (
-                        <img
-                          className="decision-option-art"
-                          src={cardArtUrl(optionCard)}
-                          alt={optionCard.name}
-                          data-card-preview={optionCard.id}
-                        />
-                      )}
-                      <span>
-                        {targets.length ? (
-                          <>
-                            <span className="decision-action-label">
-                              {t(action.label)}
+              {shownActions.map((action) => {
+                const targets = publicActionTargets(game, action);
+                const optionCard = findCard(
+                  targets[0]?.card.id ?? inspectedTop ?? action.cardId,
+                );
+                return (
+                  <button
+                    key={action.id}
+                    className={`context-action ${targets.length ? "has-target" : ""}`}
+                    data-names-target={
+                      targets.length &&
+                      targets.every((item) =>
+                        t(action.label).includes(item.card.name),
+                      )
+                        ? ""
+                        : undefined
+                    }
+                    data-action-id={action.id}
+                    data-target-id={action.targetId}
+                    aria-describedby={`${detailsId}-${action.id}`}
+                    aria-label={
+                      t(action.label) +
+                      (targets.length
+                        ? ` · ${targets.map((item) => [item.owner === undefined ? "" : t(item.owner === 0 ? "Ti" : "Protivnik"), item.card.name, t(item.location)].filter(Boolean).join(" · ")).join(" + ")}`
+                        : "")
+                    }
+                    onClick={() => dispatch(action)}
+                    title={
+                      t(action.label) +
+                      (action.detail ? ` · ${t(action.detail)}` : "")
+                    }
+                  >
+                    {optionCard?.image && (
+                      <img
+                        className="decision-option-art"
+                        data-repeats-source={
+                          optionCard.id === sourceCard?.id ? "" : undefined
+                        }
+                        src={cardArtUrl(optionCard)}
+                        alt={optionCard.name}
+                        data-card-preview={optionCard.id}
+                      />
+                    )}
+                    <span>
+                      {targets.length ? (
+                        <>
+                          <span className="decision-action-label">
+                            {t(action.label)}
+                          </span>
+                          {targets.map((item) => (
+                            <span className="decision-target" key={item.id}>
+                              <strong>{item.card.name}</strong>
+                              <small className="decision-target-location">
+                                {[
+                                  item.owner === undefined
+                                    ? ""
+                                    : t(item.owner === 0 ? "Ti" : "Protivnik"),
+                                  t(item.location),
+                                ]
+                                  .filter(Boolean)
+                                  .join(" · ")}
+                              </small>
                             </span>
-                            {targets.map((item) => (
-                              <span className="decision-target" key={item.id}>
-                                <strong>{item.card.name}</strong>
-                                <small className="decision-target-location">
-                                  {[
-                                    item.owner === undefined
-                                      ? ""
-                                      : t(
-                                          item.owner === 0 ? "Ti" : "Protivnik",
-                                        ),
-                                    t(item.location),
-                                  ]
-                                    .filter(Boolean)
-                                    .join(" · ")}
-                                </small>
-                              </span>
-                            ))}
-                          </>
+                          ))}
+                        </>
+                      ) : (
+                        <strong>{t(action.label)}</strong>
+                      )}
+                      <span
+                        id={`${detailsId}-${action.id}`}
+                        className="decision-option-details"
+                      >
+                        {action.id.startsWith("hide:") && hiddenSetup ? (
+                          <small className="hidden-action-cost">
+                            {t(
+                              action.id.endsWith(":energy")
+                                ? "Hide · 1 Energy"
+                                : hiddenSetup.costLabel,
+                            )}
+                          </small>
                         ) : (
-                          <strong>{t(action.label)}</strong>
+                          action.detail && <small>{t(action.detail)}</small>
                         )}
-                        <span
-                          id={`${detailsId}-${action.id}`}
-                          className="decision-option-details"
-                        >
-                          {action.id.startsWith("hide:") && hiddenSetup ? (
-                            <small className="hidden-action-cost">
-                              {t(
-                                action.id.endsWith(":energy")
-                                  ? "Hide · 1 Energy"
-                                  : hiddenSetup.costLabel,
-                              )}
-                            </small>
-                          ) : (
-                            action.detail && <small>{t(action.detail)}</small>
-                          )}
-                          <DecisionPayment game={game} action={action} />
-                        </span>
+                        <DecisionPayment game={game} action={action} />
                       </span>
-                    </button>
-                  );
-                })}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
             {pageCount > 1 && (
               <div className="action-pages">
@@ -629,6 +658,7 @@ export function MatchControls({
             {cancel && (
               <button
                 className="secondary-decision"
+                title={t("Cancel movement")}
                 onClick={() => dispatch(cancel)}
               >
                 {t("Cancel movement")}

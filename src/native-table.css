@@ -280,8 +280,18 @@
     min-height: 48px;
   }
 
-  /* A compact command dock sits next to the hand, never between the two armies. */
+  /* ===== Command dock =====
+     The dock sits next to the hand, never between the two armies. It never
+     scrolls as a whole: the heading stays at the top, the closing action (end
+     turn, pass, confirm, resume) stays at the bottom, and only the list of
+     options between them scrolls when it is longer than the room left. If
+     even the fixed parts do not fit, the heading is the part that gives way. */
   .app.is-game .playmat:not(:has(.hand-tray.is-opening)) > .visual-controls {
+    --dock-head-min: 38px;
+    --dock-list-min: 44px;
+    --dock-pad: 12px;
+    --dock-closing: 42px;
+    --dock-cancel-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E");
     position: relative;
     inset: auto;
     grid-area: decisions;
@@ -289,87 +299,29 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: stretch;
     gap: 8px;
     min-height: 0;
-    padding: 12px;
-    overflow-y: auto;
-    scrollbar-width: thin;
+    padding: var(--dock-pad);
+    overflow: hidden;
   }
+
+  /* Heading: the card art sits beside the kicker and the title only, so every
+     line below them uses the dock's full width. */
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls
+    > .visual-controls
     > .decision-context {
-    flex: 0 0 auto;
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls.has-source
-    > .decision-context {
-    grid-template-columns: 40px minmax(0, 1fr);
-  }
-  .app.is-game .visual-controls .decision-source .game-card {
-    max-height: 56px;
-  }
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls
-    > .decision-actions {
-    flex: 0 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-    padding: 0;
-    gap: 6px;
-  }
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls
-    .context-actions {
-    display: flex;
-    flex-direction: column;
-    overflow: visible;
-    flex: 0 0 auto;
-    max-width: 100%;
-  }
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls
-    .context-action {
-    flex: 0 0 auto;
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-    min-height: 48px;
-    padding: 6px;
-  }
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls
-    .gold-button {
-    width: 100%;
-    min-height: 44px;
-  }
-  .app.is-game .visual-controls .cancel-selection {
-    right: 6px;
-    top: 6px;
-  }
-  /* Reaction window: the card art sits beside the title only, so the text of
-     the threat uses the dock's full width and the whole prompt fits without
-     scrolling in the usual case. */
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls.has-source
-    > .decision-context:has(.reaction-threat) {
     display: block;
+    flex: 0 1 auto;
+    min-height: var(--dock-head-min);
+    overflow: hidden;
   }
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls.has-source
-    > .decision-context:has(.reaction-threat)
+    > .visual-controls
+    > .decision-context
     > .decision-source {
     float: left;
     width: 27px;
@@ -378,51 +330,423 @@
   }
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls.has-source
-    > .decision-context:has(.reaction-threat)
+    > .visual-controls
+    > .decision-context
     .decision-source
     .game-card {
     max-height: 38px;
   }
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls.has-source
-    > .decision-context:has(.reaction-threat)
-    .reaction-threat {
-    clear: left;
-    margin-top: 6px;
+    > .visual-controls
+    .decision-copy {
+    padding-right: 0;
   }
-  /* An empty hand reads as a quiet, centred note instead of a stray label. */
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
-    .hand-tray.is-empty
-    .hand {
-    align-items: center;
-    justify-content: center;
+    > .visual-controls
+    .decision-kicker {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
-  /* The closing action (end turn, pass, confirm) stays in view while a longer
-     list of options scrolls above it. */
-  .app.is-game .playmat:not(:has(.hand-tray.is-opening)) > .visual-controls {
-    scroll-padding-bottom: 68px;
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .decision-title {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .card-cost-note,
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .decision-copy
+    > :is(p, .reaction-threat, .decision-target-summary, .spell-name-search) {
+    clear: left;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .card-cost-note {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .reaction-threat {
+    margin-top: 6px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .decision-copy
+    > p {
+    -webkit-line-clamp: 3;
+  }
+  /* The receipt that every listed option shares is given once, here. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .decision-shared-payment {
+    display: block;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .decision-shared-payment
+    .decision-payment {
+    margin-top: 4px;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-actions[data-shared-payment]
+    .decision-payment {
+    display: none;
+  }
+  /* While choices are listed, they matter more than the card text, the
+     general instruction or the reminder of what is on the chain. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls.has-source:has(.context-action)
+    .decision-copy
+    > p,
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls:has(.context-action)
+    .reaction-threat {
+    display: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls:has(.confirm-decision)
+    .decision-copy
+    > p {
+    -webkit-line-clamp: 2;
+  }
+
+  /* A selected card with choices keeps its heading to the name and the
+     receipt: the window is named by the turn bar, and the receipt states what
+     will actually be paid. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls.has-source:has(.context-action)
+    .decision-kicker,
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls:has(.decision-payment)
+    .card-cost-note {
+    display: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .decision-copy
+    > .decision-shared-payment {
+    overflow: hidden;
+  }
+  /* An option does not repeat the art that the heading already shows. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-action
+    .decision-option-art[data-repeats-source] {
+    display: none;
+  }
+  /* Nor the cost that the pressed play method already shows. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls.has-hidden-modes
+    .context-action
+    .hidden-action-cost {
+    display: none;
+  }
+
+  /* Clearing the selection is a corner control, not a row of its own. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions
+    > .cancel-selection {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls:has(> .decision-actions > .cancel-selection)
+    :is(.decision-kicker, .decision-title) {
+    padding-right: 28px;
+  }
+
+  /* Actions: everything keeps its height except the list of options. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: stretch;
+    width: 100%;
+    min-height: 0;
+    padding: 0;
+    gap: 6px;
   }
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
     > .visual-controls
     > .decision-actions
-    > .gold-button:last-child {
-    position: sticky;
-    bottom: 0;
-    z-index: 3;
+    > * {
     flex: none;
   }
-  /* Reaction window: the responses and "continue" share one row, so the
-     prompt fits the dock on a 768px-high laptop without scrolling. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions
+    > .context-actions {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 100%;
+    min-height: calc(var(--dock-list-min) + 6px);
+    /* Room for the focus ring and the hover lift inside the scroller. */
+    margin: -3px;
+    padding: 3px;
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions
+    > .context-actions:empty {
+    display: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-action {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 44px;
+    padding: 6px 8px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-action
+    .decision-option-art {
+    width: 28px;
+    height: 39px;
+  }
+  /* Target name and place share a line. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-action
+    .decision-target
+    > :is(strong, small) {
+    display: inline;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-action
+    .decision-target
+    > small::before {
+    content: " · ";
+  }
+  /* When the label already names the target ("Assign 6 damage to Mega-Mech"),
+     it becomes the option's heading and the name is not repeated under it. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-action[data-names-target]
+    .decision-action-label {
+    color: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-action[data-names-target]
+    .decision-target
+    > strong {
+    display: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-action[data-names-target]
+    .decision-target
+    > small::before {
+    content: none;
+  }
+  /* The receipt already states the cost; its pool lines stay in its tooltip. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-action
+    .decision-option-details:has(.decision-payment)
+    > small:not(.hidden-action-cost) {
+    display: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .decision-payment {
+    margin-top: 4px;
+    padding-top: 4px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .decision-payment-pool {
+    display: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .gold-button {
+    width: 100%;
+    min-height: var(--dock-closing);
+  }
+
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .secondary-decision {
+    min-height: 40px;
+  }
+  /* Movement: "cancel" is a compact control beside "move", which keeps the
+     full width for its receipt. Its label stays available to assistive
+     technology and as a tooltip. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .secondary-decision) {
+    flex-flow: row wrap;
+    align-content: flex-end;
+    align-items: stretch;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .secondary-decision)
+    > .secondary-decision {
+    flex: 0 0 var(--dock-closing);
+    display: grid;
+    place-items: center;
+    width: var(--dock-closing);
+    min-width: 0;
+    padding: 0;
+    overflow: hidden;
+    font-size: 0;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .secondary-decision)
+    > .secondary-decision::before {
+    content: "";
+    width: 18px;
+    height: 18px;
+    background: currentColor;
+    -webkit-mask: var(--dock-cancel-icon) center / contain no-repeat;
+    mask: var(--dock-cancel-icon) center / contain no-repeat;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .secondary-decision)
+    > .confirm-decision {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .secondary-decision)
+    > .end-turn {
+    flex: 1 1 100%;
+  }
+  /* More options than fit one page: the pager shares the closing action's
+     row instead of taking one of its own. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions
+    > .action-pages {
+    position: absolute;
+    bottom: var(--dock-pad);
+    left: var(--dock-pad);
+    width: 84px;
+    height: var(--dock-closing);
+    justify-content: space-between;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions
+    > .action-pages
+    button {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    min-height: 0;
+    padding: 0;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .action-pages)
+    > .gold-button:last-child {
+    width: auto;
+    margin-left: 90px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .action-pages:last-child) {
+    padding-bottom: calc(var(--dock-closing) + 6px);
+  }
+
+  /* Reaction window: the responses and "continue" share one row. */
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
     > .visual-controls
     > .decision-actions:has(> .reaction-responses) {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-content: end;
     align-items: start;
     gap: 6px;
   }
@@ -466,7 +790,6 @@
     > .visual-controls
     > .decision-actions:has(> .reaction-responses)
     > .gold-button:last-child {
-    position: static;
     grid-column: 2;
     grid-row: 1;
     align-self: stretch;
@@ -475,12 +798,38 @@
     line-height: 1.25;
     white-space: normal;
   }
+  /* A response shortcut and a listed option together: side by side, with
+     the closing action below them. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .reaction-responses)
+    > .context-actions:not(:empty) {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+    overflow: visible;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .reaction-responses):has(
+      > .context-actions:not(:empty)
+    )
+    > .gold-button:last-child {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-height: var(--dock-closing);
+  }
+
   /* The response buttons name themselves ("Select response") and their group
      is labelled for assistive technology, so the dock keeps the visible
      caption out of the way and saves a line. */
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls
+    > .visual-controls
     .reaction-responses-label {
     position: absolute;
     width: 1px;
@@ -492,11 +841,50 @@
   }
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls
+    > .visual-controls
     > .hidden-play-modes {
     flex: 0 0 auto;
     width: 100%;
     max-width: none;
+    margin: 0;
+  }
+
+  /* An empty hand reads as a quiet, centred note instead of a stray label. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .hand-tray.is-empty
+    .hand {
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* A lower dock keeps the heading to what the choices do not already say. */
+@media (min-width: 1100px) and (min-height: 650px) and (max-height: 849px) {
+  /* Options are told apart by their text here; the art would cost each of
+     them a line. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-action
+    .decision-option-art {
+    display: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .decision-copy
+    > p {
+    -webkit-line-clamp: 2;
+  }
+  .app.is-game .playmat:not(:has(.hand-tray.is-opening)) > .visual-controls {
+    --dock-closing: 40px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .secondary-decision {
+    min-height: 36px;
   }
 }
 
@@ -536,22 +924,159 @@
   .app.is-game .player-cards .setup-empty-art {
     height: calc(100cqh - 4px);
   }
-  /* The short dock keeps the reaction prompt to its title and choices: the
-     threat stays readable on the chain in the middle of the table. */
+  /* The short dock (140px) keeps to the title, the choices and the closing
+     action. The turn bar above the table already names the window, and the
+     chain in the middle of the table shows what is being answered. */
+  .app.is-game .playmat:not(:has(.hand-tray.is-opening)) > .visual-controls {
+    --dock-head-min: 22px;
+    --dock-list-min: 40px;
+    --dock-pad: 10px;
+    --dock-closing: 34px;
+    gap: 6px;
+  }
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls
+    > .visual-controls
+    .decision-kicker,
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-context
+    > .decision-source,
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
     .reaction-threat,
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls
+    > .visual-controls
     .reaction-response
-    > img {
+    > img,
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-action
+    .decision-option-art,
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .decision-payment
+    > span:not(.decision-payment-cost) {
     display: none;
   }
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
-    .visual-controls
+    > .visual-controls:has(> .decision-actions > .cancel-selection)
+    .decision-title {
+    padding-right: 26px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions
+    > .cancel-selection {
+    top: 6px;
+    right: 6px;
+    width: 26px;
+    height: 26px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .decision-title {
+    -webkit-line-clamp: 1;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .decision-copy
+    > p {
+    margin-top: 3px;
+  }
+  /* One line of instruction is enough beside two rows of controls. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls:has(
+      .reaction-response,
+      .review-navigation,
+      .confirm-decision
+    )
+    .decision-copy
+    > p {
+    -webkit-line-clamp: 1;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-action {
+    min-height: 40px;
+    padding: 5px 8px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .gold-button {
+    padding-block: 6px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .secondary-decision {
+    min-height: 34px;
+    padding-block: 5px;
+  }
+  /* Choices leave no room for an instruction here. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls:has(.context-action)
+    .decision-copy
+    > p {
+    display: none;
+  }
+  /* Play methods: a single compact row, and the option below it does not
+     repeat the cost that the pressed method already shows. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .hidden-play-modes {
+    margin: 0;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .hidden-play-modes
+    button {
+    min-height: 34px;
+    padding-block: 3px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .hidden-play-modes
+    .cancel-selection {
+    flex-basis: 34px;
+    width: 34px;
+    height: 34px;
+    padding: 7px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .hidden-play-modes
+    small {
+    display: none;
+  }
+  /* While a selected card lists its choices, the way out is the corner
+     control; ending the turn or passing comes back once it is cleared. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls:has(.context-action)
+    .gold-button.secondary-ending {
+    display: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
     .reaction-response {
     padding-left: 10px;
   }
@@ -560,6 +1085,7 @@
     > .visual-controls
     > .decision-actions:has(> .reaction-responses)
     > .gold-button:last-child {
+    min-height: 44px;
     font-size: 11px;
     line-height: 1.2;
   }
@@ -570,5 +1096,95 @@
     > .gold-button:last-child
     svg {
     display: none;
+  }
+  /* The play methods already carry a way out, so ending the turn waits
+     until the selection is cleared. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls.has-hidden-modes
+    .end-turn {
+    display: none;
+  }
+  /* The pager keeps its row when the ending beside it is hidden. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls:has(.context-action)
+    > .decision-actions:has(> .action-pages + .secondary-ending:last-child) {
+    padding-bottom: calc(var(--dock-closing) + 6px);
+  }
+  /* With a pager, the shared receipt moves beside it, where the hidden
+     ending left room. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls:has(.context-action):has(.action-pages)
+    .decision-shared-payment {
+    position: absolute;
+    right: var(--dock-pad);
+    bottom: var(--dock-pad);
+    left: calc(var(--dock-pad) + 92px);
+    display: grid;
+    align-content: center;
+    height: var(--dock-closing);
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls:has(.context-action):has(.action-pages)
+    .decision-shared-payment
+    .decision-payment {
+    margin-top: 0;
+  }
+  /* Paused review: the step buttons and "resume" share one row. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .review-navigation) {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .review-navigation)
+    > .review-navigation {
+    flex: 1.35 1 0;
+    display: flex;
+    gap: 6px;
+    min-width: 0;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .review-navigation)
+    .review-previous {
+    flex: 0 0 34px;
+    width: 34px;
+    min-width: 0;
+    padding: 0;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .review-navigation)
+    .review-navigation
+    > button:last-child {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-inline: 6px;
+    font-size: 11px;
+    line-height: 1.15;
+    white-space: normal;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .review-navigation)
+    > .gold-button {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    padding-inline: 6px;
+    font-size: 11px;
+    line-height: 1.15;
+    white-space: normal;
   }
 }

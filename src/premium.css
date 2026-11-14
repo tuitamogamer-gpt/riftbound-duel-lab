@@ -945,35 +945,60 @@ html {
   box-shadow: 0 0 10px currentColor;
 }
 
-/* The pinned closing action (see native-table.css) covers what scrolls
-   beneath it with the dock's own surface. */
-@media (min-width: 1100px) and (min-height: 650px) {
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls
-    > .decision-actions:not(:has(> .reaction-responses))
-    > .gold-button:last-child:not(.secondary-ending):not(:disabled) {
-    box-shadow:
-      inset 0 1px 0 #ffffffa6,
-      inset 0 -1px 0 #7a5a2180,
-      0 0 0 12px var(--dock-surface),
-      0 -22px 18px -6px var(--dock-surface);
+/* A list of options that scrolls fades at the edge that hides more of it.
+   Browsers without scroll-driven animations show the plain edge and the
+   scrollbar. */
+.app.is-game .visual-controls .context-actions {
+  scrollbar-color: color-mix(in srgb, var(--dock-accent) 55%, transparent)
+    transparent;
+}
+@property --dock-fade-top {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --dock-fade-bottom {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@keyframes dock-list-edges {
+  0% {
+    --dock-fade-top: 0px;
+    --dock-fade-bottom: 18px;
   }
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls
-    > .decision-actions:not(:has(> .reaction-responses))
-    > .gold-button.secondary-ending:last-child,
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls
-    > .decision-actions:not(:has(> .reaction-responses))
-    > .gold-button:last-child:disabled {
-    background: linear-gradient(180deg, #1c343e, #12252e);
-    box-shadow:
-      inset 0 1px 0 #ffffff14,
-      0 0 0 12px var(--dock-surface),
-      0 -22px 18px -6px var(--dock-surface);
+  12%,
+  88% {
+    --dock-fade-top: 18px;
+    --dock-fade-bottom: 18px;
+  }
+  100% {
+    --dock-fade-top: 18px;
+    --dock-fade-bottom: 0px;
+  }
+}
+@supports (animation-timeline: scroll()) {
+  @media (min-width: 1100px) and (min-height: 650px) {
+    .app.is-game
+      .playmat:not(:has(.hand-tray.is-opening))
+      > .visual-controls
+      > .decision-actions
+      > .context-actions {
+      animation: dock-list-edges linear both;
+      animation-timeline: scroll(self);
+      -webkit-mask-image: linear-gradient(
+        transparent,
+        #000 var(--dock-fade-top),
+        #000 calc(100% - var(--dock-fade-bottom)),
+        transparent
+      );
+      mask-image: linear-gradient(
+        transparent,
+        #000 var(--dock-fade-top),
+        #000 calc(100% - var(--dock-fade-bottom)),
+        transparent
+      );
+    }
   }
 }
 
@@ -1145,7 +1170,6 @@ html {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.14em;
-  text-transform: uppercase;
 }
 .app .training-decision {
   background:
@@ -1430,14 +1454,14 @@ html {
     0 34px 80px -14px #000,
     0 12px 36px #000b;
 }
-/* Small labels above dialog and page titles. */
+/* Small labels above dialog and page titles. Their case is left as written:
+   a transform would also change the text that is read and copied. */
 .app .modal .eyebrow,
 .app .online-duel .eyebrow,
 .app .match-history .eyebrow {
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.18em;
-  text-transform: uppercase;
 }
 
 /* Phone launch bar: frosted, with the same champagne hairline as the panels. */

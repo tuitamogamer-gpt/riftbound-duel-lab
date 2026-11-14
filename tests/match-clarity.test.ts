@@ -185,3 +185,60 @@ describe("readable decisions without predicting hidden outcomes", () => {
     );
   });
 });
+
+describe("dock options without repeated information", () => {
+  const renderSelected = (game: GameState, selected: string) =>
+    renderToStaticMarkup(
+      createElement(MatchControls, {
+        game,
+        review: null,
+        legal: getLegalActions(game, 0),
+        selected,
+        target: null,
+        clear: vi.fn(),
+        act: vi.fn(),
+        inspect: vi.fn(),
+        resume: vi.fn(),
+        selectSource: vi.fn(),
+        paused: false,
+        busy: false,
+        mulligan: [],
+      }),
+    );
+  const count = (html: string, text: string) => html.split(text).length - 1;
+
+  it("gives a receipt that every listed option shares once in the heading as well", () => {
+    const game = createTrainingPosition("deploy");
+    game.fields[0].controller = 0;
+    const before = structuredClone(game);
+    const html = renderSelected(game, "hand:0");
+    const options = count(html, 'class="context-action ');
+    expect(options).toBe(2);
+    expect(count(html, 'class="decision-shared-payment"')).toBe(1);
+    expect(html).toContain('data-shared-payment=""');
+    // Each option keeps its own receipt for layouts that list them in full.
+    expect(count(html, 'class="decision-payment"')).toBe(options + 1);
+    // The option art is the selected card's own art, which the heading shows.
+    expect(count(html, 'data-repeats-source=""')).toBe(options);
+    expect(game).toEqual(before);
+  });
+
+  it("keeps the receipt in the option when there is only one option", () => {
+    const html = renderSelected(createTrainingPosition("deploy"), "hand:0");
+    expect(count(html, 'class="context-action ')).toBe(1);
+    expect(html).not.toContain("decision-shared-payment");
+    expect(html).not.toContain("data-shared-payment");
+    expect(count(html, 'class="decision-payment"')).toBe(1);
+  });
+
+  it("marks an option whose label already names its target", () => {
+    const html = renderSelected(createTrainingPosition("reaction"), "hand:0");
+    const option = html.match(
+      /<button[^>]*class="context-action has-target"[\s\S]*?<\/button>/,
+    )?.[0];
+    expect(option).toContain("Play Wind Wall → Hextech Ray");
+    expect(option).toContain('data-names-target=""');
+    // The target's art is not the selected card's art.
+    expect(option).not.toContain("data-repeats-source");
+  });
+});
