@@ -168,7 +168,9 @@
   .app.is-game .player-cards > .rune-zone .rune-orbs {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-auto-rows: minmax(0, 1fr);
+    /* Rows hug the 64px rune cap, so a few runes stay together as one group
+       instead of spreading over the panel's height. */
+    grid-auto-rows: minmax(0, 64px);
     align-content: center;
     align-items: center;
     gap: 6px 3px;
@@ -355,6 +357,139 @@
     right: 6px;
     top: 6px;
   }
+  /* Reaction window: the card art sits beside the title only, so the text of
+     the threat uses the dock's full width and the whole prompt fits without
+     scrolling in the usual case. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls.has-source
+    > .decision-context:has(.reaction-threat) {
+    display: block;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls.has-source
+    > .decision-context:has(.reaction-threat)
+    > .decision-source {
+    float: left;
+    width: 27px;
+    height: auto;
+    margin: 0 10px 0 0;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls.has-source
+    > .decision-context:has(.reaction-threat)
+    .decision-source
+    .game-card {
+    max-height: 38px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls.has-source
+    > .decision-context:has(.reaction-threat)
+    .reaction-threat {
+    clear: left;
+    margin-top: 6px;
+  }
+  /* An empty hand reads as a quiet, centred note instead of a stray label. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .hand-tray.is-empty
+    .hand {
+    align-items: center;
+    justify-content: center;
+  }
+  /* The closing action (end turn, pass, confirm) stays in view while a longer
+     list of options scrolls above it. */
+  .app.is-game .playmat:not(:has(.hand-tray.is-opening)) > .visual-controls {
+    scroll-padding-bottom: 68px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions
+    > .gold-button:last-child {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    flex: none;
+  }
+  /* Reaction window: the responses and "continue" share one row, so the
+     prompt fits the dock on a 768px-high laptop without scrolling. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .reaction-responses) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 6px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .reaction-responses)
+    > * {
+    grid-column: 1 / -1;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .reaction-responses)
+    > .reaction-responses {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .reaction-responses)
+    > .reaction-responses
+    > div {
+    display: grid;
+    gap: 6px;
+    overflow: visible;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .reaction-responses)
+    .reaction-response {
+    width: 100%;
+    min-width: 0;
+    text-align: left;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .reaction-responses)
+    > .gold-button:last-child {
+    position: static;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: stretch;
+    min-height: 52px;
+    padding-inline: 8px;
+    line-height: 1.25;
+    white-space: normal;
+  }
+  /* The response buttons name themselves ("Select response") and their group
+     is labelled for assistive technology, so the dock keeps the visible
+     caption out of the way and saves a line. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .reaction-responses-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
     .visual-controls
@@ -400,5 +535,40 @@
   .app.is-game .player-cards .champion-zone .game-card.small,
   .app.is-game .player-cards .setup-empty-art {
     height: calc(100cqh - 4px);
+  }
+  /* The short dock keeps the reaction prompt to its title and choices: the
+     threat stays readable on the chain in the middle of the table. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .reaction-threat,
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .reaction-response
+    > img {
+    display: none;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    .visual-controls
+    .reaction-response {
+    padding-left: 10px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .reaction-responses)
+    > .gold-button:last-child {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .decision-actions:has(> .reaction-responses)
+    > .gold-button:last-child
+    svg {
+    display: none;
   }
 }
