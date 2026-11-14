@@ -533,7 +533,8 @@
     /* Room for the focus ring and the hover lift inside the scroller. */
     margin: -3px;
     padding: 3px;
-    overflow: hidden auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
   }
