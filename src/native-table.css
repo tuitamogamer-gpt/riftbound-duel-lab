@@ -568,6 +568,15 @@
     .playmat:not(:has(.hand-tray.is-opening))
     > .visual-controls
     .context-action
+    .decision-target {
+    margin-top: 2px;
+    font-size: 11px;
+    line-height: 14px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-action
     .decision-target
     > :is(strong, small) {
     display: inline;
@@ -859,8 +868,65 @@
   }
 }
 
+/* Below 1000px the art would cost each option a line once there are two or
+   more of them; a single option keeps it. */
+@media (min-width: 1100px) and (min-height: 650px) and (max-height: 999px) {
+  /* Two lines of instruction are enough above a list of choices. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls:has(.context-action)
+    .decision-copy
+    > p {
+    -webkit-line-clamp: 2;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-actions:has(> .context-action:nth-child(2))
+    .decision-option-art {
+    display: none;
+  }
+}
+
 /* A lower dock keeps the heading to what the choices do not already say. */
 @media (min-width: 1100px) and (min-height: 650px) and (max-height: 849px) {
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .hidden-play-modes
+    button {
+    min-height: 36px;
+    padding-block: 3px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    > .hidden-play-modes
+    .cancel-selection {
+    flex-basis: 36px;
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+  }
+  /* A selected card whose receipt sits in its only option needs no art in
+     the heading; the name is enough. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls.has-source:has(.context-action):not(
+      :has(.decision-shared-payment)
+    )
+    > .decision-context
+    > .decision-source {
+    display: none;
+  }
+  /* Outside combat, listed choices replace the general instruction. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls:not(.window-damage):has(.context-action)
+    .decision-copy
+    > p {
+    display: none;
+  }
   /* Options are told apart by their text here; the art would cost each of
      them a line. */
   .app.is-game
@@ -1095,6 +1161,21 @@
     > .decision-actions:has(> .reaction-responses)
     > .gold-button:last-child
     svg {
+    display: none;
+  }
+  /* An option keeps to its label and place here; the pressed play method
+     already states its cost. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .context-action
+    .decision-option-details
+    > small,
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls.has-hidden-modes
+    .context-action
+    .decision-payment {
     display: none;
   }
   /* The play methods already carry a way out, so ending the turn waits
