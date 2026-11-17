@@ -327,6 +327,9 @@
     width: 27px;
     height: auto;
     margin: 0 10px 0 0;
+    /* Above the positioned text block beside it, so that it stays clickable. */
+    position: relative;
+    z-index: 1;
   }
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
