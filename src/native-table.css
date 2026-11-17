@@ -391,42 +391,6 @@
     > p {
     -webkit-line-clamp: 3;
   }
-  /* The receipt that every listed option shares is given once, here. */
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls
-    .decision-shared-payment {
-    display: block;
-  }
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls
-    .decision-shared-payment
-    .decision-payment {
-    margin-top: 4px;
-    padding-top: 0;
-    border-top: 0;
-  }
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls
-    .context-actions[data-shared-payment]
-    .decision-payment {
-    display: none;
-  }
-  /* While choices are listed, they matter more than the card text, the
-     general instruction or the reminder of what is on the chain. */
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls.has-source:has(.context-action)
-    .decision-copy
-    > p,
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls:has(.context-action)
-    .reaction-threat {
-    display: none;
-  }
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
     > .visual-controls:has(.confirm-decision)
@@ -435,41 +399,12 @@
     -webkit-line-clamp: 2;
   }
 
-  /* A selected card with choices keeps its heading to the name and the
-     receipt: the window is named by the turn bar, and the receipt states what
-     will actually be paid. */
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls.has-source:has(.context-action)
-    .decision-kicker,
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls:has(.decision-payment)
-    .card-cost-note {
-    display: none;
-  }
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
     > .visual-controls
     .decision-copy
     > .decision-shared-payment {
     overflow: hidden;
-  }
-  /* An option does not repeat the art that the heading already shows. */
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls
-    .context-action
-    .decision-option-art[data-repeats-source] {
-    display: none;
-  }
-  /* Nor the cost that the pressed play method already shows. */
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls.has-hidden-modes
-    .context-action
-    .hidden-action-cost {
-    display: none;
   }
 
   /* Clearing the selection is a corner control, not a row of its own. */
@@ -589,56 +524,6 @@
     .decision-target
     > small::before {
     content: " · ";
-  }
-  /* When the label already names the target ("Assign 6 damage to Mega-Mech"),
-     it becomes the option's heading and the name is not repeated under it. */
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls
-    .context-action[data-names-target]
-    .decision-action-label {
-    color: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.25;
-  }
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls
-    .context-action[data-names-target]
-    .decision-target
-    > strong {
-    display: none;
-  }
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls
-    .context-action[data-names-target]
-    .decision-target
-    > small::before {
-    content: none;
-  }
-  /* The receipt already states the cost; its pool lines stay in its tooltip. */
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls
-    .context-action
-    .decision-option-details:has(.decision-payment)
-    > small:not(.hidden-action-cost) {
-    display: none;
-  }
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls
-    .decision-payment {
-    margin-top: 4px;
-    padding-top: 4px;
-  }
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls
-    .decision-payment-pool {
-    display: none;
   }
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
@@ -920,14 +805,6 @@
     > .decision-source {
     display: none;
   }
-  /* Outside combat, listed choices replace the general instruction. */
-  .app.is-game
-    .playmat:not(:has(.hand-tray.is-opening))
-    > .visual-controls:not(.window-damage):has(.context-action)
-    .decision-copy
-    > p {
-    display: none;
-  }
   /* Options are told apart by their text here; the art would cost each of
      them a line. */
   .app.is-game
@@ -1060,6 +937,23 @@
     > p {
     margin-top: 3px;
   }
+  /* The counts of what can be done are smaller here, so that two rows of
+     them still fit above the closing action. */
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .turn-moves {
+    gap: 4px;
+    margin-top: 4px;
+  }
+  .app.is-game
+    .playmat:not(:has(.hand-tray.is-opening))
+    > .visual-controls
+    .turn-moves
+    > li {
+    height: 20px;
+    padding: 0 6px;
+  }
   /* One line of instruction is enough beside two rows of controls. */
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
@@ -1171,7 +1065,7 @@
     > .visual-controls
     .context-action
     .decision-option-details
-    > small,
+    > :is(small, .option-cost),
   .app.is-game
     .playmat:not(:has(.hand-tray.is-opening))
     > .visual-controls.has-hidden-modes

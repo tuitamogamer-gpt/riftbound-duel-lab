@@ -17,7 +17,8 @@ export type ActionTargetView = {
   location: string;
 };
 
-function locationLabel(location: string | undefined) {
+/** The display name of a base or battlefield slot (an untranslated key). */
+export function locationLabel(location: string | undefined) {
   return location === "base:0"
     ? "Tvoja baza"
     : location === "base:1"

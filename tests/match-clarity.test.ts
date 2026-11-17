@@ -186,8 +186,8 @@ describe("readable decisions without predicting hidden outcomes", () => {
   });
 });
 
-describe("dock options without repeated information", () => {
-  const renderSelected = (game: GameState, selected: string) =>
+describe("dock commands are drawn, not written out", () => {
+  const renderSelected = (game: GameState, selected: string | null) =>
     renderToStaticMarkup(
       createElement(MatchControls, {
         game,
@@ -206,39 +206,97 @@ describe("dock options without repeated information", () => {
       }),
     );
   const count = (html: string, text: string) => html.split(text).length - 1;
+  const options = (html: string) =>
+    html.match(/<button[^>]*class="context-action[\s\S]*?<\/button>/g) ?? [];
 
-  it("gives a receipt that every listed option shares once in the heading as well", () => {
+  it("gives a receipt that every listed option shares once, in the heading", () => {
     const game = createTrainingPosition("deploy");
     game.fields[0].controller = 0;
     const before = structuredClone(game);
     const html = renderSelected(game, "hand:0");
-    const options = count(html, 'class="context-action ');
-    expect(options).toBe(2);
-    expect(count(html, 'class="decision-shared-payment"')).toBe(1);
-    expect(html).toContain('data-shared-payment=""');
-    // Each option keeps its own receipt for layouts that list them in full.
-    expect(count(html, 'class="decision-payment"')).toBe(options + 1);
-    // The option art is the selected card's own art, which the heading shows.
-    expect(count(html, 'data-repeats-source=""')).toBe(options);
+    expect(options(html)).toHaveLength(2);
+    expect(count(html, 'class="decision-payment"')).toBe(1);
+    const sharedId = html.match(
+      /class="decision-shared-payment" id="([^"]+)"/,
+    )?.[1];
+    expect(sharedId).toBeTruthy();
+    // Each option is still described by the receipt it shares.
+    for (const option of options(html))
+      expect(option).toMatch(
+        new RegExp(`aria-describedby="[^"]* ${sharedId}"`),
+      );
     expect(game).toEqual(before);
   });
 
-  it("keeps the receipt in the option when there is only one option", () => {
-    const html = renderSelected(createTrainingPosition("deploy"), "hand:0");
-    expect(count(html, 'class="context-action ')).toBe(1);
-    expect(html).not.toContain("decision-shared-payment");
-    expect(html).not.toContain("data-shared-payment");
-    expect(count(html, 'class="decision-payment"')).toBe(1);
+  it("draws a play to a place as the place, with the full label kept for readers", () => {
+    const game = createTrainingPosition("deploy");
+    game.fields[0].controller = 0;
+    const [base, field] = options(renderSelected(game, "hand:0"));
+    expect(base).toContain('data-option="place"');
+    expect(base).toContain('data-control="you"');
+    expect(base).toContain('aria-label="Play Playful Phantom at your base"');
+    expect(base).toContain('<span class="option-verb">Play</span>');
+    expect(base).toContain('<strong class="option-place">Your base</strong>');
+    expect(base).not.toContain("option-backdrop");
+    // A battlefield is named by its card and shows that card's art.
+    expect(field).toContain('data-option="place"');
+    expect(field).toContain('data-control="you"');
+    expect(field).toContain(
+      '<strong class="option-place">Altar to Unity</strong>',
+    );
+    expect(field).toContain('class="option-backdrop"');
+    // The card being played is in the heading; its art is not repeated.
+    expect(field).not.toContain("decision-option-art");
   });
 
-  it("marks an option whose label already names its target", () => {
-    const html = renderSelected(createTrainingPosition("reaction"), "hand:0");
-    const option = html.match(
-      /<button[^>]*class="context-action has-target"[\s\S]*?<\/button>/,
-    )?.[0];
-    expect(option).toContain("Play Wind Wall → Hextech Ray");
-    expect(option).toContain('data-names-target=""');
-    // The target's art is not the selected card's art.
-    expect(option).not.toContain("data-repeats-source");
+  it("keeps the receipt in the option when there is only one, without a second cost beside it", () => {
+    const html = renderSelected(createTrainingPosition("deploy"), "hand:0");
+    expect(options(html)).toHaveLength(1);
+    expect(html).not.toContain("decision-shared-payment");
+    expect(count(html, 'class="decision-payment"')).toBe(1);
+    // The sentences stay as text that is read; the chips are decoration.
+    expect(html).toMatch(
+      /<span class="read-text">Pay \d+ Energy · \d+ Power<\/span><span class="payment-chips is-cost" aria-hidden="true">/,
+    );
+    expect(html).toMatch(/<span class="read-text">After payment: \d+ ready/);
+    // The printed cost equals what is paid: it is read, not drawn twice.
+    expect(html).toContain("Printed cost");
+    expect(count(html, 'class="payment-chips is-cost"')).toBe(1);
+  });
+
+  it("names a target option by its target, under the verb of its label", () => {
+    const [option] = options(
+      renderSelected(createTrainingPosition("reaction"), "hand:0"),
+    );
+    expect(option).toContain('class="context-action has-target"');
+    expect(option).toContain('data-option="target"');
+    expect(option).toContain('data-owner="foe"');
+    expect(option).toContain('aria-label="Play Wind Wall → Hextech Ray');
+    expect(option).toContain('<span class="option-verb">Play</span>');
+    expect(option).toContain("<strong>Hextech Ray</strong>");
+    expect(option).not.toContain("decision-action-label");
+    // The target's art, not the selected card's.
+    expect(option).toContain('class="decision-option-art"');
+  });
+
+  it("counts what can be done instead of repeating one instruction", () => {
+    const moves = (html: string) =>
+      [
+        ...html.matchAll(/<li data-move="(\w+)">[\s\S]*?<b>(\d+)<\/b><\/li>/g),
+      ].map(([, kind, n]) => `${kind}:${n}`);
+    const deploy = renderSelected(createTrainingPosition("deploy"), null);
+    expect(moves(deploy)).toEqual(["cards:1"]);
+    // The instruction is still there for a reader.
+    expect(deploy).toContain(
+      '<p class="read-text">Click a glowing card to play it',
+    );
+    expect(
+      moves(renderSelected(createTrainingPosition("movement"), null)),
+    ).toEqual(["units:2"]);
+    const nothing = createTrainingPosition("deploy");
+    nothing.players[0].hand = [];
+    const html = renderSelected(nothing, null);
+    expect(moves(html)).toEqual([]);
+    expect(html).toContain("Nothing to play. End your turn.");
   });
 });

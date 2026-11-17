@@ -1,0 +1,268 @@
+/* =====================================================================
+   The inside of a command in the dock: option tiles, receipts and the
+   counts of what can be done. The layout sheets size and place the tiles;
+   this sheet draws what is in them, the same way on every screen.
+   ===================================================================== */
+
+/* Text that is read (and found by tests) but not drawn. Its parent is
+   positioned, so that it scrolls and clips with the part it belongs to. The
+   margin is forced: a layout's own margin for that element would otherwise
+   push the hidden box outside its part. */
+.app.is-game
+  .visual-controls
+  :is(.decision-context, .decision-actions)
+  .read-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px !important;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.visual-controls
+  :is(
+    .decision-copy,
+    .decision-payment,
+    .decision-payment-cost,
+    .decision-payment-after,
+    .option-cost,
+    .card-cost-note
+  ) {
+  position: relative;
+}
+
+/* ---- Chips: the lightning bolt and the diamond that the cards carry ---- */
+.visual-controls .payment-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+  vertical-align: middle;
+}
+.visual-controls .payment-caption {
+  margin-right: 1px;
+  color: #8fa5b0;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+.visual-controls .payment-chip {
+  --chip-color: #bfe9dc;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 18px;
+  padding: 0 5px;
+  border: 1px solid color-mix(in srgb, var(--chip-color) 55%, transparent);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--chip-color) 13%, transparent);
+  color: var(--chip-color);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+.visual-controls .payment-chip > svg {
+  flex: none;
+}
+.visual-controls .payment-chip > i {
+  font-size: 10px;
+  font-style: normal;
+}
+.visual-controls .payment-chip > small {
+  display: inline;
+  font-size: 9px;
+  font-weight: 500;
+  opacity: 0.85;
+}
+.visual-controls .payment-chip.is-energy {
+  --chip-color: #ffe2a0;
+}
+.visual-controls .payment-chip.is-power {
+  --chip-color: #d6bcff;
+}
+/* What is left after paying is quieter than what is paid. */
+.visual-controls .payment-chips.is-left .payment-chip {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--chip-color) 34%, transparent);
+  font-weight: 500;
+}
+
+/* ---- Receipt: what is paid, then what is left ---- */
+.app.is-game .visual-controls .decision-payment {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 9px;
+  margin: 5px 0 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.app.is-game
+  .visual-controls
+  .decision-payment
+  > :is(.decision-payment-cost, .decision-payment-after) {
+  display: inline-flex;
+}
+/* On the gold confirm button the chips are ink on metal. */
+.app.is-game .visual-controls .confirm-decision .payment-chip {
+  --chip-color: #33270a;
+  background: #33270a14;
+}
+.app.is-game .visual-controls .confirm-decision .payment-caption {
+  color: #5a4819;
+}
+.app.is-game .visual-controls .confirm-decision .decision-payment {
+  justify-content: center;
+  margin-top: 6px;
+}
+
+/* ---- Heading ---- */
+.app.is-game .visual-controls .card-cost-note {
+  display: block;
+  margin-top: 4px;
+}
+.app.is-game .visual-controls .decision-shared-payment {
+  display: block;
+}
+
+/* ---- Option tile ---- */
+.app.is-game .visual-controls .context-action {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  text-align: left;
+}
+.visual-controls .context-action > .option-body {
+  flex: 1 1 auto;
+  display: block;
+  min-width: 0;
+}
+/* A place is drawn as the place: its art fills the tile, darker under the
+   text, and its edge has the colour of whoever controls it.
+   The card image has a frame and two text boxes around its art. The backdrop
+   is larger than the tile, which crops them away at any tile shape. */
+.visual-controls .option-backdrop {
+  position: absolute;
+  inset: -45% -8%;
+  z-index: -1;
+  background-position: center 42%;
+  background-size: cover;
+}
+.visual-controls .option-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    #06131af5 0%,
+    #06131ad1 46%,
+    #06131a8c 100%
+  );
+}
+.visual-controls .context-action:is([data-control], [data-owner])::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--tile-edge, #8fa5b0);
+}
+.visual-controls .context-action:is([data-control="you"], [data-owner="you"]) {
+  --tile-edge: #64dcc8;
+}
+.visual-controls .context-action:is([data-control="foe"], [data-owner="foe"]) {
+  --tile-edge: #f29a9a;
+}
+/* A place tile needs little width, so two or three of them stay side by
+   side on a narrow phone instead of scrolling out of view. */
+.app.is-game .visual-controls .context-action[data-option="place"] {
+  flex: 1 1 84px;
+  min-width: 84px;
+  padding-left: 11px;
+}
+.visual-controls .option-verb {
+  display: block;
+  color: var(--tile-edge, #9fb3bd);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+}
+.app.is-game .visual-controls .context-action .option-place {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 1px;
+  color: #f2f7f6;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px #000c;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.visual-controls .option-cost {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-top: 4px;
+}
+.app.is-game .visual-controls .context-action .option-note {
+  display: inline;
+  color: #b9dbd0;
+  font-size: 10px;
+}
+
+/* A target tile shows the target's art on every screen, including the phone's
+   paired tiles. */
+.app.is-game .visual-controls.paired-targets .decision-option-art {
+  display: block;
+  flex: none;
+  width: 30px;
+  height: 42px;
+}
+
+/* ---- What can be done this turn ---- */
+.visual-controls .turn-moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.visual-controls .turn-moves > li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid #64dcc847;
+  border-radius: 12px;
+  background: #64dcc814;
+  color: #bfe9dc;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.visual-controls .turn-moves > li > b {
+  color: #f2f7f6;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.visual-controls .turn-moves > li[data-move="cards"] {
+  border-color: #e8c98759;
+  background: #e8c98717;
+  color: #f0dcaa;
+}
+.app.is-game .visual-controls .decision-copy .turn-moves-none {
+  margin: 5px 0 0;
+}

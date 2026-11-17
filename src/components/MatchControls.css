@@ -569,10 +569,3 @@
     -webkit-line-clamp: 2;
   }
 }
-
-/* Every listed option costs the same: the receipt can be given once in the
-   heading. Only a layout with a narrow option list shows it (and hides the
-   repeats); elsewhere each option keeps its own receipt. */
-.decision-shared-payment {
-  display: none;
-}

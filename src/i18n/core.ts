@@ -15,6 +15,7 @@ import { seriesMessages } from "./series";
 import { historyMessages } from "./history";
 import { onlineMessages } from "./online";
 import { clarityMessages } from "./clarity";
+import { commandMessages } from "./commands";
 import { experienceMessages } from "./experience";
 import { returningMessages } from "./returning";
 import { uiUpgradeMessages } from "./ui-upgrade";
@@ -44,6 +45,7 @@ export const messages: Record<string, [string, string, string]> = {
   ...historyMessages,
   ...onlineMessages,
   ...clarityMessages,
+  ...commandMessages,
   ...experienceMessages,
   ...returningMessages,
   ...uiUpgradeMessages,

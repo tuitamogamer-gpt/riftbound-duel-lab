@@ -32,6 +32,7 @@ import "./components/CardDetail.css";
 import "./match-clarity.css";
 import "./decision-table.css";
 import "./native-table.css";
+import "./dock-commands.css";
 import "./ui-theme.css";
 import "./premium.css";
 if (import.meta.env.PROD) registerOfflineWhenIdle();

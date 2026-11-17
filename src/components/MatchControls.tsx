@@ -1,13 +1,28 @@
 import { useId, useMemo, useState } from "react";
-import { ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  EyeOff,
+  Footprints,
+  Layers,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { findCard, type CatalogCard } from "../catalog";
 import { cardArtUrl } from "../data/art";
 import { Card } from "./Card";
-import { DecisionPayment, paymentSignature } from "./DecisionPayment";
+import {
+  CostChips,
+  DecisionPayment,
+  paymentCost,
+  paymentSignature,
+} from "./DecisionPayment";
 import { reactionSources } from "../game/reaction-presentation";
 import { useCompactTable } from "../hooks/useCompactTable";
 import {
   cardEffectSummary,
+  locationLabel,
   publicActionTargets,
 } from "../game/action-target-presentation";
 import { isFriendlyBuffAction } from "../game/friendly-buff-actions";
@@ -191,8 +206,9 @@ export function MatchControls({
     page * pageSize,
     page * pageSize + pageSize,
   );
-  // When every listed option costs the same, the receipt is also given once in
-  // the heading; a layout with a narrow list can then drop the repeats.
+  const opening = game.phase === "mulligan" && !game.players[0].mulliganDone;
+  // When every listed option costs the same, the receipt is given once in the
+  // heading instead of in every option.
   const sharedPayment =
     shownActions.length > 1 &&
     shownActions.every((action, _index, all) => {
@@ -201,7 +217,76 @@ export function MatchControls({
     })
       ? shownActions[0]
       : null;
-  const opening = game.phase === "mulligan" && !game.players[0].mulliganDone;
+  // Options are listed below the heading: they replace its instruction.
+  const listed =
+    !paused &&
+    !review &&
+    !busy &&
+    !opening &&
+    shownActions.length > 0 &&
+    !namingSpell;
+  // A general instruction gives way to the listed options; one that explains
+  // this card's situation (a Hidden play, counts of a selection) stays drawn.
+  const quietHint =
+    listed &&
+    !damageSummary &&
+    !movement &&
+    !boardSelection &&
+    !trashSelection &&
+    !hiddenStatus &&
+    !(hiddenSetup && hiddenPlayMode === "hide");
+  // The receipt in view states the cost; the printed cost is shown beside it
+  // only when it is a different amount.
+  const receiptAction =
+    sharedPayment ?? (shownActions.length === 1 ? shownActions[0] : null);
+  const paid =
+    listed && receiptAction ? paymentCost(game, receiptAction) : null;
+  // Nothing is selected and it is the player's move: instead of a sentence,
+  // the heading counts what can be done, by kind.
+  const turnMoves = useMemo(() => {
+    const cards = new Set<string>();
+    const units = new Set<string>();
+    const abilities = new Set<string>();
+    const hiddenCards = new Set<string>();
+    for (const action of legal) {
+      const source = action.sourceId;
+      if (!source || action.category === "pass" || action.category === "end")
+        continue;
+      if (source.startsWith("hand:")) cards.add(source.split(":jayce:")[0]);
+      else if (source.startsWith("hidden:")) hiddenCards.add(source);
+      else if (action.id.startsWith("move-start:")) units.add(source);
+      else abilities.add(source);
+    }
+    return [
+      { key: "cards", label: "Cards", count: cards.size, Icon: Layers },
+      { key: "units", label: "Units", count: units.size, Icon: Footprints },
+      {
+        key: "abilities",
+        label: "Abilities",
+        count: abilities.size,
+        Icon: Sparkles,
+      },
+      {
+        key: "hidden",
+        label: "Hidden cards",
+        count: hiddenCards.size,
+        Icon: EyeOff,
+      },
+    ].filter((entry) => entry.count > 0);
+  }, [legal]);
+  const idle =
+    !listed &&
+    !selected &&
+    !card &&
+    !paused &&
+    !review &&
+    !busy &&
+    !opening &&
+    !forcedPass &&
+    game.winner === null &&
+    !["damage", "move", "choice"].includes(game.phase) &&
+    !(canRespond && responses.size > 0) &&
+    Boolean(ending);
   const keep = legal.find(
     (action) =>
       action.category === "mulligan" &&
@@ -286,7 +371,13 @@ export function MatchControls({
           </div>
         )}
         <div className="decision-copy" role="status" aria-live="polite">
-          <span className="decision-kicker">
+          <span
+            className={
+              listed && sourceCard
+                ? "decision-kicker read-text"
+                : "decision-kicker"
+            }
+          >
             {t(
               paused
                 ? "Game paused"
@@ -329,20 +420,41 @@ export function MatchControls({
                   t(hiddenSetup.costLabel)
                 ) : (
                   <>
-                    {t("Printed cost")} · {card.energy ?? 0} {t("ENERGY")} ·{" "}
-                    {card.power ?? 0} {t("power")}
+                    <span className="read-text">
+                      {t("Printed cost")} · {card.energy ?? 0} {t("ENERGY")} ·{" "}
+                      {card.power ?? 0} {t("power")}
+                    </span>
+                    {!(
+                      paid &&
+                      paid.energy === (card.energy ?? 0) &&
+                      paid.power === (card.power ?? 0)
+                    ) && (
+                      <CostChips
+                        energy={card.energy ?? 0}
+                        power={card.power ?? 0}
+                        caption={t("Cost")}
+                        showZero={card.power ? false : "energy"}
+                      />
+                    )}
                   </>
                 )}
               </span>
             )}
           </strong>
           {sharedPayment && !paused && !review && !busy && !opening && (
-            <div className="decision-shared-payment">
+            <div
+              className="decision-shared-payment"
+              id={`${detailsId}-shared-payment`}
+            >
               <DecisionPayment game={game} action={sharedPayment} />
             </div>
           )}
           {pendingCard && (
-            <div className="reaction-threat">
+            <div
+              className={
+                listed ? "reaction-threat read-text" : "reaction-threat"
+              }
+            >
               <span>
                 {t("On the chain: {card}", { card: pendingCard.name })}
                 {pendingTargets.length > 0 &&
@@ -365,11 +477,44 @@ export function MatchControls({
               </span>
             </div>
           )}
-          <p>
-            {damageSummary &&
-              `${t("Damage remaining: {count}", { count: damageSummary.remaining })} · ${t("{count} lethal assignments", { count: damageSummary.lethal })} · `}
-            {movement && !review && !paused && !busy
-              ? t("{count} selected → {destination}. {instruction}", {
+          {idle ? (
+            <>
+              <p className="read-text">{t(hint)}</p>
+              {turnMoves.length ? (
+                <ul className="turn-moves" aria-label={t("Available moves")}>
+                  {turnMoves.map(({ key, label, count, Icon }) => (
+                    <li key={key} data-move={key}>
+                      <Icon size={13} aria-hidden="true" />
+                      <span>{t(label)}</span>
+                      <b>{count}</b>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="turn-moves-none">
+                  {t(
+                    ending?.category === "end"
+                      ? "Nothing to play. End your turn."
+                      : "Nothing to play. Pass to continue.",
+                  )}
+                </p>
+              )}
+            </>
+          ) : (
+            <p className={quietHint ? "read-text" : undefined}>
+              {damageSummary && (
+                <span className="decision-summary">
+                  {t("Damage remaining: {count}", {
+                    count: damageSummary.remaining,
+                  })}
+                  {" · "}
+                  {t("{count} lethal assignments", {
+                    count: damageSummary.lethal,
+                  })}
+                </span>
+              )}
+              {movement && !review && !paused && !busy ? (
+                t("{count} selected → {destination}. {instruction}", {
                   count: movement.unitIds.length,
                   destination: destination ?? "",
                   instruction: t(
@@ -380,18 +525,26 @@ export function MatchControls({
                         : "Click units to change the group, then confirm.",
                   ),
                 })
-              : boardSelection && !review && !paused && !busy
-                ? t(
-                    "{count} selected · Choose cards on the board, then confirm.",
-                    { count: boardSelection.selected.length },
-                  )
-                : trashSelection && !review && !paused && !busy
-                  ? t(
-                      "{count} selected · Choose cards from the trash, then confirm.",
-                      { count: trashSelection.trashSelection!.selected.length },
-                    )
-                  : t(hint)}
-          </p>
+              ) : boardSelection && !review && !paused && !busy ? (
+                t(
+                  "{count} selected · Choose cards on the board, then confirm.",
+                  { count: boardSelection.selected.length },
+                )
+              ) : trashSelection && !review && !paused && !busy ? (
+                t(
+                  "{count} selected · Choose cards from the trash, then confirm.",
+                  { count: trashSelection.trashSelection!.selected.length },
+                )
+              ) : (
+                <span
+                  className={listed && damageSummary ? "read-text" : undefined}
+                >
+                  {damageSummary ? " · " : ""}
+                  {t(hint)}
+                </span>
+              )}
+            </p>
+          )}
           {namingSpell && !review && !paused && !busy && (
             <input
               className="spell-name-search"
@@ -537,66 +690,153 @@ export function MatchControls({
                 </div>
               </div>
             )}
-            <div
-              className="context-actions"
-              data-shared-payment={sharedPayment ? "" : undefined}
-            >
+            <div className="context-actions">
               {namingSpell && !actions.length && (
                 <span>{t("No matching spells")}</span>
               )}
               {shownActions.map((action) => {
+                const label = t(action.label);
                 const targets = publicActionTargets(game, action);
                 const optionCard = findCard(
                   targets[0]?.card.id ?? inspectedTop ?? action.cardId,
                 );
+                // Playing or moving the card in the heading to a place: the
+                // heading already names the card, so the option is the place.
+                const field = game.fields.find(
+                  (item) => item.id === action.locationId,
+                );
+                const fieldCard = findCard(field?.cardId);
+                const verb =
+                  !targets.length &&
+                  action.locationId &&
+                  sourceCard &&
+                  label.includes(sourceCard.name)
+                    ? label.slice(0, label.indexOf(sourceCard.name)).trim()
+                    : "";
+                const place = verb
+                  ? (fieldCard?.name ?? t(locationLabel(action.locationId)))
+                  : "";
+                const isPlace = Boolean(verb && place);
+                const controller = field
+                  ? field.controller
+                  : action.locationId === "base:0"
+                    ? 0
+                    : action.locationId === "base:1"
+                      ? 1
+                      : null;
+                // "1 energy · 1 power" is a cost; a receipt states it better.
+                // A label that names its targets leaves a verb once they
+                // and the card in the heading are taken out of it.
+                const namesTargets =
+                  targets.length > 0 &&
+                  targets.every((item) => label.includes(item.card.name));
+                const targetVerb = namesTargets
+                  ? [...targets.map((item) => item.card.name), sourceCard?.name]
+                      .reduce<string>(
+                        (rest, name) => (name ? rest.replace(name, "") : rest),
+                        label,
+                      )
+                      .replace(/[\s→+·:,—-]+$/u, "")
+                      .replace(/\s*→[\s→+]*/gu, " ")
+                      .replace(/\s{2,}/g, " ")
+                      .trim()
+                  : "";
+                const cost = /^(\d+) energy · (\d+) power/.exec(
+                  action.detail ?? "",
+                );
+                const receipt = paymentSignature(game, action) !== null;
+                const detail = action.detail ? t(action.detail) : "";
+                const detailRest = cost
+                  ? detail.split(" · ").slice(2).join(" · ")
+                  : detail;
                 return (
                   <button
                     key={action.id}
                     className={`context-action ${targets.length ? "has-target" : ""}`}
-                    data-names-target={
-                      targets.length &&
-                      targets.every((item) =>
-                        t(action.label).includes(item.card.name),
-                      )
-                        ? ""
+                    data-option={
+                      isPlace ? "place" : targets.length ? "target" : "plain"
+                    }
+                    data-control={
+                      isPlace
+                        ? controller === 0
+                          ? "you"
+                          : controller === 1
+                            ? "foe"
+                            : "none"
+                        : undefined
+                    }
+                    data-owner={
+                      targets.length === 1 && targets[0].owner !== undefined
+                        ? targets[0].owner === 0
+                          ? "you"
+                          : "foe"
                         : undefined
                     }
                     data-action-id={action.id}
                     data-target-id={action.targetId}
-                    aria-describedby={`${detailsId}-${action.id}`}
+                    aria-describedby={
+                      sharedPayment
+                        ? `${detailsId}-${action.id} ${detailsId}-shared-payment`
+                        : `${detailsId}-${action.id}`
+                    }
                     aria-label={
-                      t(action.label) +
+                      label +
                       (targets.length
                         ? ` · ${targets.map((item) => [item.owner === undefined ? "" : t(item.owner === 0 ? "Ti" : "Protivnik"), item.card.name, t(item.location)].filter(Boolean).join(" · ")).join(" + ")}`
                         : "")
                     }
                     onClick={() => dispatch(action)}
-                    title={
-                      t(action.label) +
-                      (action.detail ? ` · ${t(action.detail)}` : "")
-                    }
+                    title={label + (detail ? ` · ${detail}` : "")}
                   >
-                    {optionCard?.image && (
-                      <img
-                        className="decision-option-art"
-                        data-repeats-source={
-                          optionCard.id === sourceCard?.id ? "" : undefined
-                        }
-                        src={cardArtUrl(optionCard)}
-                        alt={optionCard.name}
-                        data-card-preview={optionCard.id}
+                    {isPlace && fieldCard?.image && (
+                      <span
+                        className="option-backdrop"
+                        aria-hidden="true"
+                        style={{
+                          backgroundImage: `url("${cardArtUrl(fieldCard)}")`,
+                        }}
                       />
                     )}
-                    <span>
-                      {targets.length ? (
+                    {optionCard?.image &&
+                      !isPlace &&
+                      optionCard.id !== sourceCard?.id && (
+                        <img
+                          className="decision-option-art"
+                          src={cardArtUrl(optionCard)}
+                          alt={optionCard.name}
+                          data-card-preview={optionCard.id}
+                        />
+                      )}
+                    <span className="option-body">
+                      {isPlace ? (
                         <>
-                          <span className="decision-action-label">
-                            {t(action.label)}
-                          </span>
+                          <span className="option-verb">{verb}</span>
+                          <strong className="option-place">{place}</strong>
+                        </>
+                      ) : targets.length ? (
+                        <>
+                          {namesTargets ? (
+                            targetVerb && (
+                              <span className="option-verb">{targetVerb}</span>
+                            )
+                          ) : (
+                            <span className="decision-action-label">
+                              {label}
+                            </span>
+                          )}
                           {targets.map((item) => (
                             <span className="decision-target" key={item.id}>
                               <strong>{item.card.name}</strong>
-                              <small className="decision-target-location">
+                              <small
+                                className={
+                                  // Every target of combat damage is at the
+                                  // battlefield of the fight, on the side the
+                                  // tile's edge already shows.
+                                  game.phase === "damage"
+                                    ? "decision-target-location read-text"
+                                    : "decision-target-location"
+                                }
+                              >
                                 {[
                                   item.owner === undefined
                                     ? ""
@@ -610,24 +850,56 @@ export function MatchControls({
                           ))}
                         </>
                       ) : (
-                        <strong>{t(action.label)}</strong>
+                        <strong>{label}</strong>
                       )}
                       <span
                         id={`${detailsId}-${action.id}`}
                         className="decision-option-details"
                       >
                         {action.id.startsWith("hide:") && hiddenSetup ? (
-                          <small className="hidden-action-cost">
+                          <small
+                            className={
+                              receipt
+                                ? "hidden-action-cost read-text"
+                                : "hidden-action-cost"
+                            }
+                          >
                             {t(
                               action.id.endsWith(":energy")
                                 ? "Hide · 1 Energy"
                                 : hiddenSetup.costLabel,
                             )}
                           </small>
+                        ) : cost ? (
+                          <>
+                            <span className="read-text">{detail}</span>
+                            {(!receipt || detailRest) && (
+                              <span className="option-cost" aria-hidden="true">
+                                {!receipt && (
+                                  <CostChips
+                                    energy={Number(cost[1])}
+                                    power={Number(cost[2])}
+                                    showZero={
+                                      cost[1] === "0" && cost[2] === "0"
+                                        ? "energy"
+                                        : false
+                                    }
+                                  />
+                                )}
+                                {detailRest && (
+                                  <small className="option-note">
+                                    {detailRest}
+                                  </small>
+                                )}
+                              </span>
+                            )}
+                          </>
                         ) : (
-                          action.detail && <small>{t(action.detail)}</small>
+                          detail && <small>{detail}</small>
                         )}
-                        <DecisionPayment game={game} action={action} />
+                        {!sharedPayment && (
+                          <DecisionPayment game={game} action={action} />
+                        )}
                       </span>
                     </span>
                   </button>
