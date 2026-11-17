@@ -107,6 +107,8 @@ The existing table layout and image-only public-card hover previews remain in pl
 
 A [premium finish](docs/PREMIUM-FINISH.md) adds one layer of light and depth on top: a champagne-metal primary action on every screen, glass panels, battlefields that glow in their controller's colour, card art that shimmers while it loads, and a result panel with the score and a single next step. On desktop, the command dock keeps its heading at the top and its closing action at the bottom, and only the list of options between them scrolls. Reduced motion and **Reduce effects** turn the transitions off.
 
+The dock [draws its commands](docs/DOCK-COMMANDS.md) instead of writing them out: a cost is chips with the bolt and diamond from the cards, an option is the battlefield or the target with its art, and with nothing selected the dock counts the cards, units and abilities that can be used.
+
 ## Native match flow
 
 - Desktop keeps the complete table and one decision bar in the viewport. On phones, a public minimap shows every base and battlefield, including control, unit counts, Might, combat, Hidden counts and available targets. The selected zone has the opponent above your units; crowded rows scroll horizontally without shrinking touch targets.

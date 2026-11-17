@@ -28,6 +28,8 @@ This pass gives the whole app one finish: more light and depth, metal accents on
 
 ## The command dock on desktop
 
+> **17 November.** The inside of an option and the receipt were redrawn for every screen: see [Dock commands that are drawn](DOCK-COMMANDS.md). Where the two documents differ, that one describes the current state. The three parts of the dock and the measurements below still hold.
+
 The dock next to the hand has a fixed size: 256 × 140 px at 1280 × 720, 288 × 248 px at 1440 × 900. Its content was laid out as one scrolling column, and in most states the column was taller than the dock. At 1280 × 720 the dock showed half of End turn at the start of every turn. With a card selected, the ways to play it sat below the fold at every size up to 1920 × 1080.
 
 ![The dock at 1280 × 720 and 1440 × 900, before and after](screenshots/premium-dock.jpg)

@@ -1,5 +1,14 @@
 # Validation evidence
 
+## Dock commands that are drawn — 17 November 2026
+
+On a phone the dock was mostly text. It now [draws its commands](DOCK-COMMANDS.md): chips for a cost, the place or the target for an option, counts for what can be done.
+
+- **Code as of commit `396ecb3`** (the commit after it changes one style rule): the full run outside the precon matrix has **3,028 tests in 156 files**, of which 3,027 passed. One simulation test reached its 60-second limit while screenshots were captured on the same machine; its file then passed on its own, 15 of 15. The engine is untouched, so the precon matrix was not repeated. TypeScript, the production build and catalog consistency passed.
+- **Phone**, 390 × 844: with a unit selected the dock goes from 277 px to 128 px and from 480 drawn characters to 87.
+- **Desktop**: the 2,070 dock measurements were repeated, with no content taller than the dock and no control outside it.
+- **Browser checks**: the 22 scripts have the same outcome as on `bb8e4eb`. `native-table-check` found one regression during the work (the card art in the desktop heading could not be clicked), which is fixed.
+
 ## Premium finish, desktop dock and Songstress — 14 November 2026
 
 The [premium finish](PREMIUM-FINISH.md) restyles the app and lays out the desktop command dock so that its buttons are never cut off. The same pass corrects the last open item of the Radiance follow-up: a unit exhausted for [Starry-Eyed Songstress that then leaves](RADIANCE-FOLLOWUP.md#14-november-2026-songstress-and-a-unit-that-leaves).
